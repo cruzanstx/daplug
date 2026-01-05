@@ -1,0 +1,12 @@
+{
+  "name": "daplug",
+  "version": "0.12.10",
+  "description": "AI-assisted development workflows with multi-model prompt execution",
+  "author": {
+    "name": "CruzanSTX",
+    "url": "https://github.com/cruzanstx/daplug"
+  },
+  "repository": "https://github.com/cruzanstx/daplug",
+  "license": "MIT",
+  "keywords": ["ai", "automation", "codex", "gemini", "prompts", "worktrees", "agents"]
+}

@@ -1,0 +1,269 @@
+---
+name: prompt-executor
+description: Execute prompts from ./prompts/ directory with various AI models. Use when user asks to run a prompt, execute a task, delegate work to an AI model, run prompts in worktrees/tmux, or run prompts with verification loops.
+allowed-tools:
+  - Bash(git:*)
+  - Bash(mkdir:*)
+  - Bash(cp:*)
+  - Bash(rm:*)
+  - Bash(python3 ~/.claude/plugins/cache/daplug/daplug/*/skills/prompt-executor/scripts/executor.py:*)
+  - Bash(codex:*)
+  - Bash(gemini:*)
+  - Bash(tmux:*)
+  - Bash(cat:*)
+  - Bash(pgrep:*)
+  - Bash(REPO_ROOT=:*)
+  - Bash(REPO_NAME=:*)
+  - Bash(WORKTREE_PATH=:*)
+  - Bash(WORKTREES_DIR=:*)
+  - Bash(BRANCH_NAME=:*)
+  - Bash(TIMESTAMP=:*)
+  - Bash(\:*)
+  - Read
+  - Edit
+  - Write
+  - Task
+  - Glob
+  - Grep
+---
+
+# Prompt Executor
+
+## Auto-Approval Setup
+
+If the user has to manually confirm the executor bash command, suggest they add this rule to `~/.claude/settings.json` under `permissions.allow`:
+
+```json
+"Bash(PLUGIN_ROOT=$(jq -r '.plugins.\"daplug@daplug\"[0].installPath' ~/.claude/plugins/installed_plugins.json):*)"
+```
+
+**Quick command to add it:**
+```bash
+# Add auto-approval rule for prompt executor
+jq '.permissions.allow += ["Bash(PLUGIN_ROOT=$(jq -r '"'"'.plugins.\"daplug@daplug\"[0].installPath'"'"' ~/.claude/plugins/installed_plugins.json):*)"]' ~/.claude/settings.json > /tmp/settings.json && mv /tmp/settings.json ~/.claude/settings.json
+```
+
+---
+
+Execute prompts from `./prompts/` directory using various AI models (Claude, Codex, Gemini, ZAI, etc).
+
+## When to Use This Skill
+
+- User says "run prompt 123" or "execute prompt 123"
+- User says "run that prompt with codex/gemini/zai"
+- User wants to "run a prompt in a worktree"
+- User wants to "run prompts in parallel"
+- User asks to "delegate this to codex/gemini"
+- User wants to "run with verification loop" or "keep retrying until complete"
+- User asks to "check loop status" for a running prompt
+
+## Executor Script
+
+**IMPORTANT:** Get the executor path from Claude's installed plugins manifest:
+
+```bash
+PLUGIN_ROOT=$(jq -r '.plugins."daplug@daplug"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+EXECUTOR="$PLUGIN_ROOT/skills/prompt-executor/scripts/executor.py"
+python3 "$EXECUTOR" [prompts...] [options]
+```
+
+**Options:**
+- `--model, -m`: claude, codex, codex-high, codex-xhigh, gemini, zai, local, qwen, devstral
+- `--cwd, -c`: Working directory for execution
+- `--run, -r`: Actually run the CLI (default: just return info)
+- `--info-only, -i`: Only return prompt info, no CLI details
+- `--worktree, -w`: Create isolated git worktree for execution
+- `--base-branch, -b`: Base branch for worktree (default: main)
+- `--on-conflict`: How to handle existing worktree (error|remove|reuse|increment)
+- `--loop, -l`: Enable iterative verification loop until completion
+- `--max-iterations`: Max loop iterations before giving up (default: 3)
+- `--completion-marker`: Text pattern signaling completion (default: VERIFICATION_COMPLETE)
+- `--loop-status`: Check status of an existing verification loop
+
+**Output:** JSON with prompt content, CLI command, log path, worktree info, and loop state if enabled
+
+## Execution Flows
+
+### Direct Execution (default)
+
+```bash
+# Get executor path from installed plugins manifest
+PLUGIN_ROOT=$(jq -r '.plugins."daplug@daplug"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+EXECUTOR="$PLUGIN_ROOT/skills/prompt-executor/scripts/executor.py"
+
+# Get prompt info
+python3 "$EXECUTOR" 123 --model codex
+
+# Run in current directory
+python3 "$EXECUTOR" 123 --model codex --run
+```
+
+### With Worktree (built-in)
+
+Single command creates worktree, copies TASK.md, and optionally runs:
+
+```bash
+# Create worktree and get info
+python3 "$EXECUTOR" 123 --worktree --model codex
+
+# Create worktree and run immediately
+python3 "$EXECUTOR" 123 --worktree --model codex --run
+
+# Use different base branch
+python3 "$EXECUTOR" 123 --worktree --base-branch develop --model codex
+```
+
+The worktree directory is read from `worktree_dir:` in CLAUDE.md, or defaults to `../worktrees/`.
+
+### With tmux (use tmux-manager skill)
+
+1. Get CLI command from executor:
+```bash
+python3 "$EXECUTOR" 123 --model codex
+# Returns: {"cli_command": ["codex", "exec", "--full-auto"], "content": "...", "log": "..."}
+```
+
+2. Create tmux session using tmux-manager patterns:
+```bash
+SESSION_NAME="prompt-123-$(date +%Y%m%d-%H%M%S)"
+tmux new-session -d -s "$SESSION_NAME" -c "$WORKTREE_PATH"
+```
+
+3. Send command to session:
+```bash
+tmux send-keys -t "$SESSION_NAME" "codex exec --full-auto '...' 2>&1 | tee $LOG_FILE" C-m
+```
+
+### With Verification Loop
+
+Run prompts with automatic retries until the task is verified complete:
+
+```bash
+# Run with verification loop (background, default 3 iterations)
+python3 "$EXECUTOR" 123 --model codex --run --loop
+
+# With custom max iterations
+python3 "$EXECUTOR" 123 --model codex --run --loop --max-iterations 5
+
+# With custom completion marker
+python3 "$EXECUTOR" 123 --model codex --run --loop --completion-marker "TASK_DONE"
+
+# Worktree + loop combo
+python3 "$EXECUTOR" 123 --model codex --worktree --run --loop
+```
+
+**Output includes:**
+```json
+{
+  "execution": {
+    "status": "loop_running",
+    "pid": 12345,
+    "loop_log": "~/.claude/cli-logs/codex-123-loop-20251229-120000.log",
+    "state_file": "~/.claude/loop-state/123.json",
+    "max_iterations": 3,
+    "completion_marker": "VERIFICATION_COMPLETE"
+  }
+}
+```
+
+### Check Loop Status
+
+```bash
+# Check specific prompt's loop
+python3 "$EXECUTOR" 123 --loop-status
+
+# List all active loops
+python3 "$EXECUTOR" --loop-status
+```
+
+## Model Reference
+
+| Model | CLI | Description |
+|-------|-----|-------------|
+| claude | (Task subagent) | Claude Sonnet via subagent |
+| codex | codex exec --full-auto | OpenAI Codex (gpt-5.2-codex) |
+| codex-high | codex exec --full-auto -c model_reasoning_effort="high" | Codex with high reasoning |
+| gemini | gemini -y | Google Gemini 2.5 Pro |
+| zai | codex exec --profile zai | Z.AI GLM-4.7 |
+| local/qwen | codex exec --profile local | Local qwen model |
+| devstral | codex exec --profile local-devstral | Local devstral model |
+
+## Output Display
+
+After executing the prompt, display a clear summary that includes the prompt **title** from the JSON output:
+
+```markdown
+## Execution Started
+
+**Prompt 295**: Add transcript success monitoring with retry logic
+
+| Field | Value |
+|-------|-------|
+| Model | codex (gpt-5.2-codex) |
+| Status | 🟢 Running (PID 12345) |
+| Loop | Max 3 iterations |
+
+Worktree: `.worktrees/repo-prompt-295-20251229-181852/`
+Branch: `prompt/295-transcript-success-monitoring`
+```
+
+**Important**: Always include the `title` field from the executor JSON output. This tells the user what the prompt actually does, not just its number.
+
+## Monitoring Pattern
+
+After launching, spawn a haiku monitor subagent:
+
+```
+Task(
+  subagent_type: "general-purpose",
+  model: "haiku",
+  run_in_background: true,
+  prompt: """
+    Monitor prompt execution:
+    - Log file: {log_path}
+    - PID: {pid}
+    - {If tmux: Session: {session}}
+    - {If worktree: Worktree: {worktree_path}}
+
+    IMPORTANT: Use Bash tool for all file operations (not Read tool):
+
+    Every 30 seconds, check status using Bash:
+    ```bash
+    # Check if process is running
+    ps -p {pid} > /dev/null 2>&1 && echo "RUNNING" || echo "STOPPED"
+
+    # Tail last 20 lines of log
+    tail -20 "{log_path}"
+    ```
+
+    On completion (process ended):
+    ```bash
+    # Get summary from log
+    tail -50 "{log_path}"
+
+    # If worktree, show git status
+    cd "{worktree_path}" && git log --oneline -5 && git diff --stat
+    ```
+    - Summarize what was done
+    - Report final status
+  """
+)
+```
+
+## Cleanup
+
+For worktree executions, after completion:
+
+```bash
+# Remove TASK.md before merge
+rm "$WORKTREE_PATH/TASK.md"
+
+# Merge if requested
+git checkout main
+git merge --no-ff "$BRANCH_NAME" -m "Merge prompt: $BRANCH_NAME"
+
+# Cleanup
+git worktree remove "$WORKTREE_PATH"
+git branch -D "$BRANCH_NAME"
+git worktree prune
+```

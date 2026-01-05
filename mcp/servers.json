@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "daplug-example": {
+      "command": "echo",
+      "args": ["MCP server placeholder - replace with actual server"],
+      "disabled": true
+    }
+  }
+}

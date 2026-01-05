@@ -1,0 +1,10 @@
+{
+  "hook": "PreToolUse",
+  "matcher": "Bash",
+  "hooks": [
+    {
+      "type": "log",
+      "message": "daplug: About to run a bash command"
+    }
+  ]
+}

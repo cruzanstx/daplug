@@ -1,0 +1,19 @@
+{
+  "name": "daplug-marketplace",
+  "owner": {
+    "name": "CruzanSTX",
+    "url": "https://github.com/cruzanstx"
+  },
+  "metadata": {
+    "description": "Single-plugin marketplace for daplug - AI-assisted development workflows",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "daplug",
+      "source": ".",
+      "category": "development",
+      "tags": ["ai", "automation", "codex", "gemini", "prompts", "worktrees"]
+    }
+  ]
+}
