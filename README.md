@@ -16,7 +16,7 @@ claude plugin marketplace add cruzanstx/daplug
 claude plugin marketplace add https://github.com/cruzanstx/daplug
 
 # Install daplug
-claude plugin install daplug@cruzanstx-marketplace
+claude plugin install daplug@cruzanstx
 ```
 
 ### Manual Installation
@@ -153,7 +153,7 @@ claude plugin marketplace add cruzanstx/daplug
 claude plugin marketplace add https://github.com/cruzanstx/daplug
 
 # Install the plugin
-claude plugin install daplug@cruzanstx-marketplace
+claude plugin install daplug@cruzanstx
 ```
 
 ### Via Git Clone
@@ -179,14 +179,14 @@ Add to your project's `.claude/settings.json`:
       "extraKnown": ["cruzanstx/daplug"]
     }
   },
-  "enabledPlugins": ["daplug@cruzanstx-marketplace"]
+  "enabledPlugins": ["daplug@cruzanstx"]
 }
 ```
 
 Or install manually for each team member:
 ```bash
 claude plugin marketplace add cruzanstx/daplug
-claude plugin install daplug@cruzanstx-marketplace
+claude plugin install daplug@cruzanstx
 ```
 
 ## Updating
@@ -197,9 +197,9 @@ Claude Code doesn't have built-in plugin update notifications yet ([feature requ
 
 ```bash
 # Uninstall, refresh marketplace, then reinstall
-claude plugin uninstall daplug@cruzanstx-marketplace
+claude plugin uninstall daplug@cruzanstx
 claude plugin marketplace update daplug
-claude plugin install daplug@cruzanstx-marketplace
+claude plugin install daplug@cruzanstx
 ```
 
 **Important**: You must uninstall first - `claude plugin install` won't overwrite an existing cached version.
@@ -220,7 +220,7 @@ notify-plugin-update:
       echo "daplug updated to v${VERSION}"
       # Slack notification (uncomment and configure):
       # curl -X POST -H 'Content-type: application/json' \
-      #   --data "{\"text\":\"daplug plugin updated to v${VERSION} - run: claude plugin uninstall daplug@cruzanstx-marketplace && claude plugin marketplace update daplug && claude plugin install daplug@cruzanstx-marketplace\"}" \
+      #   --data "{\"text\":\"daplug plugin updated to v${VERSION} - run: claude plugin uninstall daplug@cruzanstx && claude plugin marketplace update daplug && claude plugin install daplug@cruzanstx\"}" \
       #   $SLACK_WEBHOOK_URL
 
       # Email notification (uncomment and configure):
@@ -247,7 +247,7 @@ daplug: v0.2.0 -> v0.3.0
 NEEDS_UPDATE
 
 Update available! Run:
-  claude plugin uninstall daplug@cruzanstx-marketplace && claude plugin marketplace update daplug && claude plugin install daplug@cruzanstx-marketplace
+  claude plugin uninstall daplug@cruzanstx && claude plugin marketplace update daplug && claude plugin install daplug@cruzanstx
 
 Then resume session:
   claude --resume
@@ -365,7 +365,7 @@ Commands that reference internal plugin files (like `run-prompt.md` calling `exe
 
 ```bash
 # Get exact install path from Claude's tracking
-PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx-marketplace"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx"[0].installPath' ~/.claude/plugins/installed_plugins.json)
 EXECUTOR="$PLUGIN_ROOT/skills/prompt-executor/scripts/executor.py"
 python3 "$EXECUTOR" 123 --model codex
 ```

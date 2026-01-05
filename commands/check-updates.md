@@ -6,7 +6,7 @@ description: Check if daplug plugin has updates available
 Run this command, then output the result to the user:
 
 ```bash
-bash -c 'REMOTE=$(jq -r ".\"daplug\".source.url // empty" ~/.claude/plugins/known_marketplaces.json 2>/dev/null) && INSTALLED=$(jq -r ".plugins.\"daplug@cruzanstx-marketplace\"[0].version // empty" ~/.claude/plugins/installed_plugins.json 2>/dev/null) && LATEST=$(git archive --remote="$REMOTE" HEAD plugins/daplug/.claude-plugin/plugin.json 2>/dev/null | tar -xO 2>/dev/null | jq -r ".version // empty") && echo "daplug: v${INSTALLED:-not installed} -> v${LATEST:-unknown}" && test "$INSTALLED" = "$LATEST" && echo "UP_TO_DATE" || echo "NEEDS_UPDATE"'
+bash -c 'REMOTE=$(jq -r ".\"daplug\".source.url // empty" ~/.claude/plugins/known_marketplaces.json 2>/dev/null) && INSTALLED=$(jq -r ".plugins.\"daplug@cruzanstx\"[0].version // empty" ~/.claude/plugins/installed_plugins.json 2>/dev/null) && LATEST=$(git archive --remote="$REMOTE" HEAD plugins/daplug/.claude-plugin/plugin.json 2>/dev/null | tar -xO 2>/dev/null | jq -r ".version // empty") && echo "daplug: v${INSTALLED:-not installed} -> v${LATEST:-unknown}" && test "$INSTALLED" = "$LATEST" && echo "UP_TO_DATE" || echo "NEEDS_UPDATE"'
 ```
 
 Based on output, respond:
@@ -14,7 +14,7 @@ Based on output, respond:
 - If "NEEDS_UPDATE":
   ```
   Update available! Run:
-    claude plugin uninstall daplug@cruzanstx-marketplace && claude plugin marketplace update daplug && claude plugin install daplug@cruzanstx-marketplace
+    claude plugin uninstall daplug@cruzanstx && claude plugin marketplace update daplug && claude plugin install daplug@cruzanstx
 
   Then resume session:
     claude --resume

@@ -19,7 +19,7 @@ Locate and resolve prompt files using the prompt-manager skill.
 All operations use prompt-manager for consistent git root detection:
 
 ```bash
-PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx-marketplace"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx"[0].installPath' ~/.claude/plugins/installed_plugins.json)
 PROMPT_MANAGER="$PLUGIN_ROOT/skills/prompt-manager/scripts/manager.py"
 ```
 

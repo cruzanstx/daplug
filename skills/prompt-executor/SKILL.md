@@ -34,13 +34,13 @@ allowed-tools:
 If the user has to manually confirm the executor bash command, suggest they add this rule to `~/.claude/settings.json` under `permissions.allow`:
 
 ```json
-"Bash(PLUGIN_ROOT=$(jq -r '.plugins.\"daplug@cruzanstx-marketplace\"[0].installPath' ~/.claude/plugins/installed_plugins.json):*)"
+"Bash(PLUGIN_ROOT=$(jq -r '.plugins.\"daplug@cruzanstx\"[0].installPath' ~/.claude/plugins/installed_plugins.json):*)"
 ```
 
 **Quick command to add it:**
 ```bash
 # Add auto-approval rule for prompt executor
-jq '.permissions.allow += ["Bash(PLUGIN_ROOT=$(jq -r '"'"'.plugins.\"daplug@cruzanstx-marketplace\"[0].installPath'"'"' ~/.claude/plugins/installed_plugins.json):*)"]' ~/.claude/settings.json > /tmp/settings.json && mv /tmp/settings.json ~/.claude/settings.json
+jq '.permissions.allow += ["Bash(PLUGIN_ROOT=$(jq -r '"'"'.plugins.\"daplug@cruzanstx\"[0].installPath'"'"' ~/.claude/plugins/installed_plugins.json):*)"]' ~/.claude/settings.json > /tmp/settings.json && mv /tmp/settings.json ~/.claude/settings.json
 ```
 
 ---
@@ -62,7 +62,7 @@ Execute prompts from `./prompts/` directory using various AI models (Claude, Cod
 **IMPORTANT:** Get the executor path from Claude's installed plugins manifest:
 
 ```bash
-PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx-marketplace"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx"[0].installPath' ~/.claude/plugins/installed_plugins.json)
 EXECUTOR="$PLUGIN_ROOT/skills/prompt-executor/scripts/executor.py"
 python3 "$EXECUTOR" [prompts...] [options]
 ```
@@ -88,7 +88,7 @@ python3 "$EXECUTOR" [prompts...] [options]
 
 ```bash
 # Get executor path from installed plugins manifest
-PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx-marketplace"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx"[0].installPath' ~/.claude/plugins/installed_plugins.json)
 EXECUTOR="$PLUGIN_ROOT/skills/prompt-executor/scripts/executor.py"
 
 # Get prompt info
