@@ -35,7 +35,7 @@ Execute prompts from `./prompts/` directory using various AI models.
 **IMPORTANT:** Get the executor path from Claude's installed plugins manifest:
 
 ```bash
-PLUGIN_ROOT=$(jq -r '.plugins."daplug@daplug"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx-marketplace"[0].installPath' ~/.claude/plugins/installed_plugins.json)
 EXECUTOR="$PLUGIN_ROOT/skills/prompt-executor/scripts/executor.py"
 ```
 

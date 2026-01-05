@@ -26,7 +26,7 @@ Optional flags via $ARGUMENTS:
 **IMPORTANT:** Use the prompt-manager script for all prompt operations:
 
 ```bash
-PLUGIN_ROOT=$(jq -r '.plugins."daplug@daplug"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx-marketplace"[0].installPath' ~/.claude/plugins/installed_plugins.json)
 PROMPT_MANAGER="$PLUGIN_ROOT/skills/prompt-manager/scripts/manager.py"
 ```
 

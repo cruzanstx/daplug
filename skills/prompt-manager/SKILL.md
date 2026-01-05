@@ -35,7 +35,7 @@ tools:
 ### Get Next Number
 
 ```bash
-PROMPT_MANAGER=$(jq -r '.plugins."daplug@daplug"[0].installPath' ~/.claude/plugins/installed_plugins.json)/skills/prompt-manager/scripts/manager.py
+PROMPT_MANAGER=$(jq -r '.plugins."daplug@cruzanstx-marketplace"[0].installPath' ~/.claude/plugins/installed_plugins.json)/skills/prompt-manager/scripts/manager.py
 python3 "$PROMPT_MANAGER" next-number
 ```
 
@@ -132,7 +132,7 @@ python3 "$PROMPT_MANAGER" info --json
 
 ```bash
 # Get plugin path
-PLUGIN_ROOT=$(jq -r '.plugins."daplug@daplug"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx-marketplace"[0].installPath' ~/.claude/plugins/installed_plugins.json)
 PROMPT_MANAGER="$PLUGIN_ROOT/skills/prompt-manager/scripts/manager.py"
 
 # Get next number

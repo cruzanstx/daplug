@@ -95,7 +95,7 @@ Should I proceed, or would you like to adjust anything?"
 Create the prompt(s) using prompt-manager:
 
 ```bash
-PLUGIN_ROOT=$(jq -r '.plugins."daplug@daplug"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx-marketplace"[0].installPath' ~/.claude/plugins/installed_plugins.json)
 PROMPT_MANAGER="$PLUGIN_ROOT/skills/prompt-manager/scripts/manager.py"
 ```
 
@@ -149,7 +149,7 @@ PROMPT_MANAGER="$PLUGIN_ROOT/skills/prompt-manager/scripts/manager.py"
 1. Generate prompt content with XML structure
 2. Use prompt-manager to create the file:
    ```bash
-   PLUGIN_ROOT=$(jq -r '.plugins."daplug@daplug"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+   PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx-marketplace"[0].installPath' ~/.claude/plugins/installed_plugins.json)
    PROMPT_MANAGER="$PLUGIN_ROOT/skills/prompt-manager/scripts/manager.py"
 
    # Get next number
@@ -777,7 +777,7 @@ If user chooses #2:
 - First, check if clarification is needed before generating the prompt
 - **Use prompt-manager for all prompt operations** (handles git root detection automatically):
   ```bash
-  PLUGIN_ROOT=$(jq -r '.plugins."daplug@daplug"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+  PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx-marketplace"[0].installPath' ~/.claude/plugins/installed_plugins.json)
   PROMPT_MANAGER="$PLUGIN_ROOT/skills/prompt-manager/scripts/manager.py"
   ```
 - To determine the next number: `python3 "$PROMPT_MANAGER" next-number`
