@@ -113,7 +113,7 @@ python3 "$EXECUTOR" 123 --worktree --model codex --run
 python3 "$EXECUTOR" 123 --worktree --base-branch develop --model codex
 ```
 
-The worktree directory is read from `worktree_dir:` in CLAUDE.md, or defaults to `../worktrees/`.
+The worktree directory is read from `worktree_dir` in `<daplug_config>` within CLAUDE.md (via config-reader), or defaults to `../worktrees/`.
 
 ### With tmux (use tmux-manager skill)
 
@@ -165,6 +165,8 @@ python3 "$EXECUTOR" 123 --model codex --worktree --run --loop
   }
 }
 ```
+
+Log paths follow `cli_logs_dir` from `<daplug_config>` if configured (default `~/.claude/cli-logs/`).
 
 ### Check Loop Status
 

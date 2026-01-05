@@ -24,7 +24,10 @@ Before starting, determine the llms_txt repository location:
 
 **1. Check for existing setting in `~/.claude/CLAUDE.md`:**
 ```bash
-LLMS_TXT_DIR=$(grep -E "^llms_txt_dir:" ~/.claude/CLAUDE.md 2>/dev/null | sed 's/llms_txt_dir: *//' | tr -d '\r')
+PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+CONFIG_READER="$PLUGIN_ROOT/skills/config-reader/scripts/config.py"
+
+LLMS_TXT_DIR=$(python3 "$CONFIG_READER" get llms_txt_dir)
 if [ -z "$LLMS_TXT_DIR" ] || [ ! -d "$LLMS_TXT_DIR" ]; then
     # Proceed to AskUserQuestion (Step 2)
     :
@@ -83,13 +86,7 @@ mkdir -p "$LLMS_TXT_DIR/prompts/completed"
 
 **6. Save setting to `~/.claude/CLAUDE.md`:**
 ```bash
-if grep -q "^llms_txt_dir:" ~/.claude/CLAUDE.md 2>/dev/null; then
-    sed -i "s|^llms_txt_dir:.*|llms_txt_dir: $LLMS_TXT_DIR|" ~/.claude/CLAUDE.md
-elif grep -q "## daplug Settings" ~/.claude/CLAUDE.md 2>/dev/null; then
-    sed -i "/## daplug Settings/a llms_txt_dir: $LLMS_TXT_DIR" ~/.claude/CLAUDE.md
-else
-    echo -e "\n## daplug Settings\nllms_txt_dir: $LLMS_TXT_DIR" >> ~/.claude/CLAUDE.md
-fi
+python3 "$CONFIG_READER" set llms_txt_dir "$LLMS_TXT_DIR" --scope user
 ```
 
 **7. All prompts will be created in:** `$LLMS_TXT_DIR/prompts/`
@@ -407,10 +404,10 @@ Before presenting options:
 
 1. **Check ai_usage_awareness setting** (feature flag):
    ```bash
-   AI_USAGE_AWARENESS=$(grep -E "^ai_usage_awareness:" ./CLAUDE.md 2>/dev/null | sed 's/ai_usage_awareness: *//')
-   if [ -z "$AI_USAGE_AWARENESS" ]; then
-       AI_USAGE_AWARENESS=$(grep -E "^ai_usage_awareness:" ~/.claude/CLAUDE.md 2>/dev/null | sed 's/ai_usage_awareness: *//')
-   fi
+   PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+   CONFIG_READER="$PLUGIN_ROOT/skills/config-reader/scripts/config.py"
+
+   AI_USAGE_AWARENESS=$(python3 "$CONFIG_READER" get ai_usage_awareness)
    ```
 
    **If setting not found in either location:**
@@ -422,9 +419,15 @@ Before presenting options:
 
    Choose (1-2): _"
 
-   Based on response, add to `~/.claude/CLAUDE.md` under `## daplug Settings`:
+   Based on response, set in `~/.claude/CLAUDE.md` under `<daplug_config>`:
    - If yes: `ai_usage_awareness: enabled`
    - If no: `ai_usage_awareness: disabled`
+
+   ```bash
+   python3 "$CONFIG_READER" set ai_usage_awareness "enabled" --scope user
+   # or
+   python3 "$CONFIG_READER" set ai_usage_awareness "disabled" --scope user
+   ```
 
    **If setting is "disabled":** Skip step 2, don't show usage info, proceed directly to step 3.
 
@@ -445,12 +448,9 @@ Before presenting options:
    - `> 90%` → Near limit (show with 🔴)
    - `100%` or error → Unavailable (show with ❌, skip in recommendations)
 
-3. **Read preferred_agent** from CLAUDE.md:
+3. **Read preferred_agent** from `<daplug_config>` in CLAUDE.md:
    ```bash
-   PREFERRED_AGENT=$(grep -E "^preferred_agent:" ./CLAUDE.md 2>/dev/null | sed 's/preferred_agent: *//')
-   if [ -z "$PREFERRED_AGENT" ]; then
-       PREFERRED_AGENT=$(grep -E "^preferred_agent:" ~/.claude/CLAUDE.md 2>/dev/null | sed 's/preferred_agent: *//')
-   fi
+   PREFERRED_AGENT=$(python3 "$CONFIG_READER" get preferred_agent)
    PREFERRED_AGENT=${PREFERRED_AGENT:-claude}
    ```
 </detection_logic>

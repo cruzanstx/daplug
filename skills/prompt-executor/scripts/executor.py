@@ -72,32 +72,45 @@ def get_repo_root() -> Path:
         return Path.cwd()
 
 
+def _read_config_value(repo_root: Path, key: str) -> Optional[str]:
+    """Read a config value via config-reader if available."""
+    config_reader = Path(__file__).resolve().parents[3] / "skills" / "config-reader" / "scripts" / "config.py"
+    if not config_reader.exists():
+        return None
+    try:
+        result = subprocess.run(
+            [sys.executable, str(config_reader), "get", key, "--repo-root", str(repo_root), "--quiet"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        value = result.stdout.strip()
+        return value if value else None
+    except OSError:
+        return None
+
+
+def get_cli_logs_dir(repo_root: Path) -> Path:
+    configured = _read_config_value(repo_root, "cli_logs_dir")
+    if configured:
+        expanded = os.path.expandvars(os.path.expanduser(configured))
+        log_path = Path(expanded)
+        if not log_path.is_absolute():
+            return (repo_root / log_path).resolve()
+        return log_path
+    return Path.home() / ".claude" / "cli-logs"
+
+
 def get_worktree_dir(repo_root: Path) -> Path:
-    """Get worktree directory from CLAUDE.md or use default.
+    """Get worktree directory from <daplug_config> or use default.
 
     Priority: project CLAUDE.md -> global ~/.claude/CLAUDE.md -> .worktrees/
     """
-    # Check project CLAUDE.md first
-    claude_md = repo_root / "CLAUDE.md"
-    if claude_md.exists():
-        content = claude_md.read_text()
-        match = re.search(r'^worktree_dir:\s*(.+)$', content, re.MULTILINE)
-        if match:
-            configured = match.group(1).strip()
-            if configured.startswith('.') or not configured.startswith('/'):
-                return (repo_root / configured).resolve()
-            return Path(configured)
-
-    # Check global ~/.claude/CLAUDE.md
-    global_claude_md = Path.home() / ".claude" / "CLAUDE.md"
-    if global_claude_md.exists():
-        content = global_claude_md.read_text()
-        match = re.search(r'^worktree_dir:\s*(.+)$', content, re.MULTILINE)
-        if match:
-            configured = match.group(1).strip()
-            if configured.startswith('.') or not configured.startswith('/'):
-                return (repo_root / configured).resolve()
-            return Path(configured)
+    configured = _read_config_value(repo_root, "worktree_dir")
+    if configured:
+        if configured.startswith('.') or not configured.startswith('/'):
+            return (repo_root / configured).resolve()
+        return Path(configured)
 
     # Default: .worktrees/ inside repo
     return (repo_root / ".worktrees").resolve()
@@ -1360,7 +1373,7 @@ def main():
             prompt_files = resolve_prompts(prompts_dir, args.prompts)
 
         cli_info = get_cli_info(args.model)
-        log_dir = Path.home() / ".claude" / "cli-logs"
+        log_dir = get_cli_logs_dir(repo_root)
         log_dir.mkdir(parents=True, exist_ok=True)
 
         result = {
