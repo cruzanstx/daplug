@@ -11,7 +11,7 @@
   "plugins": [
     {
       "name": "daplug",
-      "source": ".",
+      "source": "./",
       "category": "development",
       "tags": ["ai", "automation", "codex", "gemini", "prompts", "worktrees"]
     }
