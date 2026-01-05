@@ -28,6 +28,7 @@ Optional flags via $ARGUMENTS:
 ```bash
 PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx"[0].installPath' ~/.claude/plugins/installed_plugins.json)
 PROMPT_MANAGER="$PLUGIN_ROOT/skills/prompt-manager/scripts/manager.py"
+CONFIG_READER="$PLUGIN_ROOT/skills/config-reader/scripts/config.py"
 ```
 
 This ensures consistent git root detection and prompt resolution across all daplug commands.
@@ -36,16 +37,13 @@ This ensures consistent git root detection and prompt resolution across all dapl
 <step0_check_agent_preference>
 **Check CLAUDE.md for preferred agent before generating recommendations:**
 
-1. Look for `preferred_agent:` setting (project first, then user-level):
+1. Look for `preferred_agent` setting (project first, then user-level) via `<daplug_config>`:
 ```bash
 # Get REPO_ROOT from prompt-manager for consistent path resolution
 REPO_ROOT=$(python3 "$PROMPT_MANAGER" info --json | jq -r '.repo_root')
 
-# Check project-level first, then user-level
-PREFERRED_AGENT=$(grep -E "^preferred_agent:" "$REPO_ROOT/CLAUDE.md" 2>/dev/null | sed 's/preferred_agent: *//')
-if [ -z "$PREFERRED_AGENT" ]; then
-    PREFERRED_AGENT=$(grep -E "^preferred_agent:" ~/.claude/CLAUDE.md 2>/dev/null | sed 's/preferred_agent: *//')
-fi
+# Check project-level first, then user-level via config reader
+PREFERRED_AGENT=$(python3 "$CONFIG_READER" get preferred_agent --repo-root "$REPO_ROOT")
 echo "${PREFERRED_AGENT:-not_set}"
 ```
 
@@ -63,17 +61,8 @@ Use AskUserQuestion tool with options:
 # Create ~/.claude/ if needed
 mkdir -p ~/.claude
 
-# Add or update preferred_agent in user-level CLAUDE.md
-if [ -f ~/.claude/CLAUDE.md ]; then
-    if grep -q "^preferred_agent:" ~/.claude/CLAUDE.md; then
-        sed -i "s/^preferred_agent:.*/preferred_agent: <selected_agent>/" ~/.claude/CLAUDE.md
-    else
-        echo "preferred_agent: <selected_agent>" >> ~/.claude/CLAUDE.md
-    fi
-else
-    echo "# User-level Claude Code settings" > ~/.claude/CLAUDE.md
-    echo "preferred_agent: <selected_agent>" >> ~/.claude/CLAUDE.md
-fi
+# Set preferred_agent in user-level CLAUDE.md using <daplug_config>
+python3 "$CONFIG_READER" set preferred_agent "<selected_agent>" --scope user
 ```
 
 4. Store the preference for use in recommendations.
@@ -217,10 +206,7 @@ REPO_ROOT=$(python3 "$PROMPT_MANAGER" info --json | jq -r '.repo_root')
 REPO_NAME=$(basename "$REPO_ROOT")
 
 # Read worktree_dir from CLAUDE.md (project first, then user-level)
-WORKTREE_DIR=$(grep -E "^worktree_dir:" "$REPO_ROOT/CLAUDE.md" 2>/dev/null | sed 's/worktree_dir: *//')
-if [ -z "$WORKTREE_DIR" ]; then
-    WORKTREE_DIR=$(grep -E "^worktree_dir:" ~/.claude/CLAUDE.md 2>/dev/null | sed 's/worktree_dir: *//')
-fi
+WORKTREE_DIR=$(python3 "$CONFIG_READER" get worktree_dir --repo-root "$REPO_ROOT")
 ```
 
 **If not found, prompt the user:**
@@ -239,16 +225,7 @@ WORKTREE_DIR=$(cd "$WORKTREE_DIR" 2>/dev/null && pwd || mkdir -p "$WORKTREE_DIR"
 
 # Save to user-level CLAUDE.md
 mkdir -p ~/.claude
-if [ -f ~/.claude/CLAUDE.md ]; then
-    if grep -q "^worktree_dir:" ~/.claude/CLAUDE.md; then
-        sed -i "s|^worktree_dir:.*|worktree_dir: $WORKTREE_DIR|" ~/.claude/CLAUDE.md
-    else
-        echo "worktree_dir: $WORKTREE_DIR" >> ~/.claude/CLAUDE.md
-    fi
-else
-    echo "# User-level Claude Code settings" > ~/.claude/CLAUDE.md
-    echo "worktree_dir: $WORKTREE_DIR" >> ~/.claude/CLAUDE.md
-fi
+python3 "$CONFIG_READER" set worktree_dir "$WORKTREE_DIR" --scope user
 ```
 </step5_check_worktree_dir>
 
@@ -304,7 +281,7 @@ Output a structured report with:
 
 ## Quick Start Commands
 
-**Preferred Agent:** `{preferred_agent}` (change in `$REPO_ROOT/CLAUDE.md`)
+**Preferred Agent:** `{preferred_agent}` (change in `$REPO_ROOT/CLAUDE.md` under `<daplug_config>`)
 
 ### Run Single Prompt (in current context)
 ```bash
@@ -457,7 +434,7 @@ Keep the output scannable - users want to quickly see what's available and what 
 - Group prompts by category (Research, Backend, Frontend, etc.)
 - Keep Notes column concise (< 60 chars)
 - Always include `--worktree` in commands for isolation
-- Use the user's `preferred_agent` from CLAUDE.md in all commands
+- Use the user's `preferred_agent` from `<daplug_config>` in CLAUDE.md in all commands
 
 **Recommendations section format:**
 ```markdown

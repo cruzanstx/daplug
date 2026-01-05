@@ -27,16 +27,18 @@ Clone/copy this plugin to one of:
 
 ## What's Included
 
-### Commands (11)
+### Commands (13)
 
 | Command | Description |
 |---------|-------------|
+| `/daplug:check-config` | Verify daplug configuration status and detect legacy settings |
 | `/daplug:cclimits` | Check AI CLI usage/quota (Claude, Codex, Gemini, Z.AI) |
 | `/daplug:check-updates` | Check if plugin has updates available |
 | `/daplug:codex-cli` | Run task with OpenAI Codex CLI |
 | `/daplug:create-llms-txt` | Research and generate llms_txt documentation |
 | `/daplug:create-prompt` | Create optimized, XML-structured prompts |
 | `/daplug:gemini-cli` | Run task with Google Gemini CLI |
+| `/daplug:migrate-config` | Migrate legacy CLAUDE.md settings to <daplug_config> |
 | `/daplug:prompts` | Analyze prompts folder and recommend next steps |
 | `/daplug:qwen-cli` | Run task with local Qwen model via Codex CLI |
 | `/daplug:run-prompt` | Execute prompts with various AI models |
@@ -52,11 +54,12 @@ Clone/copy this plugin to one of:
 | `infra-troubleshooter` | Diagnose infrastructure issues |
 | `k8s-cicd-troubleshooter` | Troubleshoot Kubernetes and CI/CD pipelines |
 
-### Skills (6)
+### Skills (7)
 
 | Skill | Description |
 |-------|-------------|
 | `ai-usage` | Check AI CLI usage/quota (Claude, Codex, Gemini, Z.AI) |
+| `config-reader` | Read and manage daplug config from CLAUDE.md (<daplug_config>) |
 | `prompt-executor` | Execute prompts with AI models, worktrees, tmux |
 | `prompt-finder` | Find and resolve prompts in ./prompts/ directory |
 | `prompt-manager` | CRUD operations for prompts (create, list, complete, delete) |
@@ -292,7 +295,17 @@ For teams, combine:
 
 ## First-Run Setup
 
-On first use, daplug prompts for user settings and saves them to `~/.claude/CLAUDE.md`:
+On first use, daplug prompts for user settings and saves them to `~/.claude/CLAUDE.md` under a `<daplug_config>` block:
+
+```markdown
+<daplug_config>
+preferred_agent: codex
+worktree_dir: .worktrees/
+llms_txt_dir: /storage/projects/docker/llms_txt
+ai_usage_awareness: enabled
+cli_logs_dir: ~/.claude/cli-logs/
+</daplug_config>
+```
 
 | Setting | When Prompted | Default |
 |---------|---------------|---------|
@@ -300,8 +313,11 @@ On first use, daplug prompts for user settings and saves them to `~/.claude/CLAU
 | `worktree_dir` | Running `/daplug:run-prompt --worktree` | `../worktrees` |
 | `llms_txt_dir` | Running `/daplug:create-llms-txt` | `../llms_txt` |
 | `ai_usage_awareness` | Running `/daplug:create-prompt` (when choosing executor) | Asks user (enabled/disabled) |
+| `cli_logs_dir` | Not prompted (advanced) | `~/.claude/cli-logs/` |
 
 Settings are checked in order: project `./CLAUDE.md` → user `~/.claude/CLAUDE.md`
+
+If you still have legacy plaintext settings, run `/daplug:migrate-config` to upgrade them.
 
 ### AI Usage Awareness
 
@@ -312,9 +328,11 @@ When enabled, `/create-prompt` will:
 - Suggest fallback models when preferred agent is unavailable
 - Show individual Gemini model quotas
 
-To toggle manually, add to `~/.claude/CLAUDE.md`:
-```
+To toggle manually, update `~/.claude/CLAUDE.md` under `<daplug_config>`:
+```markdown
+<daplug_config>
 ai_usage_awareness: enabled   # or 'disabled'
+</daplug_config>
 ```
 
 ### Codex CLI Prerequisites

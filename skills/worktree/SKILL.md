@@ -8,6 +8,8 @@ allowed-tools:
   - Bash(mkdir:*)
   - Bash(find:*)
   - Bash(realpath:*)
+  - Bash(jq:*)
+  - Bash(python3:*)
   - Bash(REPO_ROOT=:*)
   - Bash(REPO_NAME=:*)
   - Bash(WORKTREE_PATH=:*)
@@ -41,9 +43,11 @@ Worktree directory location is configurable per-project via CLAUDE.md.
 ### Config Format (in CLAUDE.md)
 
 ```markdown
+<daplug_config>
 worktree_dir: /absolute/path/to/worktrees
 # OR
 worktree_dir: .worktrees/
+</daplug_config>
 ```
 
 ### Get Worktree Directory
@@ -52,11 +56,11 @@ worktree_dir: .worktrees/
 
 ```bash
 REPO_ROOT=$(git rev-parse --show-toplevel)
+PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+CONFIG_READER="$PLUGIN_ROOT/skills/config-reader/scripts/config.py"
 
 # 1. Check for worktree_dir in CLAUDE.md
-if [ -f "${REPO_ROOT}/CLAUDE.md" ]; then
-    CONFIGURED_DIR=$(grep -E '^worktree_dir:\s*' "${REPO_ROOT}/CLAUDE.md" | sed 's/^worktree_dir:\s*//' | tr -d ' ')
-fi
+CONFIGURED_DIR=$(python3 "$CONFIG_READER" get worktree_dir --repo-root "$REPO_ROOT")
 
 if [ -n "$CONFIGURED_DIR" ]; then
     # 2a. Expand relative paths (starts with . or no leading /)
@@ -86,17 +90,11 @@ When no configuration exists and user needs to set one up:
 2. **Store the preference** in CLAUDE.md:
 ```bash
 REPO_ROOT=$(git rev-parse --show-toplevel)
+PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+CONFIG_READER="$PLUGIN_ROOT/skills/config-reader/scripts/config.py"
 
-# Add config to CLAUDE.md (append if file exists, create if not)
-if [ -f "${REPO_ROOT}/CLAUDE.md" ]; then
-    # Check if worktree_dir already exists
-    if ! grep -q '^worktree_dir:' "${REPO_ROOT}/CLAUDE.md"; then
-        echo "" >> "${REPO_ROOT}/CLAUDE.md"
-        echo "worktree_dir: ${CHOSEN_PATH}" >> "${REPO_ROOT}/CLAUDE.md"
-    fi
-else
-    echo "worktree_dir: ${CHOSEN_PATH}" > "${REPO_ROOT}/CLAUDE.md"
-fi
+# Add config to CLAUDE.md under <daplug_config>
+python3 "$CONFIG_READER" set worktree_dir "${CHOSEN_PATH}" --scope project
 ```
 
 3. **If path is inside project** (relative path chosen), ensure gitignore:
@@ -138,11 +136,11 @@ fi
 REPO_ROOT=$(git rev-parse --show-toplevel)
 REPO_NAME=$(basename "$REPO_ROOT")
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+CONFIG_READER="$PLUGIN_ROOT/skills/config-reader/scripts/config.py"
 
 # Get configured worktree directory (see Configuration section)
-if [ -f "${REPO_ROOT}/CLAUDE.md" ]; then
-    CONFIGURED_DIR=$(grep -E '^worktree_dir:\s*' "${REPO_ROOT}/CLAUDE.md" | sed 's/^worktree_dir:\s*//' | tr -d ' ')
-fi
+CONFIGURED_DIR=$(python3 "$CONFIG_READER" get worktree_dir --repo-root "$REPO_ROOT")
 if [ -n "$CONFIGURED_DIR" ]; then
     if [[ "$CONFIGURED_DIR" == .* ]] || [[ "$CONFIGURED_DIR" != /* ]]; then
         WORKTREES_DIR=$(realpath "${REPO_ROOT}/${CONFIGURED_DIR}")
@@ -225,9 +223,9 @@ git branch -D branch-name
 ```bash
 # Get configured worktree directory (see Configuration section)
 REPO_ROOT=$(git rev-parse --show-toplevel)
-if [ -f "${REPO_ROOT}/CLAUDE.md" ]; then
-    CONFIGURED_DIR=$(grep -E '^worktree_dir:\s*' "${REPO_ROOT}/CLAUDE.md" | sed 's/^worktree_dir:\s*//' | tr -d ' ')
-fi
+PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+CONFIG_READER="$PLUGIN_ROOT/skills/config-reader/scripts/config.py"
+CONFIGURED_DIR=$(python3 "$CONFIG_READER" get worktree_dir --repo-root "$REPO_ROOT")
 if [ -n "$CONFIGURED_DIR" ]; then
     if [[ "$CONFIGURED_DIR" == .* ]] || [[ "$CONFIGURED_DIR" != /* ]]; then
         WORKTREES_DIR=$(realpath "${REPO_ROOT}/${CONFIGURED_DIR}")
@@ -286,7 +284,7 @@ Worktrees require file permissions for the worktrees directory. Check/add to `~/
 
 1. **Use RUN_ID timestamps** - Prevents naming collisions on reruns
 2. **Track what you create** - Store paths/branches in arrays for cleanup
-3. **Configure worktree location** - Set `worktree_dir:` in CLAUDE.md for consistency
+3. **Configure worktree location** - Set `worktree_dir` under `<daplug_config>` in CLAUDE.md for consistency
    - Sibling directory (`../worktrees/`) - default, avoids git conflicts
    - Inside project (`.worktrees/`) - self-contained, must be gitignored
 4. **Prune regularly** - Run `git worktree prune` to clean stale references

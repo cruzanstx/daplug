@@ -327,11 +327,13 @@ Before presenting options:
 
 1. **Check ai_usage_awareness setting** (feature flag):
    ```bash
+   PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+   CONFIG_READER="$PLUGIN_ROOT/skills/config-reader/scripts/config.py"
+   PROMPT_MANAGER="$PLUGIN_ROOT/skills/prompt-manager/scripts/manager.py"
+   REPO_ROOT=$(python3 "$PROMPT_MANAGER" info --json | jq -r '.repo_root')
+
    # Project-level first, then user-level fallback
-   AI_USAGE_AWARENESS=$(grep -E "^ai_usage_awareness:" ./CLAUDE.md 2>/dev/null | sed 's/ai_usage_awareness: *//')
-   if [ -z "$AI_USAGE_AWARENESS" ]; then
-       AI_USAGE_AWARENESS=$(grep -E "^ai_usage_awareness:" ~/.claude/CLAUDE.md 2>/dev/null | sed 's/ai_usage_awareness: *//')
-   fi
+   AI_USAGE_AWARENESS=$(python3 "$CONFIG_READER" get ai_usage_awareness --repo-root "$REPO_ROOT")
    ```
 
    **If setting not found in either location:**
@@ -343,9 +345,16 @@ Before presenting options:
 
    Choose (1-2): _"
 
-   Based on response, add to `~/.claude/CLAUDE.md` under `## daplug Settings`:
+   Based on response, set in `~/.claude/CLAUDE.md` under `<daplug_config>`:
    - If yes: `ai_usage_awareness: enabled`
    - If no: `ai_usage_awareness: disabled`
+
+   ```bash
+   # Save to user config
+   python3 "$CONFIG_READER" set ai_usage_awareness "enabled" --scope user
+   # or
+   python3 "$CONFIG_READER" set ai_usage_awareness "disabled" --scope user
+   ```
 
    **If setting is "disabled":** Skip step 2, don't show usage info, proceed directly to step 3.
 
@@ -385,13 +394,10 @@ Before presenting options:
 
    Set the matching type flag to `true`, default all to `false`.
 
-4. **Read preferred_agent** from CLAUDE.md:
+4. **Read preferred_agent** from `<daplug_config>` in CLAUDE.md:
    ```bash
    # Project-level first, then user-level fallback
-   PREFERRED_AGENT=$(grep -E "^preferred_agent:" ./CLAUDE.md 2>/dev/null | sed 's/preferred_agent: *//')
-   if [ -z "$PREFERRED_AGENT" ]; then
-       PREFERRED_AGENT=$(grep -E "^preferred_agent:" ~/.claude/CLAUDE.md 2>/dev/null | sed 's/preferred_agent: *//')
-   fi
+   PREFERRED_AGENT=$(python3 "$CONFIG_READER" get preferred_agent --repo-root "$REPO_ROOT")
    # Default to "claude" if not set
    PREFERRED_AGENT=${PREFERRED_AGENT:-claude}
    ```
@@ -787,7 +793,7 @@ If user chooses #2:
 - Adapt the XML structure to fit the task - not every tag is needed every time
 - Prompts are saved to `{git_root}/prompts/` automatically
 - Each prompt file should contain ONLY the prompt content, no preamble or explanation
-- **Read preferred_agent** from CLAUDE.md before presenting executor options
+- **Read preferred_agent** from `<daplug_config>` in CLAUDE.md before presenting executor options
 - **Detect prompt type** (test, research, refactor) for smart recommendations
 - Present the appropriate decision tree based on what was created
 - When user chooses to run prompts, present the **full model selection menu**:
