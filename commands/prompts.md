@@ -50,11 +50,14 @@ echo "${PREFERRED_AGENT:-not_set}"
 2. **If not found, prompt the user:**
 Use AskUserQuestion tool with options:
 - `claude` - Claude Code (default, most capable)
-- `codex` - OpenAI Codex CLI (gpt-5.2-codex, default reasoning)
+- `codex` - OpenAI Codex CLI (gpt-5.2-codex, fast execution)
 - `codex-high` - OpenAI Codex CLI with high reasoning effort
 - `codex-xhigh` - OpenAI Codex CLI with extra-high reasoning effort
+- `gpt52` - OpenAI GPT-5.2 (planning, research, analysis)
+- `gpt52-high` - OpenAI GPT-5.2 with high reasoning effort
+- `gpt52-xhigh` - OpenAI GPT-5.2 with extra-high reasoning (30+ min tasks)
 - `gemini` - Google Gemini CLI
-- `zai` - Z.AI GLM-4.6 via Codex CLI
+- `zai` - Z.AI GLM-4.7 via Codex CLI
 
 3. **After user selects, save to user-level `~/.claude/CLAUDE.md`** (applies to all projects):
 ```bash

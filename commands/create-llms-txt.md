@@ -462,9 +462,12 @@ All available models for /daplug:run-prompt --model:
 - `claude` - Claude sub-agent in current context (best for complex reasoning, multi-step tasks)
 
 **OpenAI Codex Family:** (check: `codex.primary_window.used`, `codex.secondary_window.used`)
-- `codex` - GPT-5.1-code (fast, good for straightforward coding)
-- `codex-high` - GPT-5.1-code with higher token limits
-- `codex-xhigh` - GPT-5.1-code with maximum token limits (complex projects)
+- `codex` - gpt-5.2-codex (fast, good for straightforward coding)
+- `codex-high` - gpt-5.2-codex with high reasoning
+- `codex-xhigh` - gpt-5.2-codex with xhigh reasoning (complex projects)
+- `gpt52` - gpt-5.2 (planning, research, analysis)
+- `gpt52-high` - gpt-5.2 with high reasoning
+- `gpt52-xhigh` - gpt-5.2 with xhigh reasoning (30+ min tasks)
 
 **Google Gemini Family:** (check: `gemini.models.<model>.used` for each)
 - `gemini` - Gemini 3 Flash Preview (default, best coding performance)
@@ -488,11 +491,13 @@ For llms.txt research tasks, recommend models in this order (based on availabili
 
 | Priority | Model | Reason |
 |----------|-------|--------|
-| 1 | codex-xhigh | Best for large doc research + writing |
-| 2 | gemini25pro | Great at comprehensive research |
-| 3 | gemini3pro | Most capable Gemini |
-| 4 | claude | Excellent reasoning but uses your quota |
-| 5 | zai | Good fallback for documentation |
+| 1 | gpt52-xhigh | Best for research - deep reasoning, can work 30+ min |
+| 2 | gpt52-high | Great for methodical research |
+| 3 | gemini25pro | Great at comprehensive research |
+| 4 | gemini3pro | Most capable Gemini |
+| 5 | claude | Excellent reasoning but uses your quota |
+| 6 | codex-xhigh | Good for doc writing after research |
+| 7 | zai | Good fallback for documentation |
 
 **Recommended flags for llms.txt:**
 - `--worktree` - Isolate the work (can continue working on other things)
@@ -540,21 +545,26 @@ If user chooses #1:
   2. Claude (worktree) - isolated git worktree
 
   **Codex (OpenAI):** {usage status}
-  3. codex - GPT-5.1-code standard
-  4. codex-high - higher token limit
-  5. codex-xhigh - maximum tokens (Recommended for llms.txt)
+  3. codex - gpt-5.2-codex standard
+  4. codex-high - higher reasoning
+  5. codex-xhigh - maximum reasoning
+
+  **GPT-5.2 (OpenAI):** {usage status} - Best for research/planning
+  6. gpt52 - planning, research, analysis
+  7. gpt52-high - deep reasoning
+  8. gpt52-xhigh - maximum reasoning (30+ min) (Recommended for llms.txt)
 
   **Gemini (Google):** {show each model's usage}
-  6. gemini (3-flash) - {X}% used
-  7. gemini25flash - {X}% used
-  8. gemini25pro - {X}% used - great for research
-  9. gemini3pro - {X}% used - most capable
+  9. gemini (3-flash) - {X}% used
+  10. gemini25flash - {X}% used
+  11. gemini25pro - {X}% used - great for research
+  12. gemini3pro - {X}% used - most capable
 
   **Other:**
-  10. zai - {X}% used
-  11. local/qwen/devstral - Local models (no quota)
+  13. zai - {X}% used
+  14. local/qwen/devstral - Local models (no quota)
 
-  [Show recommendation: "Recommended for llms.txt research: codex-xhigh --worktree --loop"]
+  [Show recommendation: "Recommended for llms.txt research: gpt52-xhigh --worktree --loop"]
   [If preferred_agent is set and available: "Your preferred agent: {preferred_agent} ✅"]
 
   **Additional flags (can combine):**
@@ -562,7 +572,7 @@ If user chooses #1:
   - `--loop` - Auto-retry until verification passes (recommended: ensures quality)
   - `--loop --max-iterations N` - Limit loop retries (default: 3)
 
-  Choose (1-11), or type model with flags (e.g., 'codex-xhigh --worktree --loop'): _"
+  Choose (1-14), or type model with flags (e.g., 'gpt52-xhigh --worktree --loop'): _"
 
   **Execute based on selection:**
 

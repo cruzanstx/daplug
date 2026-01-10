@@ -68,7 +68,7 @@ python3 "$EXECUTOR" [prompts...] [options]
 ```
 
 **Options:**
-- `--model, -m`: claude, codex, codex-high, codex-xhigh, gemini, zai, local, qwen, devstral
+- `--model, -m`: claude, codex, codex-high, codex-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, zai, local, qwen, devstral
 - `--cwd, -c`: Working directory for execution
 - `--run, -r`: Actually run the CLI (default: just return info)
 - `--info-only, -i`: Only return prompt info, no CLI details
@@ -185,6 +185,10 @@ python3 "$EXECUTOR" --loop-status
 | claude | (Task subagent) | Claude Sonnet via subagent |
 | codex | codex exec --full-auto | OpenAI Codex (gpt-5.2-codex) |
 | codex-high | codex exec --full-auto -c model_reasoning_effort="high" | Codex with high reasoning |
+| codex-xhigh | codex exec --full-auto -c model_reasoning_effort="xhigh" | Codex with xhigh reasoning |
+| gpt52 | codex exec --full-auto -m gpt-5.2 | GPT-5.2 for planning/research |
+| gpt52-high | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="high" | GPT-5.2 with high reasoning |
+| gpt52-xhigh | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="xhigh" | GPT-5.2 with xhigh reasoning |
 | gemini | gemini -y | Google Gemini 2.5 Pro |
 | zai | codex exec --profile zai | Z.AI GLM-4.7 |
 | local/qwen | codex exec --profile local | Local qwen model |
