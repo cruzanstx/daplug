@@ -11,11 +11,11 @@ Set Padding 20
 Hide
 Type "python3 demos/demo-shell.py llms-txt-creation"
 Enter
-Sleep 200ms
+Sleep 300ms
 Show
 
-# Create llms.txt documentation
+# Create llms.txt documentation prompt
 Type "/create-llms-txt pydantic-ai"
-Sleep 300ms
+Sleep 1500ms
 Enter
-Sleep 3500ms
+Sleep 5000ms

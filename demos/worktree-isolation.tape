@@ -11,11 +11,11 @@ Set Padding 20
 Hide
 Type "python3 demos/demo-shell.py worktree-isolation"
 Enter
-Sleep 200ms
+Sleep 300ms
 Show
 
-# Run prompt with worktree isolation
+# Run prompt in isolated worktree
 Type "/run-prompt 005 --worktree"
-Sleep 300ms
+Sleep 1500ms
 Enter
-Sleep 4500ms
+Sleep 6000ms

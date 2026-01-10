@@ -11,29 +11,29 @@ Set Padding 20
 Hide
 Type "python3 demos/demo-shell.py multi-model-delegation"
 Enter
-Sleep 200ms
+Sleep 300ms
 Show
 
 # Create first prompt
 Type '/create-prompt "add a billing summary table"'
-Sleep 300ms
-Enter
 Sleep 1200ms
+Enter
+Sleep 2000ms
 
 # Create second prompt
 Type '/create-prompt "add audit log filters"'
-Sleep 300ms
-Enter
 Sleep 1200ms
+Enter
+Sleep 2000ms
 
 # Create third prompt
 Type '/create-prompt "add CSV export"'
-Sleep 300ms
+Sleep 1200ms
 Enter
-Sleep 1500ms
+Sleep 2500ms
 
-# Run all in parallel
+# Run all prompts in parallel with gemini
 Type "/run-prompt 001 002 003 --parallel --model gemini"
-Sleep 300ms
+Sleep 1500ms
 Enter
-Sleep 4000ms
+Sleep 5500ms

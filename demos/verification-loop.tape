@@ -11,11 +11,11 @@ Set Padding 20
 Hide
 Type "python3 demos/demo-shell.py verification-loop"
 Enter
-Sleep 200ms
+Sleep 300ms
 Show
 
-# Run prompt with verification loop
+# Run with verification loop
 Type "/run-prompt 010 --loop --max-iterations 5"
-Sleep 300ms
+Sleep 1500ms
 Enter
-Sleep 5000ms
+Sleep 7000ms

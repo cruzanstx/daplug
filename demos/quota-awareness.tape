@@ -11,11 +11,11 @@ Set Padding 20
 Hide
 Type "python3 demos/demo-shell.py quota-awareness"
 Enter
-Sleep 200ms
+Sleep 300ms
 Show
 
-# Check quota
+# Check AI quota usage
 Type "/cclimits"
-Sleep 300ms
+Sleep 1500ms
 Enter
-Sleep 5000ms
+Sleep 7000ms

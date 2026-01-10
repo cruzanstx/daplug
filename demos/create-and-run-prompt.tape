@@ -11,23 +11,23 @@ Set Padding 20
 Hide
 Type "python3 demos/demo-shell.py create-and-run-prompt"
 Enter
-Sleep 200ms
+Sleep 300ms
 Show
 
-# User types the create-prompt command at the > prompt
+# User types the create-prompt command
 Type '/create-prompt "add a login form with email validation"'
-Sleep 300ms
+Sleep 1500ms
 Enter
-Sleep 2000ms
+Sleep 3500ms
 
-# User selects option 1 (Run prompt now)
+# User reads the prompt created, then selects option 1
 Type "1"
-Sleep 200ms
+Sleep 1000ms
 Enter
-Sleep 2000ms
+Sleep 3500ms
 
-# User selects option 3 (codex)
+# User reviews model options, selects codex
 Type "3"
-Sleep 200ms
+Sleep 1000ms
 Enter
-Sleep 3000ms
+Sleep 4500ms
