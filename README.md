@@ -136,6 +136,9 @@ Commands below are shown without the `/daplug:` prefix for readability. In Claud
 
 ## Recent Changes
 
+### v0.14.1 (2026-01-10)
+- **Fix**: Corrected marketplace name in `/check-updates` command (`cruzanstx` not `daplug`)
+
 ### v0.14.0 (2026-01-10)
 - **GPT-5.2 model support**: Added `gpt52`, `gpt52-high`, `gpt52-xhigh` for planning and research tasks
 - **Model management utility**: New `scripts/manage-models.py` for listing, checking, and adding models
