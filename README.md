@@ -1,6 +1,6 @@
 # daplug
 
-A collection of commands, agents, and skills for AI-assisted development workflows.
+Delegate prompts to Codex, Gemini, Z.AI, or local models from Claude Code — with Ralph-Wiggum-inspired verification loops.
 
 ## Installation
 
