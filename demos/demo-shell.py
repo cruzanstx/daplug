@@ -1,21 +1,52 @@
 #!/usr/bin/env python3
 """
-Demo shell for VHS recordings - outputs realistic Claude Code-style responses.
+Demo shell for VHS recordings - simulates Claude Code interface.
 """
 import sys
+import time
 
-# ANSI color codes for terminal output
+# ANSI color codes matching Claude Code's terminal output
 BOLD = "\033[1m"
 GREEN = "\033[32m"
 YELLOW = "\033[33m"
 CYAN = "\033[36m"
+MAGENTA = "\033[35m"
 DIM = "\033[2m"
 RESET = "\033[0m"
+BLUE = "\033[34m"
+
+# Claude Code style elements
+BULLET = f"{MAGENTA}●{RESET}"
+PROMPT = f"{BOLD}>{RESET} "
+
+
+def print_slow(text: str, delay: float = 0.01) -> None:
+    """Print text with a slight delay to simulate typing/thinking."""
+    for char in text:
+        print(char, end="", flush=True)
+        time.sleep(delay)
+    print()
+
+
+def claude_response(text: str) -> str:
+    """Format text as a Claude response."""
+    lines = text.strip().split("\n")
+    formatted = []
+    for i, line in enumerate(lines):
+        if i == 0:
+            formatted.append(f"  {line}")
+        else:
+            formatted.append(f"  {line}")
+    return "\n".join(formatted)
+
 
 SCENARIOS = {
     "create-and-run-prompt": [
-        f"""
-{BOLD}I'll create an optimized prompt for adding a login form with email validation.{RESET}
+        # User types command, Claude responds
+        ("user", '/create-prompt "add a login form with email validation"'),
+        ("thinking", "Analyzing request..."),
+        ("response", f"""
+{BULLET} I'll create an optimized prompt for adding a login form with email validation.
 
 {GREEN}✓{RESET} Saved prompt to {CYAN}./prompts/001-login-form-validation.md{RESET}
 
@@ -26,13 +57,13 @@ SCENARIOS = {
   3. Save for later
   4. Other
 
-Choose (1-4): {DIM}1{RESET}
-""",
-        f"""
-{BOLD}📊 AI Quota Status:{RESET}
+  Choose (1-4):"""),
+        ("user", "1"),
+        ("response", f"""
+{BULLET} {BOLD}📊 AI Quota Status:{RESET}
   Claude: 18% (5h) {GREEN}✅{RESET} | Codex: 0% (5h) {GREEN}✅{RESET} | Z.AI: 1% {GREEN}✅{RESET}
 
-{BOLD}Execute via:{RESET}
+{BULLET} {BOLD}Execute via:{RESET}
 
   {BOLD}Claude:{RESET}
   1. Claude - sub-agent in current context
@@ -48,110 +79,109 @@ Choose (1-4): {DIM}1{RESET}
 
   {DIM}Recommended: codex (your preferred agent){RESET}
 
-Choose (1-6): {DIM}3{RESET}
-""",
-        f"""
-{BOLD}Execution Summary{RESET}
+  Choose (1-6):"""),
+        ("user", "3"),
+        ("tool", "Bash", "python3 executor.py 001 --model codex --run"),
+        ("response", f"""
+{BULLET} {BOLD}Execution Summary{RESET}
 
   Prompt   Model   Log
   ──────   ─────   ───
-  001      codex   ~/.claude/cli-logs/codex-001-20260110-143052.log
+  001      codex   ~/.claude/cli-logs/codex-001-20260110.log
 
-{BOLD}Status{RESET}
+{BULLET} {BOLD}Status{RESET}
 
-  Prompt                          Status              Monitor
-  ──────                          ──────              ───────
-  001 - Login Form Validation     {GREEN}🟢 Running{RESET} (PID 48291)   Background agent
-
-{BOLD}Quick commands:{RESET}
-  {DIM}# Tail log{RESET}
-  tail -f ~/.claude/cli-logs/codex-001-20260110-143052.log
+  Prompt                          Status                 Monitor
+  ──────                          ──────                 ───────
+  001 - Login Form Validation     {GREEN}🟢 Running{RESET} (PID 48291)    Background agent
 
 {GREEN}✅{RESET} {BOLD}Prompt 001 is now running with codex{RESET}
-""",
-    ],
-    "multi-model-delegation": [
-        f"""
-{GREEN}✓{RESET} Saved prompt to {CYAN}./prompts/001-billing-summary.md{RESET}
-""",
-        f"""
-{GREEN}✓{RESET} Saved prompt to {CYAN}./prompts/002-audit-log-filter.md{RESET}
-""",
-        f"""
-{GREEN}✓{RESET} Saved prompt to {CYAN}./prompts/003-csv-export.md{RESET}
 
-{BOLD}3 prompts created.{RESET} Ready for parallel execution.
-""",
-        f"""
-{BOLD}📊 AI Quota Status:{RESET}
+  {DIM}# Tail log{RESET}
+  tail -f ~/.claude/cli-logs/codex-001-20260110.log"""),
+    ],
+
+    "multi-model-delegation": [
+        ("user", '/create-prompt "add a billing summary table"'),
+        ("response", f"{GREEN}✓{RESET} Saved prompt to {CYAN}./prompts/001-billing-summary.md{RESET}"),
+        ("user", '/create-prompt "add audit log filters"'),
+        ("response", f"{GREEN}✓{RESET} Saved prompt to {CYAN}./prompts/002-audit-log-filter.md{RESET}"),
+        ("user", '/create-prompt "add CSV export"'),
+        ("response", f"""{GREEN}✓{RESET} Saved prompt to {CYAN}./prompts/003-csv-export.md{RESET}
+
+{BULLET} {BOLD}3 prompts created.{RESET} Ready for parallel execution."""),
+        ("user", "/run-prompt 001 002 003 --parallel --model gemini"),
+        ("tool", "Bash", "python3 executor.py 001 002 003 --model gemini --parallel --run"),
+        ("response", f"""
+{BULLET} {BOLD}📊 AI Quota Status:{RESET}
   Claude: 45% (5h) {YELLOW}⚠️{RESET} | Codex: 12% (5h) {GREEN}✅{RESET} | Gemini: 7% {GREEN}✅{RESET}
 
-{BOLD}Execution Summary{RESET}
+{BULLET} {BOLD}Execution Summary{RESET}
 
-  Prompt   Model    Worktree                                    Log
-  ──────   ─────    ────────                                    ───
-  001      gemini   .worktrees/myapp-prompt-001-20260110/       ~/.claude/cli-logs/gemini-001-*.log
-  002      gemini   .worktrees/myapp-prompt-002-20260110/       ~/.claude/cli-logs/gemini-002-*.log
-  003      gemini   .worktrees/myapp-prompt-003-20260110/       ~/.claude/cli-logs/gemini-003-*.log
+  Prompt   Model    Worktree                               Log
+  ──────   ─────    ────────                               ───
+  001      gemini   .worktrees/myapp-prompt-001/           ~/.claude/cli-logs/gemini-001.log
+  002      gemini   .worktrees/myapp-prompt-002/           ~/.claude/cli-logs/gemini-002.log
+  003      gemini   .worktrees/myapp-prompt-003/           ~/.claude/cli-logs/gemini-003.log
 
-{BOLD}Status{RESET}
+{BULLET} {BOLD}Status{RESET}
 
-  Prompt                    Status              Monitor
-  ──────                    ──────              ───────
-  001 - Billing Summary     {GREEN}🟢 Running{RESET} (PID 51023)   Background agent
-  002 - Audit Log Filter    {GREEN}🟢 Running{RESET} (PID 51024)   Background agent
-  003 - CSV Export          {GREEN}🟢 Running{RESET} (PID 51025)   Background agent
+  Prompt                    Status                 Monitor
+  ──────                    ──────                 ───────
+  001 - Billing Summary     {GREEN}🟢 Running{RESET} (PID 51023)    Background agent
+  002 - Audit Log Filter    {GREEN}🟢 Running{RESET} (PID 51024)    Background agent
+  003 - CSV Export          {GREEN}🟢 Running{RESET} (PID 51025)    Background agent
 
-{GREEN}✅{RESET} {BOLD}3 prompts running in parallel with gemini{RESET}
-""",
+{GREEN}✅{RESET} {BOLD}3 prompts running in parallel with gemini{RESET}"""),
     ],
+
     "worktree-isolation": [
-        f"""
-{BOLD}Execution Summary{RESET}
+        ("user", "/run-prompt 005 --worktree"),
+        ("tool", "Bash", "python3 executor.py 005 --worktree --run"),
+        ("response", f"""
+{BULLET} {BOLD}Execution Summary{RESET}
 
-  Prompt   Model   Worktree                                         Branch
-  ──────   ─────   ────────                                         ──────
-  005      codex   .worktrees/myapp-prompt-005-20260110-143521/     prompt/005-refactor-auth
+  Prompt   Model   Worktree                                       Branch
+  ──────   ─────   ────────                                       ──────
+  005      codex   .worktrees/myapp-prompt-005-20260110/          prompt/005-refactor-auth
 
-{BOLD}Worktree created:{RESET}
-  Path:   {CYAN}.worktrees/myapp-prompt-005-20260110-143521/{RESET}
+{BULLET} {BOLD}Worktree created:{RESET}
+  Path:   {CYAN}.worktrees/myapp-prompt-005-20260110/{RESET}
   Branch: {CYAN}prompt/005-refactor-auth{RESET}
 
-{DIM}Your main branch remains clean. Changes isolated in worktree.{RESET}
+  {DIM}Your main branch remains clean. Changes isolated in worktree.{RESET}
 
-{BOLD}Status{RESET}
+{BULLET} {BOLD}Status{RESET}
 
-  Prompt                    Status              Monitor
-  ──────                    ──────              ───────
-  005 - Refactor Auth       {GREEN}🟢 Running{RESET} (PID 52891)   Background agent
-
-{BOLD}Quick commands:{RESET}
-  {DIM}# Check worktree{RESET}
-  cd .worktrees/myapp-prompt-005-20260110-143521/
-
-  {DIM}# Merge when done{RESET}
-  git checkout main && git merge prompt/005-refactor-auth
+  Prompt                    Status                 Monitor
+  ──────                    ──────                 ───────
+  005 - Refactor Auth       {GREEN}🟢 Running{RESET} (PID 52891)    Background agent
 
 {GREEN}✅{RESET} {BOLD}Prompt 005 running in isolated worktree{RESET}
-""",
+
+  {DIM}# Merge when done{RESET}
+  git checkout main && git merge prompt/005-refactor-auth"""),
     ],
+
     "verification-loop": [
-        f"""
-{BOLD}🔄 Verification Loop Started{RESET}
+        ("user", "/run-prompt 010 --loop --max-iterations 5"),
+        ("tool", "Bash", "python3 executor.py 010 --loop --max-iterations 5 --run"),
+        ("response", f"""
+{BULLET} {BOLD}🔄 Verification Loop Started{RESET}
   Prompt: 010
   Model: codex
   Max iterations: 5
   Completion marker: VERIFICATION_COMPLETE
 
-{BOLD}Iteration 1/5{RESET}
+{BULLET} {BOLD}Iteration 1/5{RESET}
   Status: {YELLOW}NEEDS_RETRY{RESET}
   Reason: 3 tests failing
 
-{BOLD}Iteration 2/5{RESET}
+{BULLET} {BOLD}Iteration 2/5{RESET}
   Status: {YELLOW}NEEDS_RETRY{RESET}
   Reason: 2 lint errors remain
 
-{BOLD}Iteration 3/5{RESET}
+{BULLET} {BOLD}Iteration 3/5{RESET}
   Status: {GREEN}VERIFICATION_COMPLETE{RESET}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -160,12 +190,14 @@ Choose (1-6): {DIM}3{RESET}
 
   All tests passing
   Lint clean
-  Build succeeded
-""",
+  Build succeeded"""),
     ],
+
     "quota-awareness": [
-        f"""
-{BOLD}🔍 AI CLI Usage Checker{RESET}
+        ("user", "/cclimits"),
+        ("tool", "Bash", "npx cclimits"),
+        ("response", f"""
+{BULLET} {BOLD}🔍 AI CLI Usage Checker{RESET}
    2026-01-10 14:35:22
 
 ══════════════════════════════════════════════════
@@ -186,13 +218,11 @@ Choose (1-6): {DIM}3{RESET}
 ══════════════════════════════════════════════════
   {BOLD}OpenAI Codex{RESET}
 ══════════════════════════════════════════════════
-  {GREEN}✅{RESET} Connected
-  Plan: pro
+  {GREEN}✅{RESET} Connected  |  Plan: pro
 
   5h Window:
     Used:      0%
     Remaining: 100%
-    Resets in: 5h 0m
 
 ══════════════════════════════════════════════════
   {BOLD}Google Gemini{RESET}
@@ -201,26 +231,23 @@ Choose (1-6): {DIM}3{RESET}
 
   gemini-3-flash:     7% used
   gemini-2.5-pro:    10% used
-  gemini-3-pro:      10% used
 
 ══════════════════════════════════════════════════
   {BOLD}Z.AI{RESET}
 ══════════════════════════════════════════════════
   {GREEN}✅{RESET} Connected
 
-  Token Quota:
-    Used:      1%
-    Remaining: 99%
-    Resets in: 58m
+  Token Quota: 1% used
 
 {BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{RESET}
-{BOLD}Summary:{RESET} Claude: 18% | Codex: 0% | Gemini: 7% | Z.AI: 1%
-{DIM}Recommendation: codex has the most capacity{RESET}
-""",
+{BOLD}Summary:{RESET} Claude: 18% | Codex: 0% | Gemini: 7% | Z.AI: 1%"""),
     ],
+
     "llms-txt-creation": [
-        f"""
-{BOLD}Creating llms.txt documentation prompt{RESET}
+        ("user", "/create-llms-txt pydantic-ai"),
+        ("thinking", "Checking llms_txt repository..."),
+        ("response", f"""
+{BULLET} {BOLD}Creating llms.txt documentation prompt{RESET}
 
   Target:    pydantic-ai
   Category:  python/
@@ -228,11 +255,10 @@ Choose (1-6): {DIM}3{RESET}
 
 {GREEN}✓{RESET} Saved prompt to {CYAN}/storage/projects/docker/llms_txt/prompts/014-pydantic-ai-docs.md{RESET}
 
-{DIM}Prompt created in llms_txt repository (cross-repo){RESET}
+  {DIM}Prompt created in llms_txt repository (cross-repo){RESET}
 
-{BOLD}Next step:{RESET}
-  /run-prompt 014 --model codex --prompt-file /storage/projects/docker/llms_txt/prompts/014-pydantic-ai-docs.md
-""",
+{BULLET} {BOLD}Next step:{RESET}
+  /run-prompt 014 --model codex"""),
     ],
 }
 
@@ -247,16 +273,31 @@ def main() -> int:
     steps = SCENARIOS.get(scenario)
     if not steps:
         print(f"Unknown scenario: {scenario}")
-        print("Available: " + ", ".join(sorted(SCENARIOS.keys())))
         return 2
 
     for step in steps:
-        try:
-            input()  # Wait for Enter (from VHS tape)
-        except EOFError:
-            return 0
-        print(step.strip())
-        print()
+        step_type = step[0]
+
+        if step_type == "user":
+            # Wait for VHS to type the command
+            try:
+                user_input = input(PROMPT)
+            except EOFError:
+                return 0
+            # The typed command is already shown by VHS
+
+        elif step_type == "thinking":
+            print(f"  {DIM}{step[1]}{RESET}")
+            time.sleep(0.3)
+
+        elif step_type == "tool":
+            tool_name, tool_cmd = step[1], step[2]
+            print(f"  {DIM}Using {tool_name}...{RESET}")
+            time.sleep(0.2)
+
+        elif step_type == "response":
+            print(step[1].strip())
+            print()
 
     return 0
 
