@@ -136,6 +136,12 @@ Commands below are shown without the `/daplug:` prefix for readability. In Claud
 
 ## Recent Changes
 
+### v0.13.0 (2026-01-05)
+- **New config format**: Settings now stored in `<daplug_config>` XML blocks in CLAUDE.md files
+- **Migration command**: `/daplug:migrate-config` automatically converts legacy plaintext settings
+- **Config detection**: `/daplug:check-config` verifies config status and detects legacy settings
+- **New skill: config-reader**: Python-based config parsing with project → user fallback
+
 ### v0.12.9 (2026-01-04)
 - **Central llms_txt prompts**: `/create-llms-txt` now creates prompts in `$LLMS_TXT_DIR/prompts/` (the llms_txt repo) instead of the current project's `./prompts/`
 - **Auto-discovery**: Reads `llms_txt_dir` from `~/.claude/CLAUDE.md`, offers clone/configure flow if not set
