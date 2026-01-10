@@ -27,7 +27,7 @@ Clone/copy this plugin to one of:
 
 ## What's Included
 
-### Commands (13)
+### Commands (14)
 
 | Command | Description |
 |---------|-------------|
@@ -37,6 +37,7 @@ Clone/copy this plugin to one of:
 | `/daplug:codex-cli` | Run task with OpenAI Codex CLI |
 | `/daplug:create-llms-txt` | Research and generate llms_txt documentation |
 | `/daplug:create-prompt` | Create optimized, XML-structured prompts |
+| `/daplug:devstral-cli` | Run task with local Devstral model via Codex CLI |
 | `/daplug:gemini-cli` | Run task with Google Gemini CLI |
 | `/daplug:migrate-config` | Migrate legacy CLAUDE.md settings to <daplug_config> |
 | `/daplug:prompts` | Analyze prompts folder and recommend next steps |
@@ -45,7 +46,7 @@ Clone/copy this plugin to one of:
 | `/daplug:uvc` | Update docs and push to version control |
 | `/daplug:zai-cli` | Run task with Z.AI GLM-4.7 via Codex CLI |
 
-### Agents (4)
+### Agents (5)
 
 | Agent | Description |
 |-------|-------------|
@@ -53,6 +54,7 @@ Clone/copy this plugin to one of:
 | `go-build-optimizer` | Optimize Go compilation and Docker builds |
 | `infra-troubleshooter` | Diagnose infrastructure issues |
 | `k8s-cicd-troubleshooter` | Troubleshoot Kubernetes and CI/CD pipelines |
+| `readonly-log-watcher` | Monitor prompt execution logs without touching files |
 
 ### Skills (7)
 
@@ -71,6 +73,66 @@ Clone/copy this plugin to one of:
 
 ### MCP Servers
 - `servers.json` - Placeholder MCP config (disabled by default)
+
+## Showcase
+
+Commands below are shown without the `/daplug:` prefix for readability. In Claude Code, use `/daplug:<command>` if you prefer namespaced commands.
+
+### Create & Execute Prompts
+![create-prompt demo](demos/create-and-run-prompt.gif)
+
+> `/create-prompt` generates XML-structured prompts optimized for each task type, then `/run-prompt` executes them with your chosen model.
+
+### Multi-Model Delegation
+![multi-model demo](demos/multi-model-delegation.gif)
+
+> Run prompt batches across Claude, Codex, Gemini, or Z.AI with parallel execution and quota-aware routing.
+
+### Worktree Isolation
+![worktree demo](demos/worktree-isolation.gif)
+
+> Execute prompts in isolated git worktrees to keep your main branch clean while tasks run.
+
+### Verification Loops
+![loop demo](demos/verification-loop.gif)
+
+> Re-run prompts until tests pass with `--loop` and completion-marker detection.
+
+### Quota Awareness
+![quota demo](demos/quota-awareness.gif)
+
+> Check usage across all AI CLIs and pick the model with the most headroom.
+
+### LLMS.txt Generation
+![llms-txt demo](demos/llms-txt-creation.gif)
+
+> `/create-llms-txt` scaffolds research prompts in your llms_txt repo and supports cross-repo execution.
+
+## Quick Examples
+
+### Generate a Feature Prompt
+```bash
+# In Claude Code:
+/create-prompt "add user authentication with JWT"
+```
+
+### Run Across Multiple Models
+```bash
+/run-prompt 005 --model codex        # OpenAI Codex
+/run-prompt 005 --model gemini       # Google Gemini 3 Flash
+/run-prompt 005 --model zai          # Z.AI GLM-4.7
+```
+
+### Parallel Execution
+```bash
+/run-prompt 001 002 003 --parallel --worktree
+```
+
+### Check Quota Before Running
+```bash
+/cclimits
+# Shows: Claude: 18% | Codex: 0% | Gemini: 7% | Z.AI: 1%
+```
 
 ## Recent Changes
 
@@ -321,19 +383,60 @@ If you still have legacy plaintext settings, run `/daplug:migrate-config` to upg
 
 ### AI Usage Awareness
 
-When enabled, `/create-prompt` will:
+Daplug integrates with [cclimits](https://github.com/cruzanstx/cclimits) ([npm](https://www.npmjs.com/package/cclimits)) to provide real-time quota monitoring across all AI CLI tools.
+
+**What is cclimits?**
+
+A standalone CLI tool that checks quota/usage for AI coding tools:
+- **Claude Code** - 5-hour and 7-day rolling windows
+- **OpenAI Codex** - Primary and secondary rate limits
+- **Google Gemini CLI** - Per-model quotas (3-Flash, Flash, Pro tiers)
+- **Z.AI** - Token quota percentage
+- **OpenRouter** - Account balance
+
+**Integration with daplug:**
+
+When `ai_usage_awareness` is enabled, `/create-prompt` will:
 - Run `npx cclimits --json` before presenting model options
 - Show quota percentages for each AI model
 - Warn about models near their limits (>70% ⚠️, >90% 🔴)
 - Suggest fallback models when preferred agent is unavailable
 - Show individual Gemini model quotas
 
-To toggle manually, update `~/.claude/CLAUDE.md` under `<daplug_config>`:
+You can also check usage directly:
+```bash
+# Via daplug command
+/daplug:cclimits
+
+# Or directly via npx
+npx cclimits              # Detailed output
+npx cclimits --oneline    # Compact one-liner
+npx cclimits --json       # JSON for scripting
+```
+
+**Example output:**
+```
+Claude: 4.0% (5h) ✅ | Codex: 0% (5h) ✅ | Z.AI: 1% ✅ | Gemini: ( 3-Flash 7% ✅ | Flash 1% ✅ | Pro 10% ✅ )
+```
+
+**Status icons:**
+| Icon | Meaning |
+|------|---------|
+| ✅ | Under 70% - plenty of capacity |
+| ⚠️ | 70-90% - moderate usage |
+| 🔴 | 90-100% - near limit |
+| ❌ | 100% or unavailable |
+
+**Toggle setting:**
+
+Update `~/.claude/CLAUDE.md` under `<daplug_config>`:
 ```markdown
 <daplug_config>
 ai_usage_awareness: enabled   # or 'disabled'
 </daplug_config>
 ```
+
+**Learn more:** [cclimits on GitHub](https://github.com/cruzanstx/cclimits) | [cclimits on npm](https://www.npmjs.com/package/cclimits)
 
 ### Codex CLI Prerequisites
 
