@@ -494,6 +494,24 @@ def get_cli_info(model: str) -> dict:
             "env": {},
             "stdin_mode": "dash"
         },
+        "gpt52": {
+            "command": ["codex", "exec", "--full-auto", "-m", "gpt-5.2"],
+            "display": "gpt52 (GPT-5.2, planning/research)",
+            "env": {},
+            "stdin_mode": "dash"
+        },
+        "gpt52-high": {
+            "command": ["codex", "exec", "--full-auto", "-m", "gpt-5.2", "-c", 'model_reasoning_effort="high"'],
+            "display": "gpt52-high (GPT-5.2, high reasoning)",
+            "env": {},
+            "stdin_mode": "dash"
+        },
+        "gpt52-xhigh": {
+            "command": ["codex", "exec", "--full-auto", "-m", "gpt-5.2", "-c", 'model_reasoning_effort="xhigh"'],
+            "display": "gpt52-xhigh (GPT-5.2, xhigh reasoning, 30+ min tasks)",
+            "env": {},
+            "stdin_mode": "dash"
+        },
         "gemini": {
             "command": ["gemini", "-y", "-m", "gemini-3-flash-preview", "-p"],
             "display": "gemini (Gemini 3 Flash)",
@@ -1298,6 +1316,7 @@ def main():
     parser.add_argument("prompts", nargs="*", default=[], help="Prompt number(s) or name(s)")
     parser.add_argument("--model", "-m", default="claude",
                        choices=["claude", "codex", "codex-high", "codex-xhigh",
+                               "gpt52", "gpt52-high", "gpt52-xhigh",
                                "gemini", "gemini-high", "gemini-xhigh",
                                "gemini25pro", "gemini25flash", "gemini25lite",
                                "gemini3flash", "gemini3pro", "zai", "local", "qwen", "devstral"],

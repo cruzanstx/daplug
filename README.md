@@ -557,6 +557,21 @@ Gemini models share quotas in tiers (observed with Google One Premium):
 | `gemini-high` | 2.5 Pro | Stable, more capable |
 | `gemini-xhigh` | 3 Pro | Most capable, complex tasks |
 
+### OpenAI Model Tiers
+
+| Shorthand | Model | Best For |
+|-----------|-------|----------|
+| `codex` | gpt-5.2-codex | Fast coding execution |
+| `codex-high` | gpt-5.2-codex (high) | Complex coding |
+| `codex-xhigh` | gpt-5.2-codex (xhigh) | Large refactors |
+| `gpt52` | gpt-5.2 | Planning, research, analysis |
+| `gpt52-high` | gpt-5.2 (high) | Deep reasoning |
+| `gpt52-xhigh` | gpt-5.2 (xhigh) | Maximum reasoning (30+ min) |
+
+**When to use GPT-5.2 vs GPT-5.2-Codex:**
+- **GPT-5.2-Codex**: Best when plans are clear, need fast execution
+- **GPT-5.2**: Best for ambiguous problems, research, methodical analysis
+
 ## Worktree Auto-Install
 
 When using `--worktree`, the executor automatically detects and installs project dependencies after creating the worktree. This ensures verification commands (build, test, lint) work correctly in the isolated environment.
