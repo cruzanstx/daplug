@@ -14,8 +14,8 @@ Enter
 Sleep 300ms
 Show
 
-# Run prompt in isolated worktree
+# Run prompt in isolated worktree - full screen output
 Type "/run-prompt 005 --worktree"
 Sleep 1500ms
 Enter
-Sleep 6000ms
+Sleep 10000ms

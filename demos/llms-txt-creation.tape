@@ -18,4 +18,4 @@ Show
 Type "/create-llms-txt pydantic-ai"
 Sleep 1500ms
 Enter
-Sleep 5000ms
+Sleep 7000ms

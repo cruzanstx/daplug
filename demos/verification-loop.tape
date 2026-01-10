@@ -14,8 +14,8 @@ Enter
 Sleep 300ms
 Show
 
-# Run with verification loop
+# Run with verification loop - full screen with iterations
 Type "/run-prompt 010 --loop --max-iterations 5"
 Sleep 1500ms
 Enter
-Sleep 7000ms
+Sleep 12000ms

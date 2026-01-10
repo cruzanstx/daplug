@@ -30,10 +30,10 @@ Sleep 2000ms
 Type '/create-prompt "add CSV export"'
 Sleep 1200ms
 Enter
-Sleep 2500ms
+Sleep 3000ms
 
-# Run all prompts in parallel with gemini
+# Run all prompts in parallel - full screen output
 Type "/run-prompt 001 002 003 --parallel --model gemini"
 Sleep 1500ms
 Enter
-Sleep 5500ms
+Sleep 10000ms

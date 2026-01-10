@@ -14,8 +14,8 @@ Enter
 Sleep 300ms
 Show
 
-# Check AI quota usage
+# Check AI quota usage - lots of content to read
 Type "/cclimits"
 Sleep 1500ms
 Enter
-Sleep 7000ms
+Sleep 14000ms

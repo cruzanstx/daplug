@@ -18,16 +18,16 @@ Show
 Type '/create-prompt "add a login form with email validation"'
 Sleep 1500ms
 Enter
-Sleep 3500ms
+Sleep 4000ms
 
-# User reads the prompt created, then selects option 1
+# User reads the menu, selects option 1
 Type "1"
 Sleep 1000ms
 Enter
-Sleep 3500ms
+Sleep 5000ms
 
 # User reviews model options, selects codex
 Type "3"
 Sleep 1000ms
 Enter
-Sleep 4500ms
+Sleep 8000ms
