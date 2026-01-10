@@ -14,7 +14,7 @@ Based on output, respond:
 - If "NEEDS_UPDATE":
   ```
   Update available! Run:
-    claude plugin uninstall daplug@cruzanstx && claude plugin marketplace update daplug && claude plugin install daplug@cruzanstx
+    claude plugin uninstall daplug@cruzanstx && claude plugin marketplace update cruzanstx && claude plugin install daplug@cruzanstx
 
   Then resume session:
     claude --resume

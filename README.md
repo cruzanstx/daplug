@@ -274,7 +274,7 @@ Claude Code doesn't have built-in plugin update notifications yet ([feature requ
 ```bash
 # Uninstall, refresh marketplace, then reinstall
 claude plugin uninstall daplug@cruzanstx
-claude plugin marketplace update daplug
+claude plugin marketplace update cruzanstx
 claude plugin install daplug@cruzanstx
 ```
 
@@ -296,7 +296,7 @@ notify-plugin-update:
       echo "daplug updated to v${VERSION}"
       # Slack notification (uncomment and configure):
       # curl -X POST -H 'Content-type: application/json' \
-      #   --data "{\"text\":\"daplug plugin updated to v${VERSION} - run: claude plugin uninstall daplug@cruzanstx && claude plugin marketplace update daplug && claude plugin install daplug@cruzanstx\"}" \
+      #   --data "{\"text\":\"daplug plugin updated to v${VERSION} - run: claude plugin uninstall daplug@cruzanstx && claude plugin marketplace update cruzanstx && claude plugin install daplug@cruzanstx\"}" \
       #   $SLACK_WEBHOOK_URL
 
       # Email notification (uncomment and configure):
@@ -323,7 +323,7 @@ daplug: v0.2.0 -> v0.3.0
 NEEDS_UPDATE
 
 Update available! Run:
-  claude plugin uninstall daplug@cruzanstx && claude plugin marketplace update daplug && claude plugin install daplug@cruzanstx
+  claude plugin uninstall daplug@cruzanstx && claude plugin marketplace update cruzanstx && claude plugin install daplug@cruzanstx
 
 Then resume session:
   claude --resume
