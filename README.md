@@ -136,6 +136,11 @@ Commands below are shown without the `/daplug:` prefix for readability. In Claud
 
 ## Recent Changes
 
+### v0.14.0 (2026-01-10)
+- **GPT-5.2 model support**: Added `gpt52`, `gpt52-high`, `gpt52-xhigh` for planning and research tasks
+- **Model management utility**: New `scripts/manage-models.py` for listing, checking, and adding models
+- **Documentation**: Added "Managing Models" section to CLAUDE.md with checklist and templates
+
 ### v0.13.0 (2026-01-05)
 - **New config format**: Settings now stored in `<daplug_config>` XML blocks in CLAUDE.md files
 - **Migration command**: `/daplug:migrate-config` automatically converts legacy plaintext settings
