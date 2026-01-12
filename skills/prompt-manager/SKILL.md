@@ -6,6 +6,7 @@ CRUD operations for prompt files. Centralizes all prompt management logic to avo
 
 Manages prompt files in `{repo_root}/prompts/` with support for:
 - Listing active and completed prompts
+- Organizing active prompts in subfolders under `prompts/` (e.g. `prompts/providers/`)
 - Getting the next available number
 - Creating new prompts
 - Moving prompts to completed
@@ -47,6 +48,12 @@ Output: `006` (next available 3-digit number)
 # List all prompts
 python3 "$PROMPT_MANAGER" list
 
+# Filter to a folder under prompts/ (excludes completed/ by default)
+python3 "$PROMPT_MANAGER" list --folder providers
+
+# Tree view
+python3 "$PROMPT_MANAGER" list --tree
+
 # List as JSON
 python3 "$PROMPT_MANAGER" list --json
 
@@ -64,6 +71,13 @@ python3 "$PROMPT_MANAGER" list --completed
 python3 "$PROMPT_MANAGER" find 6
 # Output: /path/to/repo/prompts/006-my-prompt.md
 
+# Folder-qualified lookup
+python3 "$PROMPT_MANAGER" find providers/6
+# Output: /path/to/repo/prompts/providers/006-my-prompt.md
+
+# Name search across folders
+python3 "$PROMPT_MANAGER" find "backup-server"
+
 # As JSON
 python3 "$PROMPT_MANAGER" find 6 --json
 ```
@@ -80,6 +94,9 @@ python3 "$PROMPT_MANAGER" read 6
 ```bash
 # From content argument
 python3 "$PROMPT_MANAGER" create "backup-server" --content "Prompt content here"
+
+# Into a subfolder (folder is relative to prompts/; completed/ is reserved)
+python3 "$PROMPT_MANAGER" create "github-copilot-integration" --folder providers --content "..."
 
 # From file
 python3 "$PROMPT_MANAGER" create "backup-server" --content-file /tmp/prompt.md
@@ -182,7 +199,8 @@ Error: Prompt 005 already exists: /path/to/prompts/005-test.md
   "name": "backup-server",
   "filename": "006-backup-server.md",
   "path": "/path/to/repo/prompts/006-backup-server.md",
-  "status": "active"
+  "status": "active",
+  "folder": ""
 }
 ```
 

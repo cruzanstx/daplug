@@ -150,7 +150,19 @@ def create_worktree(repo_root: Path, prompt_file: Path, base_branch: str = "main
     prompt_slug = prompt_file.stem
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 
-    branch_name = f"prompt/{prompt_slug}"
+    # Include prompt folder in branch name to avoid collisions when prompts are organized
+    # into subfolders (and/or folder-scoped numbering is used).
+    prompts_dir = repo_root / "prompts"
+    branch_folder = ""
+    try:
+        rel = prompt_file.relative_to(prompts_dir)
+        if rel.parent != Path("."):
+            branch_folder = rel.parent.as_posix()
+    except ValueError:
+        branch_folder = ""
+
+    branch_folder = re.sub(r"[^a-zA-Z0-9._/-]+", "-", branch_folder).strip("/")
+    branch_name = f"prompt/{branch_folder}/{prompt_slug}" if branch_folder else f"prompt/{prompt_slug}"
     worktree_path = worktrees_dir / f"{repo_name}-prompt-{prompt_num}-{timestamp}"
 
     # Create worktrees directory
@@ -380,6 +392,8 @@ def expand_prompt_input(prompt_input: str) -> list[str]:
         "002-005" -> ["002", "003", "004", "005"]
         "002,005,007" -> ["002", "005", "007"]
         "002-004,010,015-017" -> ["002", "003", "004", "010", "015", "016", "017"]
+        "providers/011-013" -> ["providers/011", "providers/012", "providers/013"]
+        "001,providers/011,020" -> ["001", "providers/011", "020"]
         "fix-bug" -> ["fix-bug"]  (no expansion, treated as name)
     """
     results = []
@@ -392,15 +406,19 @@ def expand_prompt_input(prompt_input: str) -> list[str]:
         if not part:
             continue
 
-        # Check for range pattern (digits-digits)
-        range_match = re.match(r'^(\d+)-(\d+)$', part)
+        # Check for range pattern (optionally folder-prefixed): "<folder>/001-010" or "001-010"
+        range_match = re.match(r'^(?:(?P<folder>.+)/)?(?P<start>\d+)-(?P<end>\d+)$', part)
         if range_match:
-            start, end = int(range_match.group(1)), int(range_match.group(2))
+            folder = range_match.group("folder")
+            start_raw, end_raw = range_match.group("start"), range_match.group("end")
+            start, end = int(start_raw), int(end_raw)
             if start > end:
                 start, end = end, start  # Allow reverse ranges
             # Preserve zero-padding from the larger number
-            width = max(len(range_match.group(1)), len(range_match.group(2)))
-            results.extend(str(n).zfill(width) for n in range(start, end + 1))
+            width = max(len(start_raw), len(end_raw), 3)
+            for n in range(start, end + 1):
+                num = str(n).zfill(width)
+                results.append(f"{folder}/{num}" if folder else num)
         else:
             results.append(part)
 
@@ -409,21 +427,65 @@ def expand_prompt_input(prompt_input: str) -> list[str]:
 
 def resolve_prompt(prompts_dir: Path, prompt_input: str) -> Path:
     """Resolve a single prompt input to file path."""
+    completed_dir = prompts_dir / "completed"
+
+    def _normalize_folder(value: str) -> str:
+        cleaned = value.strip().replace("\\", "/").strip("/")
+        parts = [p for p in cleaned.split("/") if p and p != "."]
+        if any(p == ".." for p in parts):
+            raise ValueError(f"Invalid folder path (path traversal not allowed): {value}")
+        return "/".join(parts)
+
+    def _iter_prompt_files(search_root: Path, include_completed: bool) -> list[Path]:
+        files: list[Path] = []
+        for file in search_root.rglob("*.md"):
+            if not file.is_file():
+                continue
+            if file.name.startswith("_"):
+                continue
+            if not include_completed and completed_dir in file.parents:
+                continue
+            files.append(file)
+        return files
+
+    folder_filter: str | None = None
+    token = prompt_input.strip()
+    if "/" in token:
+        folder_part, token = token.rsplit("/", 1)
+        folder_filter = _normalize_folder(folder_part)
+        token = token.strip()
+
+    # Determine search root and whether to include completed/
+    if folder_filter is None:
+        search_root = prompts_dir
+        include_completed = False
+    else:
+        search_root = prompts_dir / folder_filter if folder_filter else prompts_dir
+        if not search_root.exists() or not search_root.is_dir():
+            raise FileNotFoundError(f"No prompt folder: {folder_filter}")
+        include_completed = folder_filter == "completed" or folder_filter.startswith("completed/")
+
+    files = _iter_prompt_files(search_root, include_completed=include_completed)
+
     # Try as number (e.g., "123" -> "123-*.md")
-    if prompt_input.isdigit():
-        padded = prompt_input.zfill(3)
-        matches = list(prompts_dir.glob(f"{padded}-*.md"))
-        if matches:
+    if token.isdigit():
+        padded = token.zfill(3)
+        matches = [f for f in files if f.name.startswith(f"{padded}-")]
+        if len(matches) == 1:
             return matches[0]
+        if len(matches) > 1:
+            rels = [str(m.relative_to(prompts_dir)) for m in matches]
+            raise ValueError(f"Ambiguous prompt '{prompt_input}': {rels}")
+        raise FileNotFoundError(f"No prompt found for '{prompt_input}'")
 
     # Try as partial name match
-    matches = [m for m in prompts_dir.glob(f"*{prompt_input}*.md")
-               if m.parent.name != "completed" and not m.name.startswith("_")]
+    matches = [f for f in files if token.lower() in f.name.lower()]
 
     if len(matches) == 1:
         return matches[0]
-    elif len(matches) > 1:
-        raise ValueError(f"Ambiguous prompt '{prompt_input}': {[m.name for m in matches]}")
+    if len(matches) > 1:
+        rels = [str(m.relative_to(prompts_dir)) for m in matches]
+        raise ValueError(f"Ambiguous prompt '{prompt_input}': {rels}")
 
     raise FileNotFoundError(f"No prompt found for '{prompt_input}'")
 
@@ -441,11 +503,14 @@ def resolve_prompts(prompts_dir: Path, prompt_inputs: list[str]) -> list[Path]:
 
     # No input = latest prompt
     if not prompt_inputs:
-        prompt_files = sorted(
-            [p for p in prompts_dir.glob("*.md")
-             if not p.name.startswith("_") and p.parent.name != "completed"],
-            key=lambda p: p.stat().st_mtime
-        )
+        completed_dir = prompts_dir / "completed"
+        prompt_files = [
+            p for p in prompts_dir.rglob("*.md")
+            if p.is_file()
+            and not p.name.startswith("_")
+            and completed_dir not in p.parents
+        ]
+        prompt_files = sorted(prompt_files, key=lambda p: p.stat().st_mtime)
         if not prompt_files:
             raise FileNotFoundError("No prompt files found")
         return [prompt_files[-1]]
@@ -1374,7 +1439,12 @@ def main():
                 print(json.dumps({"loop_states": states}, indent=2))
             else:
                 # Check specific prompt's loop status
-                prompt_num = args.prompts[0].zfill(3)
+                raw = args.prompts[0].strip()
+                token = raw.rsplit("/", 1)[-1]
+                if not token.isdigit():
+                    print(json.dumps({"error": f"Invalid prompt for --loop-status: {raw}"}))
+                    return
+                prompt_num = token.zfill(3)
                 state = load_loop_state(prompt_num)
                 if state:
                     print(json.dumps({"loop_state": state}, indent=2))
@@ -1418,10 +1488,33 @@ def main():
             log_file = log_dir / f"{args.model}-{prompt_num}-{timestamp}.log"
 
             content = prompt_file.read_text()
+
+            # Folder/path metadata (supports prompts/ subfolders)
+            folder = ""
+            status = "active"
+            try:
+                rel_to_prompts = prompt_file.relative_to(prompts_dir)
+                folder_path = rel_to_prompts.parent
+                folder = "" if folder_path == Path(".") else folder_path.as_posix()
+                if folder == "completed" or folder.startswith("completed/"):
+                    status = "completed"
+            except ValueError:
+                folder = ""
+                status = "active"
+
+            try:
+                rel_to_repo = prompt_file.relative_to(repo_root)
+                prompt_repo_path = rel_to_repo.as_posix()
+            except ValueError:
+                prompt_repo_path = str(prompt_file)
+
             prompt_info = {
                 "file": str(prompt_file),
+                "path": prompt_repo_path,
                 "name": prompt_file.name,
                 "number": prompt_num,
+                "folder": folder,
+                "status": status,
                 "title": extract_prompt_title(content),
                 "content": content,
                 "log": str(log_file)

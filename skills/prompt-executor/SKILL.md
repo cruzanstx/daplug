@@ -45,7 +45,7 @@ jq '.permissions.allow += ["Bash(PLUGIN_ROOT=$(jq -r '"'"'.plugins.\"daplug@cruz
 
 ---
 
-Execute prompts from `./prompts/` directory using various AI models (Claude, Codex, Gemini, ZAI, etc).
+Execute prompts from `./prompts/` (including subfolders) using various AI models (Claude, Codex, Gemini, ZAI, etc).
 
 ## When to Use This Skill
 
@@ -93,6 +93,9 @@ EXECUTOR="$PLUGIN_ROOT/skills/prompt-executor/scripts/executor.py"
 
 # Get prompt info
 python3 "$EXECUTOR" 123 --model codex
+
+# Folder-qualified prompt (resolves prompts/providers/011-*.md)
+python3 "$EXECUTOR" providers/011 --model codex
 
 # Run in current directory
 python3 "$EXECUTOR" 123 --model codex --run

@@ -7,14 +7,17 @@ and provide consistent behavior across /create-prompt, /run-prompt, etc.
 
 Usage:
     python3 manager.py next-number              # Get next available number
+    python3 manager.py next-number --folder providers  # Next number within prompts/providers/
     python3 manager.py list [--json]            # List all prompts
+    python3 manager.py list --tree              # Tree view grouped by folder
+    python3 manager.py list --folder providers  # List prompts in prompts/providers/
     python3 manager.py list --active            # List active prompts only
     python3 manager.py list --completed         # List completed prompts only
-    python3 manager.py find <number>            # Find prompt by number
-    python3 manager.py read <number>            # Read prompt content
-    python3 manager.py create <name> [--number N] [--content-file FILE]
-    python3 manager.py complete <number>        # Move to completed/
-    python3 manager.py delete <number>          # Delete prompt
+    python3 manager.py find <query>             # Find prompt by number, name, or folder/number
+    python3 manager.py read <query>             # Read prompt content
+    python3 manager.py create <name> [--folder FOLDER] [--number N] [--content-file FILE]
+    python3 manager.py complete <query>         # Move prompt to completed/
+    python3 manager.py delete <query>           # Delete prompt
     python3 manager.py info                     # Show prompts directory info
 """
 
@@ -38,6 +41,7 @@ class PromptInfo:
     filename: str
     path: Path
     status: str  # 'active' or 'completed'
+    folder: str  # '' for prompts/, 'providers' for prompts/providers/, 'completed' for prompts/completed/
 
     def to_dict(self) -> dict:
         return {
@@ -46,6 +50,7 @@ class PromptInfo:
             "filename": self.filename,
             "path": str(self.path),
             "status": self.status,
+            "folder": self.folder,
         }
 
 
@@ -90,6 +95,33 @@ def ensure_completed_dir(repo_root: Optional[Path] = None) -> Path:
     return completed_dir
 
 
+def normalize_folder(folder: Optional[str]) -> str:
+    """Normalize a folder argument to a safe, prompts/-relative path.
+
+    Returns '' for root. Rejects absolute paths and path traversal.
+    """
+    if folder is None:
+        return ""
+
+    cleaned = folder.strip().replace("\\", "/").strip("/")
+    if cleaned in ("", ".", "./"):
+        return ""
+
+    parts: list[str] = [p for p in cleaned.split("/") if p and p != "."]
+    if any(p == ".." for p in parts):
+        raise ValueError(f"Invalid folder path (path traversal not allowed): {folder}")
+    if cleaned.startswith("~") or cleaned.startswith("/"):
+        raise ValueError(f"Invalid folder path (must be relative to prompts/): {folder}")
+
+    return "/".join(parts)
+
+
+def validate_create_folder(folder: str) -> None:
+    """Validate a create destination folder (completed/ is reserved)."""
+    if folder == "completed" or folder.startswith("completed/"):
+        raise ValueError("Folder 'completed' is reserved (archive destination)")
+
+
 def parse_prompt_filename(filename: str) -> Optional[tuple[str, str]]:
     """
     Parse a prompt filename to extract number and name.
@@ -105,6 +137,7 @@ def list_prompts(
     repo_root: Optional[Path] = None,
     active_only: bool = False,
     completed_only: bool = False,
+    folder: Optional[str] = None,
 ) -> list[PromptInfo]:
     """
     List all prompts in the repository.
@@ -120,101 +153,232 @@ def list_prompts(
     if repo_root is None:
         repo_root = get_repo_root()
 
-    prompts = []
+    prompts: list[PromptInfo] = []
 
-    # List active prompts
-    if not completed_only:
-        prompts_dir = get_prompts_dir(repo_root)
-        if prompts_dir.exists():
-            for file in prompts_dir.iterdir():
-                if file.is_file() and file.suffix == ".md":
-                    parsed = parse_prompt_filename(file.name)
-                    if parsed:
-                        number, name = parsed
-                        prompts.append(PromptInfo(
-                            number=number,
-                            name=name,
-                            filename=file.name,
-                            path=file,
-                            status="active",
-                        ))
+    prompts_dir = get_prompts_dir(repo_root)
+    completed_dir = get_completed_dir(repo_root)
 
-    # List completed prompts
-    if not active_only:
-        completed_dir = get_completed_dir(repo_root)
-        if completed_dir.exists():
-            for file in completed_dir.iterdir():
-                if file.is_file() and file.suffix == ".md":
-                    parsed = parse_prompt_filename(file.name)
-                    if parsed:
-                        number, name = parsed
-                        prompts.append(PromptInfo(
-                            number=number,
-                            name=name,
-                            filename=file.name,
-                            path=file,
-                            status="completed",
-                        ))
+    normalized_folder: Optional[str] = None
+    if folder is not None:
+        normalized_folder = normalize_folder(folder)
 
-    # Sort by number
-    prompts.sort(key=lambda p: p.number)
+    def _folder_sort_key(value: str) -> tuple[int, str]:
+        if value == "":
+            return (0, "")
+        if value == "completed" or value.startswith("completed/"):
+            return (2, value)
+        return (1, value)
+
+    def _add_prompt(file: Path, status: str) -> None:
+        parsed = parse_prompt_filename(file.name)
+        if not parsed:
+            return
+        number, name = parsed
+        rel_parent = file.parent.relative_to(prompts_dir) if prompts_dir in file.parents else file.parent
+        folder_value = "" if rel_parent == Path(".") else rel_parent.as_posix()
+        prompts.append(PromptInfo(
+            number=number,
+            name=name,
+            filename=file.name,
+            path=file,
+            status=status,
+            folder=folder_value,
+        ))
+
+    # Folder-filtered listing
+    if normalized_folder is not None:
+        # completed is special: allow listing it explicitly
+        if normalized_folder == "completed" or normalized_folder.startswith("completed/"):
+            if completed_only or not active_only:
+                if completed_dir.exists():
+                    for file in completed_dir.rglob("*.md"):
+                        if file.is_file():
+                            _add_prompt(file, "completed")
+        else:
+            if active_only or not completed_only:
+                target_dir = prompts_dir if normalized_folder == "" else prompts_dir / normalized_folder
+                if target_dir.exists():
+                    for file in target_dir.rglob("*.md"):
+                        if not file.is_file():
+                            continue
+                        if completed_dir in file.parents:
+                            continue
+                        _add_prompt(file, "active")
+
+        prompts.sort(key=lambda p: (_folder_sort_key(p.folder), p.number, p.name))
+        return prompts
+
+    # List active prompts across prompts/ (all subfolders except completed/)
+    if not completed_only and prompts_dir.exists():
+        for file in prompts_dir.rglob("*.md"):
+            if not file.is_file():
+                continue
+            if completed_dir in file.parents:
+                continue
+            _add_prompt(file, "active")
+
+    # List completed prompts in prompts/completed/
+    if not active_only and completed_dir.exists():
+        for file in completed_dir.rglob("*.md"):
+            if file.is_file():
+                _add_prompt(file, "completed")
+
+    prompts.sort(key=lambda p: (_folder_sort_key(p.folder), p.number, p.name))
     return prompts
 
 
-def get_next_number(repo_root: Optional[Path] = None) -> str:
+def get_next_number(repo_root: Optional[Path] = None, folder: Optional[str] = None) -> str:
     """
     Get the next available prompt number.
-    Checks both active and completed prompts to avoid duplicates.
+    By default, checks all prompts (active + completed) to avoid duplicates.
+
+    If folder is provided, the next number is scoped to that folder only
+    (i.e., prompts/{folder}/ or prompts/ for root). This enables folder-scoped numbering.
 
     Returns:
         Three-digit string (e.g., "006")
     """
-    prompts = list_prompts(repo_root)
+    if repo_root is None:
+        repo_root = get_repo_root()
 
-    if not prompts:
+    # Global numbering (default): avoid duplicates across all prompts and completed/
+    if folder is None:
+        prompts = list_prompts(repo_root)
+        if not prompts:
+            return "001"
+        highest = max(int(p.number) for p in prompts)
+        return f"{highest + 1:03d}"
+
+    # Folder-scoped numbering: scan only within that folder (does not consider completed/)
+    normalized_folder = normalize_folder(folder)
+    if normalized_folder == "completed" or normalized_folder.startswith("completed/"):
+        raise ValueError("Folder-scoped numbering is not supported for 'completed/'")
+
+    prompts_dir = get_prompts_dir(repo_root)
+    target_dir = prompts_dir if normalized_folder == "" else prompts_dir / normalized_folder
+    if not target_dir.exists():
         return "001"
 
-    # Find highest number
-    highest = max(int(p.number) for p in prompts)
-    next_num = highest + 1
+    candidates: list[PromptInfo] = []
+    if normalized_folder == "":
+        for file in target_dir.glob("*.md"):
+            if file.is_file():
+                parsed = parse_prompt_filename(file.name)
+                if parsed:
+                    number, name = parsed
+                    candidates.append(PromptInfo(
+                        number=number,
+                        name=name,
+                        filename=file.name,
+                        path=file,
+                        status="active",
+                        folder="",
+                    ))
+    else:
+        completed_dir = get_completed_dir(repo_root)
+        for file in target_dir.rglob("*.md"):
+            if not file.is_file():
+                continue
+            if completed_dir in file.parents:
+                continue
+            parsed = parse_prompt_filename(file.name)
+            if not parsed:
+                continue
+            number, name = parsed
+            rel_parent = file.parent.relative_to(prompts_dir)
+            folder_value = "" if rel_parent == Path(".") else rel_parent.as_posix()
+            candidates.append(PromptInfo(
+                number=number,
+                name=name,
+                filename=file.name,
+                path=file,
+                status="active",
+                folder=folder_value,
+            ))
 
-    return f"{next_num:03d}"
+    if not candidates:
+        return "001"
+
+    highest = max(int(p.number) for p in candidates)
+    return f"{highest + 1:03d}"
 
 
-def find_prompt(number: str, repo_root: Optional[Path] = None) -> Optional[PromptInfo]:
+def _format_prompt_ref(prompt: PromptInfo) -> str:
+    prefix = f"{prompt.folder}/" if prompt.folder else ""
+    return f"{prefix}{prompt.number}-{prompt.name}"
+
+
+def find_prompt(query: str, repo_root: Optional[Path] = None) -> Optional[PromptInfo]:
     """
-    Find a prompt by its number.
+    Find a prompt by number or name.
+
+    Supports:
+      - "011" (searches all folders; prefers active over completed)
+      - "providers/011" (explicit folder)
+      - "github-copilot" (name search across folders)
 
     Args:
-        number: Prompt number (can be "6" or "006")
+        query: Prompt query (number, name, or folder/query)
         repo_root: Repository root path
 
     Returns:
         PromptInfo if found, None otherwise
     """
-    # Normalize number to 3 digits
-    try:
-        normalized = f"{int(number):03d}"
-    except ValueError:
+    if repo_root is None:
+        repo_root = get_repo_root()
+
+    raw = query.strip()
+    if not raw:
+        raise ValueError("Empty prompt query")
+
+    folder_filter: Optional[str] = None
+    token = raw
+    if "/" in raw:
+        folder_part, token = raw.rsplit("/", 1)
+        folder_filter = normalize_folder(folder_part)
+
+    token = token.strip()
+    candidates = list_prompts(repo_root, folder=folder_filter) if folder_filter is not None else list_prompts(repo_root)
+
+    matches: list[PromptInfo]
+    if token.isdigit():
+        normalized = f"{int(token):03d}"
+        matches = [p for p in candidates if p.number == normalized]
+    else:
+        q = token.lower()
+        matches = [p for p in candidates if q in p.name.lower() or q in p.filename.lower()]
+
+    if not matches:
         return None
 
-    prompts = list_prompts(repo_root)
+    if folder_filter is not None:
+        if len(matches) == 1:
+            return matches[0]
+        raise ValueError(f"Ambiguous prompt '{raw}': {[_format_prompt_ref(p) for p in matches]}")
 
-    for prompt in prompts:
-        if prompt.number == normalized:
-            return prompt
+    active_matches = [p for p in matches if p.status == "active"]
+    if len(active_matches) == 1:
+        return active_matches[0]
+    if len(active_matches) > 1:
+        raise ValueError(f"Ambiguous prompt '{raw}': {[_format_prompt_ref(p) for p in active_matches]}")
+
+    completed_matches = [p for p in matches if p.status == "completed"]
+    if len(completed_matches) == 1:
+        return completed_matches[0]
+    if len(completed_matches) > 1:
+        raise ValueError(f"Ambiguous prompt '{raw}': {[_format_prompt_ref(p) for p in completed_matches]}")
 
     return None
 
 
-def read_prompt(number: str, repo_root: Optional[Path] = None) -> Optional[str]:
+def read_prompt(query: str, repo_root: Optional[Path] = None) -> Optional[str]:
     """
-    Read the content of a prompt by its number.
+    Read the content of a prompt by query.
 
     Returns:
         Prompt content as string, or None if not found
     """
-    prompt = find_prompt(number, repo_root)
+    prompt = find_prompt(query, repo_root)
     if prompt is None:
         return None
 
@@ -225,6 +389,7 @@ def create_prompt(
     name: str,
     content: str,
     number: Optional[str] = None,
+    folder: str = "",
     repo_root: Optional[Path] = None,
 ) -> PromptInfo:
     """
@@ -245,15 +410,15 @@ def create_prompt(
     if repo_root is None:
         repo_root = get_repo_root()
 
+    folder = normalize_folder(folder)
+    validate_create_folder(folder)
+
     # Generate number if not provided
     if number is None:
         number = get_next_number(repo_root)
     else:
-        # Normalize and check for duplicates
+        # Normalize (duplicates are checked within target folder)
         number = f"{int(number):03d}"
-        existing = find_prompt(number, repo_root)
-        if existing:
-            raise ValueError(f"Prompt {number} already exists: {existing.path}")
 
     # Normalize name to kebab-case
     name = name.lower().strip()
@@ -267,7 +432,20 @@ def create_prompt(
     # Create filename and path
     filename = f"{number}-{name}.md"
     prompts_dir = ensure_prompts_dir(repo_root)
-    path = prompts_dir / filename
+    target_dir = prompts_dir if folder == "" else (prompts_dir / folder)
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    # Check for duplicates within target folder
+    existing_in_folder = list(target_dir.glob(f"{number}-*.md"))
+    if existing_in_folder:
+        raise ValueError(f"Prompt {number} already exists in '{folder or 'prompts/'}': {existing_in_folder[0]}")
+
+    # Prevent collisions in completed/ (shutil.move may overwrite)
+    completed_path = get_completed_dir(repo_root) / filename
+    if completed_path.exists():
+        raise ValueError(f"Prompt filename already exists in completed/: {completed_path}")
+
+    path = target_dir / filename
 
     # Write content
     path.write_text(content)
@@ -278,15 +456,16 @@ def create_prompt(
         filename=filename,
         path=path,
         status="active",
+        folder=folder,
     )
 
 
-def complete_prompt(number: str, repo_root: Optional[Path] = None) -> PromptInfo:
+def complete_prompt(query: str, repo_root: Optional[Path] = None) -> PromptInfo:
     """
     Move a prompt to the completed directory.
 
     Args:
-        number: Prompt number to complete
+        query: Prompt query (number, name, or folder/number)
         repo_root: Repository root path
 
     Returns:
@@ -296,13 +475,13 @@ def complete_prompt(number: str, repo_root: Optional[Path] = None) -> PromptInfo
         FileNotFoundError: If prompt doesn't exist
         ValueError: If prompt is already completed
     """
-    prompt = find_prompt(number, repo_root)
+    prompt = find_prompt(query, repo_root)
 
     if prompt is None:
-        raise FileNotFoundError(f"Prompt {number} not found")
+        raise FileNotFoundError(f"Prompt {query} not found")
 
     if prompt.status == "completed":
-        raise ValueError(f"Prompt {number} is already completed")
+        raise ValueError(f"Prompt {prompt.number} is already completed")
 
     # Ensure completed directory exists
     if repo_root is None:
@@ -311,6 +490,8 @@ def complete_prompt(number: str, repo_root: Optional[Path] = None) -> PromptInfo
 
     # Move file
     new_path = completed_dir / prompt.filename
+    if new_path.exists():
+        raise ValueError(f"Destination already exists in completed/: {new_path}")
     shutil.move(str(prompt.path), str(new_path))
 
     return PromptInfo(
@@ -319,15 +500,16 @@ def complete_prompt(number: str, repo_root: Optional[Path] = None) -> PromptInfo
         filename=prompt.filename,
         path=new_path,
         status="completed",
+        folder="completed",
     )
 
 
-def delete_prompt(number: str, repo_root: Optional[Path] = None) -> PromptInfo:
+def delete_prompt(query: str, repo_root: Optional[Path] = None) -> PromptInfo:
     """
     Delete a prompt file.
 
     Args:
-        number: Prompt number to delete
+        query: Prompt query (number, name, or folder/number)
         repo_root: Repository root path
 
     Returns:
@@ -336,10 +518,10 @@ def delete_prompt(number: str, repo_root: Optional[Path] = None) -> PromptInfo:
     Raises:
         FileNotFoundError: If prompt doesn't exist
     """
-    prompt = find_prompt(number, repo_root)
+    prompt = find_prompt(query, repo_root)
 
     if prompt is None:
-        raise FileNotFoundError(f"Prompt {number} not found")
+        raise FileNotFoundError(f"Prompt {query} not found")
 
     prompt.path.unlink()
     return prompt
@@ -365,6 +547,70 @@ def get_info(repo_root: Optional[Path] = None) -> dict:
     }
 
 
+def _print_tree(prompts: list[PromptInfo], repo_root: Path, folder_filter: Optional[str] = None) -> None:
+    prompts_dir = get_prompts_dir(repo_root)
+    base_dir = prompts_dir
+    if folder_filter is not None:
+        normalized = normalize_folder(folder_filter)
+        base_dir = prompts_dir if normalized == "" else (prompts_dir / normalized)
+
+    def _status_for_file(prompt: PromptInfo) -> str:
+        return prompt.status
+
+    # Build tree nodes: {dirs: {name: node}, files: [PromptInfo]}
+    def _new_node() -> dict:
+        return {"dirs": {}, "files": []}
+
+    root = _new_node()
+
+    for prompt in prompts:
+        try:
+            rel = prompt.path.relative_to(base_dir)
+        except ValueError:
+            # Shouldn't happen for normal usage; skip
+            continue
+        parts = list(rel.parts)
+        if not parts:
+            continue
+        filename = parts.pop()
+        node = root
+        for part in parts:
+            node = node["dirs"].setdefault(part, _new_node())
+        node["files"].append(prompt)
+
+    def _sorted_children(node: dict) -> list[tuple[str, str, object]]:
+        # Return list of ('file'|'dir', name, obj) with desired ordering:
+        # files first, then dirs; completed dir last.
+        files = sorted(node["files"], key=lambda p: (p.number, p.name))
+        dirs = sorted(node["dirs"].items(), key=lambda item: (item[0] == "completed", item[0]))
+        out: list[tuple[str, str, object]] = []
+        for p in files:
+            out.append(("file", p.filename, p))
+        for name, child in dirs:
+            out.append(("dir", name, child))
+        return out
+
+    def _print_node(node: dict, prefix: str) -> None:
+        children = _sorted_children(node)
+        for idx, (kind, name, obj) in enumerate(children):
+            is_last = idx == len(children) - 1
+            connector = "└── " if is_last else "├── "
+            next_prefix = prefix + ("    " if is_last else "│   ")
+            if kind == "dir":
+                print(f"{prefix}{connector}{name}/")
+                _print_node(obj, next_prefix)
+            else:
+                prompt = obj  # type: ignore[assignment]
+                print(f"{prefix}{connector}{name} ({_status_for_file(prompt)})")
+
+    root_label = "prompts/"
+    if folder_filter is not None:
+        normalized = normalize_folder(folder_filter)
+        root_label = f"prompts/{normalized}/" if normalized else "prompts/"
+    print(root_label)
+    _print_node(root, "")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Prompt Manager - CRUD operations for prompt files"
@@ -372,39 +618,43 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
 
     # next-number command
-    subparsers.add_parser("next-number", help="Get next available prompt number")
+    next_parser = subparsers.add_parser("next-number", help="Get next available prompt number")
+    next_parser.add_argument("--folder", help="Scope numbering to a folder under prompts/")
 
     # list command
     list_parser = subparsers.add_parser("list", help="List prompts")
     list_parser.add_argument("--json", action="store_true", help="Output as JSON")
     list_parser.add_argument("--active", action="store_true", help="Active only")
     list_parser.add_argument("--completed", action="store_true", help="Completed only")
+    list_parser.add_argument("--folder", help="Filter to a folder under prompts/ (excludes completed/ by default)")
+    list_parser.add_argument("--tree", action="store_true", help="Tree view grouped by folder")
 
     # find command
-    find_parser = subparsers.add_parser("find", help="Find prompt by number")
-    find_parser.add_argument("number", help="Prompt number")
+    find_parser = subparsers.add_parser("find", help="Find prompt by number, name, or folder/number")
+    find_parser.add_argument("query", help="Prompt query (e.g. 011, providers/011, github-copilot)")
     find_parser.add_argument("--json", action="store_true", help="Output as JSON")
 
     # read command
     read_parser = subparsers.add_parser("read", help="Read prompt content")
-    read_parser.add_argument("number", help="Prompt number")
+    read_parser.add_argument("query", help="Prompt query (e.g. 011, providers/011, github-copilot)")
 
     # create command
     create_parser = subparsers.add_parser("create", help="Create new prompt")
     create_parser.add_argument("name", help="Prompt name (kebab-case)")
     create_parser.add_argument("--number", "-n", help="Specific number (auto if omitted)")
-    create_parser.add_argument("--content-file", "-f", help="Read content from file")
+    create_parser.add_argument("--folder", "-f", default="", help="Destination folder under prompts/ (excluding completed/)")
+    create_parser.add_argument("--content-file", "-F", help="Read content from file")
     create_parser.add_argument("--content", "-c", help="Prompt content (or use stdin)")
     create_parser.add_argument("--json", action="store_true", help="Output as JSON")
 
     # complete command
     complete_parser = subparsers.add_parser("complete", help="Move prompt to completed")
-    complete_parser.add_argument("number", help="Prompt number")
+    complete_parser.add_argument("query", help="Prompt query (e.g. 011, providers/011, github-copilot)")
     complete_parser.add_argument("--json", action="store_true", help="Output as JSON")
 
     # delete command
     delete_parser = subparsers.add_parser("delete", help="Delete prompt")
-    delete_parser.add_argument("number", help="Prompt number")
+    delete_parser.add_argument("query", help="Prompt query (e.g. 011, providers/011, github-copilot)")
     delete_parser.add_argument("--json", action="store_true", help="Output as JSON")
 
     # info command
@@ -415,27 +665,42 @@ def main():
 
     try:
         if args.command == "next-number":
-            print(get_next_number())
+            print(get_next_number(folder=args.folder))
 
         elif args.command == "list":
             prompts = list_prompts(
                 active_only=args.active,
                 completed_only=args.completed,
+                folder=args.folder,
             )
             if args.json:
                 print(json.dumps([p.to_dict() for p in prompts], indent=2))
             else:
-                if not prompts:
+                if args.tree:
+                    _print_tree(prompts, get_repo_root(), folder_filter=args.folder)
+                elif not prompts:
                     print("No prompts found")
                 else:
+                    # Group by folder for display
+                    grouped: dict[str, list[PromptInfo]] = {}
                     for p in prompts:
-                        status_marker = "✓" if p.status == "completed" else " "
-                        print(f"[{status_marker}] {p.number} - {p.name}")
+                        grouped.setdefault(p.folder, []).append(p)
+
+                    def _display_folder(folder: str) -> str:
+                        if folder == "":
+                            return "prompts/"
+                        return f"prompts/{folder}/"
+
+                    for folder_name in sorted(grouped.keys(), key=lambda f: (f != "", f == "completed" or f.startswith("completed/"), f)):
+                        print(_display_folder(folder_name))
+                        for p in sorted(grouped[folder_name], key=lambda p: (p.number, p.name)):
+                            status_marker = "✓" if p.status == "completed" else " "
+                            print(f"  [{status_marker}] {p.number} - {p.name}")
 
         elif args.command == "find":
-            prompt = find_prompt(args.number)
+            prompt = find_prompt(args.query)
             if prompt is None:
-                print(f"Prompt {args.number} not found", file=sys.stderr)
+                print(f"Prompt {args.query} not found", file=sys.stderr)
                 sys.exit(1)
             if args.json:
                 print(json.dumps(prompt.to_dict(), indent=2))
@@ -443,9 +708,9 @@ def main():
                 print(prompt.path)
 
         elif args.command == "read":
-            content = read_prompt(args.number)
+            content = read_prompt(args.query)
             if content is None:
-                print(f"Prompt {args.number} not found", file=sys.stderr)
+                print(f"Prompt {args.query} not found", file=sys.stderr)
                 sys.exit(1)
             print(content)
 
@@ -465,6 +730,7 @@ def main():
                 name=args.name,
                 content=content,
                 number=args.number,
+                folder=args.folder,
             )
             if args.json:
                 print(json.dumps(prompt.to_dict(), indent=2))
@@ -472,14 +738,14 @@ def main():
                 print(f"Created: {prompt.path}")
 
         elif args.command == "complete":
-            prompt = complete_prompt(args.number)
+            prompt = complete_prompt(args.query)
             if args.json:
                 print(json.dumps(prompt.to_dict(), indent=2))
             else:
                 print(f"Completed: {prompt.path}")
 
         elif args.command == "delete":
-            prompt = delete_prompt(args.number)
+            prompt = delete_prompt(args.query)
             if args.json:
                 print(json.dumps(prompt.to_dict(), indent=2))
             else:

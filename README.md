@@ -64,7 +64,7 @@ Clone/copy this plugin to one of:
 | `config-reader` | Read and manage daplug config from CLAUDE.md (<daplug_config>) |
 | `prompt-executor` | Execute prompts with AI models, worktrees, tmux |
 | `prompt-finder` | Find and resolve prompts in ./prompts/ directory |
-| `prompt-manager` | CRUD operations for prompts (create, list, complete, delete) |
+| `prompt-manager` | CRUD operations for prompts with subfolder support |
 | `tmux-manager` | Manage tmux sessions for background tasks |
 | `worktree` | Manage git worktrees for isolated development |
 
@@ -135,6 +135,15 @@ Commands below are shown without the `/daplug:` prefix for readability. In Claud
 ```
 
 ## Recent Changes
+
+### v0.15.0 (2026-01-11)
+- **Subfolder support**: Organize prompts into topic-based subfolders (e.g., `prompts/providers/`, `prompts/backend/`)
+- **New flags**: `--folder/-f` for create, `--tree` for list, `--folder` for next-number
+- **Folder-aware resolution**: `find 011` searches all folders, `find providers/011` targets specific folder
+- **Range expansion**: `providers/011-013` expands correctly with folder prefix
+- **Auto-create folders**: Folders created automatically on first prompt
+- **JSON output**: Now includes `folder`, `path`, `status` fields
+- **Branch naming**: Includes folder path to avoid collisions (e.g., `prompt/providers/001-name`)
 
 ### v0.14.1 (2026-01-10)
 - **Fix**: Corrected marketplace name in `/check-updates` command (`cruzanstx` not `daplug`)
