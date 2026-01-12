@@ -1,6 +1,6 @@
 # daplug
 
-Delegate prompts to Codex, Gemini, Z.AI, or local models from Claude Code — with Ralph-Wiggum-inspired verification loops.
+Delegate prompts to Codex, Gemini, Z.AI, or local models from Claude Code — with worktree isolation and Ralph-Wiggum-inspired verification loops.
 
 ## Installation
 
