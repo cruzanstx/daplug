@@ -6,7 +6,7 @@ argument-hint: <prompt(s)> [--model claude|codex|gemini|gemini3pro|gemini3flash|
 
 # Run Prompt
 
-Execute prompts from `./prompts/` directory using various AI models.
+Execute prompts from `./prompts/` (including subfolders) using various AI models.
 
 ## Arguments
 
@@ -23,10 +23,15 @@ Execute prompts from `./prompts/` directory using various AI models.
 
 ### Prompt Selection Syntax
 
-- Single: `123` or `fix-bug`
+- Single: `123`, `providers/011`, or `fix-bug`
 - Range: `002-005` (expands to 002, 003, 004, 005)
-- Comma list: `002,005,007`
-- Combined: `002-004,010,015-017`
+- Folder range: `providers/011-015` (expands to providers/011, 012, 013, 014, 015)
+- Comma list: `002,005,providers/011`
+- Combined: `002-004,010,providers/011-013`
+
+Notes:
+- Folder prefixes are relative to `./prompts/` (e.g. `providers/011` resolves `./prompts/providers/011-*.md`).
+- If a number/name is ambiguous across folders, specify the folder prefix.
 
 ## Execution Flow
 
@@ -79,6 +84,8 @@ This single command:
 - Returns JSON with all info (paths, PIDs, logs)
 
 Parse the JSON output to get:
+- `prompts[].folder` - prompt subfolder under `prompts/` (empty string for root)
+- `prompts[].path` - repo-relative prompt path (e.g. `prompts/providers/011-*.md`)
 - `prompts[].worktree.worktree_path` - worktree path (if created)
 - `prompts[].worktree.branch_name` - branch name (if created)
 - `prompts[].execution.pid` - background process PID
@@ -118,7 +125,7 @@ Common errors and how to handle them:
 | `No prompts directory: {path}` | No `prompts/` folder at git root | Report error, suggest: `mkdir -p $(git rev-parse --show-toplevel)/prompts` |
 | `No prompt found for '{input}'` | Prompt number/name doesn't exist | Report error, suggest running `/prompts` to list available prompts |
 | `No prompt files found` | `prompts/` exists but is empty | Report error, suggest using `/create-prompt` to create one |
-| `Ambiguous prompt '{input}'` | Multiple prompts match the input | Report matches, ask user to be more specific |
+| `Ambiguous prompt '{input}'` | Multiple prompts match the input | Report matches and ask user to specify a folder prefix (e.g. `providers/011`) or a more specific name |
 
 **CRITICAL: Do NOT attempt manual CLI execution when the executor fails.** Always report the error to the user and suggest fixes.
 
