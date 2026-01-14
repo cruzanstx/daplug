@@ -706,6 +706,87 @@ def get_sandbox_add_dirs(cwd: str = None) -> list[str]:
     return add_dirs
 
 
+def normalize_worktree_path(worktree_dir: str, repo_root: str) -> str:
+    """Normalize worktree path to absolute, handling relative paths and ~."""
+    path = worktree_dir
+
+    # Expand ~ to home directory
+    path = os.path.expanduser(path)
+
+    # Make absolute if relative (resolve against repo_root)
+    if not os.path.isabs(path):
+        path = os.path.join(str(repo_root), path)
+
+    # Normalize . and .. components
+    path = os.path.normpath(path)
+
+    # Strip trailing slashes for consistency, but keep root "/"
+    if path != "/":
+        path = path.rstrip("/")
+
+    return path
+
+
+def ensure_worktree_permissions(worktree_dir: str, repo_root: str) -> bool:
+    """Ensure worktree directory has permissions in Claude settings.
+
+    Returns True if permissions were added, False if already existed.
+    """
+    abs_path = normalize_worktree_path(worktree_dir, repo_root)
+    settings_path = os.path.expanduser("~/.claude/settings.json")
+
+    # Read existing settings
+    try:
+        with open(settings_path, "r", encoding="utf-8") as f:
+            settings = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        settings = {}
+
+    if not isinstance(settings, dict):
+        settings = {}
+
+    # Ensure structure exists
+    permissions = settings.get("permissions")
+    if not isinstance(permissions, dict):
+        permissions = {}
+        settings["permissions"] = permissions
+
+    allow = permissions.get("allow")
+    if not isinstance(allow, list):
+        allow = [] if allow is None else [str(allow)]
+        permissions["allow"] = allow
+
+    additional = permissions.get("additionalDirectories")
+    if not isinstance(additional, list):
+        additional = [] if additional is None else [str(additional)]
+        permissions["additionalDirectories"] = additional
+
+    changed = False
+
+    allow_set = {str(item) for item in allow}
+    for perm in (f"Read({abs_path}/**)", f"Edit({abs_path}/**)", f"Write({abs_path}/**)"):
+        if perm not in allow_set:
+            allow.append(perm)
+            allow_set.add(perm)
+            changed = True
+
+    additional_set = {str(item) for item in additional}
+    if abs_path not in additional_set:
+        additional.append(abs_path)
+        changed = True
+
+    if not changed:
+        return False
+
+    # Write back only if changes were made
+    os.makedirs(os.path.dirname(settings_path), exist_ok=True)
+    with open(settings_path, "w", encoding="utf-8") as f:
+        json.dump(settings, f, indent=2)
+        f.write("\n")
+
+    return True
+
+
 def get_loop_state_dir() -> Path:
     """Get the directory for loop state files."""
     state_dir = Path.home() / ".claude" / "loop-state"
@@ -1537,6 +1618,22 @@ def main():
                 execution_cwd = worktree_info["worktree_path"]
                 worktree_path = worktree_info["worktree_path"]
                 branch_name = worktree_info.get("branch_name")
+
+                # Claude Task subagents rely on global Claude Code permissions.
+                # Ensure the (potentially out-of-repo) worktree path is permitted before execution.
+                if (
+                    args.run
+                    and args.model == "claude"
+                    and cli_info.get("stdin_mode") is None
+                    and worktree_path
+                ):
+                    try:
+                        ensure_worktree_permissions(worktree_path, str(repo_root))
+                    except Exception as exc:
+                        print(
+                            f"[Claude] Warning: failed to update ~/.claude/settings.json for worktree permissions: {exc}",
+                            file=sys.stderr,
+                        )
             else:
                 execution_cwd = args.cwd or str(repo_root)
 
