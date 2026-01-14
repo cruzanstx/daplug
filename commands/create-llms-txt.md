@@ -63,7 +63,7 @@ fi
 git clone https://gitlab.local/local/llms_txt.git "$LLMS_TXT_DIR"
 
 # Verify success
-if [ -f "$LLMS_TXT_DIR/AGENTS.md" ] || [ -f "$LLMS_TXT_DIR/INDEX.md" ]; then
+if [ -f "$LLMS_TXT_DIR/AGENTS.md" ] || [ -f "$LLMS_TXT_DIR/DOCUMENTATION-INDEX.md" ]; then
     echo "✓ Repository cloned successfully"
 else
     echo "⚠ Clone may have failed - missing expected files"
