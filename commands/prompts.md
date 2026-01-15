@@ -1,7 +1,7 @@
 ---
 name: prompts
 description: Analyze prompts folder and recommend what to work on next
-argument-hint: [--pending|--completed|--all] [--verbose] [--refresh]
+argument-hint: [--pending|--completed|--all] [--folder <name>] [--tree] [--verbose] [--refresh]
 ---
 
 <objective>
@@ -13,9 +13,11 @@ Suggests executable `/daplug:run-prompt` or `/daplug:run-prompt --worktree` comm
 
 <input>
 Optional flags via $ARGUMENTS:
-- `--pending` (default): Show only pending prompts (in `./prompts/*.md`)
+- `--pending` (default): Show only pending prompts (in `./prompts/` including subfolders, excluding `completed/`)
 - `--completed`: Show only completed prompts (in `./prompts/completed/`)
 - `--all`: Show both pending and completed prompts
+- `--folder <name>`: Filter to prompts within a subfolder under `./prompts/` (e.g., `providers`, `backend`). Use `--folder completed` to target archived prompts explicitly.
+- `--tree`: Show a tree view (instead of tables)
 - `--verbose`: Include more detail from each prompt's content
 - `--refresh`: Force re-analysis, ignoring cache
 </input>
@@ -86,8 +88,12 @@ COMPLETED_COUNT=$(echo "$PROMPT_INFO" | jq -r '.completed_count')
 PROMPTS_DIR=$(echo "$PROMPT_INFO" | jq -r '.prompts_dir')
 COMPLETED_DIR=$(echo "$PROMPT_INFO" | jq -r '.completed_dir')
 
-# Get newest prompt file timestamp
-NEWEST_PROMPT=$(ls -t "$PROMPTS_DIR"/*.md "$COMPLETED_DIR"/*.md 2>/dev/null | head -1)
+# Get newest prompt file timestamp (include subfolders under prompts/)
+NEWEST_PROMPT=$(
+  find "$PROMPTS_DIR" "$COMPLETED_DIR" -type f -name "*.md" -print0 2>/dev/null \
+    | xargs -0 -r ls -t 2>/dev/null \
+    | head -1
+)
 NEWEST_TIME=$(stat -c %Y "$NEWEST_PROMPT" 2>/dev/null || echo 0)
 
 # Check cache metadata (first 10 lines contain counts and timestamp)
@@ -121,19 +127,41 @@ python3 "$PROMPT_MANAGER" list --active --json
 
 # List only completed prompts
 python3 "$PROMPT_MANAGER" list --completed --json
+
+# Filter to a folder under prompts/ (e.g., prompts/providers/)
+python3 "$PROMPT_MANAGER" list --active --folder providers --json
+
+# Tree view (for display; still prefer JSON for analysis/grouping)
+python3 "$PROMPT_MANAGER" list --tree
 ```
 
 **Based on user flags:**
-- `--pending` (default): Use `python3 "$PROMPT_MANAGER" list --active --json`
-- `--completed`: Use `python3 "$PROMPT_MANAGER" list --completed --json`
-- `--all`: Use `python3 "$PROMPT_MANAGER" list --json`
+- Resolve optional folder filter:
+  - If `--folder <name>` provided, pass `--folder "$FOLDER"` to prompt-manager list calls.
+- Resolve status filter:
+  - `--pending` (default): `python3 "$PROMPT_MANAGER" list --active --json [--folder "$FOLDER"]`
+  - `--completed`: `python3 "$PROMPT_MANAGER" list --completed --json [--folder "$FOLDER"]`
+  - `--all`: `python3 "$PROMPT_MANAGER" list --json [--folder "$FOLDER"]`
+
+**If `--tree` is provided:**
+- Still gather JSON (for summary + recommendations), but replace the listings section with a tree display (see step6).
 
 The JSON output contains:
 ```json
 [
-  {"number": "006", "name": "backup-server", "filename": "006-backup-server.md", "path": "/path/to/prompts/006-backup-server.md", "status": "active"},
-  {"number": "001", "name": "initial-setup", "filename": "001-initial-setup.md", "path": "/path/to/prompts/completed/001-initial-setup.md", "status": "completed"}
+  {"number": "006", "name": "backup-server", "folder": "", "filename": "006-backup-server.md", "path": "/path/to/prompts/006-backup-server.md", "status": "active"},
+  {"number": "011", "name": "github-copilot", "folder": "providers", "filename": "011-github-copilot.md", "path": "/path/to/prompts/providers/011-github-copilot.md", "status": "active"},
+  {"number": "001", "name": "initial-setup", "folder": "completed", "filename": "001-initial-setup.md", "path": "/path/to/prompts/completed/001-initial-setup.md", "status": "completed"}
 ]
+```
+
+**Folder-aware grouping:**
+```python
+# Pseudocode (folder is '' for root prompts/)
+prompts_by_folder = {}
+for prompt in prompts_json:
+    folder = prompt.get("folder", "") or ""
+    prompts_by_folder.setdefault(folder, []).append(prompt)
 ```
 
 **Get repo info for absolute paths:**
@@ -151,16 +179,23 @@ For each pending prompt from the JSON list:
 1. **Metadata is already extracted** from prompt-manager:
    - `number` (e.g., `"011"`)
    - `name` (e.g., `"authentication-system"`)
+   - `folder` (e.g., `""` for root, or `"providers"`)
    - `path` (absolute path to file)
    - `status` ("active" or "completed")
 
 2. **Read prompt content** using prompt-manager:
 ```bash
+# Build a folder-qualified prompt ref when needed:
+# - Root: "001"
+# - Subfolder: "providers/011"
+PROMPT_REF="{number}"
+if [ -n "{folder}" ]; then PROMPT_REF="{folder}/{number}"; fi
+
 # Read full content
-python3 "$PROMPT_MANAGER" read {number}
+python3 "$PROMPT_MANAGER" read "$PROMPT_REF"
 
 # Or read first 100 lines for analysis
-python3 "$PROMPT_MANAGER" read {number} | head -100
+python3 "$PROMPT_MANAGER" read "$PROMPT_REF" | head -100
 ```
 
    Extract from content:
@@ -198,6 +233,13 @@ Prioritize based on:
 **Identify parallelizable prompts:**
 - Group prompts that touch different files/components
 - Note which can run simultaneously in worktrees
+
+**Folder-aware grouping rules (for display + recommendations):**
+- Detect subfolders by checking for any prompt where `folder` is non-empty and not `completed` (e.g., `providers`, `backend`).
+- If subfolders exist:
+  - Group prompts by `folder` first (root prompts first), then optionally by category within each folder.
+- If no subfolders exist:
+  - Keep current behavior: group by category only (flat prompts directory).
 </step4_group_and_prioritize>
 
 <step5_check_worktree_dir>
@@ -243,26 +285,56 @@ Output a structured report with:
 ## Prompts Analysis Report
 
 ### Summary
-- Pending: X prompts
-- Completed: Y prompts
+- Pending: X prompts (Y in root, Z in subfolders)
+- Completed: N prompts
+- Folders: {folders_csv} (include `root` for `prompts/`)
 - Estimated implementation status breakdown
+
+<!-- Rendering rules -->
+<!-- 1) Determine HAS_SUBFOLDERS = any prompt where folder not in ("", "completed") -->
+<!-- 2) If --tree: show ONLY the tree listing (no tables) -->
+<!-- 3) Else if HAS_SUBFOLDERS: show ONLY folder-grouped tables -->
+<!-- 4) Else: show ONLY category-grouped tables (legacy) -->
+
+### {Pending|Completed|All} Prompts
+
+<!-- If `--tree` flag is set, show tree view instead of tables. -->
+<!-- Build the tree using prompt-manager and strip "(active|completed)" suffixes for cleanliness. -->
+<!-- Examples (match the same status + folder filters used in step2): -->
+<!-- - Pending:   python3 "$PROMPT_MANAGER" list --active --tree   [--folder "$FOLDER"] | sed -E 's/ \\((active|completed)\\)$//' -->
+<!-- - Completed: python3 "$PROMPT_MANAGER" list --completed --tree [--folder "$FOLDER"] | sed -E 's/ \\((active|completed)\\)$//' -->
+<!-- - All:       python3 "$PROMPT_MANAGER" list --tree            [--folder "$FOLDER"] | sed -E 's/ \\((active|completed)\\)$//' -->
+
+prompts/
+├── 001-initial-setup.md
+├── providers/
+│   ├── 011-github-copilot.md
+│   └── 012-cursor.md
+└── backend/
+    └── 020-api-refactor.md
+
+<!-- If NOT `--tree`: -->
+<!-- - If subfolders exist: group by folder (root first). -->
+<!-- - If no subfolders exist: group by category (legacy behavior). -->
+
+### Pending Prompts by Folder
+
+#### Root (prompts/)
+| #   | Prompt        | Notes             | Command |
+|-----|---------------|-------------------|---------|
+| 001 | initial-setup | Bootstrap project | /daplug:run-prompt 001 --model {agent} --worktree |
+
+#### providers/
+| #   | Prompt         | Notes               | Command |
+|-----|----------------|---------------------|---------|
+| 011 | github-copilot | Add Copilot support | /daplug:run-prompt providers/011 --model {agent} --worktree |
 
 ### Pending Prompts by Category
 
 #### Research/Analysis
-| #   | Prompt                        | Notes                                          | Command                                         |
-|-----|-------------------------------|------------------------------------------------|-------------------------------------------------|
-| 275 | Production Deployment Revisit | Re-evaluate self-hosted vs cloud options       | /daplug:run-prompt 275 --model {agent} --worktree |
-
-#### Backend Features
-| #   | Prompt                        | Notes                                          | Command                                         |
-|-----|-------------------------------|------------------------------------------------|-------------------------------------------------|
-| 295 | Transcript Success Monitoring | Add metrics table for fetch success rates      | /daplug:run-prompt 295 --model {agent} --worktree |
-
-#### Infrastructure/DevOps
-| #   | Prompt                        | Notes                                          | Command                                         |
-|-----|-------------------------------|------------------------------------------------|-------------------------------------------------|
-| 045 | Deploy Delays to Staging      | Deployment pipeline improvements               | /daplug:run-prompt 045 --model {agent} --worktree |
+| #   | Prompt                        | Notes                                    | Command |
+|-----|-------------------------------|------------------------------------------|---------|
+| 275 | Production Deployment Revisit | Re-evaluate self-hosted vs cloud options | /daplug:run-prompt 275 --model {agent} --worktree |
 
 ### Recommendations
 
@@ -273,6 +345,9 @@ Output a structured report with:
 **High Priority** (core functionality):
 - 295 then 298 - Backend features, run sequential:
   `/daplug:run-prompt 295 --model {agent} --worktree`
+
+**Folder-qualified refs:**
+- If a prompt is in a subfolder, always include the folder prefix in recommendations (e.g., `providers/011`), and keep root prompts as bare numbers (e.g., `001`).
 
 **Consider Skipping/Archiving**:
 - [Prompt #] - [Name] - [Why - may be obsolete or already done]
@@ -288,12 +363,12 @@ Output a structured report with:
 
 ### Run Single Prompt (in current context)
 ```bash
-/daplug:run-prompt {recommended_prompt_number} --model {preferred_agent}
+/daplug:run-prompt {recommended_prompt_ref} --model {preferred_agent}
 ```
 
 ### Run Single Prompt (isolated worktree)
 ```bash
-/daplug:run-prompt {recommended_prompt_number} --model {preferred_agent} --worktree
+/daplug:run-prompt {recommended_prompt_ref} --model {preferred_agent} --worktree
 # Worktree: $WORKTREE_DIR/$REPO_NAME-prompt-{number}-{timestamp}/
 # Logs: $WORKTREE_DIR/$REPO_NAME-prompt-{number}-{timestamp}/worktree.log
 ```
@@ -305,6 +380,8 @@ Output a structured report with:
 Example for parallel execution:
 ```bash
 /daplug:run-prompt 227 228 229 --model {preferred_agent} --worktree
+# Mixed root + subfolder example:
+/daplug:run-prompt 001 providers/011 backend/020 --model {preferred_agent} --worktree
 # Creates 3 parallel worktrees:
 # - $WORKTREE_DIR/$REPO_NAME-prompt-227-{timestamp}/
 # - $WORKTREE_DIR/$REPO_NAME-prompt-228-{timestamp}/
@@ -333,10 +410,12 @@ done
 
 ## File Locations
 
+<!-- Include one row per detected active subfolder under prompts/ (exclude "" and "completed"). -->
 | Resource | Path |
 |----------|------|
-| Pending Prompts | `$REPO_ROOT/prompts/` |
-| Completed Prompts | `$REPO_ROOT/prompts/completed/` |
+| Root Prompts | `$REPO_ROOT/prompts/` |
+| {folder}/ | `$REPO_ROOT/prompts/{folder}/` |
+| Completed | `$REPO_ROOT/prompts/completed/` |
 | Worktrees | `$WORKTREE_DIR/` |
 | Memory Bank | `$REPO_ROOT/memory-bank/` |
 | Cache File | `$REPO_ROOT/memory-bank/prompts-analysis.md` |
@@ -425,6 +504,7 @@ Keep the output scannable - users want to quickly see what's available and what 
 | #   | Prompt                     | Notes                              | Command                                         |
 |-----|----------------------------|------------------------------------|-------------------------------------------------|
 | 303 | Shorts Generation Workflow | Frontend shows "queued" - trace it | /daplug:run-prompt 303 --model codex --worktree |
+| 011 | github-copilot             | Add Copilot support                | /daplug:run-prompt providers/011 --model codex --worktree |
 ```
 
 **Table columns:**
@@ -434,7 +514,9 @@ Keep the output scannable - users want to quickly see what's available and what 
 4. `Command` - Full executable command with preferred agent
 
 **Formatting rules:**
-- Group prompts by category (Research, Backend, Frontend, etc.)
+- If any pending prompts are in subfolders (folder != "" and != "completed"): group listings by folder first (root first), then optionally by category within each folder.
+- If no subfolders exist: group prompts by category (Research, Backend, Frontend, etc.) as before.
+- If `--tree` flag: show a tree view instead of tables for the listings section.
 - Keep Notes column concise (< 60 chars)
 - Always include `--worktree` in commands for isolation
 - Use the user's `preferred_agent` from `<daplug_config>` in CLAUDE.md in all commands
