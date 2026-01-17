@@ -20,6 +20,10 @@ from typing import Optional
 
 # Default completion marker
 DEFAULT_COMPLETION_MARKER = "VERIFICATION_COMPLETE"
+# Sentinel used to separate echoed prompt instructions from model output in CLI logs.
+# Some model CLIs print the full prompt before the assistant response; this lets us
+# avoid false-positive marker detection from the prompt text itself.
+INSTRUCTIONS_END_SENTINEL = "DAPLUG_INSTRUCTIONS_END"
 
 
 def extract_prompt_title(content: str) -> str:
@@ -879,8 +883,10 @@ def check_completion_marker(log_file: Path, marker: str) -> tuple[bool, Optional
     Returns:
         tuple: (marker_found, retry_reason if NEEDS_RETRY found)
 
-    Note: Only checks for markers AFTER </verification_protocol> to avoid false positives
-    from the marker appearing in prompt instructions (which include an example of the tag).
+    Note: Some CLIs echo the full prompt (including marker instructions) into the log
+    before the model output. To avoid false positives, we only search for markers
+    after the first occurrence of INSTRUCTIONS_END_SENTINEL if present, otherwise we
+    fall back to searching after </verification_protocol>.
     """
     if not log_file.exists():
         return False, None
@@ -888,15 +894,18 @@ def check_completion_marker(log_file: Path, marker: str) -> tuple[bool, Optional
     try:
         content = log_file.read_text()
 
-        # Find where the instructions end - only look for markers after that point
-        # The verification_protocol section contains example markers that would false-match
-        protocol_end = content.rfind("</verification_protocol>")
-        if protocol_end != -1:
-            # Only search in content after the instructions
-            search_content = content[protocol_end:]
+        # Find where the prompt instructions end - only look for markers after that point.
+        sentinel_pos = content.find(INSTRUCTIONS_END_SENTINEL)
+        if sentinel_pos != -1:
+            search_content = content[sentinel_pos + len(INSTRUCTIONS_END_SENTINEL):]
         else:
-            # No protocol section found (shouldn't happen, but handle gracefully)
-            search_content = content
+            # Backward-compatible fallback: older prompt wrappers ended the "example marker"
+            # section at </verification_protocol>.
+            protocol_end = content.rfind("</verification_protocol>")
+            if protocol_end != -1:
+                search_content = content[protocol_end:]
+            else:
+                search_content = content
 
         # Check for NEEDS_RETRY marker first (takes precedence)
         # This ensures explicit retry requests are honored even if completion marker exists
@@ -1106,33 +1115,36 @@ Branch: {branch_name or 'unknown'}
 </task>
 
 <verification_protocol>
-## Completion Markers
+## Verification Loop Protocol
 
-This task uses iterative verification. You may be re-run multiple times until complete.
+This task uses an iterative verification loop. You may be re-run multiple times until complete.
 
-**To signal completion:** Output `<verification>{completion_marker}</verification>` ONLY when:
-- All implementation is done
-- Tests pass (if applicable)
-- Build succeeds (if applicable)
-- Manual verification steps completed
-
-**To signal retry needed:** Output `<verification>NEEDS_RETRY: [reason]</verification>` if:
-- Tests are failing
-- Build errors exist
-- Implementation incomplete
-- Verification steps failed
-
-**Important:**
-- Each iteration sees your previous work (files, git history)
-- DO NOT output {completion_marker} falsely to exit
-- The loop continues until genuine completion or max iterations
-- Current iteration: {iteration} of {max_iterations}
+Important:
+- Each iteration sees your previous work (files, git history).
+- The controller determines completion based on a required verification tag you output.
+- Do not claim completion unless the task is genuinely complete.
+- Current iteration: {iteration} of {max_iterations}.
 </verification_protocol>
 
 {previous_feedback}<environment>
 {worktree_context}Previous iterations in this loop:
 {history_summary}
 </environment>
+
+---
+## MANDATORY: Completion Signal (Required Action)
+
+When ALL tasks are complete and verified, you MUST output this EXACT line literally (not as an example, not inside a code block), and make it the final line of your response:
+
+<verification>{completion_marker}</verification>
+
+If anything is incomplete or failing, you MUST output this EXACT line (with your reason), and make it the final line of your response:
+
+<verification>NEEDS_RETRY: [reason]</verification>
+
+Do not output both. Do not output any other <verification> tags.
+---
+{INSTRUCTIONS_END_SENTINEL}
 """
     return verification_wrapper
 

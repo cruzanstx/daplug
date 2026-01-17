@@ -171,6 +171,11 @@ python3 "$EXECUTOR" 123 --model codex --worktree --run --loop
 
 Log paths follow `cli_logs_dir` from `<daplug_config>` if configured (default `~/.claude/cli-logs/`).
 
+**Completion markers (required):**
+- To end the loop, the model must output a final-line verification tag: `<verification>VERIFICATION_COMPLETE</verification>`.
+- To request another iteration, output: `<verification>NEEDS_RETRY: [reason]</verification>`.
+- The executor ignores any markers that appear inside echoed prompt instructions (some CLIs print the full prompt into logs).
+
 ### Check Loop Status
 
 ```bash
