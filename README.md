@@ -27,7 +27,7 @@ Clone/copy this plugin to one of:
 
 ## What's Included
 
-### Commands (14)
+### Commands (15)
 
 | Command | Description |
 |---------|-------------|
@@ -43,6 +43,7 @@ Clone/copy this plugin to one of:
 | `/daplug:prompts` | Analyze prompts folder and recommend next steps |
 | `/daplug:qwen-cli` | Run task with local Qwen model via Codex CLI |
 | `/daplug:run-prompt` | Execute prompts with various AI models |
+| `/daplug:sprint` | Automated sprint planning from specs or existing prompts |
 | `/daplug:uvc` | Update docs and push to version control |
 | `/daplug:zai-cli` | Run task with Z.AI GLM-4.7 via Codex CLI |
 
@@ -56,7 +57,7 @@ Clone/copy this plugin to one of:
 | `k8s-cicd-troubleshooter` | Troubleshoot Kubernetes and CI/CD pipelines |
 | `readonly-log-watcher` | Monitor prompt execution logs without touching files |
 
-### Skills (7)
+### Skills (8)
 
 | Skill | Description |
 |-------|-------------|
@@ -65,6 +66,7 @@ Clone/copy this plugin to one of:
 | `prompt-executor` | Execute prompts with AI models, worktrees, tmux |
 | `prompt-finder` | Find and resolve prompts in ./prompts/ directory |
 | `prompt-manager` | CRUD operations for prompts with subfolder support |
+| `sprint` | Automated sprint planning, dependency graphs, execution plans |
 | `tmux-manager` | Manage tmux sessions for background tasks |
 | `worktree` | Manage git worktrees for isolated development |
 
@@ -135,6 +137,18 @@ Commands below are shown without the `/daplug:` prefix for readability. In Claud
 ```
 
 ## Recent Changes
+
+### v0.19.0 (2026-01-18)
+- **Sprint from existing prompts**: New `--from-existing` flag analyzes prompts already in `prompts/` instead of generating from a spec
+- **Prompt filtering**: `--prompts 001-005,010`, `--folder providers/`, `--exclude 003,007` for precise selection
+- **Dependency detection**: Scans prompt content for `depends on`, `requires`, `@file` references
+- **Run script generation**: Produces executable `run-sprint.sh` for batch execution
+
+### v0.18.0 (2026-01-17)
+- **Sprint command**: New `/sprint` command for automated sprint planning from technical specifications
+- **5-phase workflow**: Spec analysis → prompt generation → dependency graph → model assignment → execution plan
+- **State management**: Persistent `.sprint-state.json` for pause/resume/status tracking
+- **Sub-commands**: `status`, `add`, `remove`, `replan`, `pause`, `resume`, `cancel`, `history`
 
 ### v0.15.0 (2026-01-11)
 - **Subfolder support**: Organize prompts into topic-based subfolders (e.g., `prompts/providers/`, `prompts/backend/`)
