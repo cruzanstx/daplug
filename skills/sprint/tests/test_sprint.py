@@ -3,6 +3,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 
 def _load_sprint_module():
     root = Path(__file__).resolve().parents[3]
@@ -113,3 +115,86 @@ def test_assign_models_respects_availability(monkeypatch):
     prompts = [{"id": "001", "title": "Auth system", "slug": "auth", "status": "pending"}]
     assigned = m.assign_models(prompts, ["claude", "codex", "gemini"])
     assert assigned["001"] != "claude"
+
+
+def test_parse_prompt_range():
+    m = _load_sprint_module()
+    assert m.parse_prompt_range("001-003,010,2") == ["001", "002", "003", "010"]
+    assert m.parse_prompt_range(None) == []
+    with pytest.raises(ValueError):
+        m.parse_prompt_range("x")
+
+
+def test_discover_existing_prompts_filters(tmp_path):
+    m = _load_sprint_module()
+    prompts_dir = tmp_path / "prompts"
+    prompts_dir.mkdir()
+    (prompts_dir / "001-one.md").write_text("# One\n", encoding="utf-8")
+    (prompts_dir / "002-two.md").write_text("# Two\n", encoding="utf-8")
+    sub = prompts_dir / "providers"
+    sub.mkdir()
+    (sub / "003-three.md").write_text("# Three\n", encoding="utf-8")
+    # Non-prompt markdown should be ignored
+    (prompts_dir / "README.md").write_text("ignore", encoding="utf-8")
+
+    all_prompts = m.discover_existing_prompts(prompts_dir)
+    assert [p["number"] for p in all_prompts] == ["001", "002", "003"]
+    assert all_prompts[2]["folder"] == "providers"
+
+    included = m.discover_existing_prompts(prompts_dir, include="001-002")
+    assert [p["number"] for p in included] == ["001", "002"]
+
+    excluded = m.discover_existing_prompts(prompts_dir, exclude="002")
+    assert [p["number"] for p in excluded] == ["001", "003"]
+
+    folder_only = m.discover_existing_prompts(prompts_dir, folder="providers/")
+    assert [p["number"] for p in folder_only] == ["003"]
+    assert folder_only[0]["folder"] == "providers"
+
+
+def test_analyze_prompt_content_extracts_fields():
+    m = _load_sprint_module()
+    prompt = {
+        "name": "001-test.md",
+        "content": """
+<objective>
+Add a --from-existing flag
+</objective>
+
+Depends on: 2
+
+@skills/sprint/scripts/sprint.py
+
+<output>
+- `skills/sprint/scripts/sprint.py`
+</output>
+
+<verification>
+python3 -m pytest -q
+</verification>
+""",
+    }
+    analysis = m.analyze_prompt_content(prompt)
+    assert analysis["title"] == "Add a --from-existing flag"
+    assert "002" in analysis["dependencies"]
+    assert "skills/sprint/scripts/sprint.py" in analysis["referenced_files"]
+    assert "skills/sprint/scripts/sprint.py" in analysis["output_files"]
+    assert "python3 -m pytest -q" in analysis["verification_commands"]
+
+
+def test_from_existing_mutual_exclusion_errors():
+    m = _load_sprint_module()
+    with pytest.raises(SystemExit) as exc:
+        m._dispatch(["sprint.py", "--from-existing", "some-spec"])
+    assert exc.value.code == 2
+
+
+def test_from_existing_dry_run_dispatch(tmp_path):
+    m = _load_sprint_module()
+    prompts_dir = tmp_path / "prompts"
+    prompts_dir.mkdir()
+    (prompts_dir / "001-one.md").write_text("# One\n", encoding="utf-8")
+    rc = m._dispatch(
+        ["sprint.py", "--from-existing", "--dry-run", "--output-dir", str(prompts_dir), "--models", "codex"]
+    )
+    assert rc == 0

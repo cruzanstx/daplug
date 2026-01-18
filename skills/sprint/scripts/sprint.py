@@ -347,7 +347,292 @@ def _parse_prompt_dependencies(prompt_text: str) -> list[str]:
     # fallback: any explicit "depends on 001" mentions
     for m in re.finditer(r"\bdepends\s+on\b[^0-9]*(\d{1,3})\b", prompt_text, re.I):
         deps.add(m.group(1).zfill(3))
+    # Additional common phrasings: "requires prompt 002", "after 003 is complete", "once 004 is done"
+    for m in re.finditer(
+        r"\b(?:requires|needs)\b[^0-9]{0,40}\b(?:prompt|task)?\b[^0-9]{0,40}(\d{1,3})\b",
+        prompt_text,
+        re.I,
+    ):
+        deps.add(m.group(1).zfill(3))
+    for m in re.finditer(r"\bafter\b[^0-9]{0,40}\b(?:prompt|task)?\b[^0-9]{0,40}(\d{1,3})\b", prompt_text, re.I):
+        deps.add(m.group(1).zfill(3))
+    for m in re.finditer(r"\bonce\b[^0-9]{0,60}\b(\d{1,3})\b[^\n]{0,80}\b(?:done|complete|completed)\b", prompt_text, re.I):
+        deps.add(m.group(1).zfill(3))
     return sorted(deps)
+
+
+def parse_prompt_range(spec: str | None) -> list[str]:
+    """
+    Parse comma-separated prompt numbers/ranges (e.g., "001-005,010") into sorted 3-digit IDs.
+    """
+    if not spec:
+        return []
+    ids: set[str] = set()
+    parts = [p.strip() for p in spec.split(",") if p.strip()]
+    for part in parts:
+        m = re.fullmatch(r"(\d{1,3})\s*-\s*(\d{1,3})", part)
+        if m:
+            start = int(m.group(1))
+            end = int(m.group(2))
+            if start > end:
+                start, end = end, start
+            for n in range(start, end + 1):
+                ids.add(str(n).zfill(3))
+            continue
+        m = re.fullmatch(r"\d{1,3}", part)
+        if m:
+            ids.add(part.zfill(3))
+            continue
+        raise ValueError(f"Invalid prompt range token: '{part}' (expected N or N-M)")
+    return sorted(ids)
+
+
+def discover_existing_prompts(
+    prompts_dir: Path,
+    include: str | None = None,
+    folder: str | None = None,
+    exclude: str | None = None,
+) -> list[dict]:
+    """
+    Find existing prompts based on filters.
+
+    Returns list of prompt dicts with:
+    - number: prompt number (e.g., "001")
+    - name: full filename
+    - path: absolute path
+    - content: prompt content
+    - folder: subfolder (empty string for root)
+    """
+    base = prompts_dir.expanduser()
+    if not base.is_absolute():
+        base = (Path.cwd() / base).resolve()
+    if not base.exists() or not base.is_dir():
+        raise FileNotFoundError(f"Prompts directory not found: {base}")
+
+    include_ids = set(parse_prompt_range(include)) if include else None
+    exclude_ids = set(parse_prompt_range(exclude)) if exclude else set()
+
+    completed_dir = (base / "completed").resolve()
+
+    search_root = base
+    include_completed = False
+    if folder:
+        candidate = (base / folder).resolve()
+        try:
+            candidate.relative_to(base.resolve())
+        except ValueError as exc:
+            raise ValueError(f"--folder must be a subfolder of {base}: {folder}") from exc
+        if not candidate.exists() or not candidate.is_dir():
+            raise FileNotFoundError(f"No prompt folder: {folder}")
+        search_root = candidate
+        cleaned = str(folder).replace("\\", "/").strip("/")
+        include_completed = cleaned == "completed" or cleaned.startswith("completed/")
+
+    def collect_files(include_completed_flag: bool) -> list[Path]:
+        files: list[Path] = []
+        for p in sorted(search_root.rglob("*.md")):
+            m = re.match(r"^(\d{1,3})-", p.name)
+            if not m:
+                continue
+            if not include_completed_flag and completed_dir in p.resolve().parents:
+                continue
+            files.append(p)
+        return files
+
+    prompt_files = collect_files(include_completed)
+    # Convenience fallback: if user didn't specify a folder and there are no active prompts,
+    # include completed/ so `--from-existing` can still operate on repos that only have archived prompts.
+    if not folder and not prompt_files:
+        prompt_files = collect_files(True)
+
+    prompts: list[dict] = []
+    for p in prompt_files:
+        m = re.match(r"^(\d{1,3})-", p.name)
+        if not m:
+            continue
+        number = m.group(1).zfill(3)
+        if include_ids is not None and number not in include_ids:
+            continue
+        if number in exclude_ids:
+            continue
+        rel = ""
+        try:
+            rel_path = p.resolve().relative_to(base.resolve())
+            rel = "" if rel_path.parent == Path(".") else rel_path.parent.as_posix()
+        except Exception:
+            rel = ""
+        prompts.append(
+            {
+                "number": number,
+                "name": p.name,
+                "path": str(p.resolve()),
+                "content": _read_text_file(p),
+                "folder": rel,
+            }
+        )
+
+    # Compute a stable execution reference for each prompt.
+    # Prefer numeric refs (e.g., "011" or "providers/011"), but disambiguate duplicates by falling back to stem.
+    by_ref_number: dict[str, list[dict]] = {}
+    for pr in prompts:
+        folder_part = str(pr.get("folder") or "").strip("/")
+        num = str(pr.get("number") or "")
+        ref_number = f"{folder_part}/{num}" if folder_part else num
+        pr["ref_number"] = ref_number
+        by_ref_number.setdefault(ref_number, []).append(pr)
+
+    for ref_number, items in by_ref_number.items():
+        if len(items) == 1:
+            items[0]["ref"] = ref_number
+            continue
+        for pr in items:
+            folder_part = str(pr.get("folder") or "").strip("/")
+            stem = Path(str(pr.get("name") or "")).stem
+            pr["ref"] = f"{folder_part}/{stem}" if folder_part else stem
+
+    # Final sanity check: refs must be unique.
+    ref_counts: dict[str, int] = {}
+    for pr in prompts:
+        r = str(pr.get("ref") or "")
+        if not r:
+            continue
+        ref_counts[r] = ref_counts.get(r, 0) + 1
+    dup_refs = {r for r, c in ref_counts.items() if c > 1}
+    if dup_refs:
+        details = []
+        for r in sorted(dup_refs):
+            matches = [p for p in prompts if str(p.get("ref")) == r]
+            paths = ", ".join(sorted(str(m.get("path")) for m in matches))
+            details.append(f"{r}: {paths}")
+        raise ValueError("Duplicate prompt references detected; cannot disambiguate. " + " | ".join(details))
+
+    prompts.sort(key=lambda d: (int(str(d.get("number", "0"))), str(d.get("ref") or "")))
+    return prompts
+
+
+def _extract_section(content: str, name: str) -> str | None:
+    # Tag-based first: <name>...</name>
+    m = re.search(rf"<{re.escape(name)}>(.*?)</{re.escape(name)}>", content, re.I | re.S)
+    if m:
+        return m.group(1).strip()
+
+    # Heading-based fallback: ## Name ... until next heading at same/higher level.
+    header_re = re.compile(rf"^(?P<level>#{1,6})\s+{re.escape(name)}\b.*$", re.I | re.M)
+    mh = header_re.search(content)
+    if not mh:
+        return None
+    level = len(mh.group("level"))
+    start = mh.end()
+    tail = content[start:]
+    next_header = re.search(rf"^#{{1,{level}}}\s+\S", tail, re.M)
+    chunk = tail[: next_header.start()] if next_header else tail
+    return chunk.strip()
+
+
+def _extract_title_from_prompt_content(content: str) -> str | None:
+    objective = _extract_section(content, "objective")
+    if objective:
+        # Use first non-empty line from objective.
+        for line in objective.splitlines():
+            line = line.strip()
+            if line:
+                return line[:160]
+
+    for line in content.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        if line.startswith("#"):
+            return line.lstrip("#").strip()[:160]
+        break
+    return None
+
+
+def _extract_paths(text: str) -> tuple[list[str], list[str]]:
+    """
+    Return (at_paths, tick_paths) extracted from @file and `file` references.
+    """
+    at_paths: set[str] = set()
+    tick_paths: set[str] = set()
+
+    for m in re.finditer(r"@([A-Za-z0-9_./-]+)", text):
+        p = m.group(1).strip()
+        if p.startswith("./"):
+            p = p[2:]
+        if p:
+            at_paths.add(p)
+
+    for m in re.finditer(r"`([^`\n]+)`", text):
+        token = m.group(1).strip()
+        if "/" not in token and not re.search(r"\.[a-zA-Z0-9]{1,5}$", token):
+            continue
+        if token.startswith("./"):
+            token = token[2:]
+        tick_paths.add(token)
+
+    return sorted(at_paths), sorted(tick_paths)
+
+
+def analyze_prompt_content(prompt: dict) -> dict:
+    """
+    Analyze a prompt file to extract:
+    - title/objective (from <objective> tag or first heading)
+    - dependencies (from "depends on", "requires prompt 002", etc.)
+    - task_type (for model assignment)
+    - verification_commands (from <verification> section or heading)
+    """
+    content = str(prompt.get("content") or "")
+    title = _extract_title_from_prompt_content(content) or str(prompt.get("name") or "Untitled")
+
+    deps = _parse_prompt_dependencies(content)
+
+    # Dependencies/Requires section scanning
+    for section_name in ("Dependencies", "Requires"):
+        section = _extract_section(content, section_name)
+        if section:
+            ids = re.findall(r"\b\d{1,3}\b", section)
+            deps.extend([i.zfill(3) for i in ids])
+
+    deps = sorted(set(deps))
+
+    verification = _extract_section(content, "verification") or ""
+    verification_commands: list[str] = []
+    for line in verification.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("```"):
+            continue
+        # Best-effort: capture obvious commands.
+        if re.match(r"^(python3|pytest|npm|pnpm|yarn|go|make|cargo|rg|git)\b", line):
+            verification_commands.append(line)
+
+    # References + outputs for file-based dependency inference
+    at_paths, tick_paths = _extract_paths(content)
+    referenced_files = sorted(set(at_paths + tick_paths))
+
+    output_section = _extract_section(content, "output") or ""
+    out_at, out_tick = _extract_paths(output_section)
+    output_files = sorted(set(out_at + out_tick))
+
+    # Heuristic task type for model assignment
+    lowered = content.lower()
+    task_type = "implementation"
+    if "test" in lowered or "pytest" in lowered:
+        task_type = "tests"
+    elif "readme" in lowered or "documentation" in lowered or "/docs" in lowered:
+        task_type = "docs"
+    elif "refactor" in lowered:
+        task_type = "refactor"
+
+    return {
+        "title": title,
+        "dependencies": deps,
+        "task_type": task_type,
+        "verification_commands": verification_commands,
+        "referenced_files": referenced_files,
+        "output_files": output_files,
+    }
 
 
 def _next_numbers_in_dir(output_dir: Path, count: int) -> list[str]:
@@ -524,6 +809,19 @@ def _patch_prompt_depends_on_lines(prompts: list[dict], deps_by_slug: dict[str, 
 
 def build_dependency_graph(prompts: list[dict], analysis: dict) -> dict[str, list[str]]:
     """Return prompt-id keyed dependency graph."""
+    # If caller provided explicit prompt-id dependencies, use those directly.
+    prompt_deps = analysis.get("prompt_dependencies")
+    if isinstance(prompt_deps, dict):
+        graph: dict[str, list[str]] = {}
+        for p in prompts:
+            pid = str(p.get("id")).zfill(3)
+            raw = prompt_deps.get(pid) or prompt_deps.get(str(p.get("id"))) or []
+            if not isinstance(raw, list):
+                raw = []
+            deps = [str(d).zfill(3) if str(d).isdigit() else str(d) for d in raw]
+            graph[pid] = sorted(set(deps))
+        return graph
+
     # Prefer analysis dependencies (component slug graph), mapping to prompt ids by slug.
     slug_to_id = {p.get("slug"): str(p.get("id")).zfill(3) for p in prompts if p.get("slug")}
     deps_by_slug: dict[str, list[str]] = analysis.get("dependencies", {}) or {}
@@ -630,7 +928,16 @@ def assign_models(prompts: list[dict], available_models: list[str]) -> dict[str,
     assignments: dict[str, str] = {}
     for p in prompts:
         pid = str(p.get("id")).zfill(3)
-        text = " ".join([str(p.get("title") or ""), str(p.get("slug") or "")])
+        text_parts = [str(p.get("title") or ""), str(p.get("slug") or "")]
+        analysis = p.get("analysis")
+        if isinstance(analysis, dict):
+            if analysis.get("task_type"):
+                text_parts.append(str(analysis["task_type"]))
+            # Keep this bounded; it's only a hint for model routing.
+            refs = analysis.get("referenced_files")
+            if isinstance(refs, list) and refs:
+                text_parts.append(" ".join(str(r) for r in refs[:10]))
+        text = " ".join(text_parts)
         model = _model_for_text(text, available_models)
         if availability:
             # If preferred appears unavailable, fall back to first available in list.
@@ -708,6 +1015,59 @@ def generate_execution_plan(
     lines.append("")
 
     return "\n".join(lines).rstrip() + "\n", phases
+
+
+def _write_run_sprint_script(
+    phases: list[list[str]],
+    model_assignments: dict[str, str],
+    options: dict,
+    output_path: Path,
+) -> None:
+    """
+    Generate a runnable script that executes prompts via prompt-executor.
+    """
+    import shlex
+
+    lines: list[str] = []
+    lines.append("#!/usr/bin/env bash")
+    lines.append("set -euo pipefail")
+    lines.append("")
+    lines.append("# Generated by skills/sprint/scripts/sprint.py")
+    lines.append("")
+
+    base_cmd = ["python3", "skills/prompt-executor/scripts/executor.py", "--run"]
+    if options.get("loop"):
+        base_cmd.extend(
+            [
+                "--loop",
+                "--max-iterations",
+                str(int(options.get("max_iterations", 3))),
+                "--completion-marker",
+                str(options.get("completion_marker", "VERIFICATION_COMPLETE")),
+            ]
+        )
+    if options.get("worktree"):
+        base_cmd.extend(["--worktree", "--base-branch", str(options.get("base_branch", "main"))])
+
+    total_phases = len(phases)
+    for i, phase in enumerate(phases, start=1):
+        lines.append(f'echo "== Phase {i}/{total_phases} =="')
+        groups: dict[str, list[str]] = {}
+        for pid in phase:
+            groups.setdefault(model_assignments.get(pid, "codex"), []).append(pid)
+        for model, pids in sorted(groups.items()):
+            cmd = [*base_cmd, "--model", model, *pids]
+            lines.append(" ".join(shlex.quote(c) for c in cmd))
+        lines.append("")
+
+    output_path = output_path.expanduser()
+    if not output_path.is_absolute():
+        output_path = (Path.cwd() / output_path).resolve()
+    _write_text_file(output_path, "\n".join(lines).rstrip() + "\n")
+    try:
+        os.chmod(output_path, 0o755)
+    except Exception:
+        pass
 
 
 def _resolve_prompt_paths(prompts: list[dict], output_dir: str) -> None:
@@ -1274,7 +1634,27 @@ def auto_execute(state: SprintState, options: dict, state_file: str = STATE_DEFA
 
 def _main_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Sprint planning + stateful execution")
-    p.add_argument("spec", help="Spec file path or inline spec text")
+    p.add_argument("spec", nargs="?", default=None, help="Spec file path or inline spec text")
+    p.add_argument(
+        "--from-existing",
+        action="store_true",
+        help="Analyze existing prompts instead of generating from spec (requires no spec argument)",
+    )
+    p.add_argument(
+        "--prompts",
+        type=str,
+        help="Comma-separated prompt numbers/ranges to include (e.g., 001-005,010)",
+    )
+    p.add_argument(
+        "--folder",
+        type=str,
+        help="Only include prompts from this subfolder of --output-dir",
+    )
+    p.add_argument(
+        "--exclude",
+        type=str,
+        help="Comma-separated prompt numbers/ranges to exclude (e.g., 003,007)",
+    )
     p.add_argument("--output-dir", default="./prompts/", help="Where to write prompt files (default: ./prompts/)")
     p.add_argument("--plan-file", default="./sprint-plan.md", help="Where to write the plan markdown")
     p.add_argument("--dry-run", action="store_true", help="Generate plan without creating prompt files/state")
@@ -1336,9 +1716,22 @@ def _dispatch(argv: list[str]) -> int:
             return 0
         raise RuntimeError(f"Unknown subcommand: {cmd}")
 
-    args = _main_parser().parse_args(argv[1:])
-    spec_content, spec_path = read_spec(args.spec)
-    analysis = analyze_spec(spec_content)
+    parser = _main_parser()
+    args = parser.parse_args(argv[1:])
+
+    if args.from_existing:
+        if args.spec:
+            parser.error("--from-existing cannot be used with a spec argument")
+    else:
+        if not args.spec:
+            parser.error("spec is required unless --from-existing is provided")
+
+    spec_content = ""
+    spec_path = "from-existing" if args.from_existing else "inline"
+    analysis: dict[str, Any] = {}
+    if not args.from_existing:
+        spec_content, spec_path = read_spec(str(args.spec))
+        analysis = analyze_spec(spec_content)
 
     options = {
         "models": args.models,
@@ -1351,14 +1744,101 @@ def _dispatch(argv: list[str]) -> int:
         "base_branch": "main",
     }
 
+    models_list = [m.strip() for m in args.models.split(",") if m.strip()]
+
     if args.dry_run:
         # Plan only
+        if args.from_existing:
+            raw_prompts = discover_existing_prompts(
+                Path(args.output_dir),
+                include=args.prompts,
+                folder=args.folder,
+                exclude=args.exclude,
+            )
+            if not raw_prompts:
+                raise RuntimeError(
+                    "No prompts found for --from-existing under --output-dir."
+                )
+            prompts: list[dict] = []
+            for rp in raw_prompts:
+                pa = analyze_prompt_content(rp)
+                stem = Path(str(rp.get("name") or "")).stem
+                slug_part = stem.split("-", 1)[1] if "-" in stem else stem
+                slug = _slugify(slug_part) if slug_part else _slugify(str(pa.get("title") or "prompt"))
+                prompts.append(
+                    {
+                        "id": str(rp.get("ref") or rp.get("number") or "").strip(),
+                        "number": str(rp.get("number") or "").zfill(3),
+                        "title": pa.get("title") or stem,
+                        "slug": slug,
+                        "status": "pending",
+                        "path": rp.get("path"),
+                        "analysis": pa,
+                    }
+                )
+
+            number_to_ids: dict[str, list[str]] = {}
+            for p in prompts:
+                number_to_ids.setdefault(str(p.get("number")), []).append(str(p.get("id")))
+
+            file_to_producers: dict[str, set[str]] = {}
+            for p in prompts:
+                pa = p.get("analysis") or {}
+                for f in (pa.get("output_files") or []):
+                    file_to_producers.setdefault(str(f), set()).add(str(p.get("id")))
+
+            prompt_deps: dict[str, list[str]] = {}
+            for p in prompts:
+                pa = p.get("analysis") or {}
+                deps_ids: set[str] = set()
+                for dep_num in (pa.get("dependencies") or []):
+                    dep_num = str(dep_num).zfill(3)
+                    matches = number_to_ids.get(dep_num) or []
+                    if not matches:
+                        continue
+                    if len(matches) > 1:
+                        sys.stderr.write(
+                            f"WARNING: Ambiguous dependency '{dep_num}' referenced in {p.get('id')}: matches {matches}. "
+                            "Skipping.\n"
+                        )
+                        continue
+                    deps_ids.add(matches[0])
+                for ref in (pa.get("referenced_files") or []):
+                    for dep_id in file_to_producers.get(str(ref), set()):
+                        if dep_id != str(p.get("id")):
+                            deps_ids.add(dep_id)
+                prompt_deps[str(p.get("id"))] = sorted(deps_ids)
+                p["analysis"] = pa
+
+            deps = build_dependency_graph(prompts, {"prompt_dependencies": prompt_deps})
+            assignments = assign_models(prompts, models_list)
+            created_at = _now_iso()
+            hint = "existing-prompts"
+            if args.folder:
+                hint = f"existing-{_slugify(str(args.folder))}"
+            sprint_id = _default_sprint_id(hint, "inline", created_at)
+            plan_text, phases = generate_execution_plan(prompts, deps, assignments, options, sprint_id=sprint_id)
+            print(plan_text)
+            if args.json:
+                print(
+                    json.dumps(
+                        {
+                            "sprint_id": sprint_id,
+                            "plan": plan_text,
+                            "dependencies": deps,
+                            "assignments": assignments,
+                            "phases": phases,
+                        },
+                        indent=2,
+                    )
+                )
+            return 0
+
         components = analysis.get("components", [])
         fake_prompts = []
         for i, c in enumerate(components, start=1):
             fake_prompts.append({"id": str(i).zfill(3), "title": c["title"], "slug": c["slug"], "status": "pending"})
         deps = build_dependency_graph(fake_prompts, analysis)
-        models_list = [m.strip() for m in args.models.split(",") if m.strip()]
         assignments = assign_models(fake_prompts, models_list)
         sprint_id = _default_sprint_id(spec_content, spec_path, _now_iso())
         plan_text, _ = generate_execution_plan(fake_prompts, deps, assignments, options, sprint_id=sprint_id)
@@ -1367,24 +1847,99 @@ def _dispatch(argv: list[str]) -> int:
             print(json.dumps({"sprint_id": sprint_id, "plan": plan_text, "dependencies": deps, "assignments": assignments}, indent=2))
         return 0
 
-    prompts = generate_prompts(analysis, args.output_dir)
-    _resolve_prompt_paths(prompts, args.output_dir)
-    deps = build_dependency_graph(prompts, analysis)
-    models_list = [m.strip() for m in args.models.split(",") if m.strip()]
-    assignments = assign_models(prompts, models_list)
+    if args.from_existing:
+        raw_prompts = discover_existing_prompts(
+            Path(args.output_dir),
+            include=args.prompts,
+            folder=args.folder,
+            exclude=args.exclude,
+        )
+        if not raw_prompts:
+            raise RuntimeError(
+                "No prompts found for --from-existing under --output-dir."
+            )
+        prompts = []
+        for rp in raw_prompts:
+            pa = analyze_prompt_content(rp)
+            stem = Path(str(rp.get("name") or "")).stem
+            slug_part = stem.split("-", 1)[1] if "-" in stem else stem
+            slug = _slugify(slug_part) if slug_part else _slugify(str(pa.get("title") or "prompt"))
+            prompts.append(
+                {
+                    "id": str(rp.get("ref") or rp.get("number") or "").strip(),
+                    "number": str(rp.get("number") or "").zfill(3),
+                    "status": "pending",
+                    "worktree": None,
+                    "merged": False,
+                    "model": None,
+                    "path": rp.get("path"),
+                    "title": pa.get("title") or stem,
+                    "slug": slug,
+                    "analysis": pa,
+                }
+            )
+
+        number_to_ids: dict[str, list[str]] = {}
+        for p in prompts:
+            number_to_ids.setdefault(str(p.get("number")), []).append(str(p.get("id")))
+
+        file_to_producers: dict[str, set[str]] = {}
+        for p in prompts:
+            pa = p.get("analysis") or {}
+            for f in (pa.get("output_files") or []):
+                file_to_producers.setdefault(str(f), set()).add(str(p.get("id")))
+
+        prompt_deps: dict[str, list[str]] = {}
+        for p in prompts:
+            pa = p.get("analysis") or {}
+            deps_ids: set[str] = set()
+            for dep_num in (pa.get("dependencies") or []):
+                dep_num = str(dep_num).zfill(3)
+                matches = number_to_ids.get(dep_num) or []
+                if not matches:
+                    continue
+                if len(matches) > 1:
+                    sys.stderr.write(
+                        f"WARNING: Ambiguous dependency '{dep_num}' referenced in {p.get('id')}: matches {matches}. "
+                        "Skipping.\n"
+                    )
+                    continue
+                deps_ids.add(matches[0])
+            for ref in (pa.get("referenced_files") or []):
+                for dep_id in file_to_producers.get(str(ref), set()):
+                    if dep_id != str(p.get("id")):
+                        deps_ids.add(dep_id)
+            prompt_deps[str(p.get("id"))] = sorted(deps_ids)
+            p["analysis"] = pa
+
+        deps = build_dependency_graph(prompts, {"prompt_dependencies": prompt_deps})
+        assignments = assign_models(prompts, models_list)
+    else:
+        prompts = generate_prompts(analysis, args.output_dir)
+        _resolve_prompt_paths(prompts, args.output_dir)
+        deps = build_dependency_graph(prompts, analysis)
+        assignments = assign_models(prompts, models_list)
+
     for p in prompts:
         pid = str(p.get("id")).zfill(3)
         p["model"] = assignments.get(pid, "codex")
 
     created_at = _now_iso()
-    sprint_id = _default_sprint_id(spec_content, spec_path, created_at)
+    if args.from_existing:
+        hint = "existing-prompts"
+        if args.folder:
+            hint = f"existing-{_slugify(str(args.folder))}"
+        sprint_id = _default_sprint_id(hint, "inline", created_at)
+    else:
+        sprint_id = _default_sprint_id(spec_content, spec_path, created_at)
     plan_text, phases = generate_execution_plan(prompts, deps, assignments, options, sprint_id=sprint_id)
     _write_text_file(Path(args.plan_file), plan_text)
+    _write_run_sprint_script(phases, assignments, options, output_path=Path("./run-sprint.sh"))
 
     state = SprintState(
         sprint_id=sprint_id,
         created_at=created_at,
-        spec_hash=_sha256_hex(spec_content),
+        spec_hash=_sha256_hex(spec_content) if spec_content else "",
         spec_path=spec_path,
         prompts=[
             {k: v for k, v in p.items() if k in {"id", "status", "worktree", "merged", "model", "path", "title", "slug"}}
@@ -1404,6 +1959,7 @@ def _dispatch(argv: list[str]) -> int:
 
     print(f"Created sprint state: {args.state_file}")
     print(f"Wrote plan: {args.plan_file}")
+    print("Wrote run script: ./run-sprint.sh")
     print("")
     print(plan_text)
 

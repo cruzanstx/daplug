@@ -30,13 +30,21 @@ This skill turns a technical specification into:
 ### Main command
 
 ```bash
+# From a spec (generates new prompts)
 python3 skills/sprint/scripts/sprint.py <spec-file-or-text> [options]
+
+# From existing prompts (no spec argument)
+python3 skills/sprint/scripts/sprint.py --from-existing [options]
 ```
 
 Options:
 - `--output-dir DIR` (default: `./prompts/`) Where to write generated prompt files
 - `--plan-file FILE` (default: `./sprint-plan.md`) Where to write the plan markdown
 - `--dry-run` Generate plan without creating prompt files or state
+- `--from-existing` Analyze existing prompts in `--output-dir` instead of generating from a spec
+- `--prompts LIST` Include only specific prompts (e.g., `001-005,010`)
+- `--folder PATH` Only include prompts from this subfolder of `--output-dir` (e.g., `providers/`)
+- `--exclude LIST` Exclude specific prompts (e.g., `003,007`)
 - `--auto-execute` Execute phases immediately, updating `.sprint-state.json`
 - `--models LIST` Comma-separated models (default: `claude,codex,gemini`)
 - `--max-parallel N` Max concurrent prompts per phase (default: `5`)
@@ -64,3 +72,21 @@ Notes:
 - Sub-commands operate on `.sprint-state.json` in the current directory unless `--state-file` is provided.
 - `cancel` is destructive for sprint-created worktrees (it removes worktree directories/branches recorded in state).
 
+### Examples
+
+```bash
+# Analyze all prompts in prompts/
+python3 skills/sprint/scripts/sprint.py --from-existing --dry-run
+
+# Only specific prompts
+python3 skills/sprint/scripts/sprint.py --from-existing --prompts 001-005,010 --dry-run
+
+# Only prompts in a subfolder
+python3 skills/sprint/scripts/sprint.py --from-existing --folder providers/ --dry-run
+
+# Exclude certain prompts
+python3 skills/sprint/scripts/sprint.py --from-existing --exclude 003,007 --dry-run
+
+# Combine with execution options
+python3 skills/sprint/scripts/sprint.py --from-existing --worktree --loop --auto-execute
+```
