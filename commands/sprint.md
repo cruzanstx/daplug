@@ -17,6 +17,13 @@ Generate prompts from a technical specification, analyze dependencies, and produ
 /sprint ./spec.md --dry-run
 /sprint ./spec.md --auto-execute
 
+# From existing prompts (no spec argument)
+/sprint --from-existing
+/sprint --from-existing --prompts 001-005,010
+/sprint --from-existing --folder providers/
+/sprint --from-existing --exclude 003,007
+/sprint --from-existing --worktree --loop
+
 # Sub-commands
 /sprint status
 /sprint add "Implement caching layer"
@@ -35,7 +42,8 @@ Given `$ARGUMENTS`:
 1. Split arguments into tokens (shell-style).
 2. If the first token is one of these sub-commands, treat it as a sub-command:
    - `status`, `add`, `remove`, `replan`, `pause`, `resume`, `cancel`, `history`
-3. Otherwise, treat the first token (and the full remaining string) as the spec input for the main sprint command.
+3. Otherwise, if `--from-existing` is present, run sprint planning using existing prompts (no spec argument allowed).
+4. Otherwise, treat the first token (and the full remaining string) as the spec input for the main sprint command.
 
 ## Run the Command
 
@@ -84,4 +92,3 @@ Notes:
 - For planning mode: create or update `.sprint-state.json` and produce a plan (and runnable `/run-prompt` commands).
 - For `--dry-run`: do not create prompt files; only show the generated plan and commands.
 - For `--auto-execute`: begin executing phase-by-phase and persist progress in `.sprint-state.json`.
-
