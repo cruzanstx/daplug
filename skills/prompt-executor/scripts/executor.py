@@ -631,9 +631,16 @@ def get_cli_info(model: str) -> dict:
         },
         "zai": {
             "command": ["codex", "exec", "--full-auto", "--profile", "zai"],
-            "display": "zai (GLM-4.7)",
+            "display": "zai (GLM-4.7 via Codex - may have issues)",
             "env": {},
             "stdin_mode": "dash"
+        },
+        "opencode": {
+            "command": ["opencode", "run", "-m", "zai/glm-4.7"],
+            "display": "opencode (GLM-4.7 via OpenCode)",
+            "env": {},
+            "stdin_mode": "arg",
+            "needs_pty": True  # OpenCode requires a PTY for proper operation
         },
         "local": {
             "command": ["codex", "exec", "--full-auto", "--profile", "local"],
@@ -1155,11 +1162,14 @@ def run_cli(cli_info: dict, content: str, cwd: str, log_file: Path) -> dict:
     Uses stdin_mode to determine how to pass prompts:
     - "dash": Use '-' as last arg, pipe content to stdin (codex)
     - "arg": Pass content as command line argument (gemini)
+
+    If needs_pty is True, wraps command with 'script' to provide a pseudo-TTY.
     """
     if not cli_info["command"]:
         return {"status": "subagent_required"}
 
     stdin_mode = cli_info.get("stdin_mode", "arg")
+    needs_pty = cli_info.get("needs_pty", False)
     env = os.environ.copy()
     env.update(cli_info["env"])
 
@@ -1189,6 +1199,13 @@ def run_cli(cli_info: dict, content: str, cwd: str, log_file: Path) -> dict:
     else:
         # Gemini-style: pass content as argument
         full_cmd = cli_info["command"] + [content]
+
+        # Wrap with script for PTY if needed (e.g., OpenCode)
+        if needs_pty:
+            import shlex
+            cmd_str = " ".join(shlex.quote(arg) for arg in full_cmd)
+            full_cmd = ["script", "-q", "-c", cmd_str, "/dev/null"]
+
         process = subprocess.Popen(
             full_cmd,
             cwd=cwd,
@@ -1210,11 +1227,13 @@ def run_cli_foreground(cli_info: dict, content: str, cwd: str, log_file: Path) -
     """Run CLI command in foreground, wait for completion. Returns execution info.
 
     Used for verification loops where we need to wait and check completion.
+    If needs_pty is True, wraps command with 'script' to provide a pseudo-TTY.
     """
     if not cli_info["command"]:
         return {"status": "subagent_required"}
 
     stdin_mode = cli_info.get("stdin_mode", "arg")
+    needs_pty = cli_info.get("needs_pty", False)
     env = os.environ.copy()
     env.update(cli_info["env"])
 
@@ -1245,6 +1264,13 @@ def run_cli_foreground(cli_info: dict, content: str, cwd: str, log_file: Path) -
         else:
             # Gemini-style: pass content as argument
             full_cmd = cli_info["command"] + [content]
+
+            # Wrap with script for PTY if needed (e.g., OpenCode)
+            if needs_pty:
+                import shlex
+                cmd_str = " ".join(shlex.quote(arg) for arg in full_cmd)
+                full_cmd = ["script", "-q", "-c", cmd_str, "/dev/null"]
+
             process = subprocess.Popen(
                 full_cmd,
                 cwd=cwd,
@@ -1477,7 +1503,8 @@ def main():
                                "gpt52", "gpt52-high", "gpt52-xhigh",
                                "gemini", "gemini-high", "gemini-xhigh",
                                "gemini25pro", "gemini25flash", "gemini25lite",
-                               "gemini3flash", "gemini3pro", "zai", "local", "qwen", "devstral"],
+                               "gemini3flash", "gemini3pro", "zai", "opencode",
+                               "local", "qwen", "devstral"],
                        help="Model/CLI to use")
     parser.add_argument("--cwd", "-c", default=None,
                        help="Working directory for execution")

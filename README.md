@@ -27,7 +27,7 @@ Clone/copy this plugin to one of:
 
 ## What's Included
 
-### Commands (15)
+### Commands (16)
 
 | Command | Description |
 |---------|-------------|
@@ -46,6 +46,7 @@ Clone/copy this plugin to one of:
 | `/daplug:sprint` | Automated sprint planning from specs or existing prompts |
 | `/daplug:uvc` | Update docs and push to version control |
 | `/daplug:zai-cli` | Run task with Z.AI GLM-4.7 via Codex CLI |
+| `/daplug:opencode-cli` | Run task with Z.AI GLM-4.7 via OpenCode CLI (recommended) |
 
 ### Agents (5)
 
@@ -122,7 +123,8 @@ Commands below are shown without the `/daplug:` prefix for readability. In Claud
 ```bash
 /run-prompt 005 --model codex        # OpenAI Codex
 /run-prompt 005 --model gemini       # Google Gemini 3 Flash
-/run-prompt 005 --model zai          # Z.AI GLM-4.7
+/run-prompt 005 --model opencode     # Z.AI GLM-4.7 (recommended)
+/run-prompt 005 --model zai          # Z.AI GLM-4.7 (via Codex)
 ```
 
 ### Parallel Execution
@@ -137,6 +139,12 @@ Commands below are shown without the `/daplug:` prefix for readability. In Claud
 ```
 
 ## Recent Changes
+
+### v0.20.0 (2026-01-18)
+- **OpenCode CLI support**: New `opencode` model for Z.AI GLM-4.7 via OpenCode CLI
+- **Recommended for Z.AI**: OpenCode handles GLM-4.7 message format correctly (fixes GitHub Issue #4)
+- **PTY wrapper**: Automatic pseudo-terminal wrapping for CLIs that require it
+- **New tests**: 7 unit tests for model configuration and PTY command wrapping
 
 ### v0.19.0 (2026-01-18)
 - **Sprint from existing prompts**: New `--from-existing` flag analyzes prompts already in `prompts/` instead of generating from a spec

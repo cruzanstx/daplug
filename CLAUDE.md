@@ -153,7 +153,8 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `gemini` | gemini | gemini-3-flash-preview |
 | `gemini-high` | gemini | gemini-2.5-pro |
 | `gemini-xhigh` | gemini | gemini-3-pro-preview |
-| `zai` | codex | GLM-4.7 via Z.AI |
+| `zai` | codex | GLM-4.7 via Z.AI (may have issues) |
+| `opencode` | opencode | GLM-4.7 via OpenCode (recommended) |
 | `qwen`/`local` | codex | qwen via LMStudio |
 | `devstral` | codex | devstral via LMStudio |
 

@@ -198,7 +198,8 @@ python3 "$EXECUTOR" --loop-status
 | gpt52-high | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="high" | GPT-5.2 with high reasoning |
 | gpt52-xhigh | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="xhigh" | GPT-5.2 with xhigh reasoning |
 | gemini | gemini -y | Google Gemini 2.5 Pro |
-| zai | codex exec --profile zai | Z.AI GLM-4.7 |
+| zai | codex exec --profile zai | Z.AI GLM-4.7 (via Codex, may have issues) |
+| opencode | opencode run -m zai/glm-4.7 | Z.AI GLM-4.7 (via OpenCode, recommended) |
 | local/qwen | codex exec --profile local | Local qwen model |
 | devstral | codex exec --profile local-devstral | Local devstral model |
 

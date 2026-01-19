@@ -2,6 +2,21 @@
 
 All notable changes to daplug are documented here.
 
+## [0.20.0] - 2026-01-18
+
+### Added
+- **OpenCode CLI support**: New `opencode` model for Z.AI GLM-4.7 via OpenCode CLI (recommended over codex `zai` profile)
+- PTY wrapper support for CLIs that require pseudo-terminals (e.g., OpenCode)
+- `needs_pty` flag in model configuration for automatic PTY wrapping
+- 7 new unit tests for model configuration and PTY command wrapping
+
+### Fixed
+- Z.AI GLM-4.7 compatibility issues (GitHub Issue #4) - OpenCode handles GLM-4.7 message format correctly
+
+### Changed
+- Model reference tables updated with opencode as recommended Z.AI option
+- `zai` codex profile retained but marked as potentially problematic
+
 ## [0.19.0] - 2026-01-18
 
 ### Added
