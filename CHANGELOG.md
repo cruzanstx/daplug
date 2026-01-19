@@ -2,6 +2,24 @@
 
 All notable changes to daplug are documented here.
 
+## [0.20.2] - 2026-01-19
+
+### Fixed
+- **CLI log path mismatch** (GitHub Issue #6): Displayed log paths now match actual files created
+  - Single `execution_timestamp` generated once and passed through entire execution chain
+  - Loop state stores timestamp for resume consistency
+  - Both foreground/background loop modes show correct `loop_log` path
+  - Claude subagent mode now creates logs in `~/.claude/cli-logs/` (was `/tmp/`)
+
+### Added
+- `--execution-timestamp` internal CLI argument for timestamp consistency across loop iterations
+- Loop log metadata header (prompt, model, timestamp, max iterations, CWD, worktree, branch)
+- 6 new unit tests for log path consistency across all execution modes
+
+### Changed
+- `run_verification_loop()` and `run_verification_loop_background()` now accept `execution_timestamp` param
+- Loop state schema extended with `execution_timestamp` field for resume support
+
 ## [0.20.1] - 2026-01-19
 
 ### Fixed
