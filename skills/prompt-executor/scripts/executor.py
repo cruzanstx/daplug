@@ -669,7 +669,7 @@ def get_cli_info(model: str) -> dict:
     return models.get(model, models["claude"])
 
 
-def get_sandbox_add_dirs(cwd: str = None) -> list[str]:
+def get_sandbox_add_dirs(cwd: Optional[str] = None) -> list[str]:
     """Get additional directories that should be writable for codex sandbox.
 
     These are needed because codex's workspace-write sandbox only allows writes
@@ -833,6 +833,7 @@ def create_loop_state(
     model: str,
     max_iterations: int,
     completion_marker: str,
+    execution_timestamp: Optional[str] = None,
     worktree_path: Optional[str] = None,
     branch_name: Optional[str] = None,
     execution_cwd: Optional[str] = None
@@ -842,6 +843,7 @@ def create_loop_state(
         "prompt_number": prompt_number,
         "prompt_file": prompt_file,
         "model": model,
+        "execution_timestamp": execution_timestamp,
         "worktree_path": worktree_path,
         "branch_name": branch_name,
         "execution_cwd": execution_cwd,
@@ -1304,6 +1306,7 @@ def run_verification_loop(
     model: str,
     max_iterations: int,
     completion_marker: str,
+    execution_timestamp: str,
     worktree_path: Optional[str] = None,
     branch_name: Optional[str] = None
 ) -> dict:
@@ -1313,12 +1316,14 @@ def run_verification_loop(
     """
     # Create or load existing loop state
     existing_state = load_loop_state(prompt_number)
-    if existing_state and existing_state["status"] == "running":
-        # Resume from existing state
+    if existing_state and existing_state.get("status") in {"pending", "running"}:
+        # Resume from existing state. Note: state["iteration"] is persisted as the
+        # next iteration to run (it is incremented after each completed iteration).
         state = existing_state
         state.setdefault("history", [])
         state.setdefault("suggested_next_steps", [])
-        state["iteration"] += 1
+        if not state.get("iteration"):
+            state["iteration"] = 1
     else:
         # Create new state
         state = create_loop_state(
@@ -1327,25 +1332,47 @@ def run_verification_loop(
             model=model,
             max_iterations=max_iterations,
             completion_marker=completion_marker,
+            execution_timestamp=execution_timestamp,
             worktree_path=worktree_path,
             branch_name=branch_name,
             execution_cwd=cwd
         )
         state["iteration"] = 1
 
+    # Ensure the execution timestamp is a single source of truth across resumes.
+    if not state.get("execution_timestamp"):
+        state["execution_timestamp"] = execution_timestamp
+    effective_timestamp = state["execution_timestamp"]
+
     state["status"] = "running"
     save_loop_state(state)
 
+    loop_log = log_dir / f"{model}-{prompt_number}-loop-{effective_timestamp}.log"
+    if not loop_log.exists():
+        with open(loop_log, "w") as f:
+            f.write("# Loop Execution Log\n")
+            f.write(f"# Prompt: {prompt_number}\n")
+            f.write(f"# Model: {model}\n")
+            f.write(f"# Started: {effective_timestamp}\n")
+            f.write(f"# Max iterations: {max_iterations}\n")
+            f.write(f"# CWD: {cwd}\n")
+            f.write(f"# Worktree: {worktree_path}\n")
+            f.write(f"# Branch: {branch_name}\n")
+            f.write("\n")
+
     result = {
+        "status": "running",
         "loop_enabled": True,
+        "loop_log": str(loop_log),
+        "max_iterations": max_iterations,
+        "completion_marker": completion_marker,
         "iterations": [],
         "final_status": None
     }
 
     while state["iteration"] <= max_iterations:
         iteration = state["iteration"]
-        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-        log_file = log_dir / f"{model}-{prompt_number}-iter{iteration}-{timestamp}.log"
+        log_file = log_dir / f"{model}-{prompt_number}-iter{iteration}-{effective_timestamp}.log"
 
         # Wrap content with verification protocol
         wrapped_content = wrap_prompt_with_verification_protocol(
@@ -1359,6 +1386,9 @@ def run_verification_loop(
         )
 
         print(f"[Loop] Starting iteration {iteration}/{max_iterations}...", file=sys.stderr)
+        with open(loop_log, "a") as f:
+            f.write(f"[Loop] Starting iteration {iteration}/{max_iterations}\n")
+            f.write(f"[Loop] Iteration log: {log_file}\n")
 
         # Run CLI and wait for completion
         exec_result = run_cli_foreground(cli_info, wrapped_content, cwd, log_file)
@@ -1392,24 +1422,34 @@ def run_verification_loop(
 
         if marker_found:
             print(f"[Loop] Completion marker found at iteration {iteration}!", file=sys.stderr)
+            with open(loop_log, "a") as f:
+                f.write(f"[Loop] Completed at iteration {iteration}\n")
             state["status"] = "completed"
             save_loop_state(state)
             result["final_status"] = "completed"
+            result["status"] = "completed"
             break
         elif retry_reason:
             print(f"[Loop] Retry requested: {retry_reason}", file=sys.stderr)
+            with open(loop_log, "a") as f:
+                f.write(f"[Loop] NEEDS_RETRY: {retry_reason}\n")
 
         if state["iteration"] >= max_iterations:
             print(f"[Loop] Max iterations ({max_iterations}) reached without completion.", file=sys.stderr)
+            with open(loop_log, "a") as f:
+                f.write(f"[Loop] Max iterations reached ({max_iterations})\n")
             state["status"] = "max_iterations_reached"
             save_loop_state(state)
             result["final_status"] = "max_iterations_reached"
+            result["status"] = "max_iterations_reached"
             break
 
         # Prepare for next iteration
         state["iteration"] += 1
         save_loop_state(state)
         print(f"[Loop] Preparing for iteration {state['iteration']}...", file=sys.stderr)
+        with open(loop_log, "a") as f:
+            f.write(f"[Loop] Preparing for iteration {state['iteration']}\n")
 
     result["state_file"] = str(get_loop_state_file(prompt_number))
     result["total_iterations"] = len(result["iterations"])
@@ -1426,6 +1466,7 @@ def run_verification_loop_background(
     model: str,
     max_iterations: int,
     completion_marker: str,
+    execution_timestamp: str,
     worktree_path: Optional[str] = None,
     branch_name: Optional[str] = None
 ) -> dict:
@@ -1440,14 +1481,14 @@ def run_verification_loop_background(
         model=model,
         max_iterations=max_iterations,
         completion_marker=completion_marker,
+        execution_timestamp=execution_timestamp,
         worktree_path=worktree_path,
         branch_name=branch_name,
         execution_cwd=cwd
     )
     save_loop_state(state)
 
-    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    loop_log = log_dir / f"{model}-{prompt_number}-loop-{timestamp}.log"
+    loop_log = log_dir / f"{model}-{prompt_number}-loop-{execution_timestamp}.log"
 
     # Build command to run this script with --loop-foreground flag
     script_path = Path(__file__).resolve()
@@ -1458,6 +1499,7 @@ def run_verification_loop_background(
         "--loop",
         "--max-iterations", str(max_iterations),
         "--completion-marker", completion_marker,
+        "--execution-timestamp", execution_timestamp,
         "--loop-foreground"  # Internal flag to run in foreground mode
     ]
 
@@ -1474,8 +1516,21 @@ def run_verification_loop_background(
         # Normal mode: resolve prompt by number
         cmd.append(prompt_number)
 
+    # Write initial metadata to loop log before starting subprocess
+    with open(loop_log, "w") as f:
+        f.write(f"# Loop Execution Log\n")
+        f.write(f"# Prompt: {prompt_number}\n")
+        f.write(f"# Model: {model}\n")
+        f.write(f"# Started: {execution_timestamp}\n")
+        f.write(f"# Max iterations: {max_iterations}\n")
+        f.write(f"# CWD: {cwd}\n")
+        f.write(f"# Worktree: {worktree_path}\n")
+        f.write(f"# Branch: {branch_name}\n")
+        f.write(f"\n")
+
     # Start background process
-    log_handle = open(loop_log, "w")
+    # Use append mode so subprocess output is added after initial metadata
+    log_handle = open(loop_log, "a")
     process = subprocess.Popen(
         cmd,
         cwd=cwd,
@@ -1536,6 +1591,12 @@ def main():
                        help="Read prompt content from file instead of resolving by number (used for worktree loops)")
     parser.add_argument("--prompt-number", type=str, default=None,
                        help="Prompt number to use with --prompt-file (for state/log naming)")
+    parser.add_argument(
+        "--execution-timestamp",
+        type=str,
+        default=None,
+        help=argparse.SUPPRESS,
+    )
 
     args = parser.parse_args()
 
@@ -1584,6 +1645,8 @@ def main():
         log_dir = get_cli_logs_dir(repo_root)
         log_dir.mkdir(parents=True, exist_ok=True)
 
+        execution_timestamp = args.execution_timestamp or datetime.now().strftime("%Y%m%d-%H%M%S")
+
         result = {
             "repo": repo_root.name,
             "model": args.model,
@@ -1603,8 +1666,7 @@ def main():
                 prompt_num = args.prompt_number.zfill(3)
             else:
                 prompt_num = prompt_file.stem.split("-")[0]
-            timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-            log_file = log_dir / f"{args.model}-{prompt_num}-{timestamp}.log"
+            log_file = log_dir / f"{args.model}-{prompt_num}-{execution_timestamp}.log"
 
             content = prompt_file.read_text()
 
@@ -1693,9 +1755,12 @@ def main():
                             model=args.model,
                             max_iterations=args.max_iterations,
                             completion_marker=args.completion_marker,
+                            execution_timestamp=execution_timestamp,
                             worktree_path=worktree_path,
                             branch_name=branch_name
                         )
+                        # For loop mode, show the loop log (exists immediately and is used by monitors)
+                        prompt_info["log"] = loop_result["loop_log"]
                         prompt_info["execution"] = loop_result
                     else:
                         # Start loop in background
@@ -1708,13 +1773,33 @@ def main():
                             model=args.model,
                             max_iterations=args.max_iterations,
                             completion_marker=args.completion_marker,
+                            execution_timestamp=execution_timestamp,
                             worktree_path=worktree_path,
                             branch_name=branch_name
                         )
+                        # For background loop, update displayed log to loop log
+                        prompt_info["log"] = loop_result["loop_log"]
                         prompt_info["execution"] = loop_result
                 else:
                     # Standard single-run mode
-                    exec_result = run_cli(cli_info, prompt_info["content"], execution_cwd, log_file)
+                    if not cli_info["command"]:
+                        # Claude subagent mode: create log file for metadata tracking
+                        with open(log_file, "w") as f:
+                            f.write(f"# Claude Subagent Execution\n")
+                            f.write(f"# Prompt: {prompt_file.name}\n")
+                            f.write(f"# Number: {prompt_num}\n")
+                            f.write(f"# Started: {execution_timestamp}\n")
+                            f.write(f"# CWD: {execution_cwd}\n")
+                            f.write(f"# Worktree: {worktree_path}\n")
+                            f.write(f"# Branch: {branch_name}\n")
+                            f.write(f"\n")
+                            f.write(f"# Prompt Content:\n")
+                            f.write(f"# {'='*60}\n")
+                            for line in prompt_info["content"].split('\n'):
+                                f.write(f"# {line}\n")
+                        exec_result = {"status": "subagent_required", "log": str(log_file)}
+                    else:
+                        exec_result = run_cli(cli_info, prompt_info["content"], execution_cwd, log_file)
                     prompt_info["execution"] = exec_result
 
             result["prompts"].append(prompt_info)
