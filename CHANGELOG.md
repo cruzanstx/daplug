@@ -2,6 +2,17 @@
 
 All notable changes to daplug are documented here.
 
+## [0.20.1] - 2026-01-19
+
+### Fixed
+- **OpenCode headless execution** (GitHub Issue #5): Changed from PTY wrapper to `--format json` for clean, parseable output
+- Removed `needs_pty` flag from opencode model - JSON format doesn't require pseudo-terminal
+
+### Changed
+- OpenCode command now uses `opencode run --format json -m zai/glm-4.7`
+- Documentation updated with OpenCode permission configuration (`~/.config/opencode/opencode.json`)
+- Updated tests to verify JSON output behavior
+
 ## [0.20.0] - 2026-01-18
 
 ### Added
