@@ -154,9 +154,21 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `gemini-high` | gemini | gemini-2.5-pro |
 | `gemini-xhigh` | gemini | gemini-3-pro-preview |
 | `zai` | codex | GLM-4.7 via Z.AI (may have issues) |
-| `opencode` | opencode | GLM-4.7 via OpenCode (recommended) |
+| `opencode` | opencode | GLM-4.7 via OpenCode (recommended; JSON output) |
 | `qwen`/`local` | codex | qwen via LMStudio |
 | `devstral` | codex | devstral via LMStudio |
+
+**OpenCode (opencode) note:** daplug runs OpenCode with `--format json` for clean, parseable logs (no PTY). To avoid interactive permission prompts in headless runs, configure `~/.config/opencode/opencode.json`, e.g.:
+
+```json
+{
+  "permission": {
+    "*": "allow",
+    "external_directory": "allow",
+    "doom_loop": "allow"
+  }
+}
+```
 
 ## Managing Models
 

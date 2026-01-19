@@ -115,14 +115,14 @@ class TestGetCliInfo(unittest.TestCase):
     def test_opencode_model_exists(self):
         """Verify opencode model is configured."""
         info = executor.get_cli_info("opencode")
-        self.assertEqual(info["command"], ["opencode", "run", "-m", "zai/glm-4.7"])
+        self.assertEqual(info["command"], ["opencode", "run", "--format", "json", "-m", "zai/glm-4.7"])
         self.assertEqual(info["stdin_mode"], "arg")
-        self.assertTrue(info.get("needs_pty", False))
+        self.assertFalse(info.get("needs_pty", False))
 
-    def test_opencode_needs_pty_flag(self):
-        """Verify opencode has needs_pty=True for PTY wrapper."""
+    def test_opencode_does_not_need_pty_flag(self):
+        """Verify opencode does not require PTY when using JSON output."""
         info = executor.get_cli_info("opencode")
-        self.assertTrue(info.get("needs_pty"), "opencode should have needs_pty=True")
+        self.assertFalse(info.get("needs_pty", False), "opencode should not need PTY")
 
     def test_codex_models_no_pty(self):
         """Verify codex models don't require PTY."""
@@ -189,4 +189,3 @@ class TestPtyCommandWrapping(unittest.TestCase):
         self.assertIn("'hello world'", cmd_str)
         # The content should be escaped as a single argument
         self.assertNotIn("$variables", cmd_str.split("'")[0])  # $ should be inside quotes
-

@@ -68,7 +68,7 @@ python3 "$EXECUTOR" [prompts...] [options]
 ```
 
 **Options:**
-- `--model, -m`: claude, codex, codex-high, codex-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, zai, local, qwen, devstral
+- `--model, -m`: claude, codex, codex-high, codex-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, zai, opencode, local, qwen, devstral
 - `--cwd, -c`: Working directory for execution
 - `--run, -r`: Actually run the CLI (default: just return info)
 - `--info-only, -i`: Only return prompt info, no CLI details
@@ -199,9 +199,21 @@ python3 "$EXECUTOR" --loop-status
 | gpt52-xhigh | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="xhigh" | GPT-5.2 with xhigh reasoning |
 | gemini | gemini -y | Google Gemini 2.5 Pro |
 | zai | codex exec --profile zai | Z.AI GLM-4.7 (via Codex, may have issues) |
-| opencode | opencode run -m zai/glm-4.7 | Z.AI GLM-4.7 (via OpenCode, recommended) |
+| opencode | opencode run --format json -m zai/glm-4.7 | Z.AI GLM-4.7 (via OpenCode, recommended; JSON output) |
 | local/qwen | codex exec --profile local | Local qwen model |
 | devstral | codex exec --profile local-devstral | Local devstral model |
+
+**OpenCode permissions (headless runs):** configure `~/.config/opencode/opencode.json` to avoid interactive permission prompts, e.g.:
+
+```json
+{
+  "permission": {
+    "*": "allow",
+    "external_directory": "allow",
+    "doom_loop": "allow"
+  }
+}
+```
 
 ## Output Display
 

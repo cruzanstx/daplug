@@ -636,11 +636,10 @@ def get_cli_info(model: str) -> dict:
             "stdin_mode": "dash"
         },
         "opencode": {
-            "command": ["opencode", "run", "-m", "zai/glm-4.7"],
+            "command": ["opencode", "run", "--format", "json", "-m", "zai/glm-4.7"],
             "display": "opencode (GLM-4.7 via OpenCode)",
             "env": {},
-            "stdin_mode": "arg",
-            "needs_pty": True  # OpenCode requires a PTY for proper operation
+            "stdin_mode": "arg"
         },
         "local": {
             "command": ["codex", "exec", "--full-auto", "--profile", "local"],
@@ -1200,7 +1199,7 @@ def run_cli(cli_info: dict, content: str, cwd: str, log_file: Path) -> dict:
         # Gemini-style: pass content as argument
         full_cmd = cli_info["command"] + [content]
 
-        # Wrap with script for PTY if needed (e.g., OpenCode)
+        # Wrap with script for PTY if needed
         if needs_pty:
             import shlex
             cmd_str = " ".join(shlex.quote(arg) for arg in full_cmd)
@@ -1265,7 +1264,7 @@ def run_cli_foreground(cli_info: dict, content: str, cwd: str, log_file: Path) -
             # Gemini-style: pass content as argument
             full_cmd = cli_info["command"] + [content]
 
-            # Wrap with script for PTY if needed (e.g., OpenCode)
+            # Wrap with script for PTY if needed
             if needs_pty:
                 import shlex
                 cmd_str = " ".join(shlex.quote(arg) for arg in full_cmd)
