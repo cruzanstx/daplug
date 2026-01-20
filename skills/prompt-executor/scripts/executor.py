@@ -858,6 +858,20 @@ def create_loop_state(
     }
 
 
+def validate_execution_cwd(execution_cwd: str) -> tuple[bool, Optional[str]]:
+    """Validate that an execution working directory exists and is a directory."""
+    try:
+        path = Path(execution_cwd)
+    except TypeError:
+        return False, f"execution_cwd is not a valid path: {execution_cwd!r}"
+
+    if not path.exists():
+        return False, f"execution_cwd does not exist: {execution_cwd}"
+    if not path.is_dir():
+        return False, f"execution_cwd is not a directory: {execution_cwd}"
+    return True, None
+
+
 def update_loop_iteration(
     state: dict,
     exit_code: int,
@@ -1344,8 +1358,16 @@ def run_verification_loop(
         state["execution_timestamp"] = execution_timestamp
     effective_timestamp = state["execution_timestamp"]
 
-    state["status"] = "running"
-    save_loop_state(state)
+    # Always refresh metadata that can change across invocations (e.g. worktree conflict resolution).
+    # This prevents resuming a pending/running loop with a stale path.
+    state["execution_cwd"] = cwd
+    if worktree_path is not None:
+        state["worktree_path"] = worktree_path
+    if branch_name is not None:
+        state["branch_name"] = branch_name
+
+    # Validate execution_cwd before attempting any loop execution.
+    cwd_ok, cwd_error = validate_execution_cwd(state["execution_cwd"])
 
     loop_log = log_dir / f"{model}-{prompt_number}-loop-{effective_timestamp}.log"
     if not loop_log.exists():
@@ -1360,6 +1382,29 @@ def run_verification_loop(
             f.write(f"# Branch: {branch_name}\n")
             f.write("\n")
 
+    if not cwd_ok:
+        state["status"] = "failed"
+        state["failure_reason"] = cwd_error
+        save_loop_state(state)
+        with open(loop_log, "a") as f:
+            f.write(f"[Loop] ERROR: {cwd_error}\n")
+        return {
+            "status": "error",
+            "loop_enabled": True,
+            "loop_log": str(loop_log),
+            "error": cwd_error,
+            "state_file": str(get_loop_state_file(prompt_number)),
+            "max_iterations": max_iterations,
+            "completion_marker": completion_marker,
+            "iterations": [],
+            "final_status": "failed",
+            "total_iterations": 0,
+            "suggested_next_steps": state.get("suggested_next_steps", []),
+        }
+
+    state["status"] = "running"
+    save_loop_state(state)
+
     result = {
         "status": "running",
         "loop_enabled": True,
@@ -1372,6 +1417,20 @@ def run_verification_loop(
 
     while state["iteration"] <= max_iterations:
         iteration = state["iteration"]
+        execution_cwd = state.get("execution_cwd") or cwd
+
+        cwd_ok, cwd_error = validate_execution_cwd(execution_cwd)
+        if not cwd_ok:
+            state["status"] = "failed"
+            state["failure_reason"] = cwd_error
+            save_loop_state(state)
+            with open(loop_log, "a") as f:
+                f.write(f"[Loop] ERROR: {cwd_error}\n")
+            result["final_status"] = "failed"
+            result["status"] = "error"
+            result["error"] = cwd_error
+            break
+
         log_file = log_dir / f"{model}-{prompt_number}-iter{iteration}-{effective_timestamp}.log"
 
         # Wrap content with verification protocol
@@ -1391,7 +1450,7 @@ def run_verification_loop(
             f.write(f"[Loop] Iteration log: {log_file}\n")
 
         # Run CLI and wait for completion
-        exec_result = run_cli_foreground(cli_info, wrapped_content, cwd, log_file)
+        exec_result = run_cli_foreground(cli_info, wrapped_content, execution_cwd, log_file)
 
         # Check for completion marker
         marker_found, retry_reason = check_completion_marker(log_file, completion_marker)
@@ -1474,6 +1533,45 @@ def run_verification_loop_background(
 
     Returns immediately with PID. The loop runs as a separate process.
     """
+    cwd_ok, cwd_error = validate_execution_cwd(cwd)
+    if not cwd_ok:
+        state = create_loop_state(
+            prompt_number=prompt_number,
+            prompt_file="",
+            model=model,
+            max_iterations=max_iterations,
+            completion_marker=completion_marker,
+            execution_timestamp=execution_timestamp,
+            worktree_path=worktree_path,
+            branch_name=branch_name,
+            execution_cwd=cwd,
+        )
+        state["status"] = "failed"
+        state["failure_reason"] = cwd_error
+        save_loop_state(state)
+
+        loop_log = log_dir / f"{model}-{prompt_number}-loop-{execution_timestamp}.log"
+        with open(loop_log, "w") as f:
+            f.write("# Loop Execution Log\n")
+            f.write(f"# Prompt: {prompt_number}\n")
+            f.write(f"# Model: {model}\n")
+            f.write(f"# Started: {execution_timestamp}\n")
+            f.write(f"# Max iterations: {max_iterations}\n")
+            f.write(f"# CWD: {cwd}\n")
+            f.write(f"# Worktree: {worktree_path}\n")
+            f.write(f"# Branch: {branch_name}\n")
+            f.write(f"\n")
+            f.write(f"[Loop] ERROR: {cwd_error}\n")
+
+        return {
+            "status": "error",
+            "error": cwd_error,
+            "loop_log": str(loop_log),
+            "state_file": str(get_loop_state_file(prompt_number)),
+            "max_iterations": max_iterations,
+            "completion_marker": completion_marker,
+        }
+
     # Create initial loop state
     state = create_loop_state(
         prompt_number=prompt_number,

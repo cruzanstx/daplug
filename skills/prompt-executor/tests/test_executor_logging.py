@@ -305,3 +305,102 @@ def test_loop_resume_preserves_timestamp(tmp_path, loop_state_dir, monkeypatch):
     final_state = json.loads(state_file.read_text())
     assert final_state["execution_timestamp"] == original_timestamp
 
+
+def test_loop_resume_updates_execution_cwd(tmp_path, loop_state_dir, monkeypatch):
+    """Loop resume: execution_cwd should be refreshed to match the current invocation."""
+    log_dir = tmp_path / "logs"
+    log_dir.mkdir()
+
+    original_timestamp = "20260119-100000"
+    completion_marker = "VERIFICATION_COMPLETE"
+
+    old_cwd = tmp_path / "old-worktree"
+    old_cwd.mkdir()
+    new_cwd = tmp_path / "new-worktree"
+    new_cwd.mkdir()
+
+    existing_state = {
+        "prompt_number": "001",
+        "prompt_file": "",
+        "model": "codex",
+        "execution_timestamp": original_timestamp,
+        "worktree_path": str(old_cwd),
+        "branch_name": "prompt/001-test",
+        "execution_cwd": str(old_cwd),
+        "iteration": 1,
+        "max_iterations": 3,
+        "completion_marker": completion_marker,
+        "started_at": "2026-01-19T10:00:00",
+        "last_updated_at": "2026-01-19T10:00:00",
+        "status": "running",
+        "history": [],
+        "suggested_next_steps": [],
+    }
+    state_file = loop_state_dir / "001.json"
+    state_file.write_text(json.dumps(existing_state))
+
+    def fake_run_cli_foreground(cli_info, content, cwd, log_file):
+        assert cwd == str(new_cwd)
+        Path(log_file).write_text(
+            f"{executor.INSTRUCTIONS_END_SENTINEL}\n"
+            f"<verification>{completion_marker}</verification>\n"
+        )
+        return {"status": "completed", "exit_code": 0, "log": str(log_file)}
+
+    monkeypatch.setattr(executor, "run_cli_foreground", fake_run_cli_foreground)
+
+    result = executor.run_verification_loop(
+        cli_info={"command": ["codex"], "env": {}, "stdin_mode": "dash"},
+        original_content="# Test\n\nDo the thing.\n",
+        cwd=str(new_cwd),
+        log_dir=log_dir,
+        prompt_number="001",
+        model="codex",
+        max_iterations=3,
+        completion_marker=completion_marker,
+        execution_timestamp="20260119-120000",
+        worktree_path=str(new_cwd),
+        branch_name="prompt/001-test",
+    )
+
+    assert result["status"] == "completed"
+
+    updated_state = json.loads(state_file.read_text())
+    assert updated_state["execution_timestamp"] == original_timestamp
+    assert updated_state["execution_cwd"] == str(new_cwd)
+    assert updated_state["worktree_path"] == str(new_cwd)
+
+
+def test_run_verification_loop_fails_cleanly_when_execution_cwd_missing(tmp_path, loop_state_dir, monkeypatch):
+    log_dir = tmp_path / "logs"
+    log_dir.mkdir()
+
+    missing_cwd = tmp_path / "missing-worktree"
+
+    def fake_run_cli_foreground(*_args, **_kwargs):
+        raise AssertionError("run_cli_foreground should not be called when execution_cwd is missing")
+
+    monkeypatch.setattr(executor, "run_cli_foreground", fake_run_cli_foreground)
+
+    result = executor.run_verification_loop(
+        cli_info={"command": ["codex"], "env": {}, "stdin_mode": "dash"},
+        original_content="# Test\n\nDo the thing.\n",
+        cwd=str(missing_cwd),
+        log_dir=log_dir,
+        prompt_number="001",
+        model="codex",
+        max_iterations=3,
+        completion_marker="VERIFICATION_COMPLETE",
+        execution_timestamp="20260119-150550",
+        worktree_path=str(missing_cwd),
+        branch_name="prompt/001-test",
+    )
+
+    assert result["status"] == "error"
+    assert "does not exist" in result["error"]
+    assert Path(result["loop_log"]).exists()
+
+    state = json.loads((loop_state_dir / "001.json").read_text())
+    assert state["status"] == "failed"
+    assert state["execution_cwd"] == str(missing_cwd)
+    assert "does not exist" in state.get("failure_reason", "")
