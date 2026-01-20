@@ -139,10 +139,16 @@ preferred_agent: codex
 local_providers:
   lmstudio: http://192.168.1.50:1234/v1
   ollama: http://gpu-server.local:11434/v1
+  vllm: http://inference.local:8000/v1
 </daplug_config>
 ```
 
 **Note:** Use full base URL including any path prefix (e.g., `/v1`, `/api/openai`). The router appends `/models`, `/chat/completions`, etc. as needed.
+
+**Supported providers:**
+- **LM Studio** - Desktop app, easy model management, default `:1234/v1`
+- **Ollama** - CLI-first, good for servers, default `:11434/v1`
+- **vLLM** - High-performance inference server, default `:8000/v1`
 
 **Config schema update** for `config-reader`:
 
