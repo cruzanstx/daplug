@@ -51,6 +51,15 @@ If this is your first time running daplug in this environment, scan for installe
 - If `~/.claude/daplug-clis.json` does **not** exist yet, recommend running `/daplug:detect-clis` before continuing.
 - If it exists, continue normally.
 
+### Step 0.3: Model Routing Behavior
+
+When the `/detect-clis` cache is present, `executor.py` routes `--model` shorthands to an installed CLI automatically:
+
+- Respects `preferred_agent` in `<daplug_config>` when multiple CLIs can run a model family.
+- Falls back gracefully when the preferred CLI isn’t installed/ready (example: `gemini-*` → `opencode`).
+- Local routing (`local`, `qwen`, `devstral`) uses the detected running provider (LM Studio / Ollama / vLLM).
+- If the cache is missing, daplug falls back to the legacy hardcoded model map for backward compatibility.
+
 ### Step 0.5: Verify Monitor Permissions
 
 Before spawning monitor agents, verify the required Read permissions exist in `~/.claude/settings.json`:

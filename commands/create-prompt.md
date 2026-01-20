@@ -14,6 +14,30 @@ The user wants you to create a prompt for: $ARGUMENTS
 
 If the user includes `--folder <path>` in the arguments, use that destination folder under `./prompts/` (e.g. `providers/`). Never use `completed/` as a destination folder.
 
+## Available Models (from /detect-clis cache)
+
+Before recommending how to run the new prompt, check what CLIs/models are actually available in this environment.
+
+1) Resolve helper scripts:
+
+```bash
+PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx"[0].installPath' ~/.claude/plugins/installed_plugins.json)
+ROUTER="$PLUGIN_ROOT/skills/cli-detector/scripts/router.py"
+CONFIG="$PLUGIN_ROOT/skills/config-reader/scripts/config.py"
+```
+
+2) Read preferred agent (if set) and show the routing table:
+
+```bash
+PREFERRED=$(python3 "$CONFIG" get preferred_agent --quiet)
+python3 "$ROUTER" --table
+echo "Your preferred_agent: ${PREFERRED:-<not set>}"
+```
+
+Guidelines:
+- Only recommend models/CLIs that are marked as ready by the cache/routing table.
+- If multiple options are available, prefer the user’s `preferred_agent`.
+
 ## Core Process
 
 <thinking>

@@ -3,21 +3,21 @@ from __future__ import annotations
 from .base import ProviderPlugin, get_provider_endpoint, http_get_json, join_url
 
 
-class LMStudioProvider(ProviderPlugin):
+class VLLMProvider(ProviderPlugin):
     @property
     def name(self) -> str:
-        return "lmstudio"
+        return "vllm"
 
     @property
     def display_name(self) -> str:
-        return "LM Studio"
+        return "vLLM"
 
     @property
     def default_endpoint(self) -> str:
-        return "http://localhost:1234/v1"
+        return "http://localhost:8000/v1"
 
     def detect_running(self, timeout_s: float = 0.3) -> tuple[bool, str]:
-        endpoint = get_provider_endpoint("lmstudio") or self.default_endpoint
+        endpoint = get_provider_endpoint("vllm") or self.default_endpoint
         data = http_get_json(join_url(endpoint, "models"), timeout_s=timeout_s)
         return (data is not None), endpoint
 
@@ -26,6 +26,8 @@ class LMStudioProvider(ProviderPlugin):
         models = data.get("data", [])
         ids: list[str] = []
         for item in models:
+            if not isinstance(item, dict):
+                continue
             model_id = item.get("id")
             if model_id:
                 ids.append(str(model_id))
@@ -35,4 +37,5 @@ class LMStudioProvider(ProviderPlugin):
         return ["aider", "codex", "opencode"]
 
 
-PLUGIN = LMStudioProvider()
+PLUGIN = VLLMProvider()
+

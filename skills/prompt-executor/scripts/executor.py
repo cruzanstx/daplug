@@ -536,7 +536,49 @@ def resolve_prompts(prompts_dir: Path, prompt_inputs: list[str]) -> list[Path]:
     return [resolve_prompt(prompts_dir, inp) for inp in unique]
 
 
-def get_cli_info(model: str) -> dict:
+def _normalize_preferred_agent(value: Optional[str]) -> Optional[str]:
+    v = (value or "").strip().lower()
+    if not v:
+        return None
+    if v in {"claude-code", "claude_code"}:
+        return "claude"
+    if v.startswith("codex"):
+        return "codex"
+    if v.startswith("gemini"):
+        return "gemini"
+    if v in {"qwen", "devstral", "local"}:
+        return "codex"
+    return v
+
+
+def _cli_info_from_router(cli_name: str, model_id: str, cmd: list[str], fallback: dict) -> dict:
+    cli = (cli_name or "").strip().lower()
+    if cli == "claude":
+        info = dict(fallback.get("claude", {}))
+        info["display"] = f"claude ({model_id})"
+        return info
+
+    stdin_mode = "dash" if cli == "codex" else "arg"
+
+    env: dict = {}
+    if cli == "codex" and "--profile" in cmd:
+        try:
+            profile = cmd[cmd.index("--profile") + 1]
+            if str(profile).startswith("local"):
+                # Keep backwards compatibility with existing local profiles.
+                env["LMSTUDIO_API_KEY"] = "lm-studio"
+        except (ValueError, IndexError):
+            pass
+
+    return {
+        "command": cmd,
+        "display": f"{cli} ({model_id})",
+        "env": env,
+        "stdin_mode": stdin_mode,
+    }
+
+
+def get_cli_info(model: str, repo_root: Optional[Path] = None) -> dict:
     """Get CLI command and info for a model.
 
     stdin_mode: How to pass prompt content
@@ -666,6 +708,23 @@ def get_cli_info(model: str) -> dict:
             "stdin_mode": None
         }
     }
+    repo_root = repo_root or get_repo_root()
+    preferred = _normalize_preferred_agent(_read_config_value(repo_root, "preferred_agent"))
+
+    # Prefer the /detect-clis cache when present; fall back to hardcoded mappings
+    # for backwards compatibility.
+    try:
+        router_dir = repo_root / "skills" / "cli-detector" / "scripts"
+        if router_dir.exists():
+            if str(router_dir) not in sys.path:
+                sys.path.append(str(router_dir))
+            import router  # type: ignore
+
+            cli_name, model_id, cmd = router.resolve_model(model, preferred_cli=preferred)
+            return _cli_info_from_router(cli_name, model_id, cmd, fallback=models)
+    except Exception:
+        pass
+
     return models.get(model, models["claude"])
 
 
@@ -1739,7 +1798,7 @@ def main():
         else:
             prompt_files = resolve_prompts(prompts_dir, args.prompts)
 
-        cli_info = get_cli_info(args.model)
+        cli_info = get_cli_info(args.model, repo_root=repo_root)
         log_dir = get_cli_logs_dir(repo_root)
         log_dir.mkdir(parents=True, exist_ok=True)
 

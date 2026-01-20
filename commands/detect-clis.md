@@ -8,6 +8,23 @@ argument-hint: "[--fix] [--dry-run] [--reset] [--json]"
 Scan for installed AI coding CLIs and local model providers, show a readable summary (tables), and optionally apply safe fixes.
 </objective>
 
+<local_provider_endpoints>
+Local provider discovery checks endpoints in this order (per provider):
+1. `<daplug_config>` `local_providers` (project `./CLAUDE.md` overrides user `~/.claude/CLAUDE.md`)
+2. Environment variables (`LMSTUDIO_ENDPOINT`, `OLLAMA_HOST`, `VLLM_ENDPOINT`)
+3. Localhost defaults (`http://localhost:1234/v1`, `http://localhost:11434/v1`, `http://localhost:8000/v1`)
+
+Example config:
+```markdown
+<daplug_config>
+local_providers:
+  lmstudio: http://192.168.1.50:1234/v1
+  ollama: http://gpu-server.local:11434/v1
+  vllm: http://inference.local:8000/v1
+</daplug_config>
+```
+</local_provider_endpoints>
+
 <process>
 
 <step1_resolve_cli_detector>
