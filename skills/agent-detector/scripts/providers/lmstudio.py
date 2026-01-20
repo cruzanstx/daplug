@@ -32,7 +32,7 @@ class LMStudioProvider(ProviderPlugin):
         return ids
 
     def compatible_clis(self) -> list[str]:
-        return ["codex", "opencode"]
+        return ["codex", "opencode", "aider"]
 
 
 PLUGIN = LMStudioProvider()

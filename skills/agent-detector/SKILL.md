@@ -12,6 +12,15 @@ Phase 1: Detect installed Tier 1 coding CLIs (Claude, Codex, Gemini, OpenCode) v
 
 ## Usage
 
+Run the `/load-agents` renderer (tables + optional fixes):
+
+```bash
+python3 skills/agent-detector/scripts/load_agents.py
+python3 skills/agent-detector/scripts/load_agents.py --json
+python3 skills/agent-detector/scripts/load_agents.py --reset
+python3 skills/agent-detector/scripts/load_agents.py --fix
+```
+
 Run a scan and print JSON:
 
 ```bash
