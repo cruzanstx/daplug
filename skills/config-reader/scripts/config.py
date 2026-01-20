@@ -35,6 +35,34 @@ LEGACY_KEY_SET = set(KNOWN_KEYS)
 BLOCK_LINE_RE = re.compile(r"^\s*([A-Za-z0-9_.-]+)\s*:\s*(.*?)\s*$")
 
 
+def _agent_cache_path() -> Path:
+    return Path.home() / ".claude" / "daplug-agents.json"
+
+
+def _normalize_preferred_agent(value: str) -> str:
+    v = (value or "").strip().lower()
+    if v in {"claude-code", "claude_code"}:
+        return "claude"
+    if v.startswith("codex"):
+        return "codex"
+    if v.startswith("gemini"):
+        return "gemini"
+    if v in {"qwen", "devstral", "local"}:
+        return "codex"
+    return v
+
+
+def _load_agent_cache() -> Optional[dict]:
+    path = _agent_cache_path()
+    if not path.exists():
+        return None
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8", errors="replace"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return raw if isinstance(raw, dict) else None
+
+
 @dataclass
 class FileConfig:
     path: Path
@@ -392,6 +420,22 @@ def cmd_status(args: argparse.Namespace) -> int:
     }
     needs_migration = bool(project.legacy_keys or user.legacy_keys)
 
+    agent_cache = _load_agent_cache()
+    cache_path = _agent_cache_path()
+    preferred_raw = str(merged.get("preferred_agent") or "").strip()
+    preferred_norm = _normalize_preferred_agent(preferred_raw) if preferred_raw else ""
+    preferred_info: Optional[dict] = None
+    if preferred_raw:
+        clis = (agent_cache or {}).get("clis") if isinstance(agent_cache, dict) else None
+        entry = clis.get(preferred_norm) if isinstance(clis, dict) else None
+        installed = bool(entry.get("installed")) if isinstance(entry, dict) else None
+        preferred_info = {
+            "value": preferred_raw,
+            "normalized": preferred_norm,
+            "known": isinstance(clis, dict) and preferred_norm in clis,
+            "installed": installed,
+        }
+
     status = {
         "paths": {
             "project": str(project_path),
@@ -404,6 +448,11 @@ def cmd_status(args: argparse.Namespace) -> int:
         "needs_migration": needs_migration,
         "legacy_settings": sorted(set(project.legacy_keys + user.legacy_keys)),
         "legacy_files": legacy,
+        "agent_cache": {
+            "path": str(cache_path),
+            "exists": agent_cache is not None,
+            "preferred_agent": preferred_info,
+        },
     }
 
     if args.json:
@@ -425,6 +474,19 @@ def cmd_status(args: argparse.Namespace) -> int:
             if keys:
                 print(f"- {scope}: {', '.join(keys)}")
         print("Run /daplug:migrate-config to upgrade.")
+    if preferred_raw:
+        if agent_cache is None:
+            print(
+                f"\nAgent cache not found ({cache_path}). Run /daplug:load-agents to validate preferred_agent."
+            )
+        elif preferred_info and preferred_info.get("known") is False:
+            print(
+                f"\n⚠️ preferred_agent '{preferred_raw}' is not a known CLI in the agent cache. Run /daplug:load-agents."
+            )
+        elif preferred_info and preferred_info.get("installed") is False:
+            print(
+                f"\n⚠️ preferred_agent '{preferred_raw}' is not installed (per {cache_path}). Run /daplug:load-agents."
+            )
     return 0
 
 

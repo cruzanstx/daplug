@@ -27,7 +27,7 @@ Clone/copy this plugin to one of:
 
 ## What's Included
 
-### Commands (16)
+### Commands (17)
 
 | Command | Description |
 |---------|-------------|
@@ -39,6 +39,7 @@ Clone/copy this plugin to one of:
 | `/daplug:create-prompt` | Create optimized, XML-structured prompts |
 | `/daplug:devstral-cli` | Run task with local Devstral model via Codex CLI |
 | `/daplug:gemini-cli` | Run task with Google Gemini CLI |
+| `/daplug:load-agents` | Scan and manage available AI coding agents |
 | `/daplug:migrate-config` | Migrate legacy CLAUDE.md settings to <daplug_config> |
 | `/daplug:prompts` | Analyze prompts folder and recommend next steps |
 | `/daplug:qwen-cli` | Run task with local Qwen model via Codex CLI |

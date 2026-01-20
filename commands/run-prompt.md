@@ -44,6 +44,13 @@ PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx"[0].installPath' ~/.claude/plugi
 EXECUTOR="$PLUGIN_ROOT/skills/prompt-executor/scripts/executor.py"
 ```
 
+### Step 0.25: Check Agent Cache (Recommended)
+
+If this is your first time running daplug in this environment, scan for installed CLIs first:
+
+- If `~/.claude/daplug-agents.json` does **not** exist yet, recommend running `/daplug:load-agents` before continuing.
+- If it exists, continue normally.
+
 ### Step 0.5: Verify Monitor Permissions
 
 Before spawning monitor agents, verify the required Read permissions exist in `~/.claude/settings.json`:
