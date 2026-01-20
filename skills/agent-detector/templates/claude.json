@@ -1,0 +1,13 @@
+{
+  "model": "claude-sonnet-4-5-20250929",
+  "permissions": {
+    "allow": [
+      "Read(~/.claude/**)",
+      "Write(~/.claude/**)",
+      "Read(~/.codex/**)",
+      "Read(~/.gemini/**)",
+      "Read(~/.config/opencode/**)",
+      "Read(~/.config/goose/**)"
+    ]
+  }
+}

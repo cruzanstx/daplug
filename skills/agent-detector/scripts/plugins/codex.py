@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import json
-import re
+import os
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
-from .base import ConfigIssue, ModelInfo, SimpleCLIPlugin
+from fixer import FIX_TEMPLATES, deep_merge_defaults, deep_merge_overwrite, load_template
+
+from .base import ConfigIssue, ModelInfo, SimpleCLIPlugin, _strip_jsonc
 
 
 class CodexCLI(SimpleCLIPlugin):
@@ -15,167 +17,9 @@ class CodexCLI(SimpleCLIPlugin):
     _version_cmd = ["codex", "--version"]
     _supported_providers = ["openai", "anthropic", "local"]
     _config_paths = [
-        Path("~/.codex/config.toml"),
         Path("~/.codex/config.json"),
+        Path("~/.codex/config.toml"),
     ]
-
-    def _pick_config_path(self) -> Optional[Path]:
-        paths = self.get_config_paths()
-        existing = [p for p in paths if p.exists()]
-        if not existing:
-            return None
-        # Prefer JSON for patching if present.
-        for p in existing:
-            if p.suffix.lower() == ".json":
-                return p
-        return existing[0]
-
-    def _has_allow_all_permissions(self, config: dict) -> bool:
-        perms = config.get("permissions")
-        return isinstance(perms, dict) and perms.get("*") == "allow"
-
-    def detect_issues(self) -> list[ConfigIssue]:
-        issues = super().detect_issues()
-        installed, _exe = self.detect_installation()
-        if not installed:
-            return []
-
-        config_path = self._pick_config_path()
-        if config_path is None or not config_path.exists():
-            return issues
-
-        config = self.parse_config(config_path)
-        if not isinstance(config, dict):
-            return issues
-
-        if not self._has_allow_all_permissions(config):
-            issues.append(
-                ConfigIssue(
-                    type="sandbox_permissions",
-                    severity="warning",
-                    message="Sandbox permissions need adjustment",
-                    fix_available=True,
-                    fix_description=f'Add permissions {{ "*": "allow" }} to {config_path}',
-                )
-            )
-        return issues
-
-    def apply_fix(self, issue: ConfigIssue) -> bool:
-        if issue.type != "sandbox_permissions":
-            return False
-
-        config_path = self._pick_config_path()
-        if config_path is None:
-            # Prefer creating the JSON config if nothing exists.
-            for p in self.get_config_paths():
-                if p.suffix.lower() == ".json":
-                    config_path = p
-                    break
-        if config_path is None:
-            return False
-
-        config_path = config_path.expanduser()
-        config_path.parent.mkdir(parents=True, exist_ok=True)
-
-        backup_path = config_path.with_name(config_path.name + ".bak")
-        try:
-            original = (
-                config_path.read_text(encoding="utf-8", errors="replace")
-                if config_path.exists()
-                else ""
-            )
-            backup_path.write_text(original, encoding="utf-8")
-        except OSError:
-            return False
-
-        ok = False
-        details: list[str] = []
-        try:
-            if config_path.suffix.lower() == ".json":
-                raw: dict = {}
-                if config_path.exists():
-                    try:
-                        raw = json.loads(config_path.read_text(encoding="utf-8", errors="replace"))
-                    except json.JSONDecodeError:
-                        raw = {}
-                if not isinstance(raw, dict):
-                    raw = {}
-                perms = raw.get("permissions")
-                if not isinstance(perms, dict):
-                    perms = {}
-                    raw["permissions"] = perms
-                perms["*"] = "allow"
-                config_path.write_text(json.dumps(raw, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-                ok = True
-                details.append(f'✅ Added "permissions": {{"*": "allow"}}')
-                details.append(f"📁 Backup saved to {backup_path}")
-            else:
-                # Best-effort TOML patching (no external deps).
-                text = config_path.read_text(encoding="utf-8", errors="replace") if config_path.exists() else ""
-                parsed = self.parse_config(config_path) if config_path.exists() else {}
-                if isinstance(parsed, dict) and self._has_allow_all_permissions(parsed):
-                    ok = True
-                else:
-                    lines = text.splitlines()
-                    changed = False
-
-                    # Inline table: permissions = { ... }
-                    inline_re = re.compile(r'^(?P<prefix>\s*permissions\s*=\s*\{)(?P<body>.*?)(?P<suffix>\}\s*)$')
-                    for i, line in enumerate(lines):
-                        m = inline_re.match(line)
-                        if not m:
-                            continue
-                        body = m.group("body").strip()
-                        if '"*"' in body or "'*'" in body or "* =" in body:
-                            break
-                        if body:
-                            if not body.endswith(","):
-                                body += ","
-                            body += ' "*" = "allow"'
-                        else:
-                            body = ' "*" = "allow"'
-                        lines[i] = f'{m.group("prefix")}{body}{m.group("suffix")}'
-                        changed = True
-                        break
-
-                    # Table form:
-                    if not changed:
-                        table_header_re = re.compile(r"^\s*\[permissions\]\s*$")
-                        in_table = False
-                        inserted = False
-                        out: list[str] = []
-                        for line in lines:
-                            if table_header_re.match(line):
-                                in_table = True
-                                out.append(line)
-                                continue
-                            if in_table and line.strip().startswith("[") and line.strip().endswith("]"):
-                                if not inserted:
-                                    out.append('"*" = "allow"')
-                                    inserted = True
-                                in_table = False
-                            out.append(line)
-                        if in_table and not inserted:
-                            out.append('"*" = "allow"')
-                            inserted = True
-                        if inserted:
-                            lines = out
-                            changed = True
-
-                    if not changed:
-                        if lines and lines[-1].strip() != "":
-                            lines.append("")
-                        lines.extend(["[permissions]", '"*" = "allow"'])
-
-                    config_path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
-                    ok = True
-                    details.append('✅ Added [permissions] "*" = "allow"')
-                    details.append(f"📁 Backup saved to {backup_path}")
-        except OSError:
-            ok = False
-
-        self._last_fix_info = {"details": "\n  ".join(details)}
-        return ok
 
     def get_available_models(self) -> list[ModelInfo]:
         return [
@@ -201,6 +45,174 @@ class CodexCLI(SimpleCLIPlugin):
             cmd.extend(["-m", model])
         cmd.append("-")
         return cmd
+
+    def _resolve_active_config(self) -> tuple[Optional[Path], Optional[dict[str, Any]], Optional[str]]:
+        """Return (path, parsed_config, error_type)."""
+        for candidate in self.get_config_paths():
+            if not candidate.exists():
+                continue
+            try:
+                content = candidate.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                return candidate, None, "read_error"
+
+            suffix = candidate.suffix.lower()
+            if suffix in {".json", ".jsonc"}:
+                try:
+                    parsed = json.loads(_strip_jsonc(content))
+                except json.JSONDecodeError:
+                    return candidate, None, "invalid_json"
+                return candidate, parsed if isinstance(parsed, dict) else {}, None
+
+            if suffix == ".toml":
+                try:
+                    import tomllib  # Python 3.11+
+
+                    parsed = tomllib.loads(content)
+                except Exception:
+                    return candidate, None, "invalid_json"
+                return candidate, parsed if isinstance(parsed, dict) else {}, None
+
+            # Unknown suffix; treat as invalid.
+            return candidate, None, "invalid_json"
+
+        return None, None, None
+
+    def detect_issues(self) -> list[ConfigIssue]:
+        installed, _exe = self.detect_installation()
+        if not installed:
+            return []
+
+        issues: list[ConfigIssue] = []
+
+        active_path, config, parse_error = self._resolve_active_config()
+        preferred_path = self.get_config_paths()[0] if self.get_config_paths() else Path("~/.codex/config.json")
+
+        if active_path is None:
+            issues.append(
+                ConfigIssue(
+                    type="missing_config",
+                    severity="error",
+                    message=f"No config found for {self.display_name}",
+                    fix_available=True,
+                    fix_description=f"Create {preferred_path}",
+                    config_path=str(preferred_path),
+                )
+            )
+        elif parse_error == "invalid_json":
+            fixable = active_path.suffix.lower() in {".json", ".jsonc"}
+            issues.append(
+                ConfigIssue(
+                    type="invalid_json",
+                    severity="error",
+                    message=f"Invalid config syntax at {active_path}",
+                    fix_available=fixable,
+                    fix_description="Replace with known-good template" if fixable else "Fix syntax manually",
+                    config_path=str(active_path),
+                )
+            )
+
+        # Missing API key (env var or prior login).
+        auth_file = Path("~/.codex/auth.json").expanduser()
+        if not os.environ.get("OPENAI_API_KEY") and not auth_file.exists():
+            issues.append(
+                ConfigIssue(
+                    type="missing_api_key",
+                    severity="error",
+                    message="OPENAI_API_KEY not set (and no ~/.codex/auth.json found)",
+                    fix_available=False,
+                )
+            )
+
+        if config is None:
+            return issues
+
+        # Permissions (headless/sandbox) defaults.
+        perms = config.get("permissions")
+        if isinstance(perms, dict) and perms.get("*") != "allow":
+            fixable = (active_path or preferred_path).suffix.lower() in {".json", ".jsonc"}
+            issues.append(
+                ConfigIssue(
+                    type="sandbox_permissions",
+                    severity="warning",
+                    message='Codex permissions are set but not "*" = "allow"',
+                    fix_available=fixable,
+                    fix_description='Set "permissions": {"*": "allow"}',
+                    config_path=str(active_path or preferred_path),
+                )
+            )
+
+        # Outdated/incomplete config schema compared to daplug defaults.
+        template = load_template("codex")
+        required_keys = ["approval_mode", "full_auto", "notify", "providers"]
+        if any(k not in config for k in required_keys):
+            fixable = (active_path or preferred_path).suffix.lower() in {".json", ".jsonc"}
+            issues.append(
+                ConfigIssue(
+                    type="outdated_config",
+                    severity="warning",
+                    message="Codex config missing recommended daplug defaults",
+                    fix_available=fixable,
+                    fix_description="Merge daplug defaults into existing config",
+                    config_path=str(active_path or preferred_path),
+                )
+            )
+
+        model = config.get("model")
+        if not isinstance(model, str) or not model.strip():
+            fixable = (active_path or preferred_path).suffix.lower() in {".json", ".jsonc"}
+            issues.append(
+                ConfigIssue(
+                    type="missing_model",
+                    severity="warning",
+                    message='Codex config missing "model"',
+                    fix_available=fixable,
+                    fix_description=f'Set model to "{template.get("model", "gpt-5.2-codex")}"',
+                    config_path=str(active_path or preferred_path),
+                )
+            )
+
+        return issues
+
+    def apply_fix(self, issue: ConfigIssue) -> bool:
+        """
+        1. Create backup of existing config
+        2. Apply minimal fix (dont overwrite entire config)
+        3. Validate fix worked
+        4. Return success/failure
+        """
+        config_path = Path(issue.config_path).expanduser() if issue.config_path else self.get_config_paths()[0]
+        if config_path.suffix.lower() not in {".json", ".jsonc"}:
+            return False
+
+        template = load_template("codex")
+
+        if issue.type in {"missing_config", "invalid_json"}:
+            config_path.parent.mkdir(parents=True, exist_ok=True)
+            config_path.write_text(json.dumps(template, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            return True
+
+        # For merge-based fixes, start from existing parsed config.
+        try:
+            raw = config_path.read_text(encoding="utf-8", errors="replace")
+            existing = json.loads(_strip_jsonc(raw))
+            existing_dict: dict[str, Any] = existing if isinstance(existing, dict) else {}
+        except (OSError, json.JSONDecodeError):
+            return False
+
+        if issue.type == "sandbox_permissions":
+            patch = (FIX_TEMPLATES.get("codex") or {}).get("sandbox_permissions") or {}
+            merged = deep_merge_overwrite(existing_dict, patch)
+        elif issue.type == "outdated_config":
+            merged = deep_merge_defaults(existing_dict, template)
+        elif issue.type == "missing_model":
+            merged = dict(existing_dict)
+            merged["model"] = template.get("model", "gpt-5.2-codex")
+        else:
+            return False
+
+        config_path.write_text(json.dumps(merged, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        return True
 
 
 PLUGIN = CodexCLI()

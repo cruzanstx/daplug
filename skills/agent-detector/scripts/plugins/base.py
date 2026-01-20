@@ -31,6 +31,7 @@ class ConfigIssue:
     message: str
     fix_available: bool
     fix_description: Optional[str] = None
+    config_path: Optional[str] = None
 
 
 class CLIPlugin(ABC):
@@ -253,4 +254,6 @@ def configissue_to_dict(issue: ConfigIssue) -> dict[str, Any]:
     }
     if issue.fix_description is not None:
         data["fix_description"] = issue.fix_description
+    if issue.config_path is not None:
+        data["config_path"] = issue.config_path
     return data

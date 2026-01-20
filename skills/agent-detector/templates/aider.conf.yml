@@ -1,0 +1,10 @@
+# Aider configuration - supports many providers
+model: gpt-4o
+edit-format: whole
+auto-commits: false
+yes: true                    # Auto-confirm prompts (batch mode)
+dark-mode: true
+# For local models via Ollama:
+# model: ollama/qwen2.5-coder:32b
+# For Anthropic:
+# model: claude-3-5-sonnet-20241022
