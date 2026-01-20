@@ -88,7 +88,7 @@ def _not_installed_recommendations() -> list[tuple[str, str]]:
 
 def _clear_cache_files() -> list[Path]:
     cleared: list[Path] = []
-    candidates = [default_cache_path(), Path("/tmp/daplug-agents.json")]
+    candidates = [default_cache_path(), Path("/tmp/daplug-clis.json")]
     for path in candidates:
         try:
             if path.exists():
@@ -224,7 +224,7 @@ def _print_human(cache: dict[str, Any]) -> None:
             msg = str(issue.get("message") or issue.get("type") or "Issue")
             print(f"  - {cli}: {msg}")
         if any(bool(i.get("fix_available")) for i in issues):
-            print("  - Run `/load-agents --fix` to apply recommended fix(es)")
+            print("  - Run `/detect-clis --fix` to apply recommended fix(es)")
 
     # Not installed
     recs = _not_installed_recommendations()
@@ -238,7 +238,7 @@ def _print_human(cache: dict[str, Any]) -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="daplug /load-agents helper")
+    p = argparse.ArgumentParser(description="daplug /detect-clis helper")
     p.add_argument("--fix", action="store_true", help="Apply recommended safe fixes")
     p.add_argument("--dry-run", action="store_true", help="Show what --fix would do without applying changes")
     p.add_argument("--reset", action="store_true", help="Clear cache and rescan")
@@ -260,7 +260,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         cleared = _clear_cache_files()
         if not args.json:
             if cleared:
-                print("🗑️ Cleared agent cache")
+                print("🗑️ Cleared CLI cache")
             else:
                 print("🗑️ Agent cache already clear")
             print("🔍 Rescanning...")
@@ -287,7 +287,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             ["CLI", "Issue", "Severity", "Fix"],
             [[_cli_label(cli), itype, sev, desc] for cli, itype, sev, desc in fixable],
         ))
-        print("\nRun `/load-agents --fix` to apply these fixes.")
+        print("\nRun `/detect-clis --fix` to apply these fixes.")
         return 0
 
     if args.fix:
@@ -316,11 +316,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         if not remaining:
             print("\nAll issues resolved!")
         else:
-            print(f"\n⚠️ Remaining issues ({len(remaining)}). Run `/load-agents` to review.")
+            print(f"\n⚠️ Remaining issues ({len(remaining)}). Run `/detect-clis` to review.")
         return 0
 
     if not args.json:
-        print("🔍 Scanning for AI coding agents...")
+        print("🔍 Scanning for AI coding CLIs...")
     cache_obj = scan_all_clis(force_refresh=bool(args.reset))
     cache = cache_obj.to_dict()
     payload = _json_payload(cache)

@@ -218,7 +218,7 @@ def _override_plugin_config_paths(plugin: CLIPlugin, config: Path) -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="daplug agent config fixer")
+    p = argparse.ArgumentParser(description="daplug CLI config fixer")
     p.add_argument("--cli", help="Fix a specific CLI (codex/opencode/gemini/claude)")
     p.add_argument("--config", help="Override config path (for testing)")
     p.add_argument("--dry-run", action="store_true", help="Show what would be fixed without applying changes")

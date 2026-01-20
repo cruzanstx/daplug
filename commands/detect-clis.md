@@ -1,6 +1,6 @@
 ---
-name: load-agents
-description: Scan and manage available AI coding agents
+name: detect-clis
+description: Scan and manage available AI coding CLIs
 argument-hint: "[--fix] [--dry-run] [--reset] [--json]"
 ---
 
@@ -10,22 +10,21 @@ Scan for installed AI coding CLIs and local model providers, show a readable sum
 
 <process>
 
-<step1_resolve_agent_detector>
-Resolve the agent detector utility:
+<step1_resolve_cli_detector>
+Resolve the CLI detector utility:
 
 ```bash
 PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx"[0].installPath' ~/.claude/plugins/installed_plugins.json)
-LOAD_AGENTS="$PLUGIN_ROOT/skills/agent-detector/scripts/load_agents.py"
+DETECT_CLIS="$PLUGIN_ROOT/skills/cli-detector/scripts/detect_clis.py"
 ```
-</step1_resolve_agent_detector>
+</step1_resolve_cli_detector>
 
 <step2_run_command>
 Run the command with the user-provided flags:
 
 ```bash
-python3 "$LOAD_AGENTS" $ARGUMENTS
+python3 "$DETECT_CLIS" $ARGUMENTS
 ```
 </step2_run_command>
 
 </process>
-

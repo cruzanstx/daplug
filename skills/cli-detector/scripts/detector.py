@@ -162,7 +162,7 @@ def get_preferred_cli(model: str) -> Optional[str]:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="daplug agent detector (Phase 1)")
+    p = argparse.ArgumentParser(description="daplug CLI detector (Phase 1)")
     p.add_argument("--scan", action="store_true", help="Scan all plugins and output JSON")
     p.add_argument("--verbose", action="store_true", help="Verbose progress output (stderr)")
     p.add_argument("--check", metavar="NAME", help="Check a specific CLI plugin")

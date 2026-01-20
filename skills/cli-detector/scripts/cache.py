@@ -34,7 +34,7 @@ def default_cache_path() -> Path:
     override = os.environ.get("DAPLUG_AGENT_CACHE_PATH")
     if override:
         return Path(os.path.expandvars(os.path.expanduser(override)))
-    return Path.home() / ".claude" / "daplug-agents.json"
+    return Path.home() / ".claude" / "daplug-clis.json"
 
 
 @dataclass
@@ -100,7 +100,7 @@ class AgentCache:
 
 
 def load_cache_file(path: Optional[Path] = None) -> Optional[AgentCache]:
-    candidate_paths = [path] if path is not None else [default_cache_path(), Path("/tmp/daplug-agents.json")]
+    candidate_paths = [path] if path is not None else [default_cache_path(), Path("/tmp/daplug-clis.json")]
     for candidate in candidate_paths:
         if candidate is None:
             continue
@@ -119,7 +119,7 @@ def load_cache_file(path: Optional[Path] = None) -> Optional[AgentCache]:
 
 
 def save_cache_file(cache: AgentCache, path: Optional[Path] = None) -> None:
-    candidate_paths = [path] if path is not None else [default_cache_path(), Path("/tmp/daplug-agents.json")]
+    candidate_paths = [path] if path is not None else [default_cache_path(), Path("/tmp/daplug-clis.json")]
     last_error: Optional[OSError] = None
     for candidate in candidate_paths:
         if candidate is None:

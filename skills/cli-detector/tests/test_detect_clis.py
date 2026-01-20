@@ -1,4 +1,4 @@
-"""Tests for load_agents.py CLI."""
+"""Tests for detect_clis.py CLI."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ import pytest
 # Ensure scripts directory is in path
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
-from load_agents import (
+from detect_clis import (
     main,
     _render_markdown_table,
     _model_summary,
@@ -114,7 +114,7 @@ class TestJsonPayload:
 
 
 class TestMainCli:
-    @patch("load_agents.scan_all_clis")
+    @patch("detect_clis.scan_all_clis")
     def test_json_flag_outputs_json(self, mock_scan, capsys):
         mock_cache = MagicMock()
         mock_cache.to_dict.return_value = {"clis": {}, "providers": {}}
@@ -127,7 +127,7 @@ class TestMainCli:
         data = json.loads(captured.out)
         assert "schema_version" in data
 
-    @patch("load_agents.scan_all_clis")
+    @patch("detect_clis.scan_all_clis")
     def test_human_output_includes_headers(self, mock_scan, capsys):
         mock_cache = MagicMock()
         mock_cache.to_dict.return_value = {
@@ -145,8 +145,8 @@ class TestMainCli:
         assert "Found" in captured.out
         assert "CLI" in captured.out
 
-    @patch("load_agents._clear_cache_files")
-    @patch("load_agents.scan_all_clis")
+    @patch("detect_clis._clear_cache_files")
+    @patch("detect_clis.scan_all_clis")
     def test_reset_clears_cache(self, mock_scan, mock_clear, capsys):
         mock_clear.return_value = [Path("/tmp/test.json")]
         mock_cache = MagicMock()

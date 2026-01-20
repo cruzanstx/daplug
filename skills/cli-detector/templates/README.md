@@ -1,10 +1,10 @@
-# daplug agent-detector templates
+# daplug cli-detector templates
 
 These are **known-good starter configs** for popular AI coding CLIs so daplug can run them non-interactively.
 
 Notes:
 - **Do not put secrets** in these files. Use env vars or the CLI's login flow.
-- The fixer (`skills/agent-detector/scripts/fixer.py`) merges these templates as *defaults* and preserves user overrides.
+- The fixer (`skills/cli-detector/scripts/fixer.py`) merges these templates as *defaults* and preserves user overrides.
 
 ## Tier 1 CLIs
 

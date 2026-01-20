@@ -477,15 +477,15 @@ def cmd_status(args: argparse.Namespace) -> int:
     if preferred_raw:
         if agent_cache is None:
             print(
-                f"\nAgent cache not found ({cache_path}). Run /daplug:load-agents to validate preferred_agent."
+                f"\nCLI cache not found ({cache_path}). Run /daplug:detect-clis to validate preferred_agent."
             )
         elif preferred_info and preferred_info.get("known") is False:
             print(
-                f"\n⚠️ preferred_agent '{preferred_raw}' is not a known CLI in the agent cache. Run /daplug:load-agents."
+                f"\n⚠️ preferred_agent '{preferred_raw}' is not a known CLI in the CLI cache. Run /daplug:detect-clis."
             )
         elif preferred_info and preferred_info.get("installed") is False:
             print(
-                f"\n⚠️ preferred_agent '{preferred_raw}' is not installed (per {cache_path}). Run /daplug:load-agents."
+                f"\n⚠️ preferred_agent '{preferred_raw}' is not installed (per {cache_path}). Run /daplug:detect-clis."
             )
     return 0
 
