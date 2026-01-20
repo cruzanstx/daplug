@@ -135,16 +135,49 @@ def _opencode_model_spec(model_id: str) -> str:
     return f"{provider}/{rest}"
 
 
+def _is_embedding_model(name: str) -> bool:
+    """Check if model name suggests it's an embedding model (not for chat/instruct)."""
+    lower = name.lower()
+    # Common embedding model indicators
+    embedding_keywords = ["embed", "embedding", "arctic-embed", "nomic-embed", "bge-", "e5-"]
+    # Other non-instruct model types
+    other_keywords = ["whisper", "tts", "speech", "vision-only", "rerank"]
+    for kw in embedding_keywords + other_keywords:
+        if kw in lower:
+            return True
+    return False
+
+
+def _pick_best_default_model(models: list[str]) -> Optional[str]:
+    """Pick the best default model, preferring instruct/chat models over embeddings."""
+    if not models:
+        return None
+
+    # Filter out embedding and other non-chat models
+    chat_models = [m for m in models if not _is_embedding_model(m)]
+
+    if chat_models:
+        # Prefer larger models first, then instruct/chat/coder variants
+        for keyword in ["120b", "80b", "70b", "32b", "30b", "20b", "8b", "coder", "instruct", "chat"]:
+            for m in chat_models:
+                if keyword in m.lower():
+                    return m
+        return chat_models[0]
+
+    # Fallback to first model if all are embeddings
+    return models[0]
+
+
 def _match_model_hint(hint: Optional[str], models: list[str]) -> Optional[str]:
     if not models:
         return None
     if not hint:
-        return models[0]
+        return _pick_best_default_model(models)
     target = hint.strip().lower()
     for m in models:
         if target in str(m).lower():
             return str(m)
-    return str(models[0])
+    return _pick_best_default_model(models)
 
 
 def _cli_has_error_issues(cli_info: dict[str, Any]) -> bool:
