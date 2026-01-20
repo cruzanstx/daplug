@@ -94,12 +94,20 @@ class GeminiCLI(SimpleCLIPlugin):
                 )
             )
 
-        if not (os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")):
+        # Check for authentication: env vars OR OAuth credentials file
+        has_env_key = bool(os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"))
+        oauth_paths = [
+            Path("~/.gemini/oauth_creds.json").expanduser(),
+            Path("~/.config/gemini/oauth_creds.json").expanduser(),
+        ]
+        has_oauth = any(p.exists() for p in oauth_paths)
+
+        if not (has_env_key or has_oauth):
             issues.append(
                 ConfigIssue(
                     type="missing_api_key",
                     severity="error",
-                    message="Neither GEMINI_API_KEY nor GOOGLE_API_KEY is set",
+                    message="No Gemini auth found (set GEMINI_API_KEY or run 'gemini auth login')",
                     fix_available=False,
                 )
             )
