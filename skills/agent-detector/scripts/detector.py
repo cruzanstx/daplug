@@ -43,7 +43,7 @@ def _model_family(model_id: str) -> str:
             return "gemini"
         if provider == "zai":
             return "glm"
-        if provider == "local":
+        if provider in {"local", "ollama", "lmstudio"}:
             return "local"
         _ = rest
         return provider
@@ -53,16 +53,20 @@ def _model_family(model_id: str) -> str:
 def _default_routing_for_model(model_id: str) -> RouteEntry:
     family = _model_family(model_id)
     if family == "claude":
-        return RouteEntry(preferred="claude", fallbacks=["opencode", "codex"])
+        return RouteEntry(preferred="claude", fallbacks=["aider", "goose", "opencode", "codex"])
     if family == "gpt":
-        return RouteEntry(preferred="codex", fallbacks=["opencode"])
+        return RouteEntry(preferred="codex", fallbacks=["aider", "goose", "opencode"])
     if family == "gemini":
-        return RouteEntry(preferred="gemini", fallbacks=["opencode"])
+        return RouteEntry(preferred="gemini", fallbacks=["aider", "goose", "opencode"])
     if family == "glm":
         return RouteEntry(preferred="opencode", fallbacks=["codex"])
     if family == "local":
-        return RouteEntry(preferred="codex", fallbacks=["opencode"])
-    return RouteEntry(preferred="codex", fallbacks=["opencode", "gemini", "claude"])
+        return RouteEntry(preferred="aider", fallbacks=["codex", "opencode", "goose"])
+    if family == "openrouter":
+        return RouteEntry(preferred="aider", fallbacks=["goose", "codex", "opencode"])
+    if family == "github":
+        return RouteEntry(preferred="ghcopilot", fallbacks=[])
+    return RouteEntry(preferred="codex", fallbacks=["aider", "goose", "opencode", "gemini", "claude"])
 
 
 def scan_all_clis(force_refresh: bool = False) -> AgentCache:
@@ -70,7 +74,10 @@ def scan_all_clis(force_refresh: bool = False) -> AgentCache:
     if not force_refresh:
         cached = load_cache()
         if cached is not None and is_cache_fresh(cached, max_age_seconds=24 * 60 * 60):
-            return cached
+            discovered = {p.name for p in discover_plugins()}
+            cached_names = set((cached.clis or {}).keys())
+            if discovered.issubset(cached_names):
+                return cached
 
     start = time.time()
     cache = AgentCache(user_preferences=UserPreferences(default_cli="codex"))
