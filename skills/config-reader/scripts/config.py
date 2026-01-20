@@ -28,6 +28,7 @@ KNOWN_KEYS = [
     "llms_txt_dir",
     "ai_usage_awareness",
     "cli_logs_dir",
+    "local_providers",
 ]
 
 LEGACY_KEY_SET = set(KNOWN_KEYS)

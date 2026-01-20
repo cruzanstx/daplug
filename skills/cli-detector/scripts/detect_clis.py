@@ -182,6 +182,7 @@ def _print_human(cache: dict[str, Any]) -> None:
     providers_by_name = {p.name: p for p in discover_providers()}
     provider_rows: list[list[str]] = []
     union_compatible: set[str] = set()
+    any_running = False
     providers = cache.get("providers") or {}
     if isinstance(providers, dict):
         for name in sorted(providers.keys()):
@@ -195,25 +196,38 @@ def _print_human(cache: dict[str, Any]) -> None:
                 display_name = plugin.display_name
 
             running = bool(info.get("running"))
-            endpoint = str(info.get("endpoint") or "")
-            endpoint_cell = endpoint if running else "(not running)"
+            any_running = any_running or running
+            endpoint = str(info.get("endpoint") or "").strip() or "-"
+            status = "✅ Running" if running else "❌ Not found"
             loaded = info.get("loaded_models") or []
             loaded_cell = "-"
             if running and isinstance(loaded, list) and loaded:
                 loaded_cell = ", ".join(str(x) for x in loaded[:5])
                 if len(loaded) > 5:
                     loaded_cell += ", …"
-            provider_rows.append([display_name, endpoint_cell, loaded_cell])
+            provider_rows.append([display_name, endpoint, status, loaded_cell])
 
     print("\n🖥️ Local Model Providers:\n")
     if provider_rows:
-        print(_render_markdown_table(["Provider", "Endpoint", "Loaded Models"], provider_rows))
+        print(_render_markdown_table(["Provider", "Base URL", "Status", "Loaded Models"], provider_rows))
     else:
         print("_No provider plugins registered._")
 
     if union_compatible:
         known = sorted(union_compatible)
         print(f"\n💡 Local models usable via: {', '.join(known)}")
+
+    if provider_rows and not any_running:
+        print(
+            "\n💡 No local model providers detected at checked endpoints.\n\n"
+            "Configure remote endpoints in your CLAUDE.md (project) or ~/.claude/CLAUDE.md (user):\n"
+            "  <daplug_config>\n"
+            "  local_providers:\n"
+            "    lmstudio: http://your-gpu-server:1234/v1\n"
+            "    ollama: http://your-server:11434/v1\n"
+            "    vllm: http://your-server:8000/v1\n"
+            "  </daplug_config>\n"
+        )
 
     # Issues
     issues = _collect_issues(cache)
