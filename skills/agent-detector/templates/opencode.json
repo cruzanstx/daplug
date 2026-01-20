@@ -1,0 +1,10 @@
+{
+  "permission": {
+    "*": "allow",
+    "external_directory": "allow",
+    "doom_loop": "allow"
+  },
+  "provider": "zai",
+  "model": "glm-4.7",
+  "mcpServers": {}
+}

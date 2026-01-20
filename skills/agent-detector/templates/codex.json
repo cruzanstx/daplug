@@ -1,0 +1,15 @@
+{
+  "model": "gpt-5.2-codex",
+  "approval_mode": "full-auto",
+  "full_auto": true,
+  "notify": {
+    "command": "",
+    "on_complete": false
+  },
+  "shell_environment_variables": {},
+  "providers": {
+    "openai": {
+      "name": "OpenAI"
+    }
+  }
+}
