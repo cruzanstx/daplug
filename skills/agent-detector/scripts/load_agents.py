@@ -116,6 +116,25 @@ def _collect_issues(cache: dict[str, Any]) -> list[dict[str, Any]]:
     return issues
 
 
+def _collect_fixable_issues() -> list[tuple[str, str, str, str]]:
+    """Return list of (cli, issue_type, severity, fix_description) for all fixable issues."""
+    fixable: list[tuple[str, str, str, str]] = []
+    for plugin in discover_plugins():
+        installed, _exe = plugin.detect_installation()
+        if not installed:
+            continue
+        for issue in plugin.detect_issues():
+            if not issue.fix_available:
+                continue
+            fixable.append((
+                plugin.name,
+                issue.type,
+                issue.severity,
+                issue.fix_description or "Apply fix",
+            ))
+    return fixable
+
+
 def _fix_all() -> list[FixResult]:
     results: list[FixResult] = []
     for plugin in discover_plugins():
@@ -221,6 +240,7 @@ def _print_human(cache: dict[str, Any]) -> None:
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="daplug /load-agents helper")
     p.add_argument("--fix", action="store_true", help="Apply recommended safe fixes")
+    p.add_argument("--dry-run", action="store_true", help="Show what --fix would do without applying changes")
     p.add_argument("--reset", action="store_true", help="Clear cache and rescan")
     p.add_argument("--json", action="store_true", help="Output machine-readable JSON only")
     return p
@@ -244,6 +264,31 @@ def main(argv: Optional[list[str]] = None) -> int:
             else:
                 print("🗑️ Agent cache already clear")
             print("🔍 Rescanning...")
+
+    if args.dry_run:
+        if not args.json:
+            print("🔍 Scanning for fixable issues (dry-run)...\n")
+        scan_all_clis(force_refresh=True)
+        fixable = _collect_fixable_issues()
+
+        if args.json:
+            print(json.dumps([
+                {"cli": cli, "issue_type": itype, "severity": sev, "fix_description": desc}
+                for cli, itype, sev, desc in fixable
+            ], indent=2, sort_keys=True))
+            return 0
+
+        if not fixable:
+            print("No fixable issues detected.")
+            return 0
+
+        print(f"Would fix {len(fixable)} issue(s):\n")
+        print(_render_markdown_table(
+            ["CLI", "Issue", "Severity", "Fix"],
+            [[_cli_label(cli), itype, sev, desc] for cli, itype, sev, desc in fixable],
+        ))
+        print("\nRun `/load-agents --fix` to apply these fixes.")
+        return 0
 
     if args.fix:
         if not args.json:

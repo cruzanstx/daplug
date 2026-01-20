@@ -1,0 +1,119 @@
+{
+  "created_at": "2026-01-19T21:58:57+00:00",
+  "current_phase": 2,
+  "dependencies": {
+    "agent-detection/012": [],
+    "agent-detection/013": [
+      "agent-detection/012"
+    ],
+    "agent-detection/014": [
+      "agent-detection/012"
+    ],
+    "agent-detection/015": [
+      "agent-detection/013"
+    ],
+    "agent-detection/016": [
+      "agent-detection/013"
+    ],
+    "agent-detection/017": [
+      "agent-detection/014"
+    ]
+  },
+  "model_usage": {},
+  "options": {
+    "auto_execute": false,
+    "base_branch": "main",
+    "completion_marker": "VERIFICATION_COMPLETE",
+    "loop": true,
+    "max_iterations": 3,
+    "max_parallel": 5,
+    "models": "claude,codex,gemini",
+    "worktree": true
+  },
+  "output_dir": "./prompts/",
+  "paused_at": null,
+  "phases": [
+    [
+      "agent-detection/012"
+    ],
+    [
+      "agent-detection/013",
+      "agent-detection/014"
+    ],
+    [
+      "agent-detection/015",
+      "agent-detection/016",
+      "agent-detection/017"
+    ]
+  ],
+  "plan_file": "./sprint-plan.md",
+  "prompts": [
+    {
+      "id": "agent-detection/012",
+      "merged": false,
+      "model": "gemini",
+      "path": "/storage/projects/docker/daplug/prompts/agent-detection/012-research-prerequisites.md",
+      "slug": "research-prerequisites",
+      "status": "completed",
+      "title": "Research all CLI coding agents and local model providers before implementation.",
+      "worktree": null,
+      "completed_at": "2026-01-19T17:30:00+00:00",
+      "notes": "Research doc created at docs/agent-detection-research.md. Prompts 013-017 updated with findings. 18 llms_txt docs created for CLI tools."
+    },
+    {
+      "id": "agent-detection/013",
+      "merged": false,
+      "model": "claude",
+      "path": "/storage/projects/docker/daplug/prompts/agent-detection/013-agent-detection-architecture.md",
+      "slug": "agent-detection-architecture",
+      "status": "pending",
+      "title": "013-agent-detection-architecture.md",
+      "worktree": null
+    },
+    {
+      "id": "agent-detection/014",
+      "merged": false,
+      "model": "claude",
+      "path": "/storage/projects/docker/daplug/prompts/agent-detection/014-implement-cli-detection.md",
+      "slug": "implement-cli-detection",
+      "status": "pending",
+      "title": "Implement the extensible CLI detection plugin system from the architecture design.",
+      "worktree": null
+    },
+    {
+      "id": "agent-detection/015",
+      "merged": false,
+      "model": "claude",
+      "path": "/storage/projects/docker/daplug/prompts/agent-detection/015-load-agents-command.md",
+      "slug": "load-agents-command",
+      "status": "pending",
+      "title": "Implement the `/load-agents` slash command for daplug that provides a user-friendly interface",
+      "worktree": null
+    },
+    {
+      "id": "agent-detection/016",
+      "merged": false,
+      "model": "claude",
+      "path": "/storage/projects/docker/daplug/prompts/agent-detection/016-config-templates-fixing.md",
+      "slug": "config-templates-fixing",
+      "status": "pending",
+      "title": "Create \"known good\" config templates for each supported CLI and implement auto-fixing",
+      "worktree": null
+    },
+    {
+      "id": "agent-detection/017",
+      "merged": false,
+      "model": "codex",
+      "path": "/storage/projects/docker/daplug/prompts/agent-detection/017-tier2-cli-plugins.md",
+      "slug": "tier2-cli-plugins",
+      "status": "pending",
+      "title": "Implement detection plugins for Tier 2 CLIs: Goose, Aider, and GitHub Copilot CLI.",
+      "worktree": null
+    }
+  ],
+  "schema_version": 1,
+  "spec_hash": "",
+  "spec_path": "from-existing",
+  "sprint_id": "existing-agent-detection-2026-01-19",
+  "total_phases": 3
+}

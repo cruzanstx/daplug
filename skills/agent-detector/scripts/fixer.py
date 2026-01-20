@@ -221,6 +221,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="daplug agent config fixer")
     p.add_argument("--cli", help="Fix a specific CLI (codex/opencode/gemini/claude)")
     p.add_argument("--config", help="Override config path (for testing)")
+    p.add_argument("--dry-run", action="store_true", help="Show what would be fixed without applying changes")
     p.add_argument("--non-interactive", action="store_true", help="Do not prompt for confirmation")
     p.add_argument("--json", action="store_true", help="Output machine-readable JSON")
     return p
@@ -228,6 +229,46 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Optional[list[str]] = None) -> int:
     args = _build_parser().parse_args(argv)
+
+    if args.dry_run:
+        from plugins import discover_plugins, get_plugin
+
+        if args.cli:
+            plugin = get_plugin(args.cli)
+            if plugin is None:
+                print(f"Unknown CLI plugin: {args.cli}", file=sys.stderr)
+                return 2
+            plugins_to_check = [plugin]
+        else:
+            plugins_to_check = list(discover_plugins())
+
+        fixable: list[dict[str, Any]] = []
+        for plugin in plugins_to_check:
+            installed, _ = plugin.detect_installation()
+            if not installed:
+                continue
+            for issue in plugin.detect_issues():
+                if not issue.fix_available:
+                    continue
+                fixable.append({
+                    "cli": plugin.name,
+                    "issue_type": issue.type,
+                    "severity": issue.severity,
+                    "fix_description": issue.fix_description or "Apply fix",
+                    "config_path": issue.config_path or "",
+                })
+
+        if args.json:
+            print(json.dumps(fixable, indent=2, sort_keys=True))
+        else:
+            if not fixable:
+                print("No fixable issues detected.")
+            else:
+                print(f"Would fix {len(fixable)} issue(s):\n")
+                for item in fixable:
+                    print(f"  {item['cli']}: {item['issue_type']} - {item['fix_description']}")
+                print("\nRun without --dry-run to apply fixes.")
+        return 0
 
     if args.cli:
         from plugins import get_plugin

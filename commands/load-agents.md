@@ -1,7 +1,7 @@
 ---
 name: load-agents
 description: Scan and manage available AI coding agents
-argument-hint: "[--fix] [--reset] [--json]"
+argument-hint: "[--fix] [--dry-run] [--reset] [--json]"
 ---
 
 <objective>
