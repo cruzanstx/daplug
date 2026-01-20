@@ -378,3 +378,217 @@ local_providers: {"lmstudio": "http://host:1234/v1", "ollama": "http://host:1143
     assert local_providers.get("lmstudio") == "http://host:1234/v1"
     assert local_providers.get("ollama") == "http://host:11434/v1"
 
+
+# --- Comprehensive model coverage tests ---
+
+
+@pytest.fixture
+def full_cache(monkeypatch):
+    """Cache with all CLIs installed and no errors."""
+    fake = _FakeCache(
+        {
+            "clis": {
+                "claude": {"installed": True, "issues": []},
+                "codex": {"installed": True, "issues": []},
+                "gemini": {"installed": True, "issues": []},
+                "opencode": {"installed": True, "issues": []},
+                "aider": {"installed": True, "issues": []},
+            },
+            "providers": {
+                "lmstudio": {
+                    "running": True,
+                    "endpoint": "http://localhost:1234/v1",
+                    "loaded_models": ["qwen2.5-coder:32b", "devstral-small"],
+                },
+            },
+        }
+    )
+    monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+    return fake
+
+
+class TestOpenAIModels:
+    """Test all OpenAI/Codex model shorthands."""
+
+    @pytest.mark.parametrize(
+        "shorthand,expected_model,expected_reasoning",
+        [
+            ("codex", "gpt-5.2-codex", None),
+            ("codex-high", "gpt-5.2-codex", "high"),
+            ("codex-xhigh", "gpt-5.2-codex", "xhigh"),
+            ("gpt52", "gpt-5.2", None),
+            ("gpt52-high", "gpt-5.2", "high"),
+            ("gpt52-xhigh", "gpt-5.2", "xhigh"),
+        ],
+    )
+    def test_codex_models(self, full_cache, shorthand, expected_model, expected_reasoning):
+        cli, model_id, cmd = router.resolve_model(shorthand)
+        assert cli == "codex"
+        assert expected_model in model_id
+        assert cmd[0] == "codex"
+        assert "exec" in cmd
+        assert "--full-auto" in cmd
+        if expected_reasoning:
+            assert any(expected_reasoning in str(c) for c in cmd)
+
+    @pytest.mark.parametrize(
+        "alias,expected_shorthand",
+        [
+            ("gpt-5.2", "gpt52"),
+            ("gpt5.2", "gpt52"),
+            ("gpt-5.2-high", "gpt52-high"),
+            ("gpt-5.2-xhigh", "gpt52-xhigh"),
+        ],
+    )
+    def test_codex_aliases(self, full_cache, alias, expected_shorthand):
+        cli, model_id, cmd = router.resolve_model(alias)
+        assert cli == "codex"
+        assert "gpt-5.2" in model_id
+
+
+class TestGeminiModels:
+    """Test all Google/Gemini model shorthands."""
+
+    @pytest.mark.parametrize(
+        "shorthand,expected_model",
+        [
+            ("gemini", "gemini-3-flash-preview"),
+            ("gemini-high", "gemini-2.5-pro"),
+            ("gemini-xhigh", "gemini-3-pro-preview"),
+            ("gemini25pro", "gemini-2.5-pro"),
+            ("gemini25flash", "gemini-2.5-flash"),
+            ("gemini25lite", "gemini-2.5-flash-lite"),
+            ("gemini3flash", "gemini-3-flash-preview"),
+            ("gemini3pro", "gemini-3-pro-preview"),
+        ],
+    )
+    def test_gemini_models(self, full_cache, shorthand, expected_model):
+        cli, model_id, cmd = router.resolve_model(shorthand)
+        assert cli == "gemini"
+        assert expected_model in model_id
+        assert cmd[0] == "gemini"
+        assert "-y" in cmd
+        assert "-m" in cmd
+        assert "-p" in cmd
+
+
+class TestZAIModels:
+    """Test Z.AI model shorthands."""
+
+    def test_zai_prefers_opencode(self, full_cache):
+        """zai shorthand prefers opencode CLI (first in zai fallback chain)."""
+        cli, model_id, cmd = router.resolve_model("zai")
+        # zai family fallback chain: ["opencode", "codex"]
+        # When opencode is installed, it's preferred
+        assert cli == "opencode"
+        assert "glm-4.7" in model_id
+        assert cmd[0] == "opencode"
+
+    def test_zai_falls_back_to_codex_profile(self, monkeypatch):
+        """When opencode not installed, zai falls back to codex with zai profile."""
+        fake = _FakeCache(
+            {
+                "clis": {
+                    "codex": {"installed": True, "issues": []},
+                    "opencode": {"installed": False, "issues": []},
+                },
+                "providers": {},
+            }
+        )
+        monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+
+        cli, model_id, cmd = router.resolve_model("zai")
+        assert cli == "codex"
+        assert "glm-4.7" in model_id
+        assert "--profile" in cmd
+        assert "zai" in cmd
+
+    def test_opencode_uses_opencode_cli(self, full_cache):
+        """opencode shorthand forces opencode CLI (strict_cli=True)."""
+        cli, model_id, cmd = router.resolve_model("opencode")
+        assert cli == "opencode"
+        assert "glm-4.7" in model_id
+        assert cmd[0] == "opencode"
+        assert "run" in cmd
+        assert "--format" in cmd
+        assert "json" in cmd
+
+
+class TestLocalModels:
+    """Test local model shorthands (qwen, devstral, local)."""
+
+    def test_local_routes_to_lmstudio(self, full_cache):
+        cli, model_id, cmd = router.resolve_model("local")
+        assert cli == "codex"
+        assert "local:lmstudio" in model_id
+        assert "--profile" in cmd
+
+    def test_qwen_routes_to_local_profile(self, full_cache):
+        cli, model_id, cmd = router.resolve_model("qwen")
+        assert cli == "codex"
+        assert "local" in model_id.lower() or "qwen" in model_id.lower()
+        assert "--profile" in cmd
+        assert "local" in cmd
+
+    def test_devstral_routes_to_local_devstral_profile(self, full_cache):
+        cli, model_id, cmd = router.resolve_model("devstral")
+        assert cli == "codex"
+        assert "--profile" in cmd
+        assert "local-devstral" in cmd
+
+
+class TestClaudeModel:
+    """Test Claude model (subagent path)."""
+
+    def test_claude_returns_empty_command(self, full_cache):
+        cli, model_id, cmd = router.resolve_model("claude")
+        assert cli == "claude"
+        assert "claude" in model_id
+        # Claude uses subagent, no external command
+        assert cmd == []
+
+
+class TestAllModelsHaveValidCommands:
+    """Ensure all defined shorthands produce valid output."""
+
+    def test_all_shorthands_resolve(self, full_cache):
+        """Every shorthand in _SHORTHAND should resolve without error."""
+        for shorthand in router._SHORTHAND.keys():
+            cli, model_id, cmd = router.resolve_model(shorthand)
+            assert cli is not None, f"{shorthand} returned None cli"
+            assert model_id is not None, f"{shorthand} returned None model_id"
+            # cmd can be [] for claude, but should be a list
+            assert isinstance(cmd, list), f"{shorthand} cmd is not a list"
+
+    def test_all_aliases_resolve(self, full_cache):
+        """Every alias in _ALIASES should resolve without error."""
+        for alias in router._ALIASES.keys():
+            cli, model_id, cmd = router.resolve_model(alias)
+            assert cli is not None, f"Alias {alias} returned None cli"
+
+
+class TestCommandStructure:
+    """Test that generated commands match expected CLI patterns."""
+
+    def test_codex_command_structure(self, full_cache):
+        """Codex commands should follow: codex exec --full-auto [-m model] [-c config]"""
+        cli, model_id, cmd = router.resolve_model("codex")
+        assert cmd[0:3] == ["codex", "exec", "--full-auto"]
+
+    def test_gemini_command_structure(self, full_cache):
+        """Gemini commands should follow: gemini -y -m model -p"""
+        cli, model_id, cmd = router.resolve_model("gemini")
+        assert cmd[0] == "gemini"
+        assert "-y" in cmd
+        idx_m = cmd.index("-m")
+        assert cmd[idx_m + 1].startswith("gemini-")
+        assert cmd[-1] == "-p"
+
+    def test_opencode_command_structure(self, full_cache):
+        """OpenCode commands should follow: opencode run --format json -m provider/model"""
+        cli, model_id, cmd = router.resolve_model("opencode")
+        assert cmd[0:4] == ["opencode", "run", "--format", "json"]
+        assert "-m" in cmd
+        idx_m = cmd.index("-m")
+        assert "/" in cmd[idx_m + 1]  # e.g., "zai/glm-4.7"
+
