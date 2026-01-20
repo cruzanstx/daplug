@@ -32,7 +32,7 @@ class OllamaProvider(ProviderPlugin):
         return ids
 
     def compatible_clis(self) -> list[str]:
-        return ["opencode"]
+        return ["aider", "goose", "opencode"]
 
 
 PLUGIN = OllamaProvider()
