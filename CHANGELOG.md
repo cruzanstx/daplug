@@ -2,6 +2,16 @@
 
 All notable changes to daplug are documented here.
 
+## [0.21.1] - 2026-01-28
+
+### Added
+- **Pipeline Deploy Monitor Agent** (`pipeline-deploy-monitor`): Automates CI/CD deployment verification workflow
+  - Monitors pipeline status after git push (glab ci status)
+  - Verifies staging pod health, migrations, and logs
+  - Runs Playwright UI checks on staging environment
+  - Triggers and verifies production deployment
+  - Proactively offers workflow after pushes to origin
+
 ## [0.21.0] - 2026-01-28
 
 ### Added
