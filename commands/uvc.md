@@ -93,8 +93,8 @@ git add memory-bank/ CLAUDE.md README.md 2>/dev/null
 # Check what's staged
 git status
 
-# Commit with conventional format
-git commit -m "docs: update memory bank with <brief-description>
+# Commit with conventional format (skip CI for docs-only changes)
+git commit -m "docs: update memory bank with <brief-description> [skip ci]
 
 <optional body with details>
 
@@ -133,10 +133,12 @@ git push origin $(git rev-parse --abbrev-ref HEAD)
 - `docs:` - Documentation only
 - `docs(scope):` - Documentation for specific area (frontend, backend, processor)
 
+**CI Skip:** Always append `[skip ci]` to the commit subject line for documentation-only commits to avoid triggering unnecessary CI/CD pipelines.
+
 **Examples:**
-- `docs: update memory bank with GitHub schema migration`
-- `docs(processor): document new job types in systemPatterns`
-- `docs: archive completed prompts and update progress`
+- `docs: update memory bank with GitHub schema migration [skip ci]`
+- `docs(processor): document new job types in systemPatterns [skip ci]`
+- `docs: archive completed prompts and update progress [skip ci]`
 </commit_format>
 
 <important>
