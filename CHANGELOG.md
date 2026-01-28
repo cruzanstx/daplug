@@ -2,6 +2,30 @@
 
 All notable changes to daplug are documented here.
 
+## [0.21.0] - 2026-01-28
+
+### Added
+- **CLI Detection System** (`cli-detector`): Extensible plugin architecture for detecting installed AI coding CLIs
+  - `/load-agents` command to scan system and configure available agents
+  - Auto-detection for Claude Code, Codex CLI, Gemini CLI, OpenCode (Tier 1)
+  - Tier 2 plugins: Goose, Aider, GitHub Copilot CLI
+  - Local model provider detection: Ollama, LMStudio, vLLM
+- **Config Fixer**: Auto-fix misconfigured CLI settings with `--dry-run` support
+  - Known-good config templates for each supported CLI
+  - Validates API keys, endpoints, and model configurations
+- **Model Routing**: Intelligent model selection based on detected capabilities
+  - Cache integration for faster subsequent lookups
+  - Prefers larger instruct models over embeddings
+- **Multi-model Test Suite**: Comprehensive test coverage for model routing
+
+### Fixed
+- Gemini OAuth credentials detection
+- Worktree path mismatch in loop state
+
+### Changed
+- Renamed `agent-detector` → `cli-detector` for clarity
+- `/uvc` command now adds `[skip ci]` to documentation commits
+
 ## [0.20.2] - 2026-01-19
 
 ### Fixed
