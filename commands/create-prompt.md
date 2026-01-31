@@ -369,13 +369,19 @@ After saving the prompt(s), present this decision tree to the user:
 <detection_logic>
 Before presenting options:
 
-1. **Check ai_usage_awareness setting** (feature flag):
+1. **Read default_run_prompt_options** (user preference for run flags):
    ```bash
    PLUGIN_ROOT=$(jq -r '.plugins."daplug@cruzanstx"[0].installPath' ~/.claude/plugins/installed_plugins.json)
    CONFIG_READER="$PLUGIN_ROOT/skills/config-reader/scripts/config.py"
    PROMPT_MANAGER="$PLUGIN_ROOT/skills/prompt-manager/scripts/manager.py"
    REPO_ROOT=$(python3 "$PROMPT_MANAGER" info --json | jq -r '.repo_root')
 
+   # Project-level first, then user-level fallback
+   DEFAULT_RUN_OPTS=$(python3 "$CONFIG_READER" get default_run_prompt_options --repo-root "$REPO_ROOT")
+   ```
+
+2. **Check ai_usage_awareness setting** (feature flag):
+   ```bash
    # Project-level first, then user-level fallback
    AI_USAGE_AWARENESS=$(python3 "$CONFIG_READER" get ai_usage_awareness --repo-root "$REPO_ROOT")
    ```
@@ -400,9 +406,9 @@ Before presenting options:
    python3 "$CONFIG_READER" set ai_usage_awareness "disabled" --scope user
    ```
 
-   **If setting is "disabled":** Skip step 2, don't show usage info, proceed directly to step 3.
+   **If setting is "disabled":** Skip step 3, don't show usage info, proceed directly to step 4.
 
-2. **Check AI CLI usage** (only if ai_usage_awareness is enabled or unset-but-user-said-yes):
+3. **Check AI CLI usage** (only if ai_usage_awareness is enabled or unset-but-user-said-yes):
    ```bash
    # Get usage data as JSON
    npx cclimits --json 2>/dev/null
@@ -420,7 +426,7 @@ Before presenting options:
    - `> 90%` → Near limit (show with 🔴, suggest alternatives)
    - `100%` or error → Unavailable (show with ❌, skip in recommendations)
 
-3. **Detect prompt type** for smart recommendations (check filename + content for keywords):
+4. **Detect prompt type** for smart recommendations (check filename + content for keywords):
 
    | Type | Keywords to Match |
    |------|-------------------|
@@ -438,7 +444,7 @@ Before presenting options:
 
    Set the matching type flag to `true`, default all to `false`.
 
-4. **Read preferred_agent** from `<daplug_config>` in CLAUDE.md:
+5. **Read preferred_agent** from `<daplug_config>` in CLAUDE.md:
    ```bash
    # Project-level first, then user-level fallback
    PREFERRED_AGENT=$(python3 "$CONFIG_READER" get preferred_agent --repo-root "$REPO_ROOT")
@@ -544,6 +550,16 @@ If you created ONE prompt (e.g., `./prompts/005-implement-feature.md`):
 
 What's next?
 
+If `DEFAULT_RUN_OPTS` is set:
+1. Run with your defaults ({DEFAULT_RUN_OPTS})
+2. Run prompt now
+3. Review/edit prompt first
+4. Save for later
+5. Other
+
+Choose (1-5): \_
+
+If `DEFAULT_RUN_OPTS` is not set:
 1. Run prompt now
 2. Review/edit prompt first
 3. Save for later
@@ -553,7 +569,38 @@ Choose (1-4): \_
 </presentation>
 
 <action>
-If user chooses #1:
+If user chooses "Run with your defaults" (only when `DEFAULT_RUN_OPTS` is set):
+  Construct the run command by appending the flags string:
+  - Example: `DEFAULT_RUN_OPTS="--model codex-xhigh --worktree --loop"`
+  - Run: `/daplug:run-prompt 005 --model codex-xhigh --worktree --loop`
+  - Treat `DEFAULT_RUN_OPTS` as a raw, space-delimited flags string to append verbatim
+
+If user chooses "Run prompt now":
+  If `DEFAULT_RUN_OPTS` is set, skip the defaults prompt and proceed to model selection below.
+  If `DEFAULT_RUN_OPTS` is empty, ask first:
+  "You haven't set default run options yet. Would you like to set them now?
+
+  1. Yes, set my defaults
+  2. No, just run this once
+
+  Choose (1-2): _"
+
+  - If #1 (set defaults):
+    - Continue to the full model selection menu below
+    - Build a flags string exactly as it would be appended to `/daplug:run-prompt`
+      - Example: `--model codex-xhigh --worktree --loop`
+    - After they select a model and flags, ask:
+      "Save these as your defaults for future prompts? (y/n): _"
+    - If yes, save to user config:
+      ```bash
+      python3 "$CONFIG_READER" set default_run_prompt_options "$SELECTED_FLAGS" --scope user
+      ```
+    - Then execute the prompt with those same flags
+
+  - If #2 (run once):
+    - Continue to the full model selection menu below
+    - Do NOT ask to save defaults again
+
   First, run cclimits to get current quota status:
   ```bash
   npx cclimits --json 2>/dev/null
@@ -639,6 +686,16 @@ Execution strategy: These prompts can run in PARALLEL (independent tasks, no sha
 
 What's next?
 
+If `DEFAULT_RUN_OPTS` is set:
+1. Run with your defaults ({DEFAULT_RUN_OPTS})
+2. Run all prompts in parallel now
+3. Run prompts sequentially instead
+4. Review/edit prompts first
+5. Other
+
+Choose (1-5): \_
+
+If `DEFAULT_RUN_OPTS` is not set:
 1. Run all prompts in parallel now
 2. Run prompts sequentially instead
 3. Review/edit prompts first
@@ -648,7 +705,38 @@ Choose (1-4): \_
 </presentation>
 
 <actions>
-If user chooses #1 or #2:
+If user chooses "Run with your defaults" (only when `DEFAULT_RUN_OPTS` is set):
+  Construct the run command by appending the flags string and adding `--parallel`:
+  - Example: `DEFAULT_RUN_OPTS="--model codex-xhigh --worktree --loop"`
+  - Run: `/daplug:run-prompt 005 006 007 --model codex-xhigh --worktree --loop --parallel`
+  - Treat `DEFAULT_RUN_OPTS` as a raw, space-delimited flags string to append verbatim
+
+If user chooses to run prompts in parallel or sequential:
+  If `DEFAULT_RUN_OPTS` is set, skip the defaults prompt and proceed to model selection below.
+  If `DEFAULT_RUN_OPTS` is empty, ask first:
+  "You haven't set default run options yet. Would you like to set them now?
+
+  1. Yes, set my defaults
+  2. No, just run this once
+
+  Choose (1-2): _"
+
+  - If #1 (set defaults):
+    - Continue to the full model selection menu below
+    - Build a flags string exactly as it would be appended to `/daplug:run-prompt`
+      - Example: `--model codex-xhigh --worktree --loop`
+    - After they select a model and flags, ask:
+      "Save these as your defaults for future prompts? (y/n): _"
+    - If yes, save to user config:
+      ```bash
+      python3 "$CONFIG_READER" set default_run_prompt_options "$SELECTED_FLAGS" --scope user
+      ```
+    - Then execute the prompts with those same flags plus `--parallel` or `--sequential` (based on choice)
+
+  - If #2 (run once):
+    - Continue to the full model selection menu below
+    - Do NOT ask to save defaults again
+
   First, run cclimits to get current quota status:
   ```bash
   npx cclimits --json 2>/dev/null
@@ -701,7 +789,7 @@ If user chooses #1 or #2:
 
   **Execute based on selection:**
 
-  If user chose #1 (parallel):
+  If user chose "Run all prompts in parallel now":
     If user selects Claude (option 1):
       Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --parallel`
 
@@ -712,7 +800,7 @@ If user chooses #1 or #2:
       Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --model {selected_model} --parallel`
       (Add `--worktree` and/or `--loop` if user requests)
 
-  If user chose #2 (sequential):
+  If user chose "Run prompts sequentially instead":
     If user selects Claude (option 1):
       Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --sequential`
 
@@ -743,6 +831,16 @@ Execution strategy: These prompts must run SEQUENTIALLY (dependencies: 005 → 0
 
 What's next?
 
+If `DEFAULT_RUN_OPTS` is set:
+1. Run with your defaults ({DEFAULT_RUN_OPTS})
+2. Run prompts sequentially now (one completes before next starts)
+3. Run first prompt only (005-setup-database.md)
+4. Review/edit prompts first
+5. Other
+
+Choose (1-5): \_
+
+If `DEFAULT_RUN_OPTS` is not set:
 1. Run prompts sequentially now (one completes before next starts)
 2. Run first prompt only (005-setup-database.md)
 3. Review/edit prompts first
@@ -752,7 +850,39 @@ Choose (1-4): \_
 </presentation>
 
 <actions>
-If user chooses #1:
+If user chooses "Run with your defaults" (only when `DEFAULT_RUN_OPTS` is set):
+  Construct the run command by appending the flags string and adding `--sequential`:
+  - Example: `DEFAULT_RUN_OPTS="--model codex-xhigh --worktree --loop"`
+  - Run: `/daplug:run-prompt 005 006 007 --model codex-xhigh --worktree --loop --sequential`
+  - Treat `DEFAULT_RUN_OPTS` as a raw, space-delimited flags string to append verbatim
+
+If user chooses to run prompts sequentially now or run first prompt only:
+  If `DEFAULT_RUN_OPTS` is set, skip the defaults prompt and proceed to model selection below.
+  If `DEFAULT_RUN_OPTS` is empty, ask first:
+  "You haven't set default run options yet. Would you like to set them now?
+
+  1. Yes, set my defaults
+  2. No, just run this once
+
+  Choose (1-2): _"
+
+  - If #1 (set defaults):
+    - Continue to the full model selection menu below
+    - Build a flags string exactly as it would be appended to `/daplug:run-prompt`
+      - Example: `--model codex-xhigh --worktree --loop`
+    - After they select a model and flags, ask:
+      "Save these as your defaults for future prompts? (y/n): _"
+    - If yes, save to user config:
+      ```bash
+      python3 "$CONFIG_READER" set default_run_prompt_options "$SELECTED_FLAGS" --scope user
+      ```
+    - Then execute the prompt(s) with those same flags
+
+  - If #2 (run once):
+    - Continue to the full model selection menu below
+    - Do NOT ask to save defaults again
+
+If user chooses "Run prompts sequentially now":
   First, run cclimits to get current quota status:
   ```bash
   npx cclimits --json 2>/dev/null
@@ -820,7 +950,7 @@ If user chooses #1:
   - "codex-xhigh --worktree --loop" → adds `--model codex-xhigh --worktree --loop`
   - "gemini25lite" → adds `--model gemini25lite` to command
 
-If user chooses #2:
+If user chooses "Run first prompt only":
   Ask user to select model (same expanded options as above, for single prompt):
 
   **Execute based on selection:**
