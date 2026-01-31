@@ -2,6 +2,16 @@
 
 All notable changes to daplug are documented here.
 
+## [0.22.0] - 2026-01-31
+
+### Added
+- **Default Run Options** (`default_run_prompt_options`): User-configurable default flags for prompt execution
+  - Set your preferred flags once: `--model codex-xhigh --worktree --loop`
+  - Shows "Run with your defaults" as first option in `/create-prompt` menu
+  - Prompts to set defaults on first run if not configured
+  - Stored in `<daplug_config>` block in CLAUDE.md
+  - Project-level config overrides user-level defaults
+
 ## [0.21.1] - 2026-01-28
 
 ### Added
