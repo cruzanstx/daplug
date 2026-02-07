@@ -547,7 +547,7 @@ def _normalize_preferred_agent(value: Optional[str]) -> Optional[str]:
     if v.startswith("gemini"):
         return "gemini"
     if v in {"qwen", "devstral", "local"}:
-        return "codex"
+        return "opencode"
     return v
 
 
@@ -578,7 +578,7 @@ def _cli_info_from_router(cli_name: str, model_id: str, cmd: list[str], fallback
     }
 
 
-def get_cli_info(model: str, repo_root: Optional[Path] = None) -> dict:
+def get_cli_info(model: str, repo_root: Optional[Path] = None, cli_override: Optional[str] = None) -> dict:
     """Get CLI command and info for a model.
 
     stdin_mode: How to pass prompt content
@@ -586,6 +586,30 @@ def get_cli_info(model: str, repo_root: Optional[Path] = None) -> dict:
       - "arg": Pass content as command line argument (gemini)
       - None: Handled by Task subagent (claude)
     """
+    cli_override = (cli_override or "").strip().lower() or None
+    legacy_local_codex = {
+        "local": {
+            "command": ["codex", "exec", "--full-auto", "--profile", "local"],
+            "display": "qwen (local via codex)",
+            "env": {"LMSTUDIO_API_KEY": "lm-studio"},
+            "stdin_mode": "dash"
+        },
+        "qwen": {
+            "command": ["codex", "exec", "--full-auto", "--profile", "local"],
+            "display": "qwen (local via codex)",
+            "env": {"LMSTUDIO_API_KEY": "lm-studio"},
+            "stdin_mode": "dash"
+        },
+        "devstral": {
+            "command": ["codex", "exec", "--full-auto", "--profile", "local-devstral"],
+            "display": "devstral (local via codex)",
+            "env": {"LMSTUDIO_API_KEY": "lm-studio"},
+            "stdin_mode": "dash"
+        },
+    }
+    if cli_override == "codex" and model in legacy_local_codex:
+        return legacy_local_codex[model]
+
     models = {
         "codex": {
             "command": ["codex", "exec", "--full-auto"],
@@ -684,22 +708,22 @@ def get_cli_info(model: str, repo_root: Optional[Path] = None) -> dict:
             "stdin_mode": "arg"
         },
         "local": {
-            "command": ["codex", "exec", "--full-auto", "--profile", "local"],
-            "display": "qwen (local)",
-            "env": {"LMSTUDIO_API_KEY": "lm-studio"},
-            "stdin_mode": "dash"
+            "command": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-next-80b"],
+            "display": "qwen (local via opencode)",
+            "env": {},
+            "stdin_mode": "arg"
         },
         "qwen": {
-            "command": ["codex", "exec", "--full-auto", "--profile", "local"],
-            "display": "qwen (local)",
-            "env": {"LMSTUDIO_API_KEY": "lm-studio"},
-            "stdin_mode": "dash"
+            "command": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-next-80b"],
+            "display": "qwen (local via opencode)",
+            "env": {},
+            "stdin_mode": "arg"
         },
         "devstral": {
-            "command": ["codex", "exec", "--full-auto", "--profile", "local-devstral"],
-            "display": "devstral (local)",
-            "env": {"LMSTUDIO_API_KEY": "lm-studio"},
-            "stdin_mode": "dash"
+            "command": ["opencode", "run", "--format", "json", "-m", "lmstudio/devstral-small-2-2512"],
+            "display": "devstral (local via opencode)",
+            "env": {},
+            "stdin_mode": "arg"
         },
         "claude": {
             "command": [],  # Handled by Task subagent
@@ -708,8 +732,10 @@ def get_cli_info(model: str, repo_root: Optional[Path] = None) -> dict:
             "stdin_mode": None
         }
     }
+    if model in {"local", "qwen", "devstral"} and cli_override != "codex":
+        return models[model]
     repo_root = repo_root or get_repo_root()
-    preferred = _normalize_preferred_agent(_read_config_value(repo_root, "preferred_agent"))
+    preferred = cli_override or _normalize_preferred_agent(_read_config_value(repo_root, "preferred_agent"))
 
     # Prefer the /detect-clis cache when present; fall back to hardcoded mappings
     # for backwards compatibility.
@@ -1717,6 +1743,9 @@ def main():
                                "gemini3flash", "gemini3pro", "zai", "opencode",
                                "local", "qwen", "devstral"],
                        help="Model/CLI to use")
+    parser.add_argument("--cli", choices=["codex", "opencode"],
+                       default=None,
+                       help="Override CLI wrapper (default: auto-detected per model)")
     parser.add_argument("--cwd", "-c", default=None,
                        help="Working directory for execution")
     parser.add_argument("--run", "-r", action="store_true",
@@ -1798,7 +1827,7 @@ def main():
         else:
             prompt_files = resolve_prompts(prompts_dir, args.prompts)
 
-        cli_info = get_cli_info(args.model, repo_root=repo_root)
+        cli_info = get_cli_info(args.model, repo_root=repo_root, cli_override=args.cli)
         log_dir = get_cli_logs_dir(repo_root)
         log_dir.mkdir(parents=True, exist_ok=True)
 
