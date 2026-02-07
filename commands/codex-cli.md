@@ -1,10 +1,10 @@
 ---
 name: codex-cli
-description: Run task with OpenAI Codex CLI (gpt-5.2-codex) (user)
+description: Run task with OpenAI Codex CLI (gpt-5.3-codex) (user)
 argument-hint: <task> [--worktree /path] [--high|--xhigh]
 ---
 
-Run a task using OpenAI Codex CLI (gpt-5.2-codex model).
+Run a task using OpenAI Codex CLI (gpt-5.3-codex model).
 
 ## Step 0: Check Prerequisites
 
@@ -32,7 +32,7 @@ Extract from $ARGUMENTS:
 - Optional `--worktree <path>` flag
 - Optional reasoning effort flag:
   - `--high` → `model_reasoning_effort="high"`
-  - `--xhigh` → `model_reasoning_effort="xhigh"` (extra high, only on gpt-5.2-codex)
+  - `--xhigh` → `model_reasoning_effort="xhigh"` (extra high, only on gpt-5.3-codex)
 
 ## Execute
 
@@ -147,7 +147,7 @@ Task(
 
 Only these lines go to main context:
 ```
-⚡ Kicked off: codex (gpt-5.2-codex) [reasoning: {default|high|xhigh}]
+⚡ Kicked off: codex (gpt-5.3-codex) [reasoning: {default|high|xhigh}]
 📄 Log: ~/.claude/cli-logs/codex-{timestamp}.log
 🔍 Monitoring agent spawned...
 ```

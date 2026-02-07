@@ -158,6 +158,6 @@ def test_codex_invalid_json_fix_replaces_with_template(tmp_path: Path, monkeypat
     assert result.success is True
 
     updated = json.loads(cfg.read_text(encoding="utf-8"))
-    assert updated["model"] == "gpt-5.2-codex"
+    assert updated["model"] == "gpt-5.3-codex"
     assert updated["approval_mode"] == "full-auto"
 

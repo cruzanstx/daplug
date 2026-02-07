@@ -462,9 +462,9 @@ All available models for /daplug:run-prompt --model:
 - `claude` - Claude sub-agent in current context (best for complex reasoning, multi-step tasks)
 
 **OpenAI Codex Family:** (check: `codex.primary_window.used`, `codex.secondary_window.used`)
-- `codex` - gpt-5.2-codex (fast, good for straightforward coding)
-- `codex-high` - gpt-5.2-codex with high reasoning
-- `codex-xhigh` - gpt-5.2-codex with xhigh reasoning (complex projects)
+- `codex` - gpt-5.3-codex (fast, good for straightforward coding)
+- `codex-high` - gpt-5.3-codex with high reasoning
+- `codex-xhigh` - gpt-5.3-codex with xhigh reasoning (complex projects)
 - `gpt52` - gpt-5.2 (planning, research, analysis)
 - `gpt52-high` - gpt-5.2 with high reasoning
 - `gpt52-xhigh` - gpt-5.2 with xhigh reasoning (30+ min tasks)
@@ -545,7 +545,7 @@ If user chooses #1:
   2. Claude (worktree) - isolated git worktree
 
   **Codex (OpenAI):** {usage status}
-  3. codex - gpt-5.2-codex standard
+  3. codex - gpt-5.3-codex standard
   4. codex-high - higher reasoning
   5. codex-xhigh - maximum reasoning
 

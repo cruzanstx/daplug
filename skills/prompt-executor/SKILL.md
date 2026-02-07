@@ -191,7 +191,7 @@ python3 "$EXECUTOR" --loop-status
 | Model | CLI | Description |
 |-------|-----|-------------|
 | claude | (Task subagent) | Claude Sonnet via subagent |
-| codex | codex exec --full-auto | OpenAI Codex (gpt-5.2-codex) |
+| codex | codex exec --full-auto | OpenAI Codex (gpt-5.3-codex) |
 | codex-high | codex exec --full-auto -c model_reasoning_effort="high" | Codex with high reasoning |
 | codex-xhigh | codex exec --full-auto -c model_reasoning_effort="xhigh" | Codex with xhigh reasoning |
 | gpt52 | codex exec --full-auto -m gpt-5.2 | GPT-5.2 for planning/research |
@@ -226,7 +226,7 @@ After executing the prompt, display a clear summary that includes the prompt **t
 
 | Field | Value |
 |-------|-------|
-| Model | codex (gpt-5.2-codex) |
+| Model | codex (gpt-5.3-codex) |
 | Status | 🟢 Running (PID 12345) |
 | Loop | Max 3 iterations |
 

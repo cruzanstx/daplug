@@ -37,17 +37,17 @@ class _ModelRequest:
 
 _SHORTHAND: dict[str, _ModelRequest] = {
     # OpenAI (Codex CLI)
-    "codex": _ModelRequest("codex", family="openai", model_id="openai:gpt-5.2-codex"),
+    "codex": _ModelRequest("codex", family="openai", model_id="openai:gpt-5.3-codex"),
     "codex-high": _ModelRequest(
         "codex-high",
         family="openai",
-        model_id="openai:gpt-5.2-codex",
+        model_id="openai:gpt-5.3-codex",
         reasoning_effort="high",
     ),
     "codex-xhigh": _ModelRequest(
         "codex-xhigh",
         family="openai",
-        model_id="openai:gpt-5.2-codex",
+        model_id="openai:gpt-5.3-codex",
         reasoning_effort="xhigh",
     ),
     "gpt52": _ModelRequest("gpt52", family="openai", model_id="openai:gpt-5.2"),

@@ -601,15 +601,15 @@ Gemini models share quotas in tiers (observed with Google One Premium):
 
 | Shorthand | Model | Best For |
 |-----------|-------|----------|
-| `codex` | gpt-5.2-codex | Fast coding execution |
-| `codex-high` | gpt-5.2-codex (high) | Complex coding |
-| `codex-xhigh` | gpt-5.2-codex (xhigh) | Large refactors |
+| `codex` | gpt-5.3-codex | Fast coding execution |
+| `codex-high` | gpt-5.3-codex (high) | Complex coding |
+| `codex-xhigh` | gpt-5.3-codex (xhigh) | Large refactors |
 | `gpt52` | gpt-5.2 | Planning, research, analysis |
 | `gpt52-high` | gpt-5.2 (high) | Deep reasoning |
 | `gpt52-xhigh` | gpt-5.2 (xhigh) | Maximum reasoning (30+ min) |
 
-**When to use GPT-5.2 vs GPT-5.2-Codex:**
-- **GPT-5.2-Codex**: Best when plans are clear, need fast execution
+**When to use GPT-5.2 vs GPT-5.3-Codex:**
+- **GPT-5.3-Codex**: Best when plans are clear, need fast execution (combines codex + reasoning)
 - **GPT-5.2**: Best for ambiguous problems, research, methodical analysis
 
 ## Worktree Auto-Install

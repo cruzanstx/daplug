@@ -144,9 +144,9 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 
 | Shorthand | CLI | Actual Model |
 |-----------|-----|--------------|
-| `codex` | codex | gpt-5.2-codex |
-| `codex-high` | codex | gpt-5.2-codex (high reasoning) |
-| `codex-xhigh` | codex | gpt-5.2-codex (xhigh reasoning) |
+| `codex` | codex | gpt-5.3-codex |
+| `codex-high` | codex | gpt-5.3-codex (high reasoning) |
+| `codex-xhigh` | codex | gpt-5.3-codex (xhigh reasoning) |
 | `gpt52` | codex | gpt-5.2 |
 | `gpt52-high` | codex | gpt-5.2 (high reasoning) |
 | `gpt52-xhigh` | codex | gpt-5.2 (xhigh reasoning) |

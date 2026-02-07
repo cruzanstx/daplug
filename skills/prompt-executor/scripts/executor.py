@@ -589,19 +589,19 @@ def get_cli_info(model: str, repo_root: Optional[Path] = None) -> dict:
     models = {
         "codex": {
             "command": ["codex", "exec", "--full-auto"],
-            "display": "codex (gpt-5.2-codex)",
+            "display": "codex (gpt-5.3-codex)",
             "env": {},
             "stdin_mode": "dash"
         },
         "codex-high": {
             "command": ["codex", "exec", "--full-auto", "-c", 'model_reasoning_effort="high"'],
-            "display": "codex-high (gpt-5.2-codex, high reasoning)",
+            "display": "codex-high (gpt-5.3-codex, high reasoning)",
             "env": {},
             "stdin_mode": "dash"
         },
         "codex-xhigh": {
             "command": ["codex", "exec", "--full-auto", "-c", 'model_reasoning_effort="xhigh"'],
-            "display": "codex-xhigh (gpt-5.2-codex, xhigh reasoning)",
+            "display": "codex-xhigh (gpt-5.3-codex, xhigh reasoning)",
             "env": {},
             "stdin_mode": "dash"
         },

@@ -52,7 +52,7 @@ echo "${PREFERRED_AGENT:-not_set}"
 2. **If not found, prompt the user:**
 Use AskUserQuestion tool with options:
 - `claude` - Claude Code (default, most capable)
-- `codex` - OpenAI Codex CLI (gpt-5.2-codex, fast execution)
+- `codex` - OpenAI Codex CLI (gpt-5.3-codex, fast execution)
 - `codex-high` - OpenAI Codex CLI with high reasoning effort
 - `codex-xhigh` - OpenAI Codex CLI with extra-high reasoning effort
 - `gpt52` - OpenAI GPT-5.2 (planning, research, analysis)
