@@ -558,7 +558,10 @@ def _cli_info_from_router(cli_name: str, model_id: str, cmd: list[str], fallback
         info["display"] = f"claude ({model_id})"
         return info
 
-    stdin_mode = "dash" if cli == "codex" else "arg"
+    if cli == "codex":
+        stdin_mode = "dash"
+    else:
+        stdin_mode = "arg"
 
     env: dict = {}
     if cli == "codex" and "--profile" in cmd:
