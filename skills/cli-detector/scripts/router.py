@@ -83,12 +83,26 @@ _SHORTHAND: dict[str, _ModelRequest] = {
         strict_cli=True,
     ),
     # Local models (provider is detected at runtime)
-    "local": _ModelRequest("local", family="local"),
-    "qwen": _ModelRequest("qwen", family="local", local_hint="qwen", codex_profile="local"),
+    "local": _ModelRequest(
+        "local",
+        family="local",
+        model_id="lmstudio:qwen3-next-80b",
+        force_cli="opencode",
+    ),
+    "qwen": _ModelRequest(
+        "qwen",
+        family="local",
+        model_id="lmstudio:qwen3-next-80b",
+        local_hint="qwen",
+        force_cli="opencode",
+        codex_profile="local",
+    ),
     "devstral": _ModelRequest(
         "devstral",
         family="local",
+        model_id="lmstudio:devstral-small-2-2512",
         local_hint="devstral",
+        force_cli="opencode",
         codex_profile="local-devstral",
     ),
     # Claude (subagent path; no external command)
@@ -107,7 +121,7 @@ _FALLBACK_CHAINS: dict[str, list[str]] = {
     "openai": ["codex", "opencode", "aider"],
     "google": ["gemini", "opencode", "aider"],
     "zai": ["opencode", "codex"],
-    "local": ["codex", "opencode", "aider"],
+    "local": ["opencode", "codex"],
 }
 
 
@@ -129,6 +143,12 @@ def _strip_provider_prefix(model_id: str) -> str:
 
 
 def _opencode_model_spec(model_id: str) -> str:
+    if model_id.startswith("local:"):
+        rest = model_id.split(":", 1)[1]
+        if ":" in rest:
+            provider, model = rest.split(":", 1)
+            return f"{provider}/{model}"
+        return rest
     if ":" not in model_id:
         return model_id
     provider, rest = model_id.split(":", 1)
@@ -267,6 +287,16 @@ def _resolve_local_model(
     preferred_cli: Optional[str],
     request: _ModelRequest,
 ) -> tuple[str, str, list[str]]:
+    def _requested_model(provider: str) -> Optional[str]:
+        if not request.model_id:
+            return None
+        if ":" not in request.model_id:
+            return None
+        req_provider = _model_provider(request.model_id)
+        if req_provider != provider:
+            return None
+        return _strip_provider_prefix(request.model_id)
+
     providers = cache.get("providers") or {}
     if not isinstance(providers, dict):
         providers = {}
@@ -277,25 +307,43 @@ def _resolve_local_model(
 
     if isinstance(lmstudio, dict) and lmstudio.get("running"):
         loaded = lmstudio.get("loaded_models") if isinstance(lmstudio.get("loaded_models"), list) else []
-        selected = _match_model_hint(model_hint, [str(x) for x in loaded if x])
+        requested = _requested_model("lmstudio")
+        selected = requested or _match_model_hint(model_hint, [str(x) for x in loaded if x])
         model_id = f"local:lmstudio:{selected}" if selected else "local:lmstudio"
-        cli = _choose_cli(cache, family="local", preferred_cli=preferred_cli, forced_cli=None)
+        cli = _choose_cli(
+            cache,
+            family="local",
+            preferred_cli=preferred_cli,
+            forced_cli=request.force_cli,
+        )
         cmd = _build_command(cli, model_id, request)
         return cli, model_id, cmd
 
     if isinstance(vllm, dict) and vllm.get("running"):
         loaded = vllm.get("loaded_models") if isinstance(vllm.get("loaded_models"), list) else []
-        selected = _match_model_hint(model_hint, [str(x) for x in loaded if x])
+        requested = _requested_model("vllm")
+        selected = requested or _match_model_hint(model_hint, [str(x) for x in loaded if x])
         model_id = f"local:vllm:{selected}" if selected else "local:vllm"
-        cli = _choose_cli(cache, family="local", preferred_cli=preferred_cli, forced_cli=None)
+        cli = _choose_cli(
+            cache,
+            family="local",
+            preferred_cli=preferred_cli,
+            forced_cli=request.force_cli,
+        )
         cmd = _build_command(cli, model_id, request)
         return cli, model_id, cmd
 
     if isinstance(ollama, dict) and ollama.get("running"):
         loaded = ollama.get("loaded_models") if isinstance(ollama.get("loaded_models"), list) else []
-        selected = _match_model_hint(model_hint, [str(x) for x in loaded if x])
+        requested = _requested_model("ollama")
+        selected = requested or _match_model_hint(model_hint, [str(x) for x in loaded if x])
         model_id = f"local:ollama:{selected}" if selected else "local:ollama"
-        cli = _choose_cli(cache, family="local", preferred_cli=preferred_cli, forced_cli=None)
+        cli = _choose_cli(
+            cache,
+            family="local",
+            preferred_cli=preferred_cli,
+            forced_cli=request.force_cli,
+        )
         cmd = _build_command(cli, model_id, request)
         return cli, model_id, cmd
 

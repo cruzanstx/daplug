@@ -85,9 +85,12 @@ def test_resolve_local_model_prefers_lmstudio(monkeypatch):
     monkeypatch.setattr(router, "load_cache_file", lambda: fake)
 
     cli, model_id, cmd = router.resolve_model("local")
-    assert cli == "codex"
+    assert cli == "opencode"
     assert model_id.startswith("local:lmstudio")
-    assert cmd[:3] == ["codex", "exec", "--full-auto"]
+    assert cmd[0:4] == ["opencode", "run", "--format", "json"]
+    assert "-m" in cmd
+    idx_m = cmd.index("-m")
+    assert cmd[idx_m + 1].startswith("lmstudio/")
 
 
 def test_resolve_local_model_uses_configured_endpoint(monkeypatch):
@@ -398,7 +401,7 @@ def full_cache(monkeypatch):
                 "lmstudio": {
                     "running": True,
                     "endpoint": "http://localhost:1234/v1",
-                    "loaded_models": ["qwen2.5-coder:32b", "devstral-small"],
+                    "loaded_models": ["qwen3-next-80b", "devstral-small-2-2512"],
                 },
             },
         }
@@ -519,22 +522,53 @@ class TestLocalModels:
 
     def test_local_routes_to_lmstudio(self, full_cache):
         cli, model_id, cmd = router.resolve_model("local")
-        assert cli == "codex"
+        assert cli == "opencode"
         assert "local:lmstudio" in model_id
-        assert "--profile" in cmd
+        assert cmd[0:4] == ["opencode", "run", "--format", "json"]
+        assert "-m" in cmd
+        idx_m = cmd.index("-m")
+        assert cmd[idx_m + 1].startswith("lmstudio/")
 
     def test_qwen_routes_to_local_profile(self, full_cache):
         cli, model_id, cmd = router.resolve_model("qwen")
-        assert cli == "codex"
-        assert "local" in model_id.lower() or "qwen" in model_id.lower()
-        assert "--profile" in cmd
-        assert "local" in cmd
+        assert cli == "opencode"
+        assert "qwen3-next-80b" in model_id
+        assert cmd[0:4] == ["opencode", "run", "--format", "json"]
+        idx_m = cmd.index("-m")
+        assert cmd[idx_m + 1] == "lmstudio/qwen3-next-80b"
 
     def test_devstral_routes_to_local_devstral_profile(self, full_cache):
         cli, model_id, cmd = router.resolve_model("devstral")
+        assert cli == "opencode"
+        assert "devstral-small-2-2512" in model_id
+        assert cmd[0:4] == ["opencode", "run", "--format", "json"]
+        idx_m = cmd.index("-m")
+        assert cmd[idx_m + 1] == "lmstudio/devstral-small-2-2512"
+
+    def test_local_falls_back_to_codex_when_opencode_missing(self, monkeypatch):
+        fake = _FakeCache(
+            {
+                "clis": {
+                    "codex": {"installed": True, "issues": []},
+                    "opencode": {"installed": False, "issues": []},
+                },
+                "providers": {
+                    "lmstudio": {
+                        "running": True,
+                        "endpoint": "http://localhost:1234/v1",
+                        "loaded_models": ["qwen3-next-80b"],
+                    },
+                },
+            }
+        )
+        monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+
+        cli, model_id, cmd = router.resolve_model("local")
         assert cli == "codex"
+        assert "local:lmstudio" in model_id
+        assert cmd[:3] == ["codex", "exec", "--full-auto"]
         assert "--profile" in cmd
-        assert "local-devstral" in cmd
+        assert "local" in cmd
 
 
 class TestClaudeModel:
@@ -591,4 +625,3 @@ class TestCommandStructure:
         assert "-m" in cmd
         idx_m = cmd.index("-m")
         assert "/" in cmd[idx_m + 1]  # e.g., "zai/glm-4.7"
-
