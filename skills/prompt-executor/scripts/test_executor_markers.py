@@ -124,6 +124,24 @@ class TestGetCliInfo(unittest.TestCase):
         info = executor.get_cli_info("opencode")
         self.assertFalse(info.get("needs_pty", False), "opencode should not need PTY")
 
+    def test_local_models_default_to_opencode(self):
+        """Verify local models default to opencode CLI."""
+        expected = {
+            "local": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-next-80b"],
+            "qwen": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-next-80b"],
+            "devstral": ["opencode", "run", "--format", "json", "-m", "lmstudio/devstral-small-2-2512"],
+        }
+        for model, cmd in expected.items():
+            info = executor.get_cli_info(model)
+            self.assertEqual(info["command"], cmd)
+            self.assertEqual(info["stdin_mode"], "arg")
+
+    def test_local_models_cli_override_codex(self):
+        """Verify --cli codex forces legacy local profiles."""
+        info = executor.get_cli_info("qwen", cli_override="codex")
+        self.assertEqual(info["command"], ["codex", "exec", "--full-auto", "--profile", "local"])
+        self.assertEqual(info["stdin_mode"], "dash")
+
     def test_codex_models_no_pty(self):
         """Verify codex models don't require PTY."""
         for model in ["codex", "codex-high", "codex-xhigh", "zai"]:
