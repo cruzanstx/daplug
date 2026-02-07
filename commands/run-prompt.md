@@ -14,6 +14,7 @@ Execute prompts from `./prompts/` (including subfolders) using various AI models
 |----------|-------------|
 | `<prompt>` | Prompt number(s), range(s), or name(s) - defaults to latest |
 | `--model, -m` | claude, codex, codex-high, codex-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, zai, local, qwen, devstral |
+| `--cli` | Override CLI wrapper: codex or opencode |
 | `--worktree, -w` | Run in isolated git worktree |
 | `--tmux, -t` | Run in tmux session (can monitor/attach later) |
 | `--parallel, -p` | Run multiple prompts in parallel |

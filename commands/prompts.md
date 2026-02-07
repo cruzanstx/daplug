@@ -60,6 +60,9 @@ Use AskUserQuestion tool with options:
 - `gpt52-xhigh` - OpenAI GPT-5.2 with extra-high reasoning (30+ min tasks)
 - `gemini` - Google Gemini CLI
 - `zai` - Z.AI GLM-4.7 via Codex CLI
+- `local` - Local model via opencode + LMStudio
+- `qwen` - Qwen via opencode + LMStudio
+- `devstral` - Devstral via opencode + LMStudio
 
 3. **After user selects, save to user-level `~/.claude/CLAUDE.md`** (applies to all projects):
 ```bash

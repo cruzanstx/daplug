@@ -292,6 +292,10 @@ def add_model_interactive(repo_root: Path) -> None:
         print(f"  {i}. {file_info['path']}")
     print(f"  ... and {len(MODEL_FILES) - 6} more")
 
+    print("\nLocal-family reminder:")
+    print("  - If adding a local model (local/qwen/devstral), update router defaults to prefer OpenCode")
+    print("    with Codex fallback, and ensure OpenCode LMStudio model IDs are correct.")
+
     print("\nRun 'python3 scripts/manage-models.py check' after updating to verify.")
 
 
