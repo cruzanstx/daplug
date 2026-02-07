@@ -490,9 +490,9 @@ All available models for /daplug:run-prompt --model:
 
 **Other Models:** (check: `zai.token_quota.percentage`)
 - `zai` - Z.AI GLM-4.7 (good for Chinese language tasks)
-- `local` - Local model via LMStudio (no quota limits)
-- `qwen` - Qwen via LMStudio (no quota limits)
-- `devstral` - Devstral via LMStudio (no quota limits)
+- `local` - Local model via opencode + LMStudio (no quota limits)
+- `qwen` - Qwen via opencode + LMStudio (no quota limits)
+- `devstral` - Devstral via opencode + LMStudio (no quota limits)
 </available_models>
 
 <recommendation_logic>
@@ -639,7 +639,7 @@ If user chooses "Run prompt now":
 
   **Other:**
   13. zai - {X}% used - Z.AI GLM-4.7
-  14. local/qwen/devstral - Local models (no quota)
+  14. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation based on detection_logic, recommendation_logic, AND availability]
   [If preferred_agent is unavailable: "⚠️ Your preferred agent ({preferred_agent}) is at {X}% - suggesting {fallback} instead"]
@@ -773,7 +773,7 @@ If user chooses to run prompts in parallel or sequential:
 
   **Other:**
   13. zai - {X}% used
-  14. local/qwen/devstral - Local models (no quota)
+  14. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation based on detection_logic, recommendation_logic, AND availability]
   [If preferred_agent is unavailable: "⚠️ {preferred_agent} at {X}% - suggesting {fallback}"]
@@ -919,7 +919,7 @@ If user chooses "Run prompts sequentially now":
 
   **Other:**
   13. zai - {X}% used
-  14. local/qwen/devstral - Local models (no quota)
+  14. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation based on detection_logic, recommendation_logic, AND availability]
   [If preferred_agent is unavailable: "⚠️ {preferred_agent} at {X}% - suggesting {fallback}"]

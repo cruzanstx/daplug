@@ -481,9 +481,9 @@ All available models for /daplug:run-prompt --model:
 
 **Other Models:** (check: `zai.token_quota.percentage`)
 - `zai` - Z.AI GLM-4.7 (good for Chinese language tasks)
-- `local` - Local model via LMStudio (no quota limits)
-- `qwen` - Qwen via LMStudio (no quota limits)
-- `devstral` - Devstral via LMStudio (no quota limits)
+- `local` - Local model via opencode + LMStudio (no quota limits)
+- `qwen` - Qwen via opencode + LMStudio (no quota limits)
+- `devstral` - Devstral via opencode + LMStudio (no quota limits)
 </available_models>
 
 <recommendation_logic>
@@ -562,7 +562,7 @@ If user chooses #1:
 
   **Other:**
   13. zai - {X}% used
-  14. local/qwen/devstral - Local models (no quota)
+  14. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation: "Recommended for llms.txt research: gpt52-xhigh --worktree --loop"]
   [If preferred_agent is set and available: "Your preferred agent: {preferred_agent} ✅"]

@@ -128,6 +128,19 @@ Commands below are shown without the `/daplug:` prefix for readability. In Claud
 /run-prompt 005 --model zai          # Z.AI GLM-4.7 (via Codex)
 ```
 
+### Local Models (OpenCode Default)
+Local models (`local`, `qwen`, `devstral`) now run through **OpenCode** by default (LMStudio-backed). You can override the CLI wrapper with `--cli`.
+
+```bash
+# Defaults to OpenCode + LMStudio
+/run-prompt 005 --model local
+/run-prompt 005 --model qwen
+/run-prompt 005 --model devstral
+
+# Legacy Codex wrapper (if you need it)
+/run-prompt 005 --model local --cli codex
+```
+
 ### Parallel Execution
 ```bash
 /run-prompt 001 002 003 --parallel --worktree
