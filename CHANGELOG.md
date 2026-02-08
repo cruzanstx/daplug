@@ -2,6 +2,21 @@
 
 All notable changes to daplug are documented here.
 
+## [0.23.0] - 2026-02-07
+
+### Added
+- **OpenCode Local Model Default**: Local models (`local`, `qwen`, `devstral`) now route through OpenCode CLI instead of Codex
+  - OpenCode connects to LMStudio with proper model IDs (`lmstudio/qwen3-next-80b`, `lmstudio/devstral-small-2-2512`)
+  - Router prefers OpenCode with automatic Codex fallback when OpenCode is unavailable
+- **`--cli` Override Flag**: New executor argument to override the CLI wrapper for any model
+  - `--cli codex` restores legacy Codex profile behavior for local models
+  - `--cli opencode` forces OpenCode for models that default to other CLIs
+
+### Changed
+- Bumped default Codex model from `gpt-5.2-codex` to `gpt-5.3-codex`
+- Updated `_normalize_preferred_agent()` to map local models to `opencode`
+- Local model fallback chain changed from `[codex]` to `[opencode, codex]`
+
 ## [0.22.0] - 2026-01-31
 
 ### Added
