@@ -127,9 +127,11 @@ class TestGetCliInfo(unittest.TestCase):
     def test_local_models_default_to_opencode(self):
         """Verify local models default to opencode CLI."""
         expected = {
-            "local": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-next-80b"],
-            "qwen": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-next-80b"],
+            "local": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-coder-next"],
+            "qwen": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-coder-next"],
             "devstral": ["opencode", "run", "--format", "json", "-m", "lmstudio/devstral-small-2-2512"],
+            "glm-local": ["opencode", "run", "--format", "json", "-m", "lmstudio/glm-4.7-flash"],
+            "qwen-small": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-4b-2507"],
         }
         for model, cmd in expected.items():
             info = executor.get_cli_info(model)
@@ -160,7 +162,8 @@ class TestGetCliInfo(unittest.TestCase):
             "claude", "codex", "codex-high", "codex-xhigh",
             "gpt52", "gpt52-high", "gpt52-xhigh",
             "gemini", "gemini-high", "gemini-xhigh",
-            "zai", "opencode", "local", "qwen", "devstral"
+            "zai", "opencode", "local", "qwen", "devstral",
+            "glm-local", "qwen-small"
         ]
         for model in models:
             info = executor.get_cli_info(model)

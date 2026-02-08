@@ -155,8 +155,10 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `gemini-xhigh` | gemini | gemini-3-pro-preview |
 | `zai` | codex | GLM-4.7 via Z.AI (may have issues) |
 | `opencode` | opencode | GLM-4.7 via OpenCode (recommended; JSON output) |
-| `qwen`/`local` | opencode | qwen via LMStudio (opencode default, --cli codex for legacy) |
-| `devstral` | opencode | devstral via LMStudio (opencode default, --cli codex for legacy) |
+| `qwen`/`local` | opencode | qwen3-coder-next via LMStudio (opencode default, --cli codex for legacy) |
+| `devstral` | opencode | devstral-small-2-2512 via LMStudio (opencode default, --cli codex for legacy) |
+| `glm-local` | opencode | glm-4.7-flash via LMStudio (local Z.AI model) |
+| `qwen-small` | opencode | qwen3-4b-2507 via LMStudio (small/fast, haiku-tier) |
 
 **OpenCode (opencode) note:** daplug runs OpenCode with `--format json` for clean, parseable logs (no PTY). To avoid interactive permission prompts in headless runs, configure `~/.config/opencode/opencode.json`, e.g.:
 

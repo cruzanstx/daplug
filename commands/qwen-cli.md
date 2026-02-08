@@ -4,7 +4,7 @@ description: Run task with local qwen model via Codex CLI + LMStudio (user)
 argument-hint: <task> [--worktree /path]
 ---
 
-Run a task using the local qwen model (qwen/qwen3-next-80b) via Codex CLI connected to LMStudio.
+Run a task using the local qwen model (qwen/qwen3-coder-next) via Codex CLI connected to LMStudio.
 
 ## Step 0: Check Prerequisites
 
@@ -42,7 +42,7 @@ PROFILE_EXISTS=$?
    - Question: "What model is loaded in LMStudio?"
    - Header: "Model"
    - Options:
-     - `qwen/qwen3-next-80b` - Qwen 3 80B (Recommended)
+     - `qwen/qwen3-coder-next` - Qwen 3 Coder Next (Recommended)
      - `mistralai/devstral-2-2512` - Devstral
      - Other - Let user specify
 

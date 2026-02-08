@@ -401,7 +401,7 @@ def full_cache(monkeypatch):
                 "lmstudio": {
                     "running": True,
                     "endpoint": "http://localhost:1234/v1",
-                    "loaded_models": ["qwen3-next-80b", "devstral-small-2-2512"],
+                    "loaded_models": ["qwen3-coder-next", "devstral-small-2-2512", "glm-4.7-flash", "qwen3-4b-2507"],
                 },
             },
         }
@@ -532,10 +532,10 @@ class TestLocalModels:
     def test_qwen_routes_to_local_profile(self, full_cache):
         cli, model_id, cmd = router.resolve_model("qwen")
         assert cli == "opencode"
-        assert "qwen3-next-80b" in model_id
+        assert "qwen3-coder-next" in model_id
         assert cmd[0:4] == ["opencode", "run", "--format", "json"]
         idx_m = cmd.index("-m")
-        assert cmd[idx_m + 1] == "lmstudio/qwen3-next-80b"
+        assert cmd[idx_m + 1] == "lmstudio/qwen3-coder-next"
 
     def test_devstral_routes_to_local_devstral_profile(self, full_cache):
         cli, model_id, cmd = router.resolve_model("devstral")
@@ -544,6 +544,22 @@ class TestLocalModels:
         assert cmd[0:4] == ["opencode", "run", "--format", "json"]
         idx_m = cmd.index("-m")
         assert cmd[idx_m + 1] == "lmstudio/devstral-small-2-2512"
+
+    def test_glm_local_routes_to_opencode(self, full_cache):
+        cli, model_id, cmd = router.resolve_model("glm-local")
+        assert cli == "opencode"
+        assert "glm-4.7-flash" in model_id
+        assert cmd[0:4] == ["opencode", "run", "--format", "json"]
+        idx_m = cmd.index("-m")
+        assert cmd[idx_m + 1] == "lmstudio/glm-4.7-flash"
+
+    def test_qwen_small_routes_to_opencode(self, full_cache):
+        cli, model_id, cmd = router.resolve_model("qwen-small")
+        assert cli == "opencode"
+        assert "qwen3-4b-2507" in model_id
+        assert cmd[0:4] == ["opencode", "run", "--format", "json"]
+        idx_m = cmd.index("-m")
+        assert cmd[idx_m + 1] == "lmstudio/qwen3-4b-2507"
 
     def test_local_falls_back_to_codex_when_opencode_missing(self, monkeypatch):
         fake = _FakeCache(
@@ -556,7 +572,7 @@ class TestLocalModels:
                     "lmstudio": {
                         "running": True,
                         "endpoint": "http://localhost:1234/v1",
-                        "loaded_models": ["qwen3-next-80b"],
+                        "loaded_models": ["qwen3-coder-next"],
                     },
                 },
             }

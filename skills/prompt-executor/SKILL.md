@@ -201,7 +201,7 @@ python3 "$EXECUTOR" --loop-status
 | gemini | gemini -y | Google Gemini 2.5 Pro |
 | zai | codex exec --profile zai | Z.AI GLM-4.7 (via Codex, may have issues) |
 | opencode | opencode run --format json -m zai/glm-4.7 | Z.AI GLM-4.7 (via OpenCode, recommended; JSON output) |
-| local/qwen | opencode run --format json -m lmstudio/qwen3-next-80b | Local qwen model (default: opencode) |
+| local/qwen | opencode run --format json -m lmstudio/qwen3-coder-next | Local qwen-coder model (default: opencode) |
 | devstral | opencode run --format json -m lmstudio/devstral-small-2-2512 | Local devstral model (default: opencode) |
 
 **OpenCode permissions (headless runs):** configure `~/.config/opencode/opencode.json` to avoid interactive permission prompts, e.g.:

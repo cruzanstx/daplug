@@ -711,20 +711,32 @@ def get_cli_info(model: str, repo_root: Optional[Path] = None, cli_override: Opt
             "stdin_mode": "arg"
         },
         "local": {
-            "command": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-next-80b"],
-            "display": "qwen (local via opencode)",
+            "command": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-coder-next"],
+            "display": "qwen-coder (local via opencode)",
             "env": {},
             "stdin_mode": "arg"
         },
         "qwen": {
-            "command": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-next-80b"],
-            "display": "qwen (local via opencode)",
+            "command": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-coder-next"],
+            "display": "qwen-coder (local via opencode)",
             "env": {},
             "stdin_mode": "arg"
         },
         "devstral": {
             "command": ["opencode", "run", "--format", "json", "-m", "lmstudio/devstral-small-2-2512"],
             "display": "devstral (local via opencode)",
+            "env": {},
+            "stdin_mode": "arg"
+        },
+        "glm-local": {
+            "command": ["opencode", "run", "--format", "json", "-m", "lmstudio/glm-4.7-flash"],
+            "display": "glm-4.7-flash (local via opencode)",
+            "env": {},
+            "stdin_mode": "arg"
+        },
+        "qwen-small": {
+            "command": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-4b-2507"],
+            "display": "qwen-3-4b (local small/fast via opencode)",
             "env": {},
             "stdin_mode": "arg"
         },
@@ -735,7 +747,7 @@ def get_cli_info(model: str, repo_root: Optional[Path] = None, cli_override: Opt
             "stdin_mode": None
         }
     }
-    if model in {"local", "qwen", "devstral"} and cli_override != "codex":
+    if model in {"local", "qwen", "devstral", "glm-local", "qwen-small"} and cli_override != "codex":
         return models[model]
     repo_root = repo_root or get_repo_root()
     preferred = cli_override or _normalize_preferred_agent(_read_config_value(repo_root, "preferred_agent"))
@@ -1744,7 +1756,8 @@ def main():
                                "gemini", "gemini-high", "gemini-xhigh",
                                "gemini25pro", "gemini25flash", "gemini25lite",
                                "gemini3flash", "gemini3pro", "zai", "opencode",
-                               "local", "qwen", "devstral"],
+                               "local", "qwen", "devstral",
+                               "glm-local", "qwen-small"],
                        help="Model/CLI to use")
     parser.add_argument("--cli", choices=["codex", "opencode"],
                        default=None,

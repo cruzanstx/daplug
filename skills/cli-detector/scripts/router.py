@@ -86,13 +86,13 @@ _SHORTHAND: dict[str, _ModelRequest] = {
     "local": _ModelRequest(
         "local",
         family="local",
-        model_id="lmstudio:qwen3-next-80b",
+        model_id="lmstudio:qwen3-coder-next",
         force_cli="opencode",
     ),
     "qwen": _ModelRequest(
         "qwen",
         family="local",
-        model_id="lmstudio:qwen3-next-80b",
+        model_id="lmstudio:qwen3-coder-next",
         local_hint="qwen",
         force_cli="opencode",
         codex_profile="local",
@@ -104,6 +104,18 @@ _SHORTHAND: dict[str, _ModelRequest] = {
         local_hint="devstral",
         force_cli="opencode",
         codex_profile="local-devstral",
+    ),
+    "glm-local": _ModelRequest(
+        "glm-local",
+        family="local",
+        model_id="lmstudio:glm-4.7-flash",
+        force_cli="opencode",
+    ),
+    "qwen-small": _ModelRequest(
+        "qwen-small",
+        family="local",
+        model_id="lmstudio:qwen3-4b-2507",
+        force_cli="opencode",
     ),
     # Claude (subagent path; no external command)
     "claude": _ModelRequest("claude", family="anthropic", model_id="anthropic:claude", force_cli="claude"),

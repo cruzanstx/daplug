@@ -2,11 +2,25 @@
 
 All notable changes to daplug are documented here.
 
+## [0.23.1] - 2026-02-07
+
+### Added
+- **New local models**: `glm-local` (GLM-4.7-Flash via LMStudio) and `qwen-small` (Qwen3-4B, haiku-tier fast model)
+
+### Fixed
+- **LMStudio model ID mismatch**: OpenCode config now uses `"id"` overrides to send correct vendor-prefixed model IDs to LMStudio API
+  - Bare config keys (e.g., `qwen3-coder-next`) were silently mismatching LMStudio's full IDs (e.g., `qwen/qwen3-coder-next`)
+  - Only worked due to LMStudio bug [#619](https://github.com/lmstudio-ai/lmstudio-bug-tracker/issues/619) (single-model fallback); failed intermittently with multiple models loaded
+
+### Changed
+- Default qwen/local model upgraded from `qwen3-next-80b` to `qwen3-coder-next` (code-optimized)
+- Model display names updated to reflect actual LMStudio model identifiers
+
 ## [0.23.0] - 2026-02-07
 
 ### Added
 - **OpenCode Local Model Default**: Local models (`local`, `qwen`, `devstral`) now route through OpenCode CLI instead of Codex
-  - OpenCode connects to LMStudio with proper model IDs (`lmstudio/qwen3-next-80b`, `lmstudio/devstral-small-2-2512`)
+  - OpenCode connects to LMStudio with proper model IDs (`lmstudio/qwen3-coder-next`, `lmstudio/devstral-small-2-2512`)
   - Router prefers OpenCode with automatic Codex fallback when OpenCode is unavailable
 - **`--cli` Override Flag**: New executor argument to override the CLI wrapper for any model
   - `--cli codex` restores legacy Codex profile behavior for local models

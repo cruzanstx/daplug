@@ -512,7 +512,7 @@ wire_api = "chat"
 
 [profiles.local]
 model_provider = "lmstudio-remote"
-model = "qwen/qwen3-next-80b"
+model = "qwen/qwen3-coder-next"
 
 [env]
 LMSTUDIO_API_KEY = "lm-studio"
