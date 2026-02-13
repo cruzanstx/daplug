@@ -620,6 +620,12 @@ def get_cli_info(model: str, repo_root: Optional[Path] = None, cli_override: Opt
             "env": {},
             "stdin_mode": "dash"
         },
+        "codex-spark": {
+            "command": ["codex", "exec", "--full-auto", "-m", "gpt-5.3-codex-spark"],
+            "display": "codex-spark (gpt-5.3-codex-spark, low latency)",
+            "env": {},
+            "stdin_mode": "dash"
+        },
         "codex-high": {
             "command": ["codex", "exec", "--full-auto", "-c", 'model_reasoning_effort="high"'],
             "display": "codex-high (gpt-5.3-codex, high reasoning)",
@@ -703,6 +709,12 @@ def get_cli_info(model: str, repo_root: Optional[Path] = None, cli_override: Opt
             "display": "zai (GLM-4.7 via Codex - may have issues)",
             "env": {},
             "stdin_mode": "dash"
+        },
+        "glm5": {
+            "command": ["opencode", "run", "--format", "json", "-m", "zai/glm-5"],
+            "display": "glm5 (GLM-5 via OpenCode)",
+            "env": {},
+            "stdin_mode": "arg"
         },
         "opencode": {
             "command": ["opencode", "run", "--format", "json", "-m", "zai/glm-4.7"],
@@ -1751,11 +1763,11 @@ def main():
     parser = argparse.ArgumentParser(description="Resolve and execute prompts")
     parser.add_argument("prompts", nargs="*", default=[], help="Prompt number(s) or name(s)")
     parser.add_argument("--model", "-m", default="claude",
-                       choices=["claude", "codex", "codex-high", "codex-xhigh",
+                       choices=["claude", "codex", "codex-spark", "codex-high", "codex-xhigh",
                                "gpt52", "gpt52-high", "gpt52-xhigh",
                                "gemini", "gemini-high", "gemini-xhigh",
                                "gemini25pro", "gemini25flash", "gemini25lite",
-                               "gemini3flash", "gemini3pro", "zai", "opencode",
+                               "gemini3flash", "gemini3pro", "zai", "glm5", "opencode",
                                "local", "qwen", "devstral",
                                "glm-local", "qwen-small"],
                        help="Model/CLI to use")

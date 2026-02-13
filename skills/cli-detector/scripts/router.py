@@ -29,6 +29,7 @@ class _ModelRequest:
     family: str  # "openai" | "anthropic" | "google" | "zai" | "local"
     model_id: Optional[str] = None
     reasoning_effort: Optional[str] = None  # "high" | "xhigh"
+    capabilities: Optional[list[str]] = None
     force_cli: Optional[str] = None
     strict_cli: bool = False
     local_hint: Optional[str] = None
@@ -38,6 +39,11 @@ class _ModelRequest:
 _SHORTHAND: dict[str, _ModelRequest] = {
     # OpenAI (Codex CLI)
     "codex": _ModelRequest("codex", family="openai", model_id="openai:gpt-5.3-codex"),
+    "codex-spark": _ModelRequest(
+        "codex-spark",
+        family="openai",
+        model_id="openai:gpt-5.3-codex-spark",
+    ),
     "codex-high": _ModelRequest(
         "codex-high",
         family="openai",
@@ -75,6 +81,7 @@ _SHORTHAND: dict[str, _ModelRequest] = {
     "gemini3pro": _ModelRequest("gemini3pro", family="google", model_id="google:gemini-3-pro-preview"),
     # Z.AI
     "zai": _ModelRequest("zai", family="zai", model_id="zai:glm-4.7"),
+    "glm5": _ModelRequest("glm5", family="zai", model_id="zai:glm-5", codex_profile="glm5"),
     "opencode": _ModelRequest(
         "opencode",
         family="zai",
@@ -101,6 +108,7 @@ _SHORTHAND: dict[str, _ModelRequest] = {
         "devstral",
         family="local",
         model_id="lmstudio:devstral-small-2-2512",
+        capabilities=["vision"],
         local_hint="devstral",
         force_cli="opencode",
         codex_profile="local-devstral",
@@ -122,6 +130,7 @@ _SHORTHAND: dict[str, _ModelRequest] = {
 }
 
 _ALIASES: dict[str, str] = {
+    "spark": "codex-spark",
     "gpt-5.2": "gpt52",
     "gpt5.2": "gpt52",
     "gpt-5.2-high": "gpt52-high",
@@ -383,7 +392,8 @@ def _build_command(cli: str, model_id: str, request: _ModelRequest) -> list[str]
 
         if request.family == "zai":
             # Existing daplug convention: codex profile "zai" points at Z.AI.
-            cmd.extend(["--profile", "zai"])
+            profile = request.codex_profile or "zai"
+            cmd.extend(["--profile", profile])
         elif request.family == "local":
             profile = request.codex_profile or "local"
             cmd.extend(["--profile", profile])
@@ -503,6 +513,7 @@ def get_routing_table() -> dict[str, dict]:
                 "cli": cli,
                 "command": cmd,
                 "status": "ready",
+                "capabilities": req.capabilities or [],
             }
         except ModelNotAvailable as exc:
             table[shorthand] = {
@@ -511,6 +522,7 @@ def get_routing_table() -> dict[str, dict]:
                 "command": None,
                 "status": "unavailable",
                 "error": str(exc),
+                "capabilities": req.capabilities or [],
             }
 
     # Add raw installed model inventory (useful for UI/debug).

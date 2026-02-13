@@ -1,7 +1,7 @@
 ---
 name: run-prompt
 description: Execute prompts from ./prompts/ with various AI models, optional worktree isolation, tmux sessions, and iterative verification loops
-argument-hint: <prompt(s)> [--model claude|codex|gemini|gemini3pro|gemini3flash|zai|local] [--worktree] [--tmux] [--parallel] [--loop]
+argument-hint: <prompt(s)> [--model claude|codex|codex-spark|gemini|gemini3pro|gemini3flash|zai|glm5|local] [--worktree] [--tmux] [--parallel] [--loop]
 ---
 
 # Run Prompt
@@ -13,7 +13,7 @@ Execute prompts from `./prompts/` (including subfolders) using various AI models
 | Argument | Description |
 |----------|-------------|
 | `<prompt>` | Prompt number(s), range(s), or name(s) - defaults to latest |
-| `--model, -m` | claude, codex, codex-high, codex-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, zai, local, qwen, devstral |
+| `--model, -m` | claude, codex, codex-spark, codex-high, codex-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, zai, glm5, local, qwen, devstral |
 | `--cli` | Override CLI wrapper: codex or opencode |
 | `--worktree, -w` | Run in isolated git worktree |
 | `--tmux, -t` | Run in tmux session (can monitor/attach later) |
@@ -59,6 +59,7 @@ When the `/detect-clis` cache is present, `executor.py` routes `--model` shortha
 - Respects `preferred_agent` in `<daplug_config>` when multiple CLIs can run a model family.
 - Falls back gracefully when the preferred CLI isn’t installed/ready (example: `gemini-*` → `opencode`).
 - Local routing (`local`, `qwen`, `devstral`) uses the detected running provider (LM Studio / Ollama / vLLM).
+- `devstral` is treated as a multimodal local model (`vision` capability metadata in router).
 - If the cache is missing, daplug falls back to the legacy hardcoded model map for backward compatibility.
 
 ### Step 0.5: Verify Monitor Permissions
@@ -355,6 +356,8 @@ Task(
 ```
 /daplug:run-prompt 123                           # Single prompt with Claude
 /daplug:run-prompt 123 --model codex             # With Codex
+/daplug:run-prompt 123 --model codex-spark       # Codex Spark (lower-latency tier)
+/daplug:run-prompt 123 --model glm5              # Z.AI GLM-5
 /daplug:run-prompt 123 --model codex --worktree  # Codex in isolated worktree
 /daplug:run-prompt 123 --tmux                    # In tmux session
 /daplug:run-prompt 123 --worktree --tmux         # Worktree + tmux (full isolation)
