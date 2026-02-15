@@ -29,7 +29,13 @@ Clone/copy this plugin to one of:
 
 OpenCode does not load Claude marketplace plugins, so daplug's namespaced commands (for example `/daplug:run-prompt`) are not available and will fail with `Command or skill not found.`
 
-To use daplug commands in OpenCode, generate thin bridge commands in OpenCode's command directory. Bridges contain an absolute `@` reference to daplug's real `commands/*.md` specs, so there's no command duplication.
+To use daplug commands in OpenCode, install bridge commands using the built-in command (from Claude Code):
+
+```
+/install-bridges opencode
+```
+
+Or run the generator script directly:
 
 ```bash
 # Default output: ~/.config/opencode/commands/
@@ -42,13 +48,15 @@ python3 scripts/generate-opencode-bridges.py .opencode/commands
 python3 scripts/generate-opencode-bridges.py --clean
 ```
 
+Bridges contain an absolute `@` reference to daplug's real `commands/*.md` specs, so there's no command duplication.
+
 Command name mapping:
 - Claude Code: `/daplug:run-prompt`
 - OpenCode: `/daplug-run-prompt`
 
 ## What's Included
 
-### Commands (18)
+### Commands (19)
 
 | Command | Description |
 |---------|-------------|
@@ -60,8 +68,9 @@ Command name mapping:
 | `/daplug:create-llms-txt` | Research and generate llms_txt documentation |
 | `/daplug:create-prompt` | Create optimized, XML-structured prompts |
 | `/daplug:devstral-cli` | Run task with local Devstral model via Codex CLI |
-| `/daplug:gemini-cli` | Run task with Google Gemini CLI |
 | `/daplug:detect-clis` | Scan and manage available AI coding CLIs |
+| `/daplug:gemini-cli` | Run task with Google Gemini CLI |
+| `/daplug:install-bridges` | Install daplug command bridges for other runtimes (e.g. OpenCode) |
 | `/daplug:migrate-config` | Migrate legacy CLAUDE.md settings to <daplug_config> |
 | `/daplug:prompts` | Analyze prompts folder and recommend next steps |
 | `/daplug:qwen-cli` | Run task with local Qwen model via Codex CLI |
@@ -176,6 +185,18 @@ Local models (`local`, `qwen`, `devstral`) now run through **OpenCode** by defau
 ```
 
 ## Recent Changes
+
+### v0.23.4 (2026-02-15)
+- **`/install-bridges` command**: Install daplug command bridges for other AI coding runtimes (currently supports OpenCode)
+- **Test suites**: 21 tests for post-push hook, 22 tests for bridge generator
+- **PostToolUse git push hook** (Issue #7): Auto-triggers `pipeline-deploy-monitor` after `git push`
+- **OpenCode bridge generator** (Issue #8): `scripts/generate-opencode-bridges.py` for cross-runtime compatibility
+
+### v0.23.0 (2026-02-07)
+- **OpenCode as default for local models**: `local`, `qwen`, `devstral` now route through OpenCode CLI (LMStudio-backed)
+- **`--cli` override flag**: `--cli codex` restores legacy behavior, `--cli opencode` forces OpenCode
+- **New local models**: `glm-local` (GLM-4.7-Flash), `qwen-small` (Qwen3-4B haiku-tier)
+- Bumped default Codex model to `gpt-5.3-codex`
 
 ### v0.20.0 (2026-01-18)
 - **OpenCode CLI support**: New `opencode` model for Z.AI GLM-4.7 via OpenCode CLI

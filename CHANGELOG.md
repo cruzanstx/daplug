@@ -2,6 +2,21 @@
 
 All notable changes to daplug are documented here.
 
+## [0.23.4] - 2026-02-15
+
+### Added
+- **`/install-bridges` command**: Install daplug command bridges for other AI coding runtimes
+  - Run `/install-bridges opencode` to generate bridge files in `~/.config/opencode/commands/`
+  - OpenCode can then invoke daplug commands natively as `/daplug-run-prompt`, `/daplug-prompts`, etc.
+  - Supports `--clean` to remove stale bridges before regenerating
+
+## [0.23.3] - 2026-02-15
+
+### Added
+- **Test suites for Issues #7 and #8**:
+  - 21 tests for `post-push-detect.sh` hook (push detection, non-push filtering, failed push handling, edge cases)
+  - 22 tests for `generate-opencode-bridges.py` (spec discovery, bridge rendering, stale cleanup, CLI args)
+
 ## [0.23.2] - 2026-02-15
 
 ### Added
