@@ -25,9 +25,30 @@ Clone/copy this plugin to one of:
 - `~/.claude/plugins/daplug/` (user scope)
 - `.claude/plugins/daplug/` (project scope)
 
+## OpenCode Compatibility
+
+OpenCode does not load Claude marketplace plugins, so daplug's namespaced commands (for example `/daplug:run-prompt`) are not available and will fail with `Command or skill not found.`
+
+To use daplug commands in OpenCode, generate thin bridge commands in OpenCode's command directory. Bridges contain an absolute `@` reference to daplug's real `commands/*.md` specs, so there's no command duplication.
+
+```bash
+# Default output: ~/.config/opencode/commands/
+python3 scripts/generate-opencode-bridges.py
+
+# Custom output directory (example: project-local)
+python3 scripts/generate-opencode-bridges.py .opencode/commands
+
+# Remove stale daplug bridges before regenerating
+python3 scripts/generate-opencode-bridges.py --clean
+```
+
+Command name mapping:
+- Claude Code: `/daplug:run-prompt`
+- OpenCode: `/daplug-run-prompt`
+
 ## What's Included
 
-### Commands (17)
+### Commands (18)
 
 | Command | Description |
 |---------|-------------|
@@ -35,6 +56,7 @@ Clone/copy this plugin to one of:
 | `/daplug:cclimits` | Check AI CLI usage/quota (Claude, Codex, Gemini, Z.AI) |
 | `/daplug:check-updates` | Check if plugin has updates available |
 | `/daplug:codex-cli` | Run task with OpenAI Codex CLI |
+| `/daplug:create-at-prompt` | Create an agent-team orchestration bundle (orchestrator prompt + sub-prompts) |
 | `/daplug:create-llms-txt` | Research and generate llms_txt documentation |
 | `/daplug:create-prompt` | Create optimized, XML-structured prompts |
 | `/daplug:devstral-cli` | Run task with local Devstral model via Codex CLI |
@@ -43,11 +65,11 @@ Clone/copy this plugin to one of:
 | `/daplug:migrate-config` | Migrate legacy CLAUDE.md settings to <daplug_config> |
 | `/daplug:prompts` | Analyze prompts folder and recommend next steps |
 | `/daplug:qwen-cli` | Run task with local Qwen model via Codex CLI |
+| `/daplug:run-at-prompt` | Run existing prompts with agent-team orchestration (phase groups + auto-deps) |
 | `/daplug:run-prompt` | Execute prompts with various AI models |
 | `/daplug:sprint` | Automated sprint planning from specs or existing prompts |
 | `/daplug:uvc` | Update docs and push to version control |
 | `/daplug:zai-cli` | Run task with Z.AI GLM-4.7 via Codex CLI |
-| `/daplug:opencode-cli` | Run task with Z.AI GLM-4.7 via OpenCode CLI (recommended) |
 
 ### Agents (5)
 
