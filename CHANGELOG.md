@@ -2,6 +2,12 @@
 
 All notable changes to daplug are documented here.
 
+## [0.23.2] - 2026-02-15
+
+### Added
+- **PostToolUse git push hook** (GitHub Issue #7): Automatically nudges Claude to spawn `pipeline-deploy-monitor` after successful `git push` commands
+  - Supports `auto_pipeline_monitor: disabled` in `<daplug_config>` to turn off the behavior per project/user config
+
 ## [0.23.1] - 2026-02-07
 
 ### Added

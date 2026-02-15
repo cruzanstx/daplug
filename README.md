@@ -73,7 +73,8 @@ Clone/copy this plugin to one of:
 | `worktree` | Manage git worktrees for isolated development |
 
 ### Hooks
-- `example-hook.json` - Example hook (logs before bash commands)
+- `hooks/hooks.json` - PostToolUse hook that nudges Claude to spawn `pipeline-deploy-monitor` after successful `git push`
+- `hooks/scripts/post-push-detect.sh` - Detects `git push` and respects `auto_pipeline_monitor: disabled` in `<daplug_config>`
 
 ### MCP Servers
 - `servers.json` - Placeholder MCP config (disabled by default)
@@ -435,6 +436,7 @@ cli_logs_dir: ~/.claude/cli-logs/
 | `llms_txt_dir` | Running `/daplug:create-llms-txt` | `../llms_txt` |
 | `ai_usage_awareness` | Running `/daplug:create-prompt` (when choosing executor) | Asks user (enabled/disabled) |
 | `cli_logs_dir` | Not prompted (advanced) | `~/.claude/cli-logs/` |
+| `auto_pipeline_monitor` | Not prompted (advanced) | `enabled` |
 
 Settings are checked in order: project `./CLAUDE.md` → user `~/.claude/CLAUDE.md`
 
