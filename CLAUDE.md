@@ -234,3 +234,34 @@ python3 skills/prompt-executor/scripts/executor.py --help | grep model-name
 # Test command generation
 python3 skills/prompt-executor/scripts/executor.py 001 --model model-name
 ```
+
+## Releasing
+
+The Claude Code plugin system resolves versions from **git tags**, not from `plugin.json` alone. Every version bump must have a corresponding git tag or `claude plugin update` won't see it.
+
+### Release Checklist
+
+1. Bump version in `.claude-plugin/plugin.json`
+2. Commit the change
+3. Create a matching git tag: `git tag v<version>`
+4. Push both: `git push origin main && git push origin v<version>`
+5. Create the GitHub release: `gh release create v<version> --title "v<version>" --notes "..."`
+
+### Quick Release
+
+```bash
+# After committing the version bump:
+VERSION=$(jq -r .version .claude-plugin/plugin.json)
+git tag "v$VERSION"
+git push origin main "v$VERSION"
+gh release create "v$VERSION" --title "v$VERSION" --generate-notes
+```
+
+### Common Mistake
+
+If you bump `plugin.json` and push without tagging, `claude plugin update` will report the **old** version as latest. Fix by tagging the commit retroactively:
+
+```bash
+git tag v<version> <commit-sha>
+git push origin v<version>
+```
