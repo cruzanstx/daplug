@@ -144,6 +144,9 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 
 | Shorthand | CLI | Actual Model |
 |-----------|-----|--------------|
+| `claude` | subagent | Claude Code Task subagent (configured in Claude Code) |
+| `cc-sonnet` | claude | sonnet (Claude Sonnet 4.5 alias) |
+| `cc-opus` | claude | opus (Claude Opus 4.6 alias) |
 | `codex` | codex | gpt-5.3-codex |
 | `codex-high` | codex | gpt-5.3-codex (high reasoning) |
 | `codex-xhigh` | codex | gpt-5.3-codex (xhigh reasoning) |

@@ -125,8 +125,29 @@ _SHORTHAND: dict[str, _ModelRequest] = {
         model_id="lmstudio:qwen3-4b-2507",
         force_cli="opencode",
     ),
-    # Claude (subagent path; no external command)
+    # Claude Code (claude CLI)
+    #
+    # Notes:
+    # - "claude" remains the generic Anthropic family shorthand used by daplug. The executor may still
+    #   treat it specially (e.g., subagent path inside Claude Code), but routing should be able to
+    #   produce a runnable command when the claude CLI is installed.
+    # - "cc-*" shorthands are intended to force Claude Code execution with explicit model selection.
     "claude": _ModelRequest("claude", family="anthropic", model_id="anthropic:claude", force_cli="claude"),
+    "cc-sonnet": _ModelRequest(
+        "cc-sonnet",
+        family="anthropic",
+        # Claude Code accepts aliases like "sonnet" or full model names (see `claude --help`).
+        model_id="anthropic:sonnet",
+        force_cli="claude",
+        strict_cli=True,
+    ),
+    "cc-opus": _ModelRequest(
+        "cc-opus",
+        family="anthropic",
+        model_id="anthropic:opus",
+        force_cli="claude",
+        strict_cli=True,
+    ),
 }
 
 _ALIASES: dict[str, str] = {
@@ -383,9 +404,32 @@ def _resolve_local_model(
 def _build_command(cli: str, model_id: str, request: _ModelRequest) -> list[str]:
     cli = cli.strip().lower()
 
-    # Claude is handled by the /run-prompt Task subagent path; no external command.
     if cli == "claude":
-        return []
+        # Claude Code supports one-shot execution with `--print` and stdin input.
+        #
+        # We intentionally avoid passing the prompt as an argv argument to reduce the risk of
+        # argv-length limits and shell escaping issues for large prompts.
+        cmd: list[str] = [
+            "claude",
+            "--print",
+            "--no-session-persistence",
+            "--output-format",
+            "text",
+            "--input-format",
+            "text",
+            # Ensure headless operation never blocks on permission prompts.
+            "--permission-mode",
+            "dontAsk",
+        ]
+
+        # "anthropic:claude" is a daplug internal placeholder meaning "use whatever Claude Code is
+        # configured to use". Do not pass "--model claude" because the claude CLI expects aliases
+        # like "sonnet"/"opus" or a full model name.
+        model = _strip_provider_prefix(model_id)
+        if model and model != "claude":
+            cmd.extend(["--model", model])
+
+        return cmd
 
     if cli == "codex":
         cmd: list[str] = ["codex", "exec", "--full-auto"]

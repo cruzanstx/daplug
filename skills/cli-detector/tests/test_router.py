@@ -588,14 +588,34 @@ class TestLocalModels:
 
 
 class TestClaudeModel:
-    """Test Claude model (subagent path)."""
+    """Test Claude Code CLI command generation."""
 
-    def test_claude_returns_empty_command(self, full_cache):
+    def test_claude_returns_headless_command(self, full_cache):
         cli, model_id, cmd = router.resolve_model("claude")
         assert cli == "claude"
         assert "claude" in model_id
-        # Claude uses subagent, no external command
-        assert cmd == []
+        assert cmd[0] == "claude"
+        assert "--print" in cmd or "-p" in cmd
+        assert "--input-format" in cmd
+        assert "--permission-mode" in cmd
+        # Base shorthand should not force a specific model (uses Claude Code config defaults).
+        assert "--model" not in cmd
+
+    @pytest.mark.parametrize(
+        "shorthand,expected_model",
+        [
+            ("cc-sonnet", "sonnet"),
+            ("cc-opus", "opus"),
+        ],
+    )
+    def test_cc_models_force_model_selection(self, full_cache, shorthand, expected_model):
+        cli, model_id, cmd = router.resolve_model(shorthand)
+        assert cli == "claude"
+        assert model_id.endswith(f":{expected_model}")
+        assert cmd[0] == "claude"
+        assert "--model" in cmd
+        idx = cmd.index("--model")
+        assert cmd[idx + 1] == expected_model
 
 
 class TestAllModelsHaveValidCommands:
@@ -607,7 +627,7 @@ class TestAllModelsHaveValidCommands:
             cli, model_id, cmd = router.resolve_model(shorthand)
             assert cli is not None, f"{shorthand} returned None cli"
             assert model_id is not None, f"{shorthand} returned None model_id"
-            # cmd can be [] for claude, but should be a list
+            # cmd should be a list (may be empty in exceptional cases, but should not be None)
             assert isinstance(cmd, list), f"{shorthand} cmd is not a list"
 
     def test_all_aliases_resolve(self, full_cache):

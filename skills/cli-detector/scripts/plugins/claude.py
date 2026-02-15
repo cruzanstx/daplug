@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 from typing import Any, Optional
 
 from fixer import deep_merge_defaults, load_template
 
-from .base import ConfigIssue, ModelInfo, SimpleCLIPlugin, _strip_jsonc
+from .base import ConfigIssue, ModelInfo, SimpleCLIPlugin, _run_command, _strip_jsonc
 
 
 class ClaudeCLI(SimpleCLIPlugin):
@@ -60,6 +59,35 @@ class ClaudeCLI(SimpleCLIPlugin):
             return []
 
         issues: list[ConfigIssue] = []
+
+        # Prefer first-party auth detection over env var checks. Claude Code can authenticate via
+        # `claude auth login` (subscription plans), which does not require ANTHROPIC_API_KEY.
+        auth_raw = _run_command(["claude", "auth", "status"], timeout_s=2.0)
+        if auth_raw:
+            try:
+                auth = json.loads(auth_raw)
+            except json.JSONDecodeError:
+                auth = None
+            if isinstance(auth, dict) and auth.get("loggedIn") is False:
+                issues.append(
+                    ConfigIssue(
+                        type="auth",
+                        severity="error",
+                        message="Claude Code is not logged in (run `claude auth login`)",
+                        fix_available=False,
+                    )
+                )
+        else:
+            # Non-fatal: don't block routing just because auth status couldn't be checked.
+            issues.append(
+                ConfigIssue(
+                    type="auth_status_unknown",
+                    severity="warning",
+                    message="Unable to determine Claude Code auth status (claude auth status returned no output)",
+                    fix_available=False,
+                )
+            )
+
         active_path, config, parse_error = self._resolve_active_config()
         preferred_path = self.get_config_paths()[0] if self.get_config_paths() else Path("~/.claude/settings.json")
 
@@ -83,16 +111,6 @@ class ClaudeCLI(SimpleCLIPlugin):
                     fix_available=True,
                     fix_description="Replace with known-good template",
                     config_path=str(active_path),
-                )
-            )
-
-        if not os.environ.get("ANTHROPIC_API_KEY"):
-            issues.append(
-                ConfigIssue(
-                    type="missing_api_key",
-                    severity="error",
-                    message="ANTHROPIC_API_KEY not set",
-                    fix_available=False,
                 )
             )
 

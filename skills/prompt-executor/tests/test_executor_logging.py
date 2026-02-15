@@ -404,3 +404,71 @@ def test_run_verification_loop_fails_cleanly_when_execution_cwd_missing(tmp_path
     assert state["status"] == "failed"
     assert state["execution_cwd"] == str(missing_cwd)
     assert "does not exist" in state.get("failure_reason", "")
+
+
+def test_get_cli_info_uses_router_for_cc_models(monkeypatch):
+    """Executor should use cli-detector router when available for cc-* models."""
+    repo_root = Path(__file__).resolve().parents[3]
+
+    # Ensure claude CLI presence check doesn't depend on the host environment.
+    monkeypatch.setattr(executor.shutil, "which", lambda name: "/usr/bin/claude" if name == "claude" else None)
+
+    router_dir = repo_root / "skills" / "cli-detector" / "scripts"
+    assert router_dir.exists()
+    if str(router_dir) not in sys.path:
+        sys.path.append(str(router_dir))
+    import router as imported_router  # noqa: E402
+
+    expected_cmd = ["claude", "--print", "--input-format", "text"]
+    monkeypatch.setattr(imported_router, "resolve_model", lambda *_a, **_k: ("claude", "anthropic:sonnet", expected_cmd))
+
+    info = executor.get_cli_info("cc-sonnet", repo_root=repo_root)
+    assert info["command"] == expected_cmd
+    assert info["stdin_mode"] == "stdin"
+
+
+def test_run_cli_stdin_mode_does_not_put_prompt_in_argv(tmp_path, monkeypatch):
+    """Large prompts should be passed via stdin for claude CLI runs (avoid argv-length limits)."""
+    logs_dir = tmp_path / "logs"
+    logs_dir.mkdir()
+    log_file = logs_dir / "claude.log"
+
+    monkeypatch.setattr(executor.shutil, "which", lambda name: "/usr/bin/claude" if name == "claude" else None)
+
+    cli_info = executor.get_cli_info("cc-sonnet", repo_root=tmp_path)
+    assert cli_info["stdin_mode"] == "stdin"
+
+    captured = {}
+
+    class _DummyStdin:
+        def __init__(self):
+            self.data = ""
+            self.closed = False
+
+        def write(self, text: str) -> None:
+            self.data += text
+
+        def close(self) -> None:
+            self.closed = True
+
+    class _DummyProc:
+        pid = 12345
+
+        def __init__(self):
+            self.stdin = _DummyStdin()
+
+    def fake_popen(cmd, **kwargs):
+        captured["cmd"] = list(cmd)
+        proc = _DummyProc()
+        captured["stdin"] = proc.stdin
+        return proc
+
+    monkeypatch.setattr(executor.subprocess, "Popen", fake_popen)
+
+    large_prompt = "x" * 250_000
+    result = executor.run_cli(cli_info, large_prompt, cwd=str(tmp_path), log_file=log_file)
+
+    assert result["status"] == "running"
+    assert captured["cmd"] == cli_info["command"]  # prompt should not be appended to argv
+    assert captured["stdin"].data == large_prompt
+    assert captured["stdin"].closed is True
