@@ -68,8 +68,8 @@ python3 "$EXECUTOR" [prompts...] [options]
 ```
 
 **Options:**
-- `--model, -m`: claude, codex, codex-high, codex-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, zai, opencode, local, qwen, devstral
-- `--cli`: Override CLI wrapper for routed models (codex or opencode)
+- `--model, -m`: claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, zai, glm5, opencode, local, qwen, devstral, glm-local, qwen-small
+- `--cli`: Override CLI wrapper (codex, opencode, or claude; aliases: claudecode, cc)
 - `--cwd, -c`: Working directory for execution
 - `--run, -r`: Actually run the CLI (default: just return info)
 - `--info-only, -i`: Only return prompt info, no CLI details

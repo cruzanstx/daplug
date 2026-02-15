@@ -112,6 +112,34 @@ class TestCompletionMarkerDetection(unittest.TestCase):
 class TestGetCliInfo(unittest.TestCase):
     """Tests for get_cli_info() model configuration."""
 
+    def test_cli_override_normalizes_to_claude(self):
+        """Verify --cli aliases (cc/claudecode) normalize to claude and produce a runnable command."""
+        from unittest.mock import patch
+
+        for alias in ["claude", "claudecode", "cc"]:
+            with patch.object(executor.shutil, "which", return_value="/usr/bin/claude"):
+                info = executor.get_cli_info("claude", cli_override=alias)
+            self.assertEqual(info["command"][0], "claude")
+            self.assertEqual(info["stdin_mode"], "stdin")
+
+    def test_cc_models_force_claude_cli(self):
+        """Verify cc-* model shorthands are wired and select the intended Claude Code model aliases."""
+        from unittest.mock import patch
+
+        with patch.object(executor.shutil, "which", return_value="/usr/bin/claude"):
+            sonnet = executor.get_cli_info("cc-sonnet")
+            opus = executor.get_cli_info("cc-opus")
+
+        self.assertEqual(sonnet["command"][0], "claude")
+        self.assertIn("--model", sonnet["command"])
+        self.assertEqual(sonnet["command"][sonnet["command"].index("--model") + 1], "sonnet")
+        self.assertEqual(sonnet["stdin_mode"], "stdin")
+
+        self.assertEqual(opus["command"][0], "claude")
+        self.assertIn("--model", opus["command"])
+        self.assertEqual(opus["command"][opus["command"].index("--model") + 1], "opus")
+        self.assertEqual(opus["stdin_mode"], "stdin")
+
     def test_opencode_model_exists(self):
         """Verify opencode model is configured."""
         info = executor.get_cli_info("opencode")
@@ -158,19 +186,23 @@ class TestGetCliInfo(unittest.TestCase):
 
     def test_all_models_have_required_keys(self):
         """Verify all models have required configuration keys."""
+        from unittest.mock import patch
+
         models = [
-            "claude", "codex", "codex-high", "codex-xhigh",
+            "claude", "cc-sonnet", "cc-opus",
+            "codex", "codex-high", "codex-xhigh",
             "gpt52", "gpt52-high", "gpt52-xhigh",
             "gemini", "gemini-high", "gemini-xhigh",
             "zai", "opencode", "local", "qwen", "devstral",
             "glm-local", "qwen-small"
         ]
-        for model in models:
-            info = executor.get_cli_info(model)
-            self.assertIn("command", info, f"{model} missing 'command'")
-            self.assertIn("display", info, f"{model} missing 'display'")
-            self.assertIn("env", info, f"{model} missing 'env'")
-            self.assertIn("stdin_mode", info, f"{model} missing 'stdin_mode'")
+        with patch.object(executor.shutil, "which", return_value="/usr/bin/claude"):
+            for model in models:
+                info = executor.get_cli_info(model)
+                self.assertIn("command", info, f"{model} missing 'command'")
+                self.assertIn("display", info, f"{model} missing 'display'")
+                self.assertIn("env", info, f"{model} missing 'env'")
+                self.assertIn("stdin_mode", info, f"{model} missing 'stdin_mode'")
 
 
 class TestPtyCommandWrapping(unittest.TestCase):

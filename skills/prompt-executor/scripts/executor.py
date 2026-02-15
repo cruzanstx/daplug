@@ -551,12 +551,25 @@ def _normalize_preferred_agent(value: Optional[str]) -> Optional[str]:
     return v
 
 
+def _normalize_cli_override(value: Optional[str]) -> Optional[str]:
+    v = (value or "").strip().lower()
+    if not v:
+        return None
+    if v in {"cc", "claudecode"}:
+        return "claude"
+    return v
+
+
 def _cli_info_from_router(cli_name: str, model_id: str, cmd: list[str], fallback: dict) -> dict:
     cli = (cli_name or "").strip().lower()
     if cli == "claude":
-        info = dict(fallback.get("claude", {}))
-        info["display"] = f"claude ({model_id})"
-        return info
+        return {
+            "command": cmd,
+            "display": f"claude ({model_id})",
+            "env": {},
+            # Claude Code reads prompt content from stdin in --print mode.
+            "stdin_mode": "stdin",
+        }
 
     if cli == "codex":
         stdin_mode = "dash"
@@ -587,9 +600,38 @@ def get_cli_info(model: str, repo_root: Optional[Path] = None, cli_override: Opt
     stdin_mode: How to pass prompt content
       - "dash": Use '-' as last arg, pipe content to stdin (codex)
       - "arg": Pass content as command line argument (gemini)
+      - "stdin": Pipe content to stdin (claude --print)
       - None: Handled by Task subagent (claude)
     """
-    cli_override = (cli_override or "").strip().lower() or None
+    cli_override = _normalize_cli_override(cli_override)
+
+    def _claude_cli_command(model_flag: Optional[str] = None) -> list[str]:
+        # One-shot/headless Claude Code invocation. Prompt content is provided via stdin.
+        cmd = [
+            "claude",
+            "--print",
+            "--no-session-persistence",
+            "--output-format",
+            "text",
+            "--input-format",
+            "text",
+            "--permission-mode",
+            "dontAsk",
+        ]
+        if model_flag:
+            cmd.extend(["--model", model_flag])
+        return cmd
+
+    def _require_claude_cli() -> None:
+        if shutil.which("claude"):
+            return
+        raise RuntimeError(
+            "Claude Code CLI ('claude') not found in PATH.\n"
+            "Install Claude Code and run `/daplug:detect-clis` to refresh daplug's CLI cache."
+        )
+
+    if cli_override == "claude" and model not in {"claude", "cc-sonnet", "cc-opus"}:
+        raise ValueError("--cli claude is only supported with --model claude, cc-sonnet, or cc-opus")
     legacy_local_codex = {
         "local": {
             "command": ["codex", "exec", "--full-auto", "--profile", "local"],
@@ -752,6 +794,18 @@ def get_cli_info(model: str, repo_root: Optional[Path] = None, cli_override: Opt
             "env": {},
             "stdin_mode": "arg"
         },
+        "cc-sonnet": {
+            "command": _claude_cli_command("sonnet"),
+            "display": "cc-sonnet (Claude Sonnet 4.5 via Claude Code)",
+            "env": {},
+            "stdin_mode": "stdin"
+        },
+        "cc-opus": {
+            "command": _claude_cli_command("opus"),
+            "display": "cc-opus (Claude Opus 4.6 via Claude Code)",
+            "env": {},
+            "stdin_mode": "stdin"
+        },
         "claude": {
             "command": [],  # Handled by Task subagent
             "display": "claude (Claude Sonnet)",
@@ -761,6 +815,15 @@ def get_cli_info(model: str, repo_root: Optional[Path] = None, cli_override: Opt
     }
     if model in {"local", "qwen", "devstral", "glm-local", "qwen-small"} and cli_override != "codex":
         return models[model]
+
+    # Preserve backwards compatibility: default "claude" model is the Task subagent path.
+    if model == "claude" and cli_override is None:
+        return models["claude"]
+
+    wants_claude_cli = model in {"cc-sonnet", "cc-opus"} or (model == "claude" and cli_override == "claude")
+    if wants_claude_cli:
+        _require_claude_cli()
+
     repo_root = repo_root or get_repo_root()
     preferred = cli_override or _normalize_preferred_agent(_read_config_value(repo_root, "preferred_agent"))
 
@@ -774,9 +837,33 @@ def get_cli_info(model: str, repo_root: Optional[Path] = None, cli_override: Opt
             import router  # type: ignore
 
             cli_name, model_id, cmd = router.resolve_model(model, preferred_cli=preferred)
-            return _cli_info_from_router(cli_name, model_id, cmd, fallback=models)
+            info = _cli_info_from_router(cli_name, model_id, cmd, fallback=models)
+            if wants_claude_cli and cli_name != "claude":
+                raise RuntimeError(
+                    f"Requested Claude Code CLI ('claude') but router selected '{cli_name}'.\n"
+                    "Run `/daplug:detect-clis` to refresh the cache, and ensure Claude Code is installed."
+                )
+            return info
     except Exception:
-        pass
+        if wants_claude_cli:
+            # Router/cache missing or misconfigured; fall back to the local claude CLI directly.
+            if model == "claude":
+                return {
+                    "command": _claude_cli_command(),
+                    "display": "claude (Claude Code CLI)",
+                    "env": {},
+                    "stdin_mode": "stdin",
+                }
+            return models[model]
+
+    # Router module not available in this checkout; keep --cli claude usable.
+    if wants_claude_cli and model == "claude":
+        return {
+            "command": _claude_cli_command(),
+            "display": "claude (Claude Code CLI)",
+            "env": {},
+            "stdin_mode": "stdin",
+        }
 
     return models.get(model, models["claude"])
 
@@ -1289,6 +1376,7 @@ def run_cli(cli_info: dict, content: str, cwd: str, log_file: Path) -> dict:
     Uses stdin_mode to determine how to pass prompts:
     - "dash": Use '-' as last arg, pipe content to stdin (codex)
     - "arg": Pass content as command line argument (gemini)
+    - "stdin": Pipe content directly to stdin (claude --print)
 
     If needs_pty is True, wraps command with 'script' to provide a pseudo-TTY.
     """
@@ -1321,6 +1409,21 @@ def run_cli(cli_info: dict, content: str, cwd: str, log_file: Path) -> dict:
             start_new_session=True
         )
         # Write prompt content to stdin and close
+        process.stdin.write(content)
+        process.stdin.close()
+    elif stdin_mode == "stdin":
+        # Claude-style: read prompt from stdin (no extra "-" arg)
+        full_cmd = cli_info["command"] + extra_args
+        process = subprocess.Popen(
+            full_cmd,
+            cwd=cwd,
+            stdin=subprocess.PIPE,
+            stdout=log_handle,
+            stderr=subprocess.STDOUT,
+            env=env,
+            text=True,
+            start_new_session=True,
+        )
         process.stdin.write(content)
         process.stdin.close()
     else:
@@ -1385,6 +1488,20 @@ def run_cli_foreground(cli_info: dict, content: str, cwd: str, log_file: Path) -
                 text=True
             )
             # Write prompt content to stdin and close
+            process.stdin.write(content)
+            process.stdin.close()
+            exit_code = process.wait()
+        elif stdin_mode == "stdin":
+            full_cmd = cli_info["command"] + extra_args
+            process = subprocess.Popen(
+                full_cmd,
+                cwd=cwd,
+                stdin=subprocess.PIPE,
+                stdout=log_handle,
+                stderr=subprocess.STDOUT,
+                env=env,
+                text=True,
+            )
             process.stdin.write(content)
             process.stdin.close()
             exit_code = process.wait()
@@ -1763,7 +1880,8 @@ def main():
     parser = argparse.ArgumentParser(description="Resolve and execute prompts")
     parser.add_argument("prompts", nargs="*", default=[], help="Prompt number(s) or name(s)")
     parser.add_argument("--model", "-m", default="claude",
-                       choices=["claude", "codex", "codex-spark", "codex-high", "codex-xhigh",
+                       choices=["claude", "cc-sonnet", "cc-opus",
+                               "codex", "codex-spark", "codex-high", "codex-xhigh",
                                "gpt52", "gpt52-high", "gpt52-xhigh",
                                "gemini", "gemini-high", "gemini-xhigh",
                                "gemini25pro", "gemini25flash", "gemini25lite",
@@ -1771,7 +1889,7 @@ def main():
                                "local", "qwen", "devstral",
                                "glm-local", "qwen-small"],
                        help="Model/CLI to use")
-    parser.add_argument("--cli", choices=["codex", "opencode"],
+    parser.add_argument("--cli", choices=["codex", "opencode", "claude", "claudecode", "cc"],
                        default=None,
                        help="Override CLI wrapper (default: auto-detected per model)")
     parser.add_argument("--cwd", "-c", default=None,
@@ -1865,6 +1983,8 @@ def main():
             "repo": repo_root.name,
             "model": args.model,
             "cli_display": cli_info["display"],
+            "cli_command": cli_info["command"],
+            "stdin_mode": cli_info.get("stdin_mode"),
             "prompts": []
         }
 
