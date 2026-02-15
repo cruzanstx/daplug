@@ -2,6 +2,13 @@
 
 All notable changes to daplug are documented here.
 
+## [0.23.5] - 2026-02-15
+
+### Added
+- **Claude Code CLI execution**: Run prompts headlessly through the local `claude` CLI
+  - New executor `--cli` override: `--cli claude` (aliases: `claudecode`, `cc`)
+  - New model shorthands: `cc-sonnet` and `cc-opus` (routes through Claude Code model aliases)
+
 ## [0.23.4] - 2026-02-15
 
 ### Added

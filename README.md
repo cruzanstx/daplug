@@ -155,6 +155,8 @@ Commands below are shown without the `/daplug:` prefix for readability. In Claud
 ### Run Across Multiple Models
 ```bash
 /run-prompt 005 --model codex        # OpenAI Codex
+/run-prompt 005 --model cc-sonnet    # Claude Code CLI (Sonnet)
+/run-prompt 005 --model cc-opus      # Claude Code CLI (Opus)
 /run-prompt 005 --model gemini       # Google Gemini 3 Flash
 /run-prompt 005 --model opencode     # Z.AI GLM-4.7 (recommended)
 /run-prompt 005 --model zai          # Z.AI GLM-4.7 (via Codex)
@@ -185,6 +187,11 @@ Local models (`local`, `qwen`, `devstral`) now run through **OpenCode** by defau
 ```
 
 ## Recent Changes
+
+### v0.23.5 (2026-02-15)
+- **Claude Code CLI execution**: Run prompts headlessly through the local `claude` CLI
+  - New executor `--cli` override: `--cli claude` (aliases: `claudecode`, `cc`)
+  - New model shorthands: `cc-sonnet` and `cc-opus`
 
 ### v0.23.4 (2026-02-15)
 - **`/install-bridges` command**: Install daplug command bridges for other AI coding runtimes (currently supports OpenCode)
