@@ -802,7 +802,7 @@ def get_cli_info(model: str, repo_root: Optional[Path] = None, cli_override: Opt
         },
         "cc-sonnet": {
             "command": _claude_cli_command("sonnet"),
-            "display": "cc-sonnet (Claude Sonnet 4.5 via Claude Code)",
+            "display": "cc-sonnet (Claude Sonnet 4.6 via Claude Code)",
             "env": {},
             "stdin_mode": "stdin"
         },
