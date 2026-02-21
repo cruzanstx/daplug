@@ -121,7 +121,7 @@ def test_get_routing_table_shows_all_options(monkeypatch):
     monkeypatch.setattr(router, "load_cache_file", lambda: fake)
 
     table = router.get_routing_table()
-    for key in ["codex", "gemini", "local", "opencode", "claude"]:
+    for key in ["codex", "gemini", "gemini31pro", "local", "opencode", "claude"]:
         assert key in table
 
 
@@ -463,6 +463,7 @@ class TestGeminiModels:
             ("gemini25lite", "gemini-2.5-flash-lite"),
             ("gemini3flash", "gemini-3-flash-preview"),
             ("gemini3pro", "gemini-3-pro-preview"),
+            ("gemini31pro", "gemini-3.1-pro-preview"),
         ],
     )
     def test_gemini_models(self, full_cache, shorthand, expected_model):

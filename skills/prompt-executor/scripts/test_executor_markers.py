@@ -180,7 +180,17 @@ class TestGetCliInfo(unittest.TestCase):
 
     def test_gemini_models_no_pty(self):
         """Verify gemini models don't require PTY."""
-        for model in ["gemini", "gemini-high", "gemini-xhigh"]:
+        for model in [
+            "gemini",
+            "gemini-high",
+            "gemini-xhigh",
+            "gemini25pro",
+            "gemini25flash",
+            "gemini25lite",
+            "gemini3flash",
+            "gemini3pro",
+            "gemini31pro",
+        ]:
             info = executor.get_cli_info(model)
             self.assertFalse(info.get("needs_pty", False), f"{model} should not need PTY")
 
@@ -193,6 +203,8 @@ class TestGetCliInfo(unittest.TestCase):
             "codex", "codex-high", "codex-xhigh",
             "gpt52", "gpt52-high", "gpt52-xhigh",
             "gemini", "gemini-high", "gemini-xhigh",
+            "gemini25pro", "gemini25flash", "gemini25lite",
+            "gemini3flash", "gemini3pro", "gemini31pro",
             "zai", "opencode", "local", "qwen", "devstral",
             "glm-local", "qwen-small"
         ]

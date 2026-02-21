@@ -68,7 +68,7 @@ python3 "$EXECUTOR" [prompts...] [options]
 ```
 
 **Options:**
-- `--model, -m`: claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, zai, glm5, opencode, local, qwen, devstral, glm-local, qwen-small
+- `--model, -m`: claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, opencode, local, qwen, devstral, glm-local, qwen-small
 - `--cli`: Override CLI wrapper (codex, opencode, or claude; aliases: claudecode, cc)
 - `--cwd, -c`: Working directory for execution
 - `--run, -r`: Actually run the CLI (default: just return info)
@@ -198,7 +198,15 @@ python3 "$EXECUTOR" --loop-status
 | gpt52 | codex exec --full-auto -m gpt-5.2 | GPT-5.2 for planning/research |
 | gpt52-high | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="high" | GPT-5.2 with high reasoning |
 | gpt52-xhigh | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="xhigh" | GPT-5.2 with xhigh reasoning |
-| gemini | gemini -y | Google Gemini 2.5 Pro |
+| gemini | gemini -y -m gemini-3-flash-preview | Google Gemini 3 Flash Preview (default) |
+| gemini-high | gemini -y -m gemini-2.5-pro | Google Gemini 2.5 Pro (stable) |
+| gemini-xhigh | gemini -y -m gemini-3-pro-preview | Google Gemini 3 Pro Preview |
+| gemini25pro | gemini -y -m gemini-2.5-pro | Google Gemini 2.5 Pro (explicit alias) |
+| gemini25flash | gemini -y -m gemini-2.5-flash | Google Gemini 2.5 Flash |
+| gemini25lite | gemini -y -m gemini-2.5-flash-lite | Google Gemini 2.5 Flash-Lite |
+| gemini3flash | gemini -y -m gemini-3-flash-preview | Google Gemini 3 Flash Preview (explicit alias) |
+| gemini3pro | gemini -y -m gemini-3-pro-preview | Google Gemini 3 Pro Preview (explicit alias) |
+| gemini31pro | gemini -y -m gemini-3.1-pro-preview | Gemini 3.1 Pro Preview (if your account has access) |
 | zai | codex exec --profile zai | Z.AI GLM-4.7 (via Codex, may have issues) |
 | opencode | opencode run --format json -m zai/glm-4.7 | Z.AI GLM-4.7 (via OpenCode, recommended; JSON output) |
 | local/qwen | opencode run --format json -m lmstudio/qwen3-coder-next | Local qwen-coder model (default: opencode) |

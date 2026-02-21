@@ -746,6 +746,12 @@ def get_cli_info(model: str, repo_root: Optional[Path] = None, cli_override: Opt
             "env": {},
             "stdin_mode": "arg"
         },
+        "gemini31pro": {
+            "command": ["gemini", "-y", "-m", "gemini-3.1-pro-preview", "-p"],
+            "display": "gemini31pro (Gemini 3.1 Pro Preview, if available)",
+            "env": {},
+            "stdin_mode": "arg"
+        },
         "zai": {
             "command": ["codex", "exec", "--full-auto", "--profile", "zai"],
             "display": "zai (GLM-4.7 via Codex - may have issues)",
@@ -1885,7 +1891,8 @@ def main():
                                "gpt52", "gpt52-high", "gpt52-xhigh",
                                "gemini", "gemini-high", "gemini-xhigh",
                                "gemini25pro", "gemini25flash", "gemini25lite",
-                               "gemini3flash", "gemini3pro", "zai", "glm5", "opencode",
+                               "gemini3flash", "gemini3pro", "gemini31pro",
+                               "zai", "glm5", "opencode",
                                "local", "qwen", "devstral",
                                "glm-local", "qwen-small"],
                        help="Model/CLI to use")

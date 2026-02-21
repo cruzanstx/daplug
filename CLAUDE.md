@@ -148,6 +148,7 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `cc-sonnet` | claude | sonnet (Claude Sonnet 4.5 alias) |
 | `cc-opus` | claude | opus (Claude Opus 4.6 alias) |
 | `codex` | codex | gpt-5.3-codex |
+| `codex-spark` | codex | gpt-5.3-codex-spark (low latency) |
 | `codex-high` | codex | gpt-5.3-codex (high reasoning) |
 | `codex-xhigh` | codex | gpt-5.3-codex (xhigh reasoning) |
 | `gpt52` | codex | gpt-5.2 |
@@ -156,7 +157,14 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `gemini` | gemini | gemini-3-flash-preview |
 | `gemini-high` | gemini | gemini-2.5-pro |
 | `gemini-xhigh` | gemini | gemini-3-pro-preview |
+| `gemini25pro` | gemini | gemini-2.5-pro |
+| `gemini25flash` | gemini | gemini-2.5-flash |
+| `gemini25lite` | gemini | gemini-2.5-flash-lite |
+| `gemini3flash` | gemini | gemini-3-flash-preview |
+| `gemini3pro` | gemini | gemini-3-pro-preview |
+| `gemini31pro` | gemini | gemini-3.1-pro-preview (if available) |
 | `zai` | codex | GLM-4.7 via Z.AI (may have issues) |
+| `glm5` | opencode | GLM-5 via OpenCode |
 | `opencode` | opencode | GLM-4.7 via OpenCode (recommended; JSON output) |
 | `qwen`/`local` | opencode | qwen3-coder-next via LMStudio (opencode default, --cli codex for legacy) |
 | `devstral` | opencode | devstral-small-2-2512 via LMStudio (opencode default, --cli codex for legacy) |

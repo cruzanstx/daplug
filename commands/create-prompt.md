@@ -478,7 +478,7 @@ All available models for /daplug:run-prompt --model:
 - `gemini25lite` - Gemini 2.5 Flash Lite (fastest)
 - `gemini3flash` - Gemini 3 Flash Preview (best coding)
 - `gemini3pro` - Gemini 3 Pro Preview (most capable)
-- `gemini2flash` - Gemini 2.0 Flash (legacy)
+- `gemini31pro` - Gemini 3.1 Pro Preview (latest, account-gated)
 
 **Gemini Model Mapping:**
 | Shorthand | API Model | Quota Bucket |
@@ -486,9 +486,9 @@ All available models for /daplug:run-prompt --model:
 | `gemini` / `gemini3flash` | gemini-3-flash-preview | gemini-3-flash-preview |
 | `gemini-high` / `gemini25pro` | gemini-2.5-pro | gemini-2.5-pro |
 | `gemini-xhigh` / `gemini3pro` | gemini-3-pro-preview | gemini-3-pro-preview |
+| `gemini31pro` | gemini-3.1-pro-preview | gemini-3.1-pro-preview |
 | `gemini25flash` | gemini-2.5-flash | gemini-2.5-flash |
 | `gemini25lite` | gemini-2.5-flash-lite | gemini-2.5-flash-lite |
-| `gemini2flash` | gemini-2.0-flash | gemini-2.0-flash |
 
 **Other Models:** (check: `zai.token_quota.percentage`)
 - `zai` - Z.AI GLM-4.7 (good for Chinese language tasks)
@@ -496,6 +496,8 @@ All available models for /daplug:run-prompt --model:
 - `local` - Local model via opencode + LMStudio (no quota limits)
 - `qwen` - Qwen via opencode + LMStudio (no quota limits)
 - `devstral` - Devstral via opencode + LMStudio (multimodal/vision, no quota limits)
+- `glm-local` - Local GLM-4.7 Flash via opencode + LMStudio (no quota limits)
+- `qwen-small` - Local qwen3-4b model via opencode + LMStudio (small/fast)
 </available_models>
 
 <recommendation_logic>
@@ -514,15 +516,15 @@ For each model family, determine status:
 | Task Type         | Primary Choice             | Fallback if Primary Unavailable                  | Flags        |
 |-------------------|----------------------------|--------------------------------------------------|--------------|
 | Test/Playwright   | codex or codex-high        | codex-spark, gemini3flash                        | `--loop`     |
-| Research/Analysis | gpt52-xhigh or claude      | gpt52-high, gemini25pro                          |              |
+| Research/Analysis | gpt52-xhigh or claude      | gpt52-high, gemini31pro (if available), gemini25pro |          |
 | Refactoring       | codex or preferred_agent   | claude, gemini3flash                             |              |
 | Simple coding     | codex-spark or zai         | gemini25flash, codex                             |              |
-| Complex logic     | gpt52-high or claude       | gpt52-xhigh, gemini3pro                          |              |
+| Complex logic     | gpt52-high or claude       | gpt52-xhigh, gemini31pro (if available), gemini3pro |         |
 | Vision/Multimodal | devstral                   | gemini25pro, claude                              |              |
-| Frontend/UI       | claude or gemini25pro      | gemini3pro, codex-high                           |              |
+| Frontend/UI       | claude or gemini25pro      | gemini31pro (if available), gemini3pro, codex-high |          |
 | Backend/API       | codex or codex-high        | gemini3flash, claude                             |              |
 | Debugging         | gpt52 or claude            | gemini25pro, codex-xhigh                         |              |
-| Performance       | codex-xhigh or claude      | gemini3pro, gemini25pro                          |              |
+| Performance       | codex-xhigh or claude      | gemini31pro (if available), gemini3pro, gemini25pro |         |
 | Documentation     | gemini25flash or claude    | zai, glm5                                        |              |
 | DevOps/Infra      | codex or gemini25flash     | glm5, gemini3flash                               |              |
 | Database/SQL      | codex or codex-high        | gemini3flash, claude                             |              |
@@ -538,8 +540,8 @@ Show a brief usage summary like:
   Claude: 18% (5h) ✅ | Codex: 0% (5h) ✅ | Gemini: varies | Z.AI: 1% ✅
 
   Gemini models:
-    3-flash: 7% ✅ | 2.5-pro: 10% ✅ | 3-pro: 10% ✅
-    2.5-flash: 1% ✅ | 2.5-lite: 1% ✅ | 2.0-flash: 1% ✅
+    3-flash: 7% ✅ | 2.5-pro: 10% ✅ | 3-pro: 10% ✅ | 3.1-pro: 4% ✅
+    2.5-flash: 1% ✅ | 2.5-lite: 1% ✅
 ```
 
 If `preferred_agent` is set AND available, it should appear first as "(Recommended)".
@@ -616,7 +618,7 @@ If user chooses "Run prompt now":
   Claude: {X}% (5h) {status} | Codex: {X}% (5h) {status} | Z.AI: {X}% {status}
 
   Gemini models:
-    3-flash: {X}% {status} | 2.5-pro: {X}% {status} | 3-pro: {X}% {status}
+    3-flash: {X}% {status} | 2.5-pro: {X}% {status} | 3-pro: {X}% {status} | 3.1-pro: {X}% {status}
     2.5-flash: {X}% {status} | 2.5-lite: {X}% {status}
 
   Execute via:
@@ -641,11 +643,12 @@ If user chooses "Run prompt now":
   11. gemini25flash - {X}% used - fast, cost-effective
   12. gemini25pro - {X}% used - stable, capable
   13. gemini3pro - {X}% used - most capable
+  14. gemini31pro - {X}% used - Gemini 3.1 Pro Preview (if available)
 
   **Other:**
-  14. zai - {X}% used - Z.AI GLM-4.7
-  15. glm5 - {X}% used - Z.AI GLM-5 (higher-capability tier)
-  16. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
+  15. zai - {X}% used - Z.AI GLM-4.7
+  16. glm5 - {X}% used - Z.AI GLM-5 (higher-capability tier)
+  17. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation based on detection_logic, recommendation_logic, AND availability]
   [If preferred_agent is unavailable: "⚠️ Your preferred agent ({preferred_agent}) is at {X}% - suggesting {fallback} instead"]
@@ -658,7 +661,7 @@ If user chooses "Run prompt now":
 
   [If is_verification_prompt or is_test_prompt: "Recommended: Add --loop for automatic retry until tests/build pass"]
 
-  Choose (1-16), or type model with flags (e.g., 'codex --loop'): _"
+  Choose (1-17), or type model with flags (e.g., 'codex --loop'): _"
 
   **Execute based on selection:**
 
@@ -668,7 +671,7 @@ If user chooses "Run prompt now":
   If user selects Claude worktree (option 2):
     Invoke via Skill tool: `/daplug:run-prompt 005 --worktree`
 
-  If user selects any other model (options 3-16):
+  If user selects any other model (options 3-17):
     Invoke via Skill tool: `/daplug:run-prompt 005 --model {selected_model}`
     (Add `--worktree` and/or `--loop` if user requests)
 
@@ -753,7 +756,7 @@ If user chooses to run prompts in parallel or sequential:
   "📊 **AI Quota Status:**
   Claude: {X}% (5h) {status} | Codex: {X}% (5h) {status} | Z.AI: {X}% {status}
 
-  Gemini: 3-flash {X}% | 2.5-pro {X}% | 3-pro {X}% | 2.5-flash {X}%
+  Gemini: 3-flash {X}% | 2.5-pro {X}% | 3-pro {X}% | 3.1-pro {X}% | 2.5-flash {X}%
 
   Execute via:
 
@@ -777,11 +780,12 @@ If user chooses to run prompts in parallel or sequential:
   11. gemini25flash - {X}% used
   12. gemini25pro - {X}% used
   13. gemini3pro - {X}% used
+  14. gemini31pro - {X}% used (if available)
 
   **Other:**
-  14. zai - {X}% used
-  15. glm5 - {X}% used
-  16. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
+  15. zai - {X}% used
+  16. glm5 - {X}% used
+  17. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation based on detection_logic, recommendation_logic, AND availability]
   [If preferred_agent is unavailable: "⚠️ {preferred_agent} at {X}% - suggesting {fallback}"]
@@ -793,7 +797,7 @@ If user chooses to run prompts in parallel or sequential:
 
   [If is_verification_prompt or is_test_prompt: "Recommended: Add --loop for automatic retry until tests/build pass"]
 
-  Choose (1-16), or type model with flags (e.g., 'codex --loop'): _"
+  Choose (1-17), or type model with flags (e.g., 'codex --loop'): _"
 
   **Execute based on selection:**
 
@@ -804,7 +808,7 @@ If user chooses to run prompts in parallel or sequential:
     If user selects Claude worktree (option 2):
       Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --worktree --parallel`
 
-    If user selects any other model (options 3-16):
+    If user selects any other model (options 3-17):
       Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --model {selected_model} --parallel`
       (Add `--worktree` and/or `--loop` if user requests)
 
@@ -815,7 +819,7 @@ If user chooses to run prompts in parallel or sequential:
     If user selects Claude worktree (option 2):
       Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --worktree --sequential`
 
-    If user selects any other model (options 3-16):
+    If user selects any other model (options 3-17):
       Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --model {selected_model} --sequential`
       (Add `--worktree` and/or `--loop` if user requests)
 
@@ -901,7 +905,7 @@ If user chooses "Run prompts sequentially now":
   "📊 **AI Quota Status:**
   Claude: {X}% (5h) {status} | Codex: {X}% (5h) {status} | Z.AI: {X}% {status}
 
-  Gemini: 3-flash {X}% | 2.5-pro {X}% | 3-pro {X}% | 2.5-flash {X}%
+  Gemini: 3-flash {X}% | 2.5-pro {X}% | 3-pro {X}% | 3.1-pro {X}% | 2.5-flash {X}%
 
   Execute via:
 
@@ -925,11 +929,12 @@ If user chooses "Run prompts sequentially now":
   11. gemini25flash - {X}% used
   12. gemini25pro - {X}% used
   13. gemini3pro - {X}% used
+  14. gemini31pro - {X}% used (if available)
 
   **Other:**
-  14. zai - {X}% used
-  15. glm5 - {X}% used
-  16. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
+  15. zai - {X}% used
+  16. glm5 - {X}% used
+  17. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation based on detection_logic, recommendation_logic, AND availability]
   [If preferred_agent is unavailable: "⚠️ {preferred_agent} at {X}% - suggesting {fallback}"]
@@ -941,7 +946,7 @@ If user chooses "Run prompts sequentially now":
 
   [If is_verification_prompt or is_test_prompt: "Recommended: Add --loop for automatic retry until tests/build pass"]
 
-  Choose (1-16), or type model with flags (e.g., 'codex --loop'): _"
+  Choose (1-17), or type model with flags (e.g., 'codex --loop'): _"
 
   **Execute based on selection:**
 
@@ -951,7 +956,7 @@ If user chooses "Run prompts sequentially now":
   If user selects Claude worktree (option 2):
     Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --worktree --sequential`
 
-  If user selects any other model (options 3-16):
+  If user selects any other model (options 3-17):
     Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --model {selected_model} --sequential`
     (Add `--worktree` and/or `--loop` if user requests)
 
@@ -971,7 +976,7 @@ If user chooses "Run first prompt only":
   If user selects Claude worktree (option 2):
     Invoke via Skill tool: `/daplug:run-prompt 005 --worktree`
 
-  If user selects any other model (options 3-16):
+  If user selects any other model (options 3-17):
     Invoke via Skill tool: `/daplug:run-prompt 005 --model {selected_model}`
     (Add `--worktree` and/or `--loop` if user requests)
 </actions>

@@ -463,6 +463,7 @@ All available models for /daplug:run-prompt --model:
 
 **OpenAI Codex Family:** (check: `codex.primary_window.used`, `codex.secondary_window.used`)
 - `codex` - gpt-5.3-codex (fast, good for straightforward coding)
+- `codex-spark` - gpt-5.3-codex-spark (near-instant responses, lowest Codex cost tier)
 - `codex-high` - gpt-5.3-codex with high reasoning
 - `codex-xhigh` - gpt-5.3-codex with xhigh reasoning (complex projects)
 - `gpt52` - gpt-5.2 (planning, research, analysis)
@@ -478,12 +479,16 @@ All available models for /daplug:run-prompt --model:
 - `gemini25lite` - Gemini 2.5 Flash Lite (fastest)
 - `gemini3flash` - Gemini 3 Flash Preview (best coding)
 - `gemini3pro` - Gemini 3 Pro Preview (most capable)
+- `gemini31pro` - Gemini 3.1 Pro Preview (latest, account-gated)
 
 **Other Models:** (check: `zai.token_quota.percentage`)
 - `zai` - Z.AI GLM-4.7 (good for Chinese language tasks)
+- `glm5` - Z.AI GLM-5 (higher-capability Z.AI coding model)
 - `local` - Local model via opencode + LMStudio (no quota limits)
 - `qwen` - Qwen via opencode + LMStudio (no quota limits)
 - `devstral` - Devstral via opencode + LMStudio (no quota limits)
+- `glm-local` - Local GLM-4.7 Flash via opencode + LMStudio (no quota limits)
+- `qwen-small` - Local qwen3-4b model via opencode + LMStudio (small/fast)
 </available_models>
 
 <recommendation_logic>
@@ -493,11 +498,12 @@ For llms.txt research tasks, recommend models in this order (based on availabili
 |----------|-------|--------|
 | 1 | gpt52-xhigh | Best for research - deep reasoning, can work 30+ min |
 | 2 | gpt52-high | Great for methodical research |
-| 3 | gemini25pro | Great at comprehensive research |
-| 4 | gemini3pro | Most capable Gemini |
-| 5 | claude | Excellent reasoning but uses your quota |
-| 6 | codex-xhigh | Good for doc writing after research |
-| 7 | zai | Good fallback for documentation |
+| 3 | gemini31pro | Most capable Gemini for research (if available) |
+| 4 | gemini25pro | Great at comprehensive research |
+| 5 | gemini3pro | Strong Gemini fallback |
+| 6 | claude | Excellent reasoning but uses your quota |
+| 7 | codex-xhigh | Good for doc writing after research |
+| 8 | zai | Good fallback for documentation |
 
 **Recommended flags for llms.txt:**
 - `--worktree` - Isolate the work (can continue working on other things)
@@ -535,7 +541,7 @@ If user chooses #1:
   Claude: {X}% (5h) {status} | Codex: {X}% (5h) {status} | Z.AI: {X}% {status}
 
   Gemini models:
-    3-flash: {X}% {status} | 2.5-pro: {X}% {status} | 3-pro: {X}% {status}
+    3-flash: {X}% {status} | 2.5-pro: {X}% {status} | 3-pro: {X}% {status} | 3.1-pro: {X}% {status}
     2.5-flash: {X}% {status} | 2.5-lite: {X}% {status}
 
   Execute via:
@@ -559,10 +565,11 @@ If user chooses #1:
   10. gemini25flash - {X}% used
   11. gemini25pro - {X}% used - great for research
   12. gemini3pro - {X}% used - most capable
+  13. gemini31pro - {X}% used - Gemini 3.1 Pro Preview (if available)
 
   **Other:**
-  13. zai - {X}% used
-  14. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
+  14. zai - {X}% used
+  15. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation: "Recommended for llms.txt research: gpt52-xhigh --worktree --loop"]
   [If preferred_agent is set and available: "Your preferred agent: {preferred_agent} ✅"]
@@ -572,7 +579,7 @@ If user chooses #1:
   - `--loop` - Auto-retry until verification passes (recommended: ensures quality)
   - `--loop --max-iterations N` - Limit loop retries (default: 3)
 
-  Choose (1-14), or type model with flags (e.g., 'gpt52-xhigh --worktree --loop'): _"
+  Choose (1-15), or type model with flags (e.g., 'gpt52-xhigh --worktree --loop'): _"
 
   **Execute based on selection:**
 
@@ -586,7 +593,7 @@ If user chooses #1:
   If user selects Claude worktree (option 2):
     Invoke via Skill tool: `/daplug:run-prompt {NUMBER} --prompt-file "$LLMS_TXT_DIR/prompts/{NUMBER}-create-llms-txt-{library-name}.md" --worktree`
 
-  If user selects any other model (options 3-11):
+  If user selects any other model (options 3-15):
     Invoke via Skill tool: `/daplug:run-prompt {NUMBER} --prompt-file "$LLMS_TXT_DIR/prompts/{NUMBER}-create-llms-txt-{library-name}.md" --model {selected_model}`
     (Add `--worktree` and/or `--loop` if user requests)
 

@@ -1,7 +1,7 @@
 ---
 name: run-prompt
 description: Execute prompts from ./prompts/ with various AI models, optional worktree isolation, tmux sessions, and iterative verification loops
-argument-hint: <prompt(s)> [--model claude|cc-sonnet|cc-opus|codex|codex-spark|gemini|zai|glm5|local] [--worktree] [--tmux] [--parallel] [--loop]
+argument-hint: <prompt(s)> [--model claude|cc-sonnet|cc-opus|codex|codex-spark|gemini|gemini31pro|zai|glm5|opencode|local] [--worktree] [--tmux] [--parallel] [--loop]
 ---
 
 # Run Prompt
@@ -13,7 +13,7 @@ Execute prompts from `./prompts/` (including subfolders) using various AI models
 | Argument | Description |
 |----------|-------------|
 | `<prompt>` | Prompt number(s), range(s), or name(s) - defaults to latest |
-| `--model, -m` | claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, zai, glm5, local, qwen, devstral |
+| `--model, -m` | claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, opencode, local, qwen, devstral, glm-local, qwen-small |
 | `--cli` | Override CLI wrapper: codex, opencode, or claude (aliases: claudecode, cc) |
 | `--worktree, -w` | Run in isolated git worktree |
 | `--tmux, -t` | Run in tmux session (can monitor/attach later) |

@@ -644,7 +644,7 @@ Gemini models share quotas in tiers (observed with Google One Premium):
 
 | Tier | Models | Shorthand |
 |------|--------|-----------|
-| **Pro** | gemini-2.5-pro, gemini-3-pro-preview | `gemini-high`, `gemini-xhigh` |
+| **Pro** | gemini-2.5-pro, gemini-3-pro-preview, gemini-3.1-pro-preview | `gemini-high`, `gemini-xhigh`, `gemini31pro` |
 | **Flash** | gemini-2.5-flash, gemini-2.5-flash-lite | `gemini25flash`, `gemini25lite` |
 | **3 Flash** | gemini-3-flash-preview | `gemini` (default) |
 
@@ -661,17 +661,29 @@ Gemini models share quotas in tiers (observed with Google One Premium):
 | `gemini` | 3 Flash | Fast, daily driver (default) |
 | `gemini-high` | 2.5 Pro | Stable, more capable |
 | `gemini-xhigh` | 3 Pro | Most capable, complex tasks |
+| `gemini25pro` | 2.5 Pro | Explicit stable Pro selection |
+| `gemini3flash` | 3 Flash | Explicit 3 Flash selection |
+| `gemini3pro` | 3 Pro | Explicit 3 Pro selection |
+| `gemini31pro` | 3.1 Pro Preview | Latest Pro model (if your account has access) |
 
 ### OpenAI Model Tiers
 
 | Shorthand | Model | Best For |
 |-----------|-------|----------|
 | `codex` | gpt-5.3-codex | Fast coding execution |
+| `codex-spark` | gpt-5.3-codex-spark | Lowest-latency quick edits |
 | `codex-high` | gpt-5.3-codex (high) | Complex coding |
 | `codex-xhigh` | gpt-5.3-codex (xhigh) | Large refactors |
 | `gpt52` | gpt-5.2 | Planning, research, analysis |
 | `gpt52-high` | gpt-5.2 (high) | Deep reasoning |
 | `gpt52-xhigh` | gpt-5.2 (xhigh) | Maximum reasoning (30+ min) |
+
+### Z.AI Model Tiers
+
+| Shorthand | Model | Best For |
+|-----------|-------|----------|
+| `zai` | glm-4.7 | General coding fallback |
+| `glm5` | glm-5 | Higher-capability Z.AI tasks |
 
 **When to use GPT-5.2 vs GPT-5.3-Codex:**
 - **GPT-5.3-Codex**: Best when plans are clear, need fast execution (combines codex + reasoning)

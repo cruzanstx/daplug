@@ -52,17 +52,32 @@ echo "${PREFERRED_AGENT:-not_set}"
 2. **If not found, prompt the user:**
 Use AskUserQuestion tool with options:
 - `claude` - Claude Code (default, most capable)
+- `cc-sonnet` - Claude Code Sonnet alias
+- `cc-opus` - Claude Code Opus alias
 - `codex` - OpenAI Codex CLI (gpt-5.3-codex, fast execution)
+- `codex-spark` - OpenAI Codex Spark (lowest-latency tier)
 - `codex-high` - OpenAI Codex CLI with high reasoning effort
 - `codex-xhigh` - OpenAI Codex CLI with extra-high reasoning effort
 - `gpt52` - OpenAI GPT-5.2 (planning, research, analysis)
 - `gpt52-high` - OpenAI GPT-5.2 with high reasoning effort
 - `gpt52-xhigh` - OpenAI GPT-5.2 with extra-high reasoning (30+ min tasks)
-- `gemini` - Google Gemini CLI
+- `gemini` - Gemini 3 Flash Preview (default Gemini shorthand)
+- `gemini-high` - Gemini 2.5 Pro
+- `gemini-xhigh` - Gemini 3 Pro Preview
+- `gemini25pro` - Gemini 2.5 Pro (explicit shorthand)
+- `gemini25flash` - Gemini 2.5 Flash
+- `gemini25lite` - Gemini 2.5 Flash-Lite
+- `gemini3flash` - Gemini 3 Flash Preview (explicit shorthand)
+- `gemini3pro` - Gemini 3 Pro Preview (explicit shorthand)
+- `gemini31pro` - Gemini 3.1 Pro Preview (if your account has access)
 - `zai` - Z.AI GLM-4.7 via Codex CLI
+- `glm5` - Z.AI GLM-5 via OpenCode
+- `opencode` - OpenCode runner with Z.AI GLM-4.7
 - `local` - Local model via opencode + LMStudio
 - `qwen` - Qwen via opencode + LMStudio
 - `devstral` - Devstral via opencode + LMStudio
+- `glm-local` - Local GLM-4.7-Flash via opencode + LMStudio
+- `qwen-small` - Local qwen3-4b model via opencode + LMStudio
 
 3. **After user selects, save to user-level `~/.claude/CLAUDE.md`** (applies to all projects):
 ```bash

@@ -1,7 +1,7 @@
 ---
 name: gemini-cli
 description: Run task with Google Gemini CLI (user)
-argument-hint: <task> [--model gemini|gemini-high|gemini-xhigh|gemini25pro|gemini25flash|gemini25lite|gemini3flash|gemini3pro] [--worktree /path]
+argument-hint: <task> [--model gemini|gemini-high|gemini-xhigh|gemini25pro|gemini25flash|gemini25lite|gemini3flash|gemini3pro|gemini31pro] [--worktree /path]
 ---
 
 Run a task using Google Gemini CLI in YOLO mode (auto-approve all tool calls).
@@ -44,6 +44,7 @@ Extract from $ARGUMENTS:
 | `gemini25lite` | `-m gemini-2.5-flash-lite` | Gemini 2.5 Flash-Lite (fastest, lowest cost) |
 | `gemini3flash` | `-m gemini-3-flash-preview` | Gemini 3 Flash Preview |
 | `gemini3pro` | `-m gemini-3-pro-preview` | Gemini 3 Pro Preview |
+| `gemini31pro` | `-m gemini-3.1-pro-preview` | Gemini 3.1 Pro Preview (if available) |
 
 ## Execute
 
@@ -66,6 +67,7 @@ case "$MODEL" in
   gemini25lite)  MODEL_FLAG="-m gemini-2.5-flash-lite" ;;
   gemini3flash)  MODEL_FLAG="-m gemini-3-flash-preview" ;;
   gemini3pro)    MODEL_FLAG="-m gemini-3-pro-preview" ;;
+  gemini31pro)   MODEL_FLAG="-m gemini-3.1-pro-preview" ;;
   *)             MODEL_FLAG="-m gemini-3-flash-preview" ;;  # gemini default
 esac
 ```
@@ -163,12 +165,13 @@ The monitoring agent handles the rest in isolated context.
 ## Examples
 
 ```bash
-# Simple task (uses Gemini 2.5 Pro by default)
+# Simple task (uses Gemini 3 Flash by default)
 /daplug:gemini-cli explain this codebase
 
 # With specific model
 /daplug:gemini-cli --model gemini25flash explain this codebase
 /daplug:gemini-cli -m gemini3pro refactor the authentication module
+/daplug:gemini-cli -m gemini31pro design an architecture migration plan
 
 # With worktree (reads TASK.md from worktree directory)
 /daplug:gemini-cli --worktree ~/projects/my-feature
@@ -183,20 +186,21 @@ Models share quotas in tiers (based on observed behavior with Google One Premium
 
 | Tier | Models | Notes |
 |------|--------|-------|
-| **Pro** | gemini-2.5-pro, gemini-3-pro-preview | Shared quota |
+| **Pro** | gemini-2.5-pro, gemini-3-pro-preview, gemini-3.1-pro-preview | Shared quota |
 | **Flash** | gemini-2.5-flash, gemini-2.5-flash-lite | Shared quota |
 | **3 Flash** | gemini-3-flash-preview | Separate quota |
 
 **Implications:**
 - `gemini` (3 Flash) has its own bucket - won't eat into Pro or older Flash limits
-- `gemini-high` and `gemini-xhigh` share the Pro quota
+- `gemini-high`, `gemini-xhigh`, and `gemini31pro` share the Pro quota
 - `gemini25flash` and `gemini25lite` share the Flash quota
+- `gemini31pro` is account-gated; if unavailable, use `gemini3pro`
 
 **Check usage:** Run `gemini` interactively and type `/usage` to see remaining quota per model.
 
 ## Notes
 
 - **Default model**: Gemini 3 Flash Preview (best performance, separate quota)
-- **Available models**: gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro
+- **Available models**: gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro
 - **YOLO mode**: Auto-approves all tool calls (file writes, shell commands)
 - **Non-interactive**: Uses `-p` flag for scripted execution
