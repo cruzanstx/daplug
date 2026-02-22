@@ -472,3 +472,46 @@ def test_run_cli_stdin_mode_does_not_put_prompt_in_argv(tmp_path, monkeypatch):
     assert captured["cmd"] == cli_info["command"]  # prompt should not be appended to argv
     assert captured["stdin"].data == large_prompt
     assert captured["stdin"].closed is True
+
+
+def test_run_cli_foreground_strips_opencode_runtime_session_vars(tmp_path, monkeypatch):
+    logs_dir = tmp_path / "logs"
+    logs_dir.mkdir()
+    log_file = logs_dir / "opencode.log"
+
+    monkeypatch.setenv("OPENCODE", "1")
+    monkeypatch.setenv("OPENCODE_HOSTNAME", "0.0.0.0")
+    monkeypatch.setenv("OPENCODE_PORT", "4096")
+    monkeypatch.setenv("OPENCODE_SERVER_PASSWORD", "secret")
+    monkeypatch.setenv("OPENCODE_CONFIG_DIR", "/root/.config/opencode")
+
+    captured = {}
+
+    class _DummyProc:
+        def wait(self):
+            return 0
+
+    def fake_popen(cmd, **kwargs):
+        captured["cmd"] = list(cmd)
+        captured["env"] = dict(kwargs.get("env", {}))
+        return _DummyProc()
+
+    monkeypatch.setattr(executor.subprocess, "Popen", fake_popen)
+
+    cli_info = {
+        "command": ["opencode", "run", "--format", "json", "-m", "openai/gpt-5.3-codex"],
+        "env": {},
+        "stdin_mode": "arg",
+        "selected_cli": "opencode",
+    }
+
+    result = executor.run_cli_foreground(cli_info, "hello", cwd=str(tmp_path), log_file=log_file)
+
+    assert result["status"] == "completed"
+    assert result["exit_code"] == 0
+    assert captured["cmd"][0] == "opencode"
+    assert "OPENCODE" not in captured["env"]
+    assert "OPENCODE_HOSTNAME" not in captured["env"]
+    assert "OPENCODE_PORT" not in captured["env"]
+    assert "OPENCODE_SERVER_PASSWORD" not in captured["env"]
+    assert captured["env"].get("OPENCODE_CONFIG_DIR") == "/root/.config/opencode"

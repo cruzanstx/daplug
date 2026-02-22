@@ -25,6 +25,12 @@ DEFAULT_COMPLETION_MARKER = "VERIFICATION_COMPLETE"
 # Some model CLIs print the full prompt before the assistant response; this lets us
 # avoid false-positive marker detection from the prompt text itself.
 INSTRUCTIONS_END_SENTINEL = "DAPLUG_INSTRUCTIONS_END"
+OPENCODE_RUNTIME_SESSION_VARS = {
+    "OPENCODE",
+    "OPENCODE_HOSTNAME",
+    "OPENCODE_PORT",
+    "OPENCODE_SERVER_PASSWORD",
+}
 
 
 def extract_prompt_title(content: str) -> str:
@@ -1682,6 +1688,9 @@ def run_cli(cli_info: dict, content: str, cwd: str, log_file: Path) -> dict:
     needs_pty = cli_info.get("needs_pty", False)
     env = os.environ.copy()
     env.update(cli_info["env"])
+    if cli_info.get("selected_cli") == "opencode" or (cli_info.get("command") and cli_info["command"][0] == "opencode"):
+        for key in OPENCODE_RUNTIME_SESSION_VARS:
+            env.pop(key, None)
 
     log_handle = open(log_file, "w")
 
@@ -1761,6 +1770,9 @@ def run_cli_foreground(cli_info: dict, content: str, cwd: str, log_file: Path) -
     needs_pty = cli_info.get("needs_pty", False)
     env = os.environ.copy()
     env.update(cli_info["env"])
+    if cli_info.get("selected_cli") == "opencode" or (cli_info.get("command") and cli_info["command"][0] == "opencode"):
+        for key in OPENCODE_RUNTIME_SESSION_VARS:
+            env.pop(key, None)
 
     log_handle = open(log_file, "w")
 
