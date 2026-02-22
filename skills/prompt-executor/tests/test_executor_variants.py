@@ -89,15 +89,32 @@ def test_explicit_cli_opencode_errors_for_unsupported_model(no_router, tmp_path)
         executor.get_cli_info("gemini", repo_root=tmp_path, cli_override="opencode")
 
 
-def test_explicit_cli_override_never_silently_ignored(tmp_path, monkeypatch):
+def test_explicit_cli_override_takes_precedence_over_router_default(tmp_path, monkeypatch):
     monkeypatch.setattr(
         executor,
         "_resolve_router_command",
         lambda *_args, **_kwargs: ("codex", "openai:gpt-5.3-codex", ["codex", "exec", "--full-auto"]),
     )
 
-    with pytest.raises(ValueError, match="Requested --cli opencode"):
-        executor.get_cli_info("codex", repo_root=tmp_path, cli_override="opencode")
+    info = executor.get_cli_info("codex", repo_root=tmp_path, cli_override="opencode", variant="high")
+    assert info["selected_cli"] == "opencode"
+    assert info["model_id"] == "openai:gpt-5.3-codex"
+    assert info["command"][:4] == ["opencode", "run", "--format", "json"]
+    assert "--variant" in info["command"]
+    assert info["command"][info["command"].index("--variant") + 1] == "high"
+    assert "via OpenCode" in info["display"]
+
+
+def test_default_router_selection_unchanged_without_cli_override(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        executor,
+        "_resolve_router_command",
+        lambda *_args, **_kwargs: ("opencode", "openai:gpt-5.3-codex", ["opencode", "run", "--format", "json"]),
+    )
+
+    info = executor.get_cli_info("codex", repo_root=tmp_path)
+    assert info["selected_cli"] == "opencode"
+    assert info["command"][:4] == ["opencode", "run", "--format", "json"]
 
 
 def test_legacy_aliases_remain_backward_compatible(no_router, tmp_path):

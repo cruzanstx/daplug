@@ -1087,12 +1087,6 @@ def get_cli_info(
     router_resolution = None if force_legacy_local_opencode else _resolve_router_command(repo_root, model, preferred)
     if router_resolution:
         router_cli, router_model_id, router_cmd = router_resolution
-        if cli_override and router_cli != cli_override:
-            raise ValueError(
-                f"Requested --cli {cli_override} for --model {model}, but router selected '{router_cli}'.\n"
-                "Run `/daplug:detect-clis` to refresh cache, ensure requested CLI is installed, "
-                "or choose a supported model/cli combination."
-            )
         if not cli_override:
             selected_cli = router_cli
         if router_model_id:
