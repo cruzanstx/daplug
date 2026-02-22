@@ -25,3 +25,8 @@ Thumbs.db
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Local artifacts
+.worktrees/
+fix_run_prompt_opencode.md
+opencode_web_backup.json
