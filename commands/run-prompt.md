@@ -1,7 +1,7 @@
 ---
 name: run-prompt
 description: Execute prompts from ./prompts/ with various AI models, optional worktree isolation, tmux sessions, and iterative verification loops
-argument-hint: <prompt(s)> [--model claude|cc-sonnet|cc-opus|codex|codex-spark|gemini|gemini31pro|zai|glm5|opencode|local] [--worktree] [--tmux] [--parallel] [--loop]
+argument-hint: <prompt(s)> [--model claude|cc-sonnet|cc-opus|codex|codex-spark|gemini|gemini31pro|zai|glm5|opencode|local] [--cli codex|opencode|claude] [--variant none|low|medium|high|xhigh] [--worktree] [--tmux] [--parallel] [--loop]
 ---
 
 # Run Prompt
@@ -14,7 +14,8 @@ Execute prompts from `./prompts/` (including subfolders) using various AI models
 |----------|-------------|
 | `<prompt>` | Prompt number(s), range(s), or name(s) - defaults to latest |
 | `--model, -m` | claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, opencode, local, qwen, devstral, glm-local, qwen-small |
-| `--cli` | Override CLI wrapper: codex, opencode, or claude (aliases: claudecode, cc) |
+| `--cli` | Override CLI wrapper: codex, opencode, or claude (aliases: claudecode, cc). Unsupported explicit combinations error clearly. |
+| `--variant` | Reasoning variant override: `none`, `low`, `medium`, `high`, `xhigh`. Explicit `--variant` overrides alias defaults. |
 | `--worktree, -w` | Run in isolated git worktree |
 | `--tmux, -t` | Run in tmux session (can monitor/attach later) |
 | `--parallel, -p` | Run multiple prompts in parallel |
@@ -58,6 +59,7 @@ When the `/detect-clis` cache is present, `executor.py` routes `--model` shortha
 
 - Respects `preferred_agent` in `<daplug_config>` when multiple CLIs can run a model family.
 - Falls back gracefully when the preferred CLI isn’t installed/ready (example: `gemini-*` → `opencode`).
+- Explicit `--cli` override intent is strict: if that CLI cannot run the selected model, executor returns an actionable error instead of silently rerouting.
 - Local routing (`local`, `qwen`, `devstral`) uses the detected running provider (LM Studio / Ollama / vLLM).
 - `devstral` is treated as a multimodal local model (`vision` capability metadata in router).
 - If the cache is missing, daplug falls back to the legacy hardcoded model map for backward compatibility.
@@ -366,7 +368,10 @@ Task(
 ```
 /daplug:run-prompt 123                           # Single prompt with Claude
 /daplug:run-prompt 123 --model codex             # With Codex
+/daplug:run-prompt 123 --model codex-high        # Codex alias (default high reasoning variant)
 /daplug:run-prompt 123 --model codex-spark       # Codex Spark (lower-latency tier)
+/daplug:run-prompt 123 --model codex-high --variant none  # Override alias default reasoning
+/daplug:run-prompt 123 --model codex --cli opencode --variant high  # Force OpenCode + variant
 /daplug:run-prompt 123 --model glm5              # Z.AI GLM-5
 /daplug:run-prompt 123 --model codex --worktree  # Codex in isolated worktree
 /daplug:run-prompt 123 --tmux                    # In tmux session

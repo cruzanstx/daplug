@@ -69,7 +69,8 @@ python3 "$EXECUTOR" [prompts...] [options]
 
 **Options:**
 - `--model, -m`: claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, opencode, local, qwen, devstral, glm-local, qwen-small
-- `--cli`: Override CLI wrapper (codex, opencode, or claude; aliases: claudecode, cc)
+- `--cli`: Override CLI wrapper (codex, opencode, or claude; aliases: claudecode, cc). Unsupported explicit combinations fail with a clear error (no silent fallback).
+- `--variant`: Reasoning variant override (`none|low|medium|high|xhigh`). Explicit `--variant` overrides alias defaults (`codex-high`, `gpt52-high`, etc.).
 - `--cwd, -c`: Working directory for execution
 - `--run, -r`: Actually run the CLI (default: just return info)
 - `--info-only, -i`: Only return prompt info, no CLI details
@@ -94,6 +95,9 @@ EXECUTOR="$PLUGIN_ROOT/skills/prompt-executor/scripts/executor.py"
 
 # Get prompt info
 python3 "$EXECUTOR" 123 --model codex
+
+# Force OpenCode path with reasoning variant
+python3 "$EXECUTOR" 123 --model codex --cli opencode --variant high
 
 # Folder-qualified prompt (resolves prompts/providers/011-*.md)
 python3 "$EXECUTOR" providers/011 --model codex
@@ -193,11 +197,11 @@ python3 "$EXECUTOR" --loop-status
 |-------|-----|-------------|
 | claude | (Task subagent) | Claude Sonnet via subagent |
 | codex | codex exec --full-auto | OpenAI Codex (gpt-5.3-codex) |
-| codex-high | codex exec --full-auto -c model_reasoning_effort="high" | Codex with high reasoning |
-| codex-xhigh | codex exec --full-auto -c model_reasoning_effort="xhigh" | Codex with xhigh reasoning |
+| codex-high | codex exec --full-auto -c model_reasoning_effort="high" | Codex alias with default `--variant high` |
+| codex-xhigh | codex exec --full-auto -c model_reasoning_effort="xhigh" | Codex alias with default `--variant xhigh` |
 | gpt52 | codex exec --full-auto -m gpt-5.2 | GPT-5.2 for planning/research |
-| gpt52-high | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="high" | GPT-5.2 with high reasoning |
-| gpt52-xhigh | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="xhigh" | GPT-5.2 with xhigh reasoning |
+| gpt52-high | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="high" | GPT-5.2 alias with default `--variant high` |
+| gpt52-xhigh | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="xhigh" | GPT-5.2 alias with default `--variant xhigh` |
 | gemini | gemini -y -m gemini-3-flash-preview | Google Gemini 3 Flash Preview (default) |
 | gemini-high | gemini -y -m gemini-2.5-pro | Google Gemini 2.5 Pro (stable) |
 | gemini-xhigh | gemini -y -m gemini-3-pro-preview | Google Gemini 3 Pro Preview |
@@ -211,6 +215,8 @@ python3 "$EXECUTOR" --loop-status
 | opencode | opencode run --format json -m zai/glm-4.7 | Z.AI GLM-4.7 (via OpenCode, recommended; JSON output) |
 | local/qwen | opencode run --format json -m lmstudio/qwen3-coder-next | Local qwen-coder model (default: opencode) |
 | devstral | opencode run --format json -m lmstudio/devstral-small-2-2512 | Local devstral model (default: opencode) |
+
+OpenCode runs include `--variant <value>` when a variant is set.
 
 **OpenCode permissions (headless runs):** configure `~/.config/opencode/opencode.json` to avoid interactive permission prompts, e.g.:
 
