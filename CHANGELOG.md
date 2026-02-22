@@ -2,6 +2,19 @@
 
 All notable changes to daplug are documented here.
 
+## [0.23.8] - 2026-02-22
+
+### Added
+- **Executor `--variant` flag**: Added first-class reasoning variant support (`none`, `low`, `medium`, `high`, `xhigh`) with explicit precedence over alias defaults.
+- **OpenCode variant passthrough**: `opencode run` invocations now include `--variant <value>` when a variant is selected.
+
+### Changed
+- **Variant normalization**: Alias models such as `codex-high`, `codex-xhigh`, `gpt52-high`, and `gpt52-xhigh` now resolve through a unified variant pipeline.
+- **CLI override behavior**: Explicit `--cli` overrides are now strict and fail with actionable errors for unsupported model/CLI combinations instead of silently rerouting.
+
+### Fixed
+- **Metadata fidelity**: Executor output now reports resolved CLI/variant metadata consistently with the actual command that will run.
+
 ## [0.23.5] - 2026-02-15
 
 ### Added
