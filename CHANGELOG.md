@@ -2,6 +2,12 @@
 
 All notable changes to daplug are documented here.
 
+## [0.23.9] - 2026-02-22
+
+### Fixed
+- **OpenCode CLI override routing**: Explicit `--cli opencode` now takes precedence over router defaults for supported models (including `codex`), so supported overrides no longer fail with a router mismatch error.
+- **Regression coverage**: Added/updated variant-routing tests to ensure explicit overrides, default routing behavior, and OpenCode variant propagation remain correct.
+
 ## [0.23.8] - 2026-02-22
 
 ### Added
