@@ -14,6 +14,7 @@ import shutil
 import subprocess
 import sys
 import time
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -560,7 +561,439 @@ def _normalize_cli_override(value: Optional[str]) -> Optional[str]:
     return v
 
 
-def _cli_info_from_router(cli_name: str, model_id: str, cmd: list[str], fallback: dict) -> dict:
+SUPPORTED_VARIANTS = ("none", "low", "medium", "high", "xhigh")
+CODEX_REASONING_VARIANTS = {"high", "xhigh"}
+
+MODEL_ALIAS_BASE = {
+    "codex-high": "codex",
+    "codex-xhigh": "codex",
+    "gpt52-high": "gpt52",
+    "gpt52-xhigh": "gpt52",
+}
+
+MODEL_ALIAS_DEFAULT_VARIANT = {
+    "codex-high": "high",
+    "codex-xhigh": "xhigh",
+    "gpt52-high": "high",
+    "gpt52-xhigh": "xhigh",
+}
+
+LEGACY_MODEL_DISPLAY = {
+    "codex": "codex (gpt-5.3-codex)",
+    "codex-spark": "codex-spark (gpt-5.3-codex-spark, low latency)",
+    "codex-high": "codex-high (gpt-5.3-codex, high reasoning)",
+    "codex-xhigh": "codex-xhigh (gpt-5.3-codex, xhigh reasoning)",
+    "gpt52": "gpt52 (GPT-5.2, planning/research)",
+    "gpt52-high": "gpt52-high (GPT-5.2, high reasoning)",
+    "gpt52-xhigh": "gpt52-xhigh (GPT-5.2, xhigh reasoning, 30+ min tasks)",
+    "gemini": "gemini (Gemini 3 Flash)",
+    "gemini-high": "gemini-high (Gemini 2.5 Pro)",
+    "gemini-xhigh": "gemini-xhigh (Gemini 3 Pro)",
+    "gemini25pro": "gemini25pro (Gemini 2.5 Pro)",
+    "gemini25flash": "gemini25flash (Gemini 2.5 Flash)",
+    "gemini25lite": "gemini25lite (Gemini 2.5 Flash-Lite)",
+    "gemini3flash": "gemini3flash (Gemini 3 Flash Preview)",
+    "gemini3pro": "gemini3pro (Gemini 3 Pro Preview)",
+    "gemini31pro": "gemini31pro (Gemini 3.1 Pro Preview, if available)",
+    "zai": "zai (GLM-4.7 via Codex - may have issues)",
+    "glm5": "glm5 (GLM-5 via OpenCode)",
+    "opencode": "opencode (GLM-4.7 via OpenCode)",
+    "local": "qwen-coder (local via opencode)",
+    "qwen": "qwen-coder (local via opencode)",
+    "devstral": "devstral (local via opencode)",
+    "glm-local": "glm-4.7-flash (local via opencode)",
+    "qwen-small": "qwen-3-4b (local small/fast via opencode)",
+    "cc-sonnet": "cc-sonnet (Claude Sonnet 4.6 via Claude Code)",
+    "cc-opus": "cc-opus (Claude Opus 4.6 via Claude Code)",
+    "claude": "claude (Claude Sonnet)",
+}
+
+MODEL_SPECS = {
+    "codex": {
+        "model_id": "openai:gpt-5.3-codex",
+        "default_cli": "codex",
+        "supports_codex_reasoning": True,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+    "codex-spark": {
+        "model_id": "openai:gpt-5.3-codex-spark",
+        "default_cli": "codex",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+    "gpt52": {
+        "model_id": "openai:gpt-5.2",
+        "default_cli": "codex",
+        "supports_codex_reasoning": True,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+    "gemini": {
+        "model_id": "google:gemini-3-flash-preview",
+        "default_cli": "gemini",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+    "gemini-high": {
+        "model_id": "google:gemini-2.5-pro",
+        "default_cli": "gemini",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+    "gemini-xhigh": {
+        "model_id": "google:gemini-3-pro-preview",
+        "default_cli": "gemini",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+    "gemini25pro": {
+        "model_id": "google:gemini-2.5-pro",
+        "default_cli": "gemini",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+    "gemini25flash": {
+        "model_id": "google:gemini-2.5-flash",
+        "default_cli": "gemini",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+    "gemini25lite": {
+        "model_id": "google:gemini-2.5-flash-lite",
+        "default_cli": "gemini",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+    "gemini3flash": {
+        "model_id": "google:gemini-3-flash-preview",
+        "default_cli": "gemini",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+    "gemini3pro": {
+        "model_id": "google:gemini-3-pro-preview",
+        "default_cli": "gemini",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+    "gemini31pro": {
+        "model_id": "google:gemini-3.1-pro-preview",
+        "default_cli": "gemini",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+    "zai": {
+        "model_id": "zai:glm-4.7",
+        "default_cli": "codex",
+        "supports_codex_reasoning": False,
+        "codex_profile": "zai",
+        "claude_model_flag": None,
+    },
+    "glm5": {
+        "model_id": "zai:glm-5",
+        "default_cli": "opencode",
+        "supports_codex_reasoning": False,
+        "codex_profile": "glm5",
+        "claude_model_flag": None,
+    },
+    "opencode": {
+        "model_id": "zai:glm-4.7",
+        "default_cli": "opencode",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+    "local": {
+        "model_id": "lmstudio:qwen3-coder-next",
+        "default_cli": "opencode",
+        "supports_codex_reasoning": False,
+        "codex_profile": "local",
+        "claude_model_flag": None,
+    },
+    "qwen": {
+        "model_id": "lmstudio:qwen3-coder-next",
+        "default_cli": "opencode",
+        "supports_codex_reasoning": False,
+        "codex_profile": "local",
+        "claude_model_flag": None,
+    },
+    "devstral": {
+        "model_id": "lmstudio:devstral-small-2-2512",
+        "default_cli": "opencode",
+        "supports_codex_reasoning": False,
+        "codex_profile": "local-devstral",
+        "claude_model_flag": None,
+    },
+    "glm-local": {
+        "model_id": "lmstudio:glm-4.7-flash",
+        "default_cli": "opencode",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+    "qwen-small": {
+        "model_id": "lmstudio:qwen3-4b-2507",
+        "default_cli": "opencode",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+    "cc-sonnet": {
+        "model_id": "anthropic:sonnet",
+        "default_cli": "claude",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": "sonnet",
+    },
+    "cc-opus": {
+        "model_id": "anthropic:opus",
+        "default_cli": "claude",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": "opus",
+    },
+    "claude": {
+        "model_id": "anthropic:claude",
+        "default_cli": "subagent",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+}
+
+CLI_OVERRIDE_SUPPORTED_MODELS = {
+    "claude": {"claude", "cc-sonnet", "cc-opus"},
+    "codex": {
+        "codex",
+        "codex-spark",
+        "codex-high",
+        "codex-xhigh",
+        "gpt52",
+        "gpt52-high",
+        "gpt52-xhigh",
+        "zai",
+        "glm5",
+        "local",
+        "qwen",
+        "devstral",
+    },
+    "opencode": {
+        "codex",
+        "codex-spark",
+        "codex-high",
+        "codex-xhigh",
+        "gpt52",
+        "gpt52-high",
+        "gpt52-xhigh",
+        "zai",
+        "glm5",
+        "opencode",
+        "local",
+        "qwen",
+        "devstral",
+        "glm-local",
+        "qwen-small",
+    },
+}
+
+
+@dataclass(frozen=True)
+class _ExecutionConfig:
+    requested_model: str
+    base_model: str
+    selected_cli: str
+    model_id: str
+    variant: Optional[str]
+    command: list[str]
+    env: dict[str, str]
+    stdin_mode: Optional[str]
+    display: str
+
+
+def _normalize_variant(value: Optional[str]) -> Optional[str]:
+    if value is None:
+        return None
+    v = value.strip().lower()
+    if not v:
+        return None
+    if v not in SUPPORTED_VARIANTS:
+        allowed = ", ".join(SUPPORTED_VARIANTS)
+        raise ValueError(f"Unsupported --variant '{value}'. Supported values: {allowed}")
+    if v == "none":
+        return None
+    return v
+
+
+def _canonical_model(model: str) -> str:
+    return MODEL_ALIAS_BASE.get(model, model)
+
+
+def _strip_provider_prefix(model_id: str) -> str:
+    return model_id.split(":", 1)[1] if ":" in model_id else model_id
+
+
+def _opencode_model_spec(model_id: str) -> str:
+    if model_id.startswith("local:"):
+        rest = model_id.split(":", 1)[1]
+        if ":" in rest:
+            provider, model = rest.split(":", 1)
+            return f"{provider}/{model}"
+        return rest
+    if ":" not in model_id:
+        return model_id
+    provider, rest = model_id.split(":", 1)
+    return f"{provider}/{rest}"
+
+
+def _claude_cli_command(model_flag: Optional[str] = None) -> list[str]:
+    cmd = [
+        "claude",
+        "--print",
+        "--no-session-persistence",
+        "--output-format",
+        "text",
+        "--input-format",
+        "text",
+        "--permission-mode",
+        "dontAsk",
+    ]
+    if model_flag:
+        cmd.extend(["--model", model_flag])
+    return cmd
+
+
+def _require_claude_cli() -> None:
+    if shutil.which("claude"):
+        return
+    raise RuntimeError(
+        "Claude Code CLI ('claude') not found in PATH.\n"
+        "Install Claude Code and run `/daplug:detect-clis` to refresh daplug's CLI cache."
+    )
+
+
+def _validate_cli_override(model: str, cli_override: Optional[str]) -> None:
+    if not cli_override:
+        return
+    supported = CLI_OVERRIDE_SUPPORTED_MODELS.get(cli_override, set())
+    if model in supported:
+        return
+    supported_models = ", ".join(sorted(supported))
+    raise ValueError(
+        f"--cli {cli_override} is not supported with --model {model}.\n"
+        f"Supported models for --cli {cli_override}: {supported_models}"
+    )
+
+
+def _resolve_router_command(
+    repo_root: Path,
+    model: str,
+    preferred_cli: Optional[str],
+) -> Optional[tuple[str, str, list[str]]]:
+    try:
+        router_dir = repo_root / "skills" / "cli-detector" / "scripts"
+        if not router_dir.exists():
+            return None
+        if str(router_dir) not in sys.path:
+            sys.path.append(str(router_dir))
+        import router  # type: ignore
+
+        cli_name, model_id, cmd = router.resolve_model(model, preferred_cli=preferred_cli)
+        return ((cli_name or "").strip().lower(), str(model_id), list(cmd))
+    except Exception:
+        return None
+
+
+def _build_codex_command(
+    model: str,
+    model_spec: dict,
+    model_id: str,
+    variant: Optional[str],
+) -> list[str]:
+    cmd = ["codex", "exec", "--full-auto"]
+    profile = model_spec.get("codex_profile")
+    if profile:
+        cmd.extend(["--profile", str(profile)])
+    else:
+        stripped = _strip_provider_prefix(model_id)
+        if stripped and stripped != "gpt-5.3-codex":
+            cmd.extend(["-m", stripped])
+
+    if variant:
+        if variant not in CODEX_REASONING_VARIANTS:
+            raise ValueError(
+                f"--variant {variant} is not supported with Codex for --model {model}. "
+                "Codex supports high/xhigh only. Use --cli opencode for low/medium variants."
+            )
+        if not model_spec.get("supports_codex_reasoning"):
+            raise ValueError(
+                f"--variant {variant} is not supported with --model {model} when using Codex."
+            )
+        cmd.extend(["-c", f'model_reasoning_effort="{variant}"'])
+    return cmd
+
+
+def _build_opencode_command(model_id: str, variant: Optional[str]) -> list[str]:
+    cmd = ["opencode", "run", "--format", "json", "-m", _opencode_model_spec(model_id)]
+    if variant:
+        cmd.extend(["--variant", variant])
+    return cmd
+
+
+def _build_gemini_command(model: str, model_id: str, variant: Optional[str]) -> list[str]:
+    if variant:
+        raise ValueError(
+            f"--variant {variant} is not supported with --model {model} when using Gemini."
+        )
+    return ["gemini", "-y", "-m", _strip_provider_prefix(model_id), "-p"]
+
+
+def _build_claude_command(model: str, model_spec: dict, variant: Optional[str]) -> list[str]:
+    if variant:
+        raise ValueError(
+            f"--variant {variant} is not supported with --model {model} when using Claude Code CLI."
+        )
+    return _claude_cli_command(model_spec.get("claude_model_flag"))
+
+
+def _env_for_command(selected_cli: str, command: list[str]) -> dict[str, str]:
+    env: dict[str, str] = {}
+    if selected_cli == "codex" and "--profile" in command:
+        try:
+            profile = command[command.index("--profile") + 1]
+            if str(profile).startswith("local"):
+                env["LMSTUDIO_API_KEY"] = "lm-studio"
+        except (ValueError, IndexError):
+            pass
+    return env
+
+
+def _dynamic_display(model: str, selected_cli: str, model_id: str, variant: Optional[str]) -> str:
+    cli_label = {
+        "codex": "Codex",
+        "opencode": "OpenCode",
+        "gemini": "Gemini",
+        "claude": "Claude Code",
+    }.get(selected_cli, selected_cli)
+    if selected_cli == "opencode":
+        target = _opencode_model_spec(model_id)
+    else:
+        target = _strip_provider_prefix(model_id)
+    suffix = f", variant={variant}" if variant else ""
+    return f"{model} ({target} via {cli_label}{suffix})"
+
+
+def _cli_info_from_router(cli_name: str, model_id: str, cmd: list[str]) -> dict:
     cli = (cli_name or "").strip().lower()
     if cli == "claude":
         return {
@@ -594,7 +1027,12 @@ def _cli_info_from_router(cli_name: str, model_id: str, cmd: list[str], fallback
     }
 
 
-def get_cli_info(model: str, repo_root: Optional[Path] = None, cli_override: Optional[str] = None) -> dict:
+def get_cli_info(
+    model: str,
+    repo_root: Optional[Path] = None,
+    cli_override: Optional[str] = None,
+    variant: Optional[str] = None,
+) -> dict:
     """Get CLI command and info for a model.
 
     stdin_mode: How to pass prompt content
@@ -604,274 +1042,131 @@ def get_cli_info(model: str, repo_root: Optional[Path] = None, cli_override: Opt
       - None: Handled by Task subagent (claude)
     """
     cli_override = _normalize_cli_override(cli_override)
+    explicit_variant = variant is not None
+    explicit_variant_value = _normalize_variant(variant)
+    effective_variant = (
+        explicit_variant_value
+        if explicit_variant
+        else MODEL_ALIAS_DEFAULT_VARIANT.get(model)
+    )
 
-    def _claude_cli_command(model_flag: Optional[str] = None) -> list[str]:
-        # One-shot/headless Claude Code invocation. Prompt content is provided via stdin.
-        cmd = [
-            "claude",
-            "--print",
-            "--no-session-persistence",
-            "--output-format",
-            "text",
-            "--input-format",
-            "text",
-            "--permission-mode",
-            "dontAsk",
-        ]
-        if model_flag:
-            cmd.extend(["--model", model_flag])
-        return cmd
+    _validate_cli_override(model, cli_override)
 
-    def _require_claude_cli() -> None:
-        if shutil.which("claude"):
-            return
-        raise RuntimeError(
-            "Claude Code CLI ('claude') not found in PATH.\n"
-            "Install Claude Code and run `/daplug:detect-clis` to refresh daplug's CLI cache."
-        )
+    base_model = _canonical_model(model)
+    model_spec = MODEL_SPECS.get(base_model)
+    if model_spec is None:
+        raise ValueError(f"Unknown model shorthand: {model}")
 
-    if cli_override == "claude" and model not in {"claude", "cc-sonnet", "cc-opus"}:
-        raise ValueError("--cli claude is only supported with --model claude, cc-sonnet, or cc-opus")
-    legacy_local_codex = {
-        "local": {
-            "command": ["codex", "exec", "--full-auto", "--profile", "local"],
-            "display": "qwen (local via codex)",
-            "env": {"LMSTUDIO_API_KEY": "lm-studio"},
-            "stdin_mode": "dash"
-        },
-        "qwen": {
-            "command": ["codex", "exec", "--full-auto", "--profile", "local"],
-            "display": "qwen (local via codex)",
-            "env": {"LMSTUDIO_API_KEY": "lm-studio"},
-            "stdin_mode": "dash"
-        },
-        "devstral": {
-            "command": ["codex", "exec", "--full-auto", "--profile", "local-devstral"],
-            "display": "devstral (local via codex)",
-            "env": {"LMSTUDIO_API_KEY": "lm-studio"},
-            "stdin_mode": "dash"
-        },
-    }
-    if cli_override == "codex" and model in legacy_local_codex:
-        return legacy_local_codex[model]
-
-    models = {
-        "codex": {
-            "command": ["codex", "exec", "--full-auto"],
-            "display": "codex (gpt-5.3-codex)",
-            "env": {},
-            "stdin_mode": "dash"
-        },
-        "codex-spark": {
-            "command": ["codex", "exec", "--full-auto", "-m", "gpt-5.3-codex-spark"],
-            "display": "codex-spark (gpt-5.3-codex-spark, low latency)",
-            "env": {},
-            "stdin_mode": "dash"
-        },
-        "codex-high": {
-            "command": ["codex", "exec", "--full-auto", "-c", 'model_reasoning_effort="high"'],
-            "display": "codex-high (gpt-5.3-codex, high reasoning)",
-            "env": {},
-            "stdin_mode": "dash"
-        },
-        "codex-xhigh": {
-            "command": ["codex", "exec", "--full-auto", "-c", 'model_reasoning_effort="xhigh"'],
-            "display": "codex-xhigh (gpt-5.3-codex, xhigh reasoning)",
-            "env": {},
-            "stdin_mode": "dash"
-        },
-        "gpt52": {
-            "command": ["codex", "exec", "--full-auto", "-m", "gpt-5.2"],
-            "display": "gpt52 (GPT-5.2, planning/research)",
-            "env": {},
-            "stdin_mode": "dash"
-        },
-        "gpt52-high": {
-            "command": ["codex", "exec", "--full-auto", "-m", "gpt-5.2", "-c", 'model_reasoning_effort="high"'],
-            "display": "gpt52-high (GPT-5.2, high reasoning)",
-            "env": {},
-            "stdin_mode": "dash"
-        },
-        "gpt52-xhigh": {
-            "command": ["codex", "exec", "--full-auto", "-m", "gpt-5.2", "-c", 'model_reasoning_effort="xhigh"'],
-            "display": "gpt52-xhigh (GPT-5.2, xhigh reasoning, 30+ min tasks)",
-            "env": {},
-            "stdin_mode": "dash"
-        },
-        "gemini": {
-            "command": ["gemini", "-y", "-m", "gemini-3-flash-preview", "-p"],
-            "display": "gemini (Gemini 3 Flash)",
-            "env": {},
-            "stdin_mode": "arg"  # Gemini takes prompt as -p argument
-        },
-        "gemini-high": {
-            "command": ["gemini", "-y", "-m", "gemini-2.5-pro", "-p"],
-            "display": "gemini-high (Gemini 2.5 Pro)",
-            "env": {},
-            "stdin_mode": "arg"
-        },
-        "gemini-xhigh": {
-            "command": ["gemini", "-y", "-m", "gemini-3-pro-preview", "-p"],
-            "display": "gemini-xhigh (Gemini 3 Pro)",
-            "env": {},
-            "stdin_mode": "arg"
-        },
-        "gemini25pro": {
-            "command": ["gemini", "-y", "-m", "gemini-2.5-pro", "-p"],
-            "display": "gemini25pro (Gemini 2.5 Pro)",
-            "env": {},
-            "stdin_mode": "arg"
-        },
-        "gemini25flash": {
-            "command": ["gemini", "-y", "-m", "gemini-2.5-flash", "-p"],
-            "display": "gemini25flash (Gemini 2.5 Flash)",
-            "env": {},
-            "stdin_mode": "arg"
-        },
-        "gemini25lite": {
-            "command": ["gemini", "-y", "-m", "gemini-2.5-flash-lite", "-p"],
-            "display": "gemini25lite (Gemini 2.5 Flash-Lite)",
-            "env": {},
-            "stdin_mode": "arg"
-        },
-        "gemini3flash": {
-            "command": ["gemini", "-y", "-m", "gemini-3-flash-preview", "-p"],
-            "display": "gemini3flash (Gemini 3 Flash Preview)",
-            "env": {},
-            "stdin_mode": "arg"
-        },
-        "gemini3pro": {
-            "command": ["gemini", "-y", "-m", "gemini-3-pro-preview", "-p"],
-            "display": "gemini3pro (Gemini 3 Pro Preview)",
-            "env": {},
-            "stdin_mode": "arg"
-        },
-        "gemini31pro": {
-            "command": ["gemini", "-y", "-m", "gemini-3.1-pro-preview", "-p"],
-            "display": "gemini31pro (Gemini 3.1 Pro Preview, if available)",
-            "env": {},
-            "stdin_mode": "arg"
-        },
-        "zai": {
-            "command": ["codex", "exec", "--full-auto", "--profile", "zai"],
-            "display": "zai (GLM-4.7 via Codex - may have issues)",
-            "env": {},
-            "stdin_mode": "dash"
-        },
-        "glm5": {
-            "command": ["opencode", "run", "--format", "json", "-m", "zai/glm-5"],
-            "display": "glm5 (GLM-5 via OpenCode)",
-            "env": {},
-            "stdin_mode": "arg"
-        },
-        "opencode": {
-            "command": ["opencode", "run", "--format", "json", "-m", "zai/glm-4.7"],
-            "display": "opencode (GLM-4.7 via OpenCode)",
-            "env": {},
-            "stdin_mode": "arg"
-        },
-        "local": {
-            "command": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-coder-next"],
-            "display": "qwen-coder (local via opencode)",
-            "env": {},
-            "stdin_mode": "arg"
-        },
-        "qwen": {
-            "command": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-coder-next"],
-            "display": "qwen-coder (local via opencode)",
-            "env": {},
-            "stdin_mode": "arg"
-        },
-        "devstral": {
-            "command": ["opencode", "run", "--format", "json", "-m", "lmstudio/devstral-small-2-2512"],
-            "display": "devstral (local via opencode)",
-            "env": {},
-            "stdin_mode": "arg"
-        },
-        "glm-local": {
-            "command": ["opencode", "run", "--format", "json", "-m", "lmstudio/glm-4.7-flash"],
-            "display": "glm-4.7-flash (local via opencode)",
-            "env": {},
-            "stdin_mode": "arg"
-        },
-        "qwen-small": {
-            "command": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-4b-2507"],
-            "display": "qwen-3-4b (local small/fast via opencode)",
-            "env": {},
-            "stdin_mode": "arg"
-        },
-        "cc-sonnet": {
-            "command": _claude_cli_command("sonnet"),
-            "display": "cc-sonnet (Claude Sonnet 4.6 via Claude Code)",
-            "env": {},
-            "stdin_mode": "stdin"
-        },
-        "cc-opus": {
-            "command": _claude_cli_command("opus"),
-            "display": "cc-opus (Claude Opus 4.6 via Claude Code)",
-            "env": {},
-            "stdin_mode": "stdin"
-        },
-        "claude": {
-            "command": [],  # Handled by Task subagent
-            "display": "claude (Claude Sonnet)",
-            "env": {},
-            "stdin_mode": None
-        }
-    }
-    if model in {"local", "qwen", "devstral", "glm-local", "qwen-small"} and cli_override != "codex":
-        return models[model]
-
-    # Preserve backwards compatibility: default "claude" model is the Task subagent path.
     if model == "claude" and cli_override is None:
-        return models["claude"]
-
-    wants_claude_cli = model in {"cc-sonnet", "cc-opus"} or (model == "claude" and cli_override == "claude")
-    if wants_claude_cli:
-        _require_claude_cli()
+        if effective_variant:
+            raise ValueError(
+                f"--variant {effective_variant} is not supported with --model claude Task subagent mode."
+            )
+        return {
+            "command": [],
+            "display": LEGACY_MODEL_DISPLAY["claude"],
+            "env": {},
+            "stdin_mode": None,
+            "selected_cli": "subagent",
+            "base_model": base_model,
+            "model_id": model_spec["model_id"],
+            "variant": None,
+        }
 
     repo_root = repo_root or get_repo_root()
     preferred = cli_override or _normalize_preferred_agent(_read_config_value(repo_root, "preferred_agent"))
 
-    # Prefer the /detect-clis cache when present; fall back to hardcoded mappings
-    # for backwards compatibility.
-    try:
-        router_dir = repo_root / "skills" / "cli-detector" / "scripts"
-        if router_dir.exists():
-            if str(router_dir) not in sys.path:
-                sys.path.append(str(router_dir))
-            import router  # type: ignore
+    # Preserve existing behavior: local shortcuts default to OpenCode unless
+    # explicitly overridden with --cli codex.
+    force_legacy_local_opencode = model in {"local", "qwen", "devstral", "glm-local", "qwen-small"} and cli_override is None
 
-            cli_name, model_id, cmd = router.resolve_model(model, preferred_cli=preferred)
-            info = _cli_info_from_router(cli_name, model_id, cmd, fallback=models)
-            if wants_claude_cli and cli_name != "claude":
-                raise RuntimeError(
-                    f"Requested Claude Code CLI ('claude') but router selected '{cli_name}'.\n"
-                    "Run `/daplug:detect-clis` to refresh the cache, and ensure Claude Code is installed."
-                )
-            return info
-    except Exception:
-        if wants_claude_cli:
-            # Router/cache missing or misconfigured; fall back to the local claude CLI directly.
-            if model == "claude":
-                return {
-                    "command": _claude_cli_command(),
-                    "display": "claude (Claude Code CLI)",
-                    "env": {},
-                    "stdin_mode": "stdin",
-                }
-            return models[model]
+    selected_cli = cli_override or model_spec["default_cli"]
+    model_id = str(model_spec["model_id"])
+    router_command: Optional[list[str]] = None
 
-    # Router module not available in this checkout; keep --cli claude usable.
-    if wants_claude_cli and model == "claude":
-        return {
-            "command": _claude_cli_command(),
-            "display": "claude (Claude Code CLI)",
-            "env": {},
-            "stdin_mode": "stdin",
-        }
+    router_resolution = None if force_legacy_local_opencode else _resolve_router_command(repo_root, model, preferred)
+    if router_resolution:
+        router_cli, router_model_id, router_cmd = router_resolution
+        if cli_override and router_cli != cli_override:
+            raise ValueError(
+                f"Requested --cli {cli_override} for --model {model}, but router selected '{router_cli}'.\n"
+                "Run `/daplug:detect-clis` to refresh cache, ensure requested CLI is installed, "
+                "or choose a supported model/cli combination."
+            )
+        if not cli_override:
+            selected_cli = router_cli
+        if router_model_id:
+            model_id = router_model_id
+        router_command = router_cmd
 
-    return models.get(model, models["claude"])
+    if selected_cli == "claude":
+        _require_claude_cli()
+
+    if selected_cli == "codex":
+        command = _build_codex_command(model, model_spec, model_id, effective_variant)
+        stdin_mode = "dash"
+    elif selected_cli == "opencode":
+        command = _build_opencode_command(model_id, effective_variant)
+        stdin_mode = "arg"
+    elif selected_cli == "gemini":
+        command = _build_gemini_command(model, model_id, effective_variant)
+        stdin_mode = "arg"
+    elif selected_cli == "claude":
+        # Keep default claude model unpinned unless a cc-* alias selected a concrete flag.
+        if router_command and model in {"cc-sonnet", "cc-opus"} and cli_override is None and not explicit_variant:
+            command = router_command
+        elif model == "claude":
+            command = _build_claude_command(model, {**model_spec, "claude_model_flag": None}, effective_variant)
+        else:
+            command = _build_claude_command(model, model_spec, effective_variant)
+        stdin_mode = "stdin"
+    else:
+        # Preserve compatibility with router-only CLIs (for example aider) when no
+        # explicit --cli override is requested.
+        if router_command is None:
+            raise ValueError(f"Unsupported CLI selected for --model {model}: {selected_cli}")
+        if effective_variant:
+            raise ValueError(
+                f"--variant {effective_variant} is not supported when router selects CLI '{selected_cli}'. "
+                "Use --cli codex or --cli opencode."
+            )
+        info = _cli_info_from_router(selected_cli, model_id, router_command)
+        info.update({
+            "selected_cli": selected_cli,
+            "base_model": base_model,
+            "model_id": model_id,
+            "variant": None,
+        })
+        return info
+
+    env = _env_for_command(selected_cli, command)
+
+    display = LEGACY_MODEL_DISPLAY.get(model, _dynamic_display(model, selected_cli, model_id, effective_variant))
+    if cli_override or explicit_variant or selected_cli != model_spec["default_cli"]:
+        display = _dynamic_display(model, selected_cli, model_id, effective_variant)
+
+    config = _ExecutionConfig(
+        requested_model=model,
+        base_model=base_model,
+        selected_cli=selected_cli,
+        model_id=model_id,
+        variant=effective_variant,
+        command=command,
+        env=env,
+        stdin_mode=stdin_mode,
+        display=display,
+    )
+
+    return {
+        "command": config.command,
+        "display": config.display,
+        "env": config.env,
+        "stdin_mode": config.stdin_mode,
+        "selected_cli": config.selected_cli,
+        "base_model": config.base_model,
+        "model_id": config.model_id,
+        "variant": config.variant,
+    }
 
 
 def get_sandbox_add_dirs(cwd: Optional[str] = None) -> list[str]:
@@ -1762,7 +2057,9 @@ def run_verification_loop_background(
     completion_marker: str,
     execution_timestamp: str,
     worktree_path: Optional[str] = None,
-    branch_name: Optional[str] = None
+    branch_name: Optional[str] = None,
+    cli_override: Optional[str] = None,
+    variant: Optional[str] = None,
 ) -> dict:
     """Start a verification loop in background mode.
 
@@ -1835,6 +2132,10 @@ def run_verification_loop_background(
         "--execution-timestamp", execution_timestamp,
         "--loop-foreground"  # Internal flag to run in foreground mode
     ]
+    if cli_override:
+        cmd.extend(["--cli", cli_override])
+    if variant is not None:
+        cmd.extend(["--variant", variant])
 
     if worktree_path:
         # When in worktree, use --prompt-file to read TASK.md directly
@@ -1899,6 +2200,15 @@ def main():
     parser.add_argument("--cli", choices=["codex", "opencode", "claude", "claudecode", "cc"],
                        default=None,
                        help="Override CLI wrapper (default: auto-detected per model)")
+    parser.add_argument(
+        "--variant",
+        choices=list(SUPPORTED_VARIANTS),
+        default=None,
+        help=(
+            "Reasoning variant: none|low|medium|high|xhigh. "
+            "Explicit --variant overrides alias defaults (for example codex-high)."
+        ),
+    )
     parser.add_argument("--cwd", "-c", default=None,
                        help="Working directory for execution")
     parser.add_argument("--run", "-r", action="store_true",
@@ -1980,7 +2290,12 @@ def main():
         else:
             prompt_files = resolve_prompts(prompts_dir, args.prompts)
 
-        cli_info = get_cli_info(args.model, repo_root=repo_root, cli_override=args.cli)
+        cli_info = get_cli_info(
+            args.model,
+            repo_root=repo_root,
+            cli_override=args.cli,
+            variant=args.variant,
+        )
         log_dir = get_cli_logs_dir(repo_root)
         log_dir.mkdir(parents=True, exist_ok=True)
 
@@ -1991,6 +2306,8 @@ def main():
             "model": args.model,
             "cli_display": cli_info["display"],
             "cli_command": cli_info["command"],
+            "selected_cli": cli_info.get("selected_cli"),
+            "variant": cli_info.get("variant"),
             "stdin_mode": cli_info.get("stdin_mode"),
             "prompts": []
         }
@@ -2116,7 +2433,9 @@ def main():
                             completion_marker=args.completion_marker,
                             execution_timestamp=execution_timestamp,
                             worktree_path=worktree_path,
-                            branch_name=branch_name
+                            branch_name=branch_name,
+                            cli_override=args.cli,
+                            variant=args.variant,
                         )
                         # For background loop, update displayed log to loop log
                         prompt_info["log"] = loop_result["loop_log"]
