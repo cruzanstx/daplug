@@ -2,6 +2,12 @@
 
 All notable changes to daplug are documented here.
 
+## [0.23.10] - 2026-02-22
+
+### Fixed
+- **OpenCode session inheritance bug**: Executor now strips runtime OpenCode session env vars (`OPENCODE`, `OPENCODE_HOSTNAME`, `OPENCODE_PORT`, `OPENCODE_SERVER_PASSWORD`) before spawning `opencode run`, preventing repeated `Error: Session not found` failures in verification loops.
+- **Regression coverage**: Added test coverage to verify OpenCode subprocess env sanitization while preserving `OPENCODE_CONFIG_DIR`.
+
 ## [0.23.9] - 2026-02-22
 
 ### Fixed
