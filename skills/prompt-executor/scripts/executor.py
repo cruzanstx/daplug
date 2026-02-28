@@ -32,6 +32,33 @@ OPENCODE_RUNTIME_SESSION_VARS = {
     "OPENCODE_SERVER_PASSWORD",
 }
 
+BWRAP_PROFILES = {
+    "strict": {
+        "network": False,
+        "writable": ["workspace", "opencode_state"],
+        "minimal_env": True,
+    },
+    "balanced": {
+        "network": True,
+        "writable": ["workspace", "opencode_state", "opencode_cache", "opencode_config"],
+        "minimal_env": True,
+    },
+    "dev": {
+        "network": True,
+        "writable": ["workspace", "opencode_state", "opencode_cache", "opencode_config", "tool_caches"],
+        "minimal_env": False,
+    },
+}
+
+BWRAP_MISSING_ERROR = (
+    "Error: bubblewrap (bwrap) not found in PATH.\n\n"
+    "Install with:\n"
+    "  apt:   sudo apt install bubblewrap\n"
+    "  dnf:   sudo dnf install bubblewrap\n"
+    "  pacman: sudo pacman -S bubblewrap\n\n"
+    "To run without sandbox: add --no-sandbox"
+)
+
 
 def extract_prompt_title(content: str) -> str:
     """Extract title from prompt content.
@@ -79,7 +106,7 @@ def get_repo_root() -> Path:
             capture_output=True, text=True, check=True
         )
         return Path(result.stdout.strip())
-    except subprocess.CalledProcessError:
+    except (subprocess.CalledProcessError, FileNotFoundError, OSError):
         return Path.cwd()
 
 
@@ -1216,6 +1243,196 @@ def get_sandbox_add_dirs(cwd: Optional[str] = None) -> list[str]:
     return add_dirs
 
 
+def resolve_sandbox_config(platform: str, args: argparse.Namespace, cwd: str) -> dict:
+    if getattr(args, "sandbox", False) and getattr(args, "no_sandbox", False):
+        raise ValueError("Cannot pass both --sandbox and --no-sandbox")
+
+    sandbox_type = getattr(args, "sandbox_type", None)
+    sandbox_enabled_flag = bool(getattr(args, "sandbox", False))
+    sandbox_disabled_flag = bool(getattr(args, "no_sandbox", False))
+
+    if sandbox_type and (sandbox_disabled_flag or not sandbox_enabled_flag):
+        raise ValueError("--sandbox-type requires sandboxing to be enabled (use --sandbox)")
+
+    profile = getattr(args, "sandbox_profile", "balanced") or "balanced"
+    if profile not in BWRAP_PROFILES:
+        raise ValueError(f"Invalid --sandbox-profile: {profile}")
+
+    workspace_input = getattr(args, "sandbox_workspace", None) or cwd
+    workspace = str(Path(workspace_input).expanduser().resolve())
+
+    if sandbox_disabled_flag or not sandbox_enabled_flag:
+        enabled = False
+        resolved_type = None
+    else:
+        resolved_type = sandbox_type
+        is_linux = platform.startswith("linux")
+        if resolved_type is None:
+            if is_linux:
+                resolved_type = "bubblewrap"
+                enabled = True
+            else:
+                print(
+                    "[Sandbox] Warning: --sandbox requested on non-Linux without --sandbox-type; sandbox disabled.",
+                    file=sys.stderr,
+                )
+                enabled = False
+        else:
+            if resolved_type == "bubblewrap" and not is_linux:
+                raise ValueError("--sandbox-type bubblewrap is only supported on Linux")
+            enabled = True
+
+    network_flag = getattr(args, "sandbox_net", None)
+    if network_flag is None:
+        network = bool(BWRAP_PROFILES[profile]["network"])
+    elif network_flag == "on":
+        network = True
+    elif network_flag == "off":
+        network = False
+    else:
+        raise ValueError(f"Invalid --sandbox-net value: {network_flag}")
+
+    return {
+        "enabled": enabled,
+        "type": resolved_type,
+        "profile": profile,
+        "workspace": workspace,
+        "network": network,
+    }
+
+
+def check_bwrap_available() -> bool:
+    return shutil.which("bwrap") is not None
+
+
+def _existing_paths(paths: list[str]) -> list[str]:
+    return [p for p in paths if Path(p).exists()]
+
+
+def build_bwrap_args(config: dict, child_command: list[str]) -> list[str]:
+    workspace = config["workspace"]
+    profile = config["profile"]
+    profile_cfg = BWRAP_PROFILES[profile]
+    home = str(Path.home())
+
+    if not Path(workspace).exists():
+        raise ValueError(f"Sandbox workspace does not exist: {workspace}")
+
+    cmd = [
+        "bwrap",
+        "--unshare-all",
+        "--new-session",
+        "--die-with-parent",
+        "--dev",
+        "/dev",
+        "--tmpfs",
+        "/tmp",
+        "--tmpfs",
+        "/run",
+    ]
+
+    if config["network"]:
+        cmd.append("--share-net")
+
+    if profile_cfg.get("minimal_env"):
+        cmd.extend([
+            "--clearenv",
+            "--setenv",
+            "PATH",
+            os.environ.get("PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"),
+            "--setenv",
+            "HOME",
+            home,
+            "--setenv",
+            "USER",
+            os.environ.get("USER", "user"),
+            "--setenv",
+            "LANG",
+            os.environ.get("LANG", "C.UTF-8"),
+            "--setenv",
+            "TERM",
+            os.environ.get("TERM", "xterm-256color"),
+        ])
+
+    readonly_paths = _existing_paths([
+        "/usr",
+        "/bin",
+        "/lib",
+        "/lib64",
+        "/usr/lib",
+        "/usr/lib64",
+        "/etc/resolv.conf",
+        "/etc/hosts",
+        "/etc/ssl",
+    ])
+    for path in readonly_paths:
+        cmd.extend(["--ro-bind", path, path])
+
+    writable_paths = {
+        "workspace": [workspace],
+        "opencode_state": [str(Path(home) / ".local" / "share" / "opencode")],
+        "opencode_cache": [str(Path(home) / ".cache" / "opencode")],
+        "opencode_config": [str(Path(home) / ".config" / "opencode")],
+        "tool_caches": [
+            str(Path(home) / ".cache" / "go-build"),
+            str(Path(home) / "go" / "pkg" / "mod"),
+            str(Path(home) / ".npm"),
+        ],
+    }
+
+    for key in profile_cfg["writable"]:
+        for path in writable_paths.get(key, []):
+            p = Path(path)
+            if key == "workspace":
+                cmd.extend(["--bind", str(p), str(p)])
+                continue
+            p.mkdir(parents=True, exist_ok=True)
+            cmd.extend(["--bind", str(p), str(p)])
+
+    cmd.extend(["--", *child_command])
+    return cmd
+
+
+def _sandbox_config_summary(config: Optional[dict]) -> str:
+    if not config:
+        return "type=none, profile=balanced, workspace=n/a, network=off"
+    network = "on" if config.get("network") else "off"
+    return (
+        f"type={config.get('type') or 'none'}, "
+        f"profile={config.get('profile', 'balanced')}, "
+        f"workspace={config.get('workspace', 'n/a')}, "
+        f"network={network}"
+    )
+
+
+def _sandbox_error_message(config: dict, reason: str) -> str:
+    summary = _sandbox_config_summary(config)
+    return (
+        f"Sandbox launch failed: {reason}\n"
+        f"Sandbox config: {summary}\n"
+        "Hints: verify bwrap is installed and the workspace/bind paths exist, or run with --no-sandbox."
+    )
+
+
+def raise_on_execution_error(execution: dict, sandbox_config: Optional[dict] = None) -> None:
+    if execution.get("status") != "error":
+        return
+    message = execution.get("error") or "Execution failed"
+    if sandbox_config and sandbox_config.get("enabled") and "Sandbox config:" not in message:
+        message = _sandbox_error_message(sandbox_config, message)
+    raise RuntimeError(message)
+
+
+def maybe_wrap_command_with_sandbox(command: Optional[list[str]], sandbox_config: Optional[dict]) -> list[str]:
+    if command is None:
+        return []
+    if not sandbox_config or not sandbox_config.get("enabled"):
+        return command
+    if sandbox_config.get("type") == "bubblewrap":
+        return build_bwrap_args(sandbox_config, command)
+    return command
+
+
 def normalize_worktree_path(worktree_dir: str, repo_root: str) -> str:
     """Normalize worktree path to absolute, handling relative paths and ~."""
     path = worktree_dir
@@ -1612,7 +1829,7 @@ def wrap_prompt_with_verification_protocol(
     completion_marker: str,
     worktree_path: Optional[str] = None,
     branch_name: Optional[str] = None,
-    history: list = None
+    history: Optional[list] = None
 ) -> str:
     """Wrap prompt content with verification protocol instructions."""
     history = history or []
@@ -1671,7 +1888,13 @@ Do not output both. Do not output any other <verification> tags.
     return verification_wrapper
 
 
-def run_cli(cli_info: dict, content: str, cwd: str, log_file: Path) -> dict:
+def run_cli(
+    cli_info: dict,
+    content: str,
+    cwd: str,
+    log_file: Path,
+    sandbox_config: Optional[dict] = None,
+) -> dict:
     """Run CLI command in background. Returns execution info.
 
     Uses stdin_mode to determine how to pass prompts:
@@ -1684,87 +1907,9 @@ def run_cli(cli_info: dict, content: str, cwd: str, log_file: Path) -> dict:
     if not cli_info["command"]:
         return {"status": "subagent_required"}
 
-    stdin_mode = cli_info.get("stdin_mode", "arg")
-    needs_pty = cli_info.get("needs_pty", False)
-    env = os.environ.copy()
-    env.update(cli_info["env"])
-    if cli_info.get("selected_cli") == "opencode" or (cli_info.get("command") and cli_info["command"][0] == "opencode"):
-        for key in OPENCODE_RUNTIME_SESSION_VARS:
-            env.pop(key, None)
-
-    log_handle = open(log_file, "w")
-
-    # For codex-based CLIs, add sandbox permissions for common directories
-    extra_args = []
-    if stdin_mode == "dash" and cli_info["command"] and cli_info["command"][0] == "codex":
-        extra_args = get_sandbox_add_dirs(cwd)
-
-    if stdin_mode == "dash":
-        # Codex-style: use '-' to read from stdin
-        full_cmd = cli_info["command"] + extra_args + ["-"]
-        process = subprocess.Popen(
-            full_cmd,
-            cwd=cwd,
-            stdin=subprocess.PIPE,
-            stdout=log_handle,
-            stderr=subprocess.STDOUT,
-            env=env,
-            text=True,
-            start_new_session=True
-        )
-        # Write prompt content to stdin and close
-        process.stdin.write(content)
-        process.stdin.close()
-    elif stdin_mode == "stdin":
-        # Claude-style: read prompt from stdin (no extra "-" arg)
-        full_cmd = cli_info["command"] + extra_args
-        process = subprocess.Popen(
-            full_cmd,
-            cwd=cwd,
-            stdin=subprocess.PIPE,
-            stdout=log_handle,
-            stderr=subprocess.STDOUT,
-            env=env,
-            text=True,
-            start_new_session=True,
-        )
-        process.stdin.write(content)
-        process.stdin.close()
-    else:
-        # Gemini-style: pass content as argument
-        full_cmd = cli_info["command"] + [content]
-
-        # Wrap with script for PTY if needed
-        if needs_pty:
-            import shlex
-            cmd_str = " ".join(shlex.quote(arg) for arg in full_cmd)
-            full_cmd = ["script", "-q", "-c", cmd_str, "/dev/null"]
-
-        process = subprocess.Popen(
-            full_cmd,
-            cwd=cwd,
-            stdout=log_handle,
-            stderr=subprocess.STDOUT,
-            env=env,
-            text=True,
-            start_new_session=True
-        )
-
-    return {
-        "status": "running",
-        "pid": process.pid,
-        "log": str(log_file)
-    }
-
-
-def run_cli_foreground(cli_info: dict, content: str, cwd: str, log_file: Path) -> dict:
-    """Run CLI command in foreground, wait for completion. Returns execution info.
-
-    Used for verification loops where we need to wait and check completion.
-    If needs_pty is True, wraps command with 'script' to provide a pseudo-TTY.
-    """
-    if not cli_info["command"]:
-        return {"status": "subagent_required"}
+    if sandbox_config and sandbox_config.get("enabled") and sandbox_config.get("type") == "bubblewrap":
+        if not check_bwrap_available():
+            return {"status": "error", "error": BWRAP_MISSING_ERROR, "log": str(log_file)}
 
     stdin_mode = cli_info.get("stdin_mode", "arg")
     needs_pty = cli_info.get("needs_pty", False)
@@ -1785,6 +1930,121 @@ def run_cli_foreground(cli_info: dict, content: str, cwd: str, log_file: Path) -
         if stdin_mode == "dash":
             # Codex-style: use '-' to read from stdin
             full_cmd = cli_info["command"] + extra_args + ["-"]
+            full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config)
+            process = subprocess.Popen(
+                full_cmd,
+                cwd=cwd,
+                stdin=subprocess.PIPE,
+                stdout=log_handle,
+                stderr=subprocess.STDOUT,
+                env=env,
+                text=True,
+                start_new_session=True
+            )
+            # Write prompt content to stdin and close
+            if process.stdin is None:
+                raise RuntimeError("CLI process stdin is unavailable in dash mode")
+            process.stdin.write(content)
+            process.stdin.close()
+        elif stdin_mode == "stdin":
+            # Claude-style: read prompt from stdin (no extra "-" arg)
+            full_cmd = cli_info["command"] + extra_args
+            full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config)
+            process = subprocess.Popen(
+                full_cmd,
+                cwd=cwd,
+                stdin=subprocess.PIPE,
+                stdout=log_handle,
+                stderr=subprocess.STDOUT,
+                env=env,
+                text=True,
+                start_new_session=True,
+            )
+            if process.stdin is None:
+                raise RuntimeError("CLI process stdin is unavailable in stdin mode")
+            process.stdin.write(content)
+            process.stdin.close()
+        else:
+            # Gemini-style: pass content as argument
+            full_cmd = cli_info["command"] + [content]
+
+            # Wrap with script for PTY if needed
+            if needs_pty:
+                import shlex
+                cmd_str = " ".join(shlex.quote(arg) for arg in full_cmd)
+                full_cmd = ["script", "-q", "-c", cmd_str, "/dev/null"]
+
+            full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config)
+            process = subprocess.Popen(
+                full_cmd,
+                cwd=cwd,
+                stdout=log_handle,
+                stderr=subprocess.STDOUT,
+                env=env,
+                text=True,
+                start_new_session=True
+            )
+    except Exception as exc:
+        log_handle.close()
+        if sandbox_config and sandbox_config.get("enabled"):
+            return {
+                "status": "error",
+                "error": _sandbox_error_message(sandbox_config, str(exc)),
+                "log": str(log_file),
+            }
+        return {"status": "error", "error": str(exc), "log": str(log_file)}
+
+    return {
+        "status": "running",
+        "pid": process.pid,
+        "log": str(log_file)
+    }
+
+
+def run_cli_foreground(
+    cli_info: dict,
+    content: str,
+    cwd: str,
+    log_file: Path,
+    sandbox_config: Optional[dict] = None,
+) -> dict:
+    """Run CLI command in foreground, wait for completion. Returns execution info.
+
+    Used for verification loops where we need to wait and check completion.
+    If needs_pty is True, wraps command with 'script' to provide a pseudo-TTY.
+    """
+    if not cli_info["command"]:
+        return {"status": "subagent_required"}
+
+    if sandbox_config and sandbox_config.get("enabled") and sandbox_config.get("type") == "bubblewrap":
+        if not check_bwrap_available():
+            return {
+                "status": "error",
+                "exit_code": 127,
+                "error": BWRAP_MISSING_ERROR,
+                "log": str(log_file),
+            }
+
+    stdin_mode = cli_info.get("stdin_mode", "arg")
+    needs_pty = cli_info.get("needs_pty", False)
+    env = os.environ.copy()
+    env.update(cli_info["env"])
+    if cli_info.get("selected_cli") == "opencode" or (cli_info.get("command") and cli_info["command"][0] == "opencode"):
+        for key in OPENCODE_RUNTIME_SESSION_VARS:
+            env.pop(key, None)
+
+    log_handle = open(log_file, "w")
+
+    # For codex-based CLIs, add sandbox permissions for common directories
+    extra_args = []
+    if stdin_mode == "dash" and cli_info["command"] and cli_info["command"][0] == "codex":
+        extra_args = get_sandbox_add_dirs(cwd)
+
+    try:
+        if stdin_mode == "dash":
+            # Codex-style: use '-' to read from stdin
+            full_cmd = cli_info["command"] + extra_args + ["-"]
+            full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config)
             process = subprocess.Popen(
                 full_cmd,
                 cwd=cwd,
@@ -1795,11 +2055,14 @@ def run_cli_foreground(cli_info: dict, content: str, cwd: str, log_file: Path) -
                 text=True
             )
             # Write prompt content to stdin and close
+            if process.stdin is None:
+                raise RuntimeError("CLI process stdin is unavailable in dash mode")
             process.stdin.write(content)
             process.stdin.close()
             exit_code = process.wait()
         elif stdin_mode == "stdin":
             full_cmd = cli_info["command"] + extra_args
+            full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config)
             process = subprocess.Popen(
                 full_cmd,
                 cwd=cwd,
@@ -1809,6 +2072,8 @@ def run_cli_foreground(cli_info: dict, content: str, cwd: str, log_file: Path) -
                 env=env,
                 text=True,
             )
+            if process.stdin is None:
+                raise RuntimeError("CLI process stdin is unavailable in stdin mode")
             process.stdin.write(content)
             process.stdin.close()
             exit_code = process.wait()
@@ -1821,6 +2086,8 @@ def run_cli_foreground(cli_info: dict, content: str, cwd: str, log_file: Path) -
                 import shlex
                 cmd_str = " ".join(shlex.quote(arg) for arg in full_cmd)
                 full_cmd = ["script", "-q", "-c", cmd_str, "/dev/null"]
+
+            full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config)
 
             process = subprocess.Popen(
                 full_cmd,
@@ -1840,6 +2107,12 @@ def run_cli_foreground(cli_info: dict, content: str, cwd: str, log_file: Path) -
         }
     except Exception as e:
         log_handle.close()
+        if sandbox_config and sandbox_config.get("enabled"):
+            return {
+                "status": "error",
+                "error": _sandbox_error_message(sandbox_config, str(e)),
+                "log": str(log_file)
+            }
         return {
             "status": "error",
             "error": str(e),
@@ -1857,6 +2130,7 @@ def run_verification_loop(
     max_iterations: int,
     completion_marker: str,
     execution_timestamp: str,
+    sandbox_config: Optional[dict] = None,
     worktree_path: Optional[str] = None,
     branch_name: Optional[str] = None
 ) -> dict:
@@ -1986,7 +2260,28 @@ def run_verification_loop(
             f.write(f"[Loop] Iteration log: {log_file}\n")
 
         # Run CLI and wait for completion
-        exec_result = run_cli_foreground(cli_info, wrapped_content, execution_cwd, log_file)
+        if sandbox_config and sandbox_config.get("enabled"):
+            exec_result = run_cli_foreground(
+                cli_info,
+                wrapped_content,
+                execution_cwd,
+                log_file,
+                sandbox_config=sandbox_config,
+            )
+        else:
+            exec_result = run_cli_foreground(cli_info, wrapped_content, execution_cwd, log_file)
+
+        if exec_result.get("status") == "error":
+            error_msg = exec_result.get("error", "Unknown execution error")
+            with open(loop_log, "a") as f:
+                f.write(f"[Loop] ERROR: {error_msg}\n")
+            state["status"] = "failed"
+            state["failure_reason"] = error_msg
+            save_loop_state(state)
+            result["final_status"] = "failed"
+            result["status"] = "error"
+            result["error"] = error_msg
+            break
 
         # Check for completion marker
         marker_found, retry_reason = check_completion_marker(log_file, completion_marker)
@@ -2066,6 +2361,11 @@ def run_verification_loop_background(
     branch_name: Optional[str] = None,
     cli_override: Optional[str] = None,
     variant: Optional[str] = None,
+    sandbox_enabled: bool = False,
+    sandbox_type: Optional[str] = None,
+    sandbox_profile: str = "balanced",
+    sandbox_workspace: Optional[str] = None,
+    sandbox_net: Optional[str] = None,
 ) -> dict:
     """Start a verification loop in background mode.
 
@@ -2142,6 +2442,16 @@ def run_verification_loop_background(
         cmd.extend(["--cli", cli_override])
     if variant is not None:
         cmd.extend(["--variant", variant])
+    if sandbox_enabled:
+        cmd.append("--sandbox")
+    if sandbox_type:
+        cmd.extend(["--sandbox-type", sandbox_type])
+    if sandbox_profile:
+        cmd.extend(["--sandbox-profile", sandbox_profile])
+    if sandbox_workspace:
+        cmd.extend(["--sandbox-workspace", sandbox_workspace])
+    if sandbox_net:
+        cmd.extend(["--sandbox-net", sandbox_net])
 
     if worktree_path:
         # When in worktree, use --prompt-file to read TASK.md directly
@@ -2223,6 +2533,18 @@ def main():
                        help="Only return prompt info, no CLI details")
     parser.add_argument("--worktree", "-w", action="store_true",
                        help="Create isolated git worktree for execution")
+    parser.add_argument("--sandbox", action="store_true",
+                       help="Enable sandboxing (Linux default backend: bubblewrap)")
+    parser.add_argument("--sandbox-type", choices=["bubblewrap"], default=None,
+                       help="Sandbox backend override")
+    parser.add_argument("--no-sandbox", action="store_true",
+                       help="Explicitly disable sandboxing")
+    parser.add_argument("--sandbox-profile", choices=["strict", "balanced", "dev"], default="balanced",
+                       help="Sandbox profile preset (default: balanced)")
+    parser.add_argument("--sandbox-workspace", default=None,
+                       help="Sandbox workspace path override (default: execution cwd)")
+    parser.add_argument("--sandbox-net", choices=["on", "off"], default=None,
+                       help="Sandbox network mode override")
     parser.add_argument("--base-branch", "-b", default="main",
                        help="Base branch for worktree (default: main)")
     parser.add_argument("--on-conflict", default="error",
@@ -2258,6 +2580,8 @@ def main():
     try:
         repo_root = get_repo_root()
         prompts_dir = repo_root / "prompts"
+        default_execution_cwd = args.cwd or str(repo_root)
+        sandbox_config = resolve_sandbox_config(sys.platform, args, default_execution_cwd)
 
         # Handle --loop-status: check status of existing loop
         if args.loop_status:
@@ -2311,10 +2635,11 @@ def main():
             "repo": repo_root.name,
             "model": args.model,
             "cli_display": cli_info["display"],
-            "cli_command": cli_info["command"],
+            "cli_command": maybe_wrap_command_with_sandbox(cli_info.get("command"), sandbox_config),
             "selected_cli": cli_info.get("selected_cli"),
             "variant": cli_info.get("variant"),
             "stdin_mode": cli_info.get("stdin_mode"),
+            "sandbox": sandbox_config,
             "prompts": []
         }
 
@@ -2401,31 +2726,58 @@ def main():
             else:
                 execution_cwd = args.cwd or str(repo_root)
 
+            prompt_sandbox_config = resolve_sandbox_config(sys.platform, args, execution_cwd)
+
+            if args.run and prompt_sandbox_config.get("enabled") and prompt_sandbox_config.get("type") == "bubblewrap":
+                if not check_bwrap_available():
+                    raise RuntimeError(BWRAP_MISSING_ERROR)
+
             if not args.info_only:
-                prompt_info["cli_command"] = cli_info["command"]
+                preview_command = cli_info["command"]
+                if cli_info.get("stdin_mode") == "dash":
+                    preview_command = preview_command + ["-"]
+                prompt_info["cli_command"] = maybe_wrap_command_with_sandbox(preview_command, prompt_sandbox_config)
                 prompt_info["cli_env"] = cli_info["env"]
+                prompt_info["sandbox"] = prompt_sandbox_config
 
             if args.run:
                 if args.loop:
                     # Verification loop mode
                     if args.loop_foreground:
                         # Run loop in foreground (called by background spawner or directly)
-                        loop_result = run_verification_loop(
-                            cli_info=cli_info,
-                            original_content=prompt_info["content"],
-                            cwd=execution_cwd,
-                            log_dir=log_dir,
-                            prompt_number=prompt_num,
-                            model=args.model,
-                            max_iterations=args.max_iterations,
-                            completion_marker=args.completion_marker,
-                            execution_timestamp=execution_timestamp,
-                            worktree_path=worktree_path,
-                            branch_name=branch_name
-                        )
+                        if prompt_sandbox_config.get("enabled"):
+                            loop_result = run_verification_loop(
+                                cli_info=cli_info,
+                                original_content=prompt_info["content"],
+                                cwd=execution_cwd,
+                                log_dir=log_dir,
+                                prompt_number=prompt_num,
+                                model=args.model,
+                                max_iterations=args.max_iterations,
+                                completion_marker=args.completion_marker,
+                                execution_timestamp=execution_timestamp,
+                                sandbox_config=prompt_sandbox_config,
+                                worktree_path=worktree_path,
+                                branch_name=branch_name,
+                            )
+                        else:
+                            loop_result = run_verification_loop(
+                                cli_info=cli_info,
+                                original_content=prompt_info["content"],
+                                cwd=execution_cwd,
+                                log_dir=log_dir,
+                                prompt_number=prompt_num,
+                                model=args.model,
+                                max_iterations=args.max_iterations,
+                                completion_marker=args.completion_marker,
+                                execution_timestamp=execution_timestamp,
+                                worktree_path=worktree_path,
+                                branch_name=branch_name,
+                            )
                         # For loop mode, show the loop log (exists immediately and is used by monitors)
                         prompt_info["log"] = loop_result["loop_log"]
                         prompt_info["execution"] = loop_result
+                        raise_on_execution_error(loop_result, prompt_sandbox_config)
                     else:
                         # Start loop in background
                         loop_result = run_verification_loop_background(
@@ -2442,10 +2794,16 @@ def main():
                             branch_name=branch_name,
                             cli_override=args.cli,
                             variant=args.variant,
+                            sandbox_enabled=bool(args.sandbox and not args.no_sandbox),
+                            sandbox_type=args.sandbox_type,
+                            sandbox_profile=args.sandbox_profile,
+                            sandbox_workspace=args.sandbox_workspace,
+                            sandbox_net=args.sandbox_net,
                         )
                         # For background loop, update displayed log to loop log
                         prompt_info["log"] = loop_result["loop_log"]
                         prompt_info["execution"] = loop_result
+                        raise_on_execution_error(loop_result, prompt_sandbox_config)
                 else:
                     # Standard single-run mode
                     if not cli_info["command"]:
@@ -2465,8 +2823,23 @@ def main():
                                 f.write(f"# {line}\n")
                         exec_result = {"status": "subagent_required", "log": str(log_file)}
                     else:
-                        exec_result = run_cli(cli_info, prompt_info["content"], execution_cwd, log_file)
+                        if prompt_sandbox_config.get("enabled"):
+                            exec_result = run_cli(
+                                cli_info,
+                                prompt_info["content"],
+                                execution_cwd,
+                                log_file,
+                                sandbox_config=prompt_sandbox_config,
+                            )
+                        else:
+                            exec_result = run_cli(
+                                cli_info,
+                                prompt_info["content"],
+                                execution_cwd,
+                                log_file,
+                            )
                     prompt_info["execution"] = exec_result
+                    raise_on_execution_error(exec_result, prompt_sandbox_config)
 
             result["prompts"].append(prompt_info)
 
