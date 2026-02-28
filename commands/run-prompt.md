@@ -1,7 +1,7 @@
 ---
 name: run-prompt
 description: Execute prompts from ./prompts/ with various AI models, optional worktree isolation, tmux sessions, and iterative verification loops
-argument-hint: <prompt(s)> [--model claude|cc-sonnet|cc-opus|codex|codex-spark|gemini|gemini31pro|zai|glm5|opencode|local] [--cli codex|opencode|claude] [--variant none|low|medium|high|xhigh] [--worktree] [--tmux] [--parallel] [--loop]
+argument-hint: <prompt(s)> [--model claude|cc-sonnet|cc-opus|codex|codex-spark|gemini|gemini31pro|zai|glm5|opencode|local] [--cli codex|opencode|claude] [--variant none|low|medium|high|xhigh] [--worktree] [--sandbox|--no-sandbox] [--sandbox-type bubblewrap] [--sandbox-profile strict|balanced|dev] [--sandbox-workspace <path>] [--sandbox-net on|off] [--tmux] [--parallel] [--loop]
 ---
 
 # Run Prompt
@@ -17,6 +17,12 @@ Execute prompts from `./prompts/` (including subfolders) using various AI models
 | `--cli` | Override CLI wrapper: codex, opencode, or claude (aliases: claudecode, cc). Unsupported explicit combinations error clearly. |
 | `--variant` | Reasoning variant override: `none`, `low`, `medium`, `high`, `xhigh`. Explicit `--variant` overrides alias defaults. |
 | `--worktree, -w` | Run in isolated git worktree |
+| `--sandbox` | Enable sandboxing (Linux default backend: bubblewrap) |
+| `--sandbox-type <type>` | Sandbox backend override (`bubblewrap`) |
+| `--no-sandbox` | Explicitly disable sandboxing |
+| `--sandbox-profile <preset>` | Isolation preset: `strict`, `balanced`, `dev` (default: `balanced`) |
+| `--sandbox-workspace <path>` | Override sandbox workspace path (default: repo/worktree cwd) |
+| `--sandbox-net <mode>` | Network override: `on` or `off` (default from profile) |
 | `--tmux, -t` | Run in tmux session (can monitor/attach later) |
 | `--parallel, -p` | Run multiple prompts in parallel |
 | `--loop, -l` | Enable iterative verification loop until completion |
@@ -374,6 +380,9 @@ Task(
 /daplug:run-prompt 123 --model codex --cli opencode --variant high  # Force OpenCode + variant
 /daplug:run-prompt 123 --model glm5              # Z.AI GLM-5
 /daplug:run-prompt 123 --model codex --worktree  # Codex in isolated worktree
+/daplug:run-prompt 123 --model codex --sandbox   # Codex in bubblewrap sandbox (Linux)
+/daplug:run-prompt 123 --model codex --sandbox --sandbox-profile strict  # strict isolation
+/daplug:run-prompt 123 --model codex --no-sandbox  # explicit opt-out
 /daplug:run-prompt 123 --tmux                    # In tmux session
 /daplug:run-prompt 123 --worktree --tmux         # Worktree + tmux (full isolation)
 /daplug:run-prompt 002-005 --parallel --worktree # Range: 002, 003, 004, 005
