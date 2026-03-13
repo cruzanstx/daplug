@@ -147,10 +147,13 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `claude` | subagent | Claude Code Task subagent (configured in Claude Code) |
 | `cc-sonnet` | claude | sonnet (Claude Sonnet 4.6 alias) |
 | `cc-opus` | claude | opus (Claude Opus 4.6 alias) |
-| `codex` | codex | gpt-5.3-codex |
+| `codex` | codex | gpt-5.4 |
 | `codex-spark` | codex | gpt-5.3-codex-spark (low latency) |
-| `codex-high` | codex | gpt-5.3-codex (high reasoning) |
-| `codex-xhigh` | codex | gpt-5.3-codex (xhigh reasoning) |
+| `codex-high` | codex | gpt-5.4 (high reasoning) |
+| `codex-xhigh` | codex | gpt-5.4 (xhigh reasoning) |
+| `gpt54` | codex | gpt-5.4 |
+| `gpt54-high` | codex | gpt-5.4 (high reasoning) |
+| `gpt54-xhigh` | codex | gpt-5.4 (xhigh reasoning) |
 | `gpt52` | codex | gpt-5.2 |
 | `gpt52-high` | codex | gpt-5.2 (high reasoning) |
 | `gpt52-xhigh` | codex | gpt-5.2 (xhigh reasoning) |
@@ -165,6 +168,7 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `gemini31pro` | gemini | gemini-3.1-pro-preview (if available) |
 | `zai` | codex | GLM-4.7 via Z.AI (may have issues) |
 | `glm5` | opencode | GLM-5 via OpenCode |
+| `kimi` | opencode | Kimi K2.5 via OpenCode |
 | `opencode` | opencode | GLM-4.7 via OpenCode (recommended; JSON output) |
 | `qwen`/`local` | opencode | qwen3-coder-next via LMStudio (opencode default, --cli codex for legacy) |
 | `devstral` | opencode | devstral-small-2-2512 via LMStudio (opencode default, --cli codex for legacy) |

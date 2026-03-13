@@ -54,10 +54,13 @@ Use AskUserQuestion tool with options:
 - `claude` - Claude Code (default, most capable)
 - `cc-sonnet` - Claude Code Sonnet alias
 - `cc-opus` - Claude Code Opus alias
-- `codex` - OpenAI Codex CLI (gpt-5.3-codex, fast execution)
+- `codex` - OpenAI Codex CLI (gpt-5.4, fast execution)
 - `codex-spark` - OpenAI Codex Spark (lowest-latency tier)
 - `codex-high` - OpenAI Codex CLI with high reasoning effort
 - `codex-xhigh` - OpenAI Codex CLI with extra-high reasoning effort
+- `gpt54` - OpenAI GPT-5.4 (direct shorthand)
+- `gpt54-high` - OpenAI GPT-5.4 with high reasoning effort
+- `gpt54-xhigh` - OpenAI GPT-5.4 with extra-high reasoning
 - `gpt52` - OpenAI GPT-5.2 (planning, research, analysis)
 - `gpt52-high` - OpenAI GPT-5.2 with high reasoning effort
 - `gpt52-xhigh` - OpenAI GPT-5.2 with extra-high reasoning (30+ min tasks)
@@ -72,6 +75,7 @@ Use AskUserQuestion tool with options:
 - `gemini31pro` - Gemini 3.1 Pro Preview (if your account has access)
 - `zai` - Z.AI GLM-4.7 via Codex CLI
 - `glm5` - Z.AI GLM-5 via OpenCode
+- `kimi` - Kimi K2.5 via OpenCode
 - `opencode` - OpenCode runner with Z.AI GLM-4.7
 - `local` - Local model via opencode + LMStudio
 - `qwen` - Qwen via opencode + LMStudio
