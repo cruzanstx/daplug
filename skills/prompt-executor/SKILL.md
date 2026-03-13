@@ -68,9 +68,9 @@ python3 "$EXECUTOR" [prompts...] [options]
 ```
 
 **Options:**
-- `--model, -m`: claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, opencode, local, qwen, devstral, glm-local, qwen-small
+- `--model, -m`: claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt54, gpt54-high, gpt54-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, kimi, opencode, local, qwen, devstral, glm-local, qwen-small
 - `--cli`: Override CLI wrapper (codex, opencode, or claude; aliases: claudecode, cc). Unsupported explicit combinations fail with a clear error (no silent fallback).
-- `--variant`: Reasoning variant override (`none|low|medium|high|xhigh`). Explicit `--variant` overrides alias defaults (`codex-high`, `gpt52-high`, etc.).
+- `--variant`: Reasoning variant override (`none|low|medium|high|xhigh`). Explicit `--variant` overrides alias defaults (`codex-high`, `gpt54-high`, `gpt52-high`, etc.).
 - `--cwd, -c`: Working directory for execution
 - `--run, -r`: Actually run the CLI (default: just return info)
 - `--info-only, -i`: Only return prompt info, no CLI details
@@ -211,9 +211,12 @@ python3 "$EXECUTOR" --loop-status
 | Model | CLI | Description |
 |-------|-----|-------------|
 | claude | (Task subagent) | Claude Sonnet via subagent |
-| codex | codex exec --full-auto | OpenAI Codex (gpt-5.3-codex) |
+| codex | codex exec --full-auto | OpenAI Codex (gpt-5.4) |
 | codex-high | codex exec --full-auto -c model_reasoning_effort="high" | Codex alias with default `--variant high` |
 | codex-xhigh | codex exec --full-auto -c model_reasoning_effort="xhigh" | Codex alias with default `--variant xhigh` |
+| gpt54 | codex exec --full-auto | GPT-5.4 direct shorthand |
+| gpt54-high | codex exec --full-auto -c model_reasoning_effort="high" | GPT-5.4 alias with default `--variant high` |
+| gpt54-xhigh | codex exec --full-auto -c model_reasoning_effort="xhigh" | GPT-5.4 alias with default `--variant xhigh` |
 | gpt52 | codex exec --full-auto -m gpt-5.2 | GPT-5.2 for planning/research |
 | gpt52-high | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="high" | GPT-5.2 alias with default `--variant high` |
 | gpt52-xhigh | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="xhigh" | GPT-5.2 alias with default `--variant xhigh` |
@@ -227,6 +230,8 @@ python3 "$EXECUTOR" --loop-status
 | gemini3pro | gemini -y -m gemini-3-pro-preview | Google Gemini 3 Pro Preview (explicit alias) |
 | gemini31pro | gemini -y -m gemini-3.1-pro-preview | Gemini 3.1 Pro Preview (if your account has access) |
 | zai | codex exec --profile zai | Z.AI GLM-4.7 (via Codex, may have issues) |
+| glm5 | opencode run --format json -m zai/glm-5 | Z.AI GLM-5 via OpenCode |
+| kimi | opencode run --format json -m opencode/kimi-k2.5 | Kimi K2.5 via OpenCode |
 | opencode | opencode run --format json -m zai/glm-4.7 | Z.AI GLM-4.7 (via OpenCode, recommended; JSON output) |
 | local/qwen | opencode run --format json -m lmstudio/qwen3-coder-next | Local qwen-coder model (default: opencode) |
 | devstral | opencode run --format json -m lmstudio/devstral-small-2-2512 | Local devstral model (default: opencode) |
@@ -256,7 +261,7 @@ After executing the prompt, display a clear summary that includes the prompt **t
 
 | Field | Value |
 |-------|-------|
-| Model | codex (gpt-5.3-codex) |
+| Model | codex (gpt-5.4) |
 | Status | 🟢 Running (PID 12345) |
 | Loop | Max 3 iterations |
 

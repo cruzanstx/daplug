@@ -461,10 +461,13 @@ All available models for /daplug:run-prompt --model:
 - `claude` - Claude sub-agent in current context (best for complex reasoning, multi-step tasks)
 
 **OpenAI Codex Family:** (check: `codex.primary_window.used`, `codex.secondary_window.used`)
-- `codex` - gpt-5.3-codex (fast, good for straightforward coding)
+- `codex` - gpt-5.4 (default Codex shorthand, fast for straightforward coding)
 - `codex-spark` - gpt-5.3-codex-spark (near-instant responses, lowest Codex cost tier)
-- `codex-high` - gpt-5.3-codex with high reasoning
-- `codex-xhigh` - gpt-5.3-codex with xhigh reasoning (complex projects)
+- `codex-high` - gpt-5.4 with high reasoning
+- `codex-xhigh` - gpt-5.4 with xhigh reasoning (complex projects)
+- `gpt54` - gpt-5.4 (explicit shorthand)
+- `gpt54-high` - gpt-5.4 with high reasoning
+- `gpt54-xhigh` - gpt-5.4 with xhigh reasoning
 - `gpt52` - gpt-5.2 (planning, research, analysis)
 - `gpt52-high` - gpt-5.2 with high reasoning
 - `gpt52-xhigh` - gpt-5.2 with xhigh reasoning (30+ min tasks)
@@ -493,6 +496,7 @@ All available models for /daplug:run-prompt --model:
 **Other Models:** (check: `zai.token_quota.percentage`)
 - `zai` - Z.AI GLM-4.7 (good for Chinese language tasks)
 - `glm5` - Z.AI GLM-5 (higher-capability Z.AI coding model)
+- `kimi` - Kimi K2.5 via OpenCode (`opencode/kimi-k2.5`)
 - `local` - Local model via opencode + LMStudio (no quota limits)
 - `qwen` - Qwen via opencode + LMStudio (no quota limits)
 - `devstral` - Devstral via opencode + LMStudio (multimodal/vision, no quota limits)
@@ -519,16 +523,16 @@ For each model family, determine status:
 | Research/Analysis | gpt52-xhigh or claude      | gpt52-high, gemini31pro (if available), gemini25pro |          |
 | Refactoring       | codex or preferred_agent   | claude, gemini3flash                             |              |
 | Simple coding     | codex-spark or zai         | gemini25flash, codex                             |              |
-| Complex logic     | gpt52-high or claude       | gpt52-xhigh, gemini31pro (if available), gemini3pro |         |
+| Complex logic     | gpt54-high or claude       | gpt54-xhigh, gpt52-xhigh, gemini31pro (if available), gemini3pro |         |
 | Vision/Multimodal | devstral                   | gemini25pro, claude                              |              |
 | Frontend/UI       | claude or gemini25pro      | gemini31pro (if available), gemini3pro, codex-high |          |
-| Backend/API       | codex or codex-high        | gemini3flash, claude                             |              |
+| Backend/API       | codex or gpt54-high        | codex-high, gemini3flash, claude                |              |
 | Debugging         | gpt52 or claude            | gemini25pro, codex-xhigh                         |              |
 | Performance       | codex-xhigh or claude      | gemini31pro (if available), gemini3pro, gemini25pro |         |
 | Documentation     | gemini25flash or claude    | zai, glm5                                        |              |
 | DevOps/Infra      | codex or gemini25flash     | glm5, gemini3flash                               |              |
 | Database/SQL      | codex or codex-high        | gemini3flash, claude                             |              |
-| Verification      | codex or codex-high        | codex-spark, glm5                                | `--loop`     |
+| Verification      | codex or gpt54-high        | codex-high, codex-spark, glm5                    | `--loop`     |
 | Planning          | gpt52-xhigh or gpt52-high  | claude, gemini25pro                              |              |
 | Default           | {preferred_agent}          | Next available by preference                     |              |
 
@@ -628,27 +632,33 @@ If user chooses "Run prompt now":
   2. Claude (worktree) - isolated git worktree
 
   **Codex (OpenAI):** {usage status}
-  3. codex - gpt-5.3-codex standard
+  3. codex - gpt-5.4 standard
   4. codex-spark - fast/low-cost coding tier
   5. codex-high - higher reasoning
   6. codex-xhigh - maximum reasoning
 
+  **GPT-5.4 (OpenAI explicit):** {usage status}
+  7. gpt54 - gpt-5.4 explicit shorthand
+  8. gpt54-high - deep reasoning
+  9. gpt54-xhigh - maximum reasoning
+
   **GPT-5.2 (OpenAI):** {usage status} - Best for planning/research
-  7. gpt52 - planning, research, analysis
-  8. gpt52-high - deep reasoning
-  9. gpt52-xhigh - maximum reasoning (30+ min tasks)
+  10. gpt52 - planning, research, analysis
+  11. gpt52-high - deep reasoning
+  12. gpt52-xhigh - maximum reasoning (30+ min tasks)
 
   **Gemini (Google):** {show each model's usage}
-  10. gemini (3-flash) - {X}% used - best coding performance
-  11. gemini25flash - {X}% used - fast, cost-effective
-  12. gemini25pro - {X}% used - stable, capable
-  13. gemini3pro - {X}% used - most capable
-  14. gemini31pro - {X}% used - Gemini 3.1 Pro Preview (if available)
+  13. gemini (3-flash) - {X}% used - best coding performance
+  14. gemini25flash - {X}% used - fast, cost-effective
+  15. gemini25pro - {X}% used - stable, capable
+  16. gemini3pro - {X}% used - most capable
+  17. gemini31pro - {X}% used - Gemini 3.1 Pro Preview (if available)
 
   **Other:**
-  15. zai - {X}% used - Z.AI GLM-4.7
-  16. glm5 - {X}% used - Z.AI GLM-5 (higher-capability tier)
-  17. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
+  18. zai - {X}% used - Z.AI GLM-4.7
+  19. glm5 - {X}% used - Z.AI GLM-5 (higher-capability tier)
+  20. kimi - {X}% used - Kimi K2.5 via OpenCode
+  21. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation based on detection_logic, recommendation_logic, AND availability]
   [If preferred_agent is unavailable: "⚠️ Your preferred agent ({preferred_agent}) is at {X}% - suggesting {fallback} instead"]
@@ -661,7 +671,7 @@ If user chooses "Run prompt now":
 
   [If is_verification_prompt or is_test_prompt: "Recommended: Add --loop for automatic retry until tests/build pass"]
 
-  Choose (1-17), or type model with flags (e.g., 'codex --loop'): _"
+  Choose (1-21), or type model with flags (e.g., 'codex --loop'): _"
 
   **Execute based on selection:**
 
@@ -671,7 +681,7 @@ If user chooses "Run prompt now":
   If user selects Claude worktree (option 2):
     Invoke via Skill tool: `/daplug:run-prompt 005 --worktree`
 
-  If user selects any other model (options 3-17):
+  If user selects any other model (options 3-21):
     Invoke via Skill tool: `/daplug:run-prompt 005 --model {selected_model}`
     (Add `--worktree` and/or `--loop` if user requests)
 
@@ -765,27 +775,33 @@ If user chooses to run prompts in parallel or sequential:
   2. Claude (worktree) - isolated git worktrees (BEST for parallel)
 
   **Codex (OpenAI):** {usage status}
-  3. codex - gpt-5.3-codex standard
+  3. codex - gpt-5.4 standard
   4. codex-spark - fast/low-cost coding tier
   5. codex-high - higher reasoning
   6. codex-xhigh - maximum reasoning
 
+  **GPT-5.4 (OpenAI explicit):** {usage status}
+  7. gpt54 - gpt-5.4 explicit shorthand
+  8. gpt54-high - deep reasoning
+  9. gpt54-xhigh - maximum reasoning
+
   **GPT-5.2 (OpenAI):** {usage status} - Best for planning/research
-  7. gpt52 - planning, research, analysis
-  8. gpt52-high - deep reasoning
-  9. gpt52-xhigh - maximum reasoning (30+ min tasks)
+  10. gpt52 - planning, research, analysis
+  11. gpt52-high - deep reasoning
+  12. gpt52-xhigh - maximum reasoning (30+ min tasks)
 
   **Gemini (Google):** {show usage per model}
-  10. gemini (3-flash) - {X}% used
-  11. gemini25flash - {X}% used
-  12. gemini25pro - {X}% used
-  13. gemini3pro - {X}% used
-  14. gemini31pro - {X}% used (if available)
+  13. gemini (3-flash) - {X}% used
+  14. gemini25flash - {X}% used
+  15. gemini25pro - {X}% used
+  16. gemini3pro - {X}% used
+  17. gemini31pro - {X}% used (if available)
 
   **Other:**
-  15. zai - {X}% used
-  16. glm5 - {X}% used
-  17. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
+  18. zai - {X}% used
+  19. glm5 - {X}% used
+  20. kimi - {X}% used
+  21. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation based on detection_logic, recommendation_logic, AND availability]
   [If preferred_agent is unavailable: "⚠️ {preferred_agent} at {X}% - suggesting {fallback}"]
@@ -797,7 +813,7 @@ If user chooses to run prompts in parallel or sequential:
 
   [If is_verification_prompt or is_test_prompt: "Recommended: Add --loop for automatic retry until tests/build pass"]
 
-  Choose (1-17), or type model with flags (e.g., 'codex --loop'): _"
+  Choose (1-21), or type model with flags (e.g., 'codex --loop'): _"
 
   **Execute based on selection:**
 
@@ -808,7 +824,7 @@ If user chooses to run prompts in parallel or sequential:
     If user selects Claude worktree (option 2):
       Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --worktree --parallel`
 
-    If user selects any other model (options 3-17):
+    If user selects any other model (options 3-21):
       Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --model {selected_model} --parallel`
       (Add `--worktree` and/or `--loop` if user requests)
 
@@ -819,7 +835,7 @@ If user chooses to run prompts in parallel or sequential:
     If user selects Claude worktree (option 2):
       Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --worktree --sequential`
 
-    If user selects any other model (options 3-17):
+    If user selects any other model (options 3-21):
       Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --model {selected_model} --sequential`
       (Add `--worktree` and/or `--loop` if user requests)
 
@@ -914,27 +930,33 @@ If user chooses "Run prompts sequentially now":
   2. Claude (worktree) - isolated git worktrees
 
   **Codex (OpenAI):** {usage status}
-  3. codex - gpt-5.3-codex standard
+  3. codex - gpt-5.4 standard
   4. codex-spark - fast/low-cost coding tier
   5. codex-high - higher reasoning
   6. codex-xhigh - maximum reasoning
 
+  **GPT-5.4 (OpenAI explicit):** {usage status}
+  7. gpt54 - gpt-5.4 explicit shorthand
+  8. gpt54-high - deep reasoning
+  9. gpt54-xhigh - maximum reasoning
+
   **GPT-5.2 (OpenAI):** {usage status} - Best for planning/research
-  7. gpt52 - planning, research, analysis
-  8. gpt52-high - deep reasoning
-  9. gpt52-xhigh - maximum reasoning (30+ min tasks)
+  10. gpt52 - planning, research, analysis
+  11. gpt52-high - deep reasoning
+  12. gpt52-xhigh - maximum reasoning (30+ min tasks)
 
   **Gemini (Google):** {show usage per model}
-  10. gemini (3-flash) - {X}% used
-  11. gemini25flash - {X}% used
-  12. gemini25pro - {X}% used
-  13. gemini3pro - {X}% used
-  14. gemini31pro - {X}% used (if available)
+  13. gemini (3-flash) - {X}% used
+  14. gemini25flash - {X}% used
+  15. gemini25pro - {X}% used
+  16. gemini3pro - {X}% used
+  17. gemini31pro - {X}% used (if available)
 
   **Other:**
-  15. zai - {X}% used
-  16. glm5 - {X}% used
-  17. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
+  18. zai - {X}% used
+  19. glm5 - {X}% used
+  20. kimi - {X}% used
+  21. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation based on detection_logic, recommendation_logic, AND availability]
   [If preferred_agent is unavailable: "⚠️ {preferred_agent} at {X}% - suggesting {fallback}"]
@@ -946,7 +968,7 @@ If user chooses "Run prompts sequentially now":
 
   [If is_verification_prompt or is_test_prompt: "Recommended: Add --loop for automatic retry until tests/build pass"]
 
-  Choose (1-17), or type model with flags (e.g., 'codex --loop'): _"
+  Choose (1-21), or type model with flags (e.g., 'codex --loop'): _"
 
   **Execute based on selection:**
 
@@ -956,7 +978,7 @@ If user chooses "Run prompts sequentially now":
   If user selects Claude worktree (option 2):
     Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --worktree --sequential`
 
-  If user selects any other model (options 3-17):
+  If user selects any other model (options 3-21):
     Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --model {selected_model} --sequential`
     (Add `--worktree` and/or `--loop` if user requests)
 
@@ -976,7 +998,7 @@ If user chooses "Run first prompt only":
   If user selects Claude worktree (option 2):
     Invoke via Skill tool: `/daplug:run-prompt 005 --worktree`
 
-  If user selects any other model (options 3-17):
+  If user selects any other model (options 3-21):
     Invoke via Skill tool: `/daplug:run-prompt 005 --model {selected_model}`
     (Add `--worktree` and/or `--loop` if user requests)
 </actions>

@@ -670,10 +670,13 @@ Gemini models share quotas in tiers (observed with Google One Premium):
 
 | Shorthand | Model | Best For |
 |-----------|-------|----------|
-| `codex` | gpt-5.3-codex | Fast coding execution |
+| `codex` | gpt-5.4 | Fast coding execution (default Codex shorthand) |
 | `codex-spark` | gpt-5.3-codex-spark | Lowest-latency quick edits |
-| `codex-high` | gpt-5.3-codex (high) | Complex coding |
-| `codex-xhigh` | gpt-5.3-codex (xhigh) | Large refactors |
+| `codex-high` | gpt-5.4 (high) | Complex coding |
+| `codex-xhigh` | gpt-5.4 (xhigh) | Large refactors |
+| `gpt54` | gpt-5.4 | Explicit GPT-5.4 shorthand |
+| `gpt54-high` | gpt-5.4 (high) | Deep reasoning with GPT-5.4 |
+| `gpt54-xhigh` | gpt-5.4 (xhigh) | Maximum reasoning with GPT-5.4 |
 | `gpt52` | gpt-5.2 | Planning, research, analysis |
 | `gpt52-high` | gpt-5.2 (high) | Deep reasoning |
 | `gpt52-xhigh` | gpt-5.2 (xhigh) | Maximum reasoning (30+ min) |
@@ -684,9 +687,10 @@ Gemini models share quotas in tiers (observed with Google One Premium):
 |-----------|-------|----------|
 | `zai` | glm-4.7 | General coding fallback |
 | `glm5` | glm-5 | Higher-capability Z.AI tasks |
+| `kimi` | kimi-k2.5 | Kimi K2.5 via OpenCode |
 
-**When to use GPT-5.2 vs GPT-5.3-Codex:**
-- **GPT-5.3-Codex**: Best when plans are clear, need fast execution (combines codex + reasoning)
+**When to use GPT-5.2 vs GPT-5.4:**
+- **GPT-5.4**: Best when plans are clear, need fast execution (combines codex + reasoning)
 - **GPT-5.2**: Best for ambiguous problems, research, methodical analysis
 
 ## Worktree Auto-Install
