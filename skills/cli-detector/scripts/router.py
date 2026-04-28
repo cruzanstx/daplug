@@ -38,7 +38,7 @@ class _ModelRequest:
 
 _SHORTHAND: dict[str, _ModelRequest] = {
     # OpenAI (Codex CLI)
-    "codex": _ModelRequest("codex", family="openai", model_id="openai:gpt-5.4"),
+    "codex": _ModelRequest("codex", family="openai", model_id="openai:gpt-5.5"),
     "codex-spark": _ModelRequest(
         "codex-spark",
         family="openai",
@@ -47,13 +47,13 @@ _SHORTHAND: dict[str, _ModelRequest] = {
     "codex-high": _ModelRequest(
         "codex-high",
         family="openai",
-        model_id="openai:gpt-5.4",
+        model_id="openai:gpt-5.5",
         reasoning_effort="high",
     ),
     "codex-xhigh": _ModelRequest(
         "codex-xhigh",
         family="openai",
-        model_id="openai:gpt-5.4",
+        model_id="openai:gpt-5.5",
         reasoning_effort="xhigh",
     ),
     "gpt54": _ModelRequest("gpt54", family="openai", model_id="openai:gpt-5.4"),
@@ -67,6 +67,19 @@ _SHORTHAND: dict[str, _ModelRequest] = {
         "gpt54-xhigh",
         family="openai",
         model_id="openai:gpt-5.4",
+        reasoning_effort="xhigh",
+    ),
+    "gpt55": _ModelRequest("gpt55", family="openai", model_id="openai:gpt-5.5"),
+    "gpt55-high": _ModelRequest(
+        "gpt55-high",
+        family="openai",
+        model_id="openai:gpt-5.5",
+        reasoning_effort="high",
+    ),
+    "gpt55-xhigh": _ModelRequest(
+        "gpt55-xhigh",
+        family="openai",
+        model_id="openai:gpt-5.5",
         reasoning_effort="xhigh",
     ),
     "gpt52": _ModelRequest("gpt52", family="openai", model_id="openai:gpt-5.2"),
@@ -174,6 +187,10 @@ _SHORTHAND: dict[str, _ModelRequest] = {
 
 _ALIASES: dict[str, str] = {
     "spark": "codex-spark",
+    "gpt-5.5": "gpt55",
+    "gpt5.5": "gpt55",
+    "gpt-5.5-high": "gpt55-high",
+    "gpt-5.5-xhigh": "gpt55-xhigh",
     "gpt-5.4": "gpt54",
     "gpt5.4": "gpt54",
     "gpt-5.4-high": "gpt54-high",

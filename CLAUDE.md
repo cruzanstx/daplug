@@ -147,13 +147,16 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `claude` | subagent | Claude Code Task subagent (configured in Claude Code) |
 | `cc-sonnet` | claude | sonnet (Claude Sonnet 4.6 alias) |
 | `cc-opus` | claude | opus (Claude Opus 4.6 alias) |
-| `codex` | codex | gpt-5.4 |
+| `codex` | codex | gpt-5.5 |
 | `codex-spark` | codex | gpt-5.3-codex-spark (low latency) |
-| `codex-high` | codex | gpt-5.4 (high reasoning) |
-| `codex-xhigh` | codex | gpt-5.4 (xhigh reasoning) |
+| `codex-high` | codex | gpt-5.5 (high reasoning) |
+| `codex-xhigh` | codex | gpt-5.5 (xhigh reasoning) |
 | `gpt54` | codex | gpt-5.4 |
 | `gpt54-high` | codex | gpt-5.4 (high reasoning) |
 | `gpt54-xhigh` | codex | gpt-5.4 (xhigh reasoning) |
+| `gpt55` | codex | gpt-5.5 |
+| `gpt55-high` | codex | gpt-5.5 (high reasoning) |
+| `gpt55-xhigh` | codex | gpt-5.5 (xhigh reasoning) |
 | `gpt52` | codex | gpt-5.2 |
 | `gpt52-high` | codex | gpt-5.2 (high reasoning) |
 | `gpt52-xhigh` | codex | gpt-5.2 (xhigh reasoning) |

@@ -12,6 +12,7 @@ Usage:
 """
 
 import argparse
+import importlib.util
 import json
 import os
 import re
@@ -57,16 +58,19 @@ MODEL_FILES = [
         "path": "commands/create-prompt.md",
         "type": "markdown_section",
         "description": "<available_models> section",
+        "skip_models": ["cc-sonnet", "cc-opus"],
     },
     {
         "path": "commands/create-prompt.md",
         "type": "markdown_table",
         "description": "Recommendation logic table",
+        "skip_models": ["cc-sonnet", "cc-opus"],
     },
     {
         "path": "commands/create-llms-txt.md",
         "type": "markdown_section",
         "description": "<available_models> section",
+        "skip_models": ["cc-sonnet", "cc-opus"],
     },
     {
         "path": "README.md",
@@ -97,25 +101,33 @@ def extract_models_from_executor(repo_root: Path) -> Dict[str, dict]:
     if not executor_path.exists():
         return {}
 
-    content = executor_path.read_text()
+    spec = importlib.util.spec_from_file_location("daplug_executor_for_manage_models", executor_path)
+    if spec is None or spec.loader is None:
+        return {}
 
-    # Find the models dict
+    module = importlib.util.module_from_spec(spec)
+    sys.path.insert(0, str(executor_path.parent))
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        sys.path.pop(0)
+
+    legacy_display = getattr(module, "LEGACY_MODEL_DISPLAY", {})
+    model_specs = getattr(module, "MODEL_SPECS", {})
+    alias_base = getattr(module, "MODEL_ALIAS_BASE", {})
+    alias_variant = getattr(module, "MODEL_ALIAS_DEFAULT_VARIANT", {})
+
     models = {}
-
-    # Match model entries like: "codex": { ... }
-    pattern = r'"(\w+(?:-\w+)*)"\s*:\s*\{\s*"command":\s*\[([^\]]+)\][^}]+?"display":\s*"([^"]+)"[^}]+?\}'
-
-    for match in re.finditer(pattern, content, re.DOTALL):
-        name = match.group(1)
-        command_str = match.group(2)
-        display = match.group(3)
-
-        # Parse command list
-        commands = re.findall(r'"([^"]+)"', command_str)
-
+    for name, display in legacy_display.items():
+        base_name = alias_base.get(name, name)
+        base_spec = model_specs.get(base_name, {})
         models[name] = {
-            "command": commands,
             "display": display,
+            "cli": base_spec.get("default_cli", "?"),
+            "model_id": base_spec.get("model_id"),
+            "variant": alias_variant.get(name),
+            "is_alias": name in alias_base,
+            "base_model": base_name,
         }
 
     return models
@@ -149,7 +161,7 @@ def list_models(repo_root: Path) -> None:
     print("-" * 75)
 
     for name, info in sorted(models.items()):
-        cli = info["command"][0] if info["command"] else "?"
+        cli = info.get("cli") or "?"
         display = info["display"][:47] + "..." if len(info["display"]) > 50 else info["display"]
         print(f"{name:<15} {display:<50} {cli:<10}")
 
@@ -175,10 +187,13 @@ def check_models(repo_root: Path) -> None:
 
         content = file_path.read_text()
         missing = []
+        skip_models = set(file_info.get("skip_models", []))
 
         for model_name in models.keys():
             # Skip checking for aliases like "local" which maps to "qwen"
             if model_name == "local":
+                continue
+            if model_name in skip_models:
                 continue
             if model_name not in content:
                 missing.append(model_name)

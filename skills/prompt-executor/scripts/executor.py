@@ -602,6 +602,8 @@ MODEL_ALIAS_BASE = {
     "codex-xhigh": "codex",
     "gpt54-high": "gpt54",
     "gpt54-xhigh": "gpt54",
+    "gpt55-high": "gpt55",
+    "gpt55-xhigh": "gpt55",
     "gpt52-high": "gpt52",
     "gpt52-xhigh": "gpt52",
 }
@@ -611,18 +613,23 @@ MODEL_ALIAS_DEFAULT_VARIANT = {
     "codex-xhigh": "xhigh",
     "gpt54-high": "high",
     "gpt54-xhigh": "xhigh",
+    "gpt55-high": "high",
+    "gpt55-xhigh": "xhigh",
     "gpt52-high": "high",
     "gpt52-xhigh": "xhigh",
 }
 
 LEGACY_MODEL_DISPLAY = {
-    "codex": "codex (gpt-5.4)",
+    "codex": "codex (gpt-5.5)",
     "codex-spark": "codex-spark (gpt-5.3-codex-spark, low latency)",
-    "codex-high": "codex-high (gpt-5.4, high reasoning)",
-    "codex-xhigh": "codex-xhigh (gpt-5.4, xhigh reasoning)",
+    "codex-high": "codex-high (gpt-5.5, high reasoning)",
+    "codex-xhigh": "codex-xhigh (gpt-5.5, xhigh reasoning)",
     "gpt54": "gpt54 (GPT-5.4, direct shorthand)",
     "gpt54-high": "gpt54-high (GPT-5.4, high reasoning)",
     "gpt54-xhigh": "gpt54-xhigh (GPT-5.4, xhigh reasoning)",
+    "gpt55": "gpt55 (GPT-5.5, direct shorthand)",
+    "gpt55-high": "gpt55-high (GPT-5.5, high reasoning)",
+    "gpt55-xhigh": "gpt55-xhigh (GPT-5.5, xhigh reasoning)",
     "gpt52": "gpt52 (GPT-5.2, planning/research)",
     "gpt52-high": "gpt52-high (GPT-5.2, high reasoning)",
     "gpt52-xhigh": "gpt52-xhigh (GPT-5.2, xhigh reasoning, 30+ min tasks)",
@@ -651,7 +658,7 @@ LEGACY_MODEL_DISPLAY = {
 
 MODEL_SPECS = {
     "codex": {
-        "model_id": "openai:gpt-5.4",
+        "model_id": "openai:gpt-5.5",
         "default_cli": "codex",
         "supports_codex_reasoning": True,
         "codex_profile": None,
@@ -666,6 +673,13 @@ MODEL_SPECS = {
     },
     "gpt54": {
         "model_id": "openai:gpt-5.4",
+        "default_cli": "codex",
+        "supports_codex_reasoning": True,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+    "gpt55": {
+        "model_id": "openai:gpt-5.5",
         "default_cli": "codex",
         "supports_codex_reasoning": True,
         "codex_profile": None,
@@ -837,6 +851,9 @@ CLI_OVERRIDE_SUPPORTED_MODELS = {
         "gpt54",
         "gpt54-high",
         "gpt54-xhigh",
+        "gpt55",
+        "gpt55-high",
+        "gpt55-xhigh",
         "gpt52",
         "gpt52-high",
         "gpt52-xhigh",
@@ -854,6 +871,9 @@ CLI_OVERRIDE_SUPPORTED_MODELS = {
         "gpt54",
         "gpt54-high",
         "gpt54-xhigh",
+        "gpt55",
+        "gpt55-high",
+        "gpt55-xhigh",
         "gpt52",
         "gpt52-high",
         "gpt52-xhigh",
@@ -988,7 +1008,7 @@ def _build_codex_command(
         cmd.extend(["--profile", str(profile)])
     else:
         stripped = _strip_provider_prefix(model_id)
-        if stripped and stripped != "gpt-5.4":
+        if stripped and stripped != "gpt-5.5":
             cmd.extend(["-m", stripped])
 
     if variant:
@@ -2535,6 +2555,7 @@ def main():
                        choices=["claude", "cc-sonnet", "cc-opus",
                                 "codex", "codex-spark", "codex-high", "codex-xhigh",
                                 "gpt54", "gpt54-high", "gpt54-xhigh",
+                                "gpt55", "gpt55-high", "gpt55-xhigh",
                                 "gpt52", "gpt52-high", "gpt52-xhigh",
                                 "gemini", "gemini-high", "gemini-xhigh",
                                 "gemini25pro", "gemini25flash", "gemini25lite",
