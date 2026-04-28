@@ -68,9 +68,9 @@ python3 "$EXECUTOR" [prompts...] [options]
 ```
 
 **Options:**
-- `--model, -m`: claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt54, gpt54-high, gpt54-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, kimi, opencode, local, qwen, devstral, glm-local, qwen-small
+- `--model, -m`: claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, kimi, opencode, local, qwen, devstral, glm-local, qwen-small
 - `--cli`: Override CLI wrapper (codex, opencode, or claude; aliases: claudecode, cc). Unsupported explicit combinations fail with a clear error (no silent fallback).
-- `--variant`: Reasoning variant override (`none|low|medium|high|xhigh`). Explicit `--variant` overrides alias defaults (`codex-high`, `gpt54-high`, `gpt52-high`, etc.).
+- `--variant`: Reasoning variant override (`none|low|medium|high|xhigh`). Explicit `--variant` overrides alias defaults (`codex-high`, `gpt55-high`, `gpt54-high`, `gpt52-high`, etc.).
 - `--cwd, -c`: Working directory for execution
 - `--run, -r`: Actually run the CLI (default: just return info)
 - `--info-only, -i`: Only return prompt info, no CLI details
@@ -211,12 +211,15 @@ python3 "$EXECUTOR" --loop-status
 | Model | CLI | Description |
 |-------|-----|-------------|
 | claude | (Task subagent) | Claude Sonnet via subagent |
-| codex | codex exec --full-auto | OpenAI Codex (gpt-5.4) |
+| codex | codex exec --full-auto | OpenAI Codex (gpt-5.5) |
 | codex-high | codex exec --full-auto -c model_reasoning_effort="high" | Codex alias with default `--variant high` |
 | codex-xhigh | codex exec --full-auto -c model_reasoning_effort="xhigh" | Codex alias with default `--variant xhigh` |
-| gpt54 | codex exec --full-auto | GPT-5.4 direct shorthand |
-| gpt54-high | codex exec --full-auto -c model_reasoning_effort="high" | GPT-5.4 alias with default `--variant high` |
-| gpt54-xhigh | codex exec --full-auto -c model_reasoning_effort="xhigh" | GPT-5.4 alias with default `--variant xhigh` |
+| gpt54 | codex exec --full-auto -m gpt-5.4 | GPT-5.4 direct shorthand |
+| gpt54-high | codex exec --full-auto -m gpt-5.4 -c model_reasoning_effort="high" | GPT-5.4 alias with default `--variant high` |
+| gpt54-xhigh | codex exec --full-auto -m gpt-5.4 -c model_reasoning_effort="xhigh" | GPT-5.4 alias with default `--variant xhigh` |
+| gpt55 | codex exec --full-auto | GPT-5.5 direct shorthand |
+| gpt55-high | codex exec --full-auto -c model_reasoning_effort="high" | GPT-5.5 alias with default `--variant high` |
+| gpt55-xhigh | codex exec --full-auto -c model_reasoning_effort="xhigh" | GPT-5.5 alias with default `--variant xhigh` |
 | gpt52 | codex exec --full-auto -m gpt-5.2 | GPT-5.2 for planning/research |
 | gpt52-high | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="high" | GPT-5.2 alias with default `--variant high` |
 | gpt52-xhigh | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="xhigh" | GPT-5.2 alias with default `--variant xhigh` |
@@ -261,7 +264,7 @@ After executing the prompt, display a clear summary that includes the prompt **t
 
 | Field | Value |
 |-------|-------|
-| Model | codex (gpt-5.4) |
+| Model | codex (gpt-5.5) |
 | Status | 🟢 Running (PID 12345) |
 | Loop | Max 3 iterations |
 

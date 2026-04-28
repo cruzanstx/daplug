@@ -24,8 +24,8 @@ class CodexCLI(SimpleCLIPlugin):
     def get_available_models(self) -> list[ModelInfo]:
         return [
             ModelInfo(
-                id="openai:gpt-5.3-codex",
-                display_name="GPT-5.3 Codex",
+                id="openai:gpt-5.5",
+                display_name="GPT-5.5",
                 provider="openai",
                 capabilities=["code", "chat"],
             ),
@@ -167,7 +167,7 @@ class CodexCLI(SimpleCLIPlugin):
                     severity="warning",
                     message='Codex config missing "model"',
                     fix_available=fixable,
-                    fix_description=f'Set model to "{template.get("model", "gpt-5.3-codex")}"',
+                    fix_description=f'Set model to "{template.get("model", "gpt-5.5")}"',
                     config_path=str(active_path or preferred_path),
                 )
             )
@@ -207,7 +207,7 @@ class CodexCLI(SimpleCLIPlugin):
             merged = deep_merge_defaults(existing_dict, template)
         elif issue.type == "missing_model":
             merged = dict(existing_dict)
-            merged["model"] = template.get("model", "gpt-5.3-codex")
+            merged["model"] = template.get("model", "gpt-5.5")
         else:
             return False
 

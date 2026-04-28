@@ -54,13 +54,16 @@ Use AskUserQuestion tool with options:
 - `claude` - Claude Code (default, most capable)
 - `cc-sonnet` - Claude Code Sonnet alias
 - `cc-opus` - Claude Code Opus alias
-- `codex` - OpenAI Codex CLI (gpt-5.4, fast execution)
+- `codex` - OpenAI Codex CLI (gpt-5.5, fast execution)
 - `codex-spark` - OpenAI Codex Spark (lowest-latency tier)
 - `codex-high` - OpenAI Codex CLI with high reasoning effort
 - `codex-xhigh` - OpenAI Codex CLI with extra-high reasoning effort
 - `gpt54` - OpenAI GPT-5.4 (direct shorthand)
 - `gpt54-high` - OpenAI GPT-5.4 with high reasoning effort
 - `gpt54-xhigh` - OpenAI GPT-5.4 with extra-high reasoning
+- `gpt55` - OpenAI GPT-5.5 (direct shorthand)
+- `gpt55-high` - OpenAI GPT-5.5 with high reasoning effort
+- `gpt55-xhigh` - OpenAI GPT-5.5 with extra-high reasoning
 - `gpt52` - OpenAI GPT-5.2 (planning, research, analysis)
 - `gpt52-high` - OpenAI GPT-5.2 with high reasoning effort
 - `gpt52-xhigh` - OpenAI GPT-5.2 with extra-high reasoning (30+ min tasks)

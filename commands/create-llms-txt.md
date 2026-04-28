@@ -462,13 +462,16 @@ All available models for /daplug:run-prompt --model:
 - `claude` - Claude sub-agent in current context (best for complex reasoning, multi-step tasks)
 
 **OpenAI Codex Family:** (check: `codex.primary_window.used`, `codex.secondary_window.used`)
-- `codex` - gpt-5.4 (default Codex shorthand, fast for straightforward coding)
+- `codex` - gpt-5.5 (default Codex shorthand, fast for straightforward coding)
 - `codex-spark` - gpt-5.3-codex-spark (near-instant responses, lowest Codex cost tier)
-- `codex-high` - gpt-5.4 with high reasoning
-- `codex-xhigh` - gpt-5.4 with xhigh reasoning (complex projects)
+- `codex-high` - gpt-5.5 with high reasoning
+- `codex-xhigh` - gpt-5.5 with xhigh reasoning (complex projects)
 - `gpt54` - gpt-5.4 (explicit shorthand)
 - `gpt54-high` - gpt-5.4 with high reasoning
 - `gpt54-xhigh` - gpt-5.4 with xhigh reasoning
+- `gpt55` - gpt-5.5 (explicit shorthand)
+- `gpt55-high` - gpt-5.5 with high reasoning
+- `gpt55-xhigh` - gpt-5.5 with xhigh reasoning
 - `gpt52` - gpt-5.2 (planning, research, analysis)
 - `gpt52-high` - gpt-5.2 with high reasoning
 - `gpt52-xhigh` - gpt-5.2 with xhigh reasoning (30+ min tasks)
@@ -502,7 +505,7 @@ For llms.txt research tasks, recommend models in this order (based on availabili
 |----------|-------|--------|
 | 1 | gpt52-xhigh | Best for research - deep reasoning, can work 30+ min |
 | 2 | gpt52-high | Great for methodical research |
-| 3 | gpt54-high | Fast, high-quality synthesis after research |
+| 3 | gpt55-high | Fast, high-quality synthesis after research |
 | 4 | gemini31pro | Most capable Gemini for research (if available) |
 | 5 | gemini25pro | Great at comprehensive research |
 | 6 | gemini3pro | Strong Gemini fallback |
@@ -557,7 +560,7 @@ If user chooses #1:
   2. Claude (worktree) - isolated git worktree
 
   **Codex (OpenAI):** {usage status}
-  3. codex - gpt-5.4 standard
+  3. codex - gpt-5.5 standard
   4. codex-high - higher reasoning
   5. codex-xhigh - maximum reasoning
 
@@ -566,23 +569,28 @@ If user chooses #1:
   7. gpt54-high - deep reasoning
   8. gpt54-xhigh - maximum reasoning
 
+  **GPT-5.5 (OpenAI explicit):** {usage status}
+  9. gpt55 - gpt-5.5 explicit shorthand
+  10. gpt55-high - deep reasoning
+  11. gpt55-xhigh - maximum reasoning
+
   **GPT-5.2 (OpenAI):** {usage status} - Best for research/planning
-  9. gpt52 - planning, research, analysis
-  10. gpt52-high - deep reasoning
-  11. gpt52-xhigh - maximum reasoning (30+ min) (Recommended for llms.txt)
+  12. gpt52 - planning, research, analysis
+  13. gpt52-high - deep reasoning
+  14. gpt52-xhigh - maximum reasoning (30+ min) (Recommended for llms.txt)
 
   **Gemini (Google):** {show each model's usage}
-  12. gemini (3-flash) - {X}% used
-  13. gemini25flash - {X}% used
-  14. gemini25pro - {X}% used - great for research
-  15. gemini3pro - {X}% used - most capable
-  16. gemini31pro - {X}% used - Gemini 3.1 Pro Preview (if available)
+  15. gemini (3-flash) - {X}% used
+  16. gemini25flash - {X}% used
+  17. gemini25pro - {X}% used - great for research
+  18. gemini3pro - {X}% used - most capable
+  19. gemini31pro - {X}% used - Gemini 3.1 Pro Preview (if available)
 
   **Other:**
-  17. zai - {X}% used
-  18. glm5 - {X}% used
-  19. kimi - {X}% used - Kimi K2.5 via OpenCode
-  20. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
+  20. zai - {X}% used
+  21. glm5 - {X}% used
+  22. kimi - {X}% used - Kimi K2.5 via OpenCode
+  23. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation: "Recommended for llms.txt research: gpt52-xhigh --worktree --loop"]
   [If preferred_agent is set and available: "Your preferred agent: {preferred_agent} ✅"]
@@ -592,7 +600,7 @@ If user chooses #1:
   - `--loop` - Auto-retry until verification passes (recommended: ensures quality)
   - `--loop --max-iterations N` - Limit loop retries (default: 3)
 
-  Choose (1-20), or type model with flags (e.g., 'gpt52-xhigh --worktree --loop'): _"
+  Choose (1-23), or type model with flags (e.g., 'gpt52-xhigh --worktree --loop'): _"
 
   **Execute based on selection:**
 
@@ -606,7 +614,7 @@ If user chooses #1:
   If user selects Claude worktree (option 2):
     Invoke via Skill tool: `/daplug:run-prompt {NUMBER} --prompt-file "$LLMS_TXT_DIR/prompts/{NUMBER}-create-llms-txt-{library-name}.md" --worktree`
 
-  If user selects any other model (options 3-20):
+  If user selects any other model (options 3-23):
     Invoke via Skill tool: `/daplug:run-prompt {NUMBER} --prompt-file "$LLMS_TXT_DIR/prompts/{NUMBER}-create-llms-txt-{library-name}.md" --model {selected_model}`
     (Add `--worktree` and/or `--loop` if user requests)
 
