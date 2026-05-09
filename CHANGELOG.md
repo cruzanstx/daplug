@@ -2,6 +2,19 @@
 
 All notable changes to daplug are documented here.
 
+## [0.27.0] - 2026-05-09
+
+### Changed
+- **Codex integration pivoted from prompt bridges to skills.** The v0.26.0 Codex bridge generator wrote files to `~/.codex/prompts/`, but inspection of Codex CLI 0.130's source (`codex-rs/tui/src/bottom_pane/slash_commands.rs`) confirmed that `SlashCommandItem` has only `Builtin` and `ServiceTier` variants — file-based user slash commands aren't a feature. The v0.26.0 bridges shipped inert.
+  - **New: `scripts/generate-codex-skills.py`** — emits `~/.codex/skills/daplug/<command>/SKILL.md` files. This IS Codex's supported user-extension mechanism; generated skills appear in Codex's `<skills_instructions>` block automatically.
+  - Each skill carries the daplug command's `description` from frontmatter so Codex can auto-trigger on context match. Invoke explicitly with `$<command>` (e.g. `$run-prompt 042`).
+  - Sentinel-based cleanup (`<!-- daplug-skill: managed; do not edit -->`) means `--clean` only removes daplug-managed skills.
+- **Automatic migration of v0.26.0 installs.** The new generator removes the inert prompt-bridges from `~/.codex/prompts/` (sentinel-identified) and restores any hand-ports archived to `.archive-pre-bridge/`. Skip with `--no-migrate`.
+- **`/install-bridges codex`** now runs the skills generator. The bridge-vs-skill terminology distinction is documented in the command help.
+
+### Removed
+- `scripts/generate-codex-bridges.py` and its test suite (dead code; the directory it wrote to is not read by Codex).
+
 ## [0.26.0] - 2026-05-09
 
 ### Added
