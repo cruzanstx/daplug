@@ -2,6 +2,15 @@
 
 All notable changes to daplug are documented here.
 
+## [0.26.0] - 2026-05-09
+
+### Added
+- **Codex command bridge generator** (`scripts/generate-codex-bridges.py`): Generates Codex-compatible slash command shims under `~/.codex/prompts/` so daplug commands like `/run-prompt`, `/create-prompt`, `/codex-cli`, etc. resolve natively in Codex CLI without manual porting.
+  - **Bare-named shims**: `~/.codex/prompts/<command>.md` (no `daplug-` prefix), so commands appear as `/run-prompt 042` rather than `/daplug-run-prompt 042`.
+  - **Hand-port safety**: Pre-existing files at colliding paths are moved to `~/.codex/prompts/.archive-pre-bridge/` before the bridge is written, preserving prior manual ports.
+  - **Sentinel-based cleanup**: Managed bridges embed `<!-- daplug-bridge: managed; do not edit -->` so `--clean` only removes daplug-generated files; unrelated user prompts are never touched.
+- **`/install-bridges codex`**: Command now accepts `codex` as a runtime alongside `opencode`.
+
 ## [0.23.10] - 2026-02-22
 
 ### Fixed
