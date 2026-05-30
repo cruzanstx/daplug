@@ -2,6 +2,16 @@
 
 All notable changes to daplug are documented here.
 
+## [0.27.1] - 2026-05-30
+
+### Fixed
+- **Worktree base-branch detection** (#15): `create_worktree` no longer hardcodes `main`. New `detect_default_branch` resolves the base from `origin/HEAD`, falls back to the current branch, then to `"main"`. Repos defaulting to `master` (or anything else) now work with `--worktree` without `--base-branch master`. CLI `--base-branch` still wins as an explicit override.
+- **Worktree isolation guard** (partial mitigation for #14): when `--worktree` is set, the verification-loop wrapper now prepends a `<critical_isolation_boundary>` block that names both the worktree and the original-checkout paths and warns the model not to leak the original path into subagent task prompts. Independently, after each iteration the loop snapshots `git status --porcelain` of the original checkout; any change aborts the loop with `status="isolation_breach"` regardless of the completion marker. This catches the prompt-542 failure mode where opencode subagents inherited an absolute path to the main checkout and wrote 138 files outside the worktree while the loop reported success.
+- **Loop plumbing**: `run_verification_loop`, `run_verification_loop_background`, and the wrapper take `original_repo_root`; a new `--original-repo-root` CLI flag is forwarded automatically when the background loop re-launches itself in the worktree.
+
+### Tests
+- New `skills/prompt-executor/tests/test_worktree_isolation.py` covers `detect_default_branch` (main/master/`origin/HEAD`/no-repo), `repo_dirty_snapshot`, the isolation-boundary wrapper, `create_worktree` base-branch wiring, and an end-to-end loop that mocks `run_cli_foreground` with breach / clean / no-worktree / worktree-equals-original variants and asserts the resulting status.
+
 ## [0.27.0] - 2026-05-09
 
 ### Changed
