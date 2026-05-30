@@ -154,6 +154,43 @@ def get_worktree_dir(repo_root: Path) -> Path:
     return (repo_root / ".worktrees").resolve()
 
 
+def detect_default_branch(repo_root: Path) -> str:
+    """Detect the repo's default branch.
+
+    Priority: origin/HEAD symbolic ref -> currently checked-out branch -> "main".
+    """
+    r = subprocess.run(
+        ["git", "symbolic-ref", "--short", "refs/remotes/origin/HEAD"],
+        capture_output=True, text=True, cwd=repo_root,
+    )
+    if r.returncode == 0 and r.stdout.strip():
+        ref = r.stdout.strip()
+        return ref.split("/", 1)[1] if "/" in ref else ref
+    r = subprocess.run(
+        ["git", "branch", "--show-current"],
+        capture_output=True, text=True, cwd=repo_root,
+    )
+    if r.returncode == 0 and r.stdout.strip():
+        return r.stdout.strip()
+    return "main"
+
+
+def repo_dirty_snapshot(repo_root: str) -> str:
+    """Return `git status --porcelain` for repo_root, or '' if git fails.
+
+    Used to detect worktree-isolation breaches: a `--worktree` run whose model
+    writes to the original (non-worktree) repository instead of the isolated path.
+    """
+    try:
+        r = subprocess.run(
+            ["git", "-C", repo_root, "status", "--porcelain"],
+            capture_output=True, text=True, timeout=30,
+        )
+    except (subprocess.SubprocessError, OSError):
+        return ""
+    return r.stdout if r.returncode == 0 else ""
+
+
 def get_existing_worktree(repo_root: Path, branch_name: str) -> str | None:
     """Check if a worktree already exists for the given branch."""
     result = subprocess.run(
@@ -172,9 +209,13 @@ def get_existing_worktree(repo_root: Path, branch_name: str) -> str | None:
     return None
 
 
-def create_worktree(repo_root: Path, prompt_file: Path, base_branch: str = "main",
+def create_worktree(repo_root: Path, prompt_file: Path, base_branch: Optional[str] = None,
                     on_conflict: str = "error") -> dict:
     """Create a git worktree for the prompt.
+
+    base_branch:
+      If None, auto-detect via detect_default_branch (origin/HEAD -> current branch -> "main").
+      Pass an explicit value to override.
 
     on_conflict options:
       - "error": Return conflict info for user decision (default)
@@ -182,6 +223,8 @@ def create_worktree(repo_root: Path, prompt_file: Path, base_branch: str = "main
       - "reuse": Reuse existing worktree if it exists
       - "increment": Create new worktree with incremented suffix (-1, -2, etc.)
     """
+    if base_branch is None:
+        base_branch = detect_default_branch(repo_root)
     worktrees_dir = get_worktree_dir(repo_root)
     repo_name = repo_root.name
     prompt_num = prompt_file.stem.split("-")[0]
@@ -1878,7 +1921,8 @@ def wrap_prompt_with_verification_protocol(
     completion_marker: str,
     worktree_path: Optional[str] = None,
     branch_name: Optional[str] = None,
-    history: Optional[list] = None
+    history: Optional[list] = None,
+    original_repo_root: Optional[str] = None,
 ) -> str:
     """Wrap prompt content with verification protocol instructions."""
     history = history or []
@@ -1898,11 +1942,29 @@ def wrap_prompt_with_verification_protocol(
 Branch: {branch_name or 'unknown'}
 """
 
+    isolation_boundary = ""
+    if worktree_path and original_repo_root and Path(worktree_path).resolve() != Path(original_repo_root).resolve():
+        isolation_boundary = f"""<critical_isolation_boundary>
+This run is sandboxed to an isolated git worktree.
+
+ISOLATED WORKTREE (the only place you may write): {worktree_path}
+ORIGINAL CHECKOUT (DO NOT TOUCH):                {original_repo_root}
+
+Hard rules:
+- All file operations (Read, Edit, Write, Bash with redirection, etc.) MUST target paths inside the worktree.
+- DO NOT read, edit, write, build against, or run shell commands inside {original_repo_root} or any path under it.
+- When spawning subagents (e.g. via a `task` tool), your composed sub-prompt MUST NOT contain the original-checkout path. Substitute the worktree path instead.
+- If the task description below mentions {original_repo_root} anywhere, treat that mention as a stale reference and rewrite it to {worktree_path} before acting on it or forwarding it to a subagent.
+- After this run completes, the executor checks `git status --porcelain` on the original checkout. If it changed during this run, the loop is failed with status `isolation_breach` regardless of what completion marker you emit. There is no recovery.
+</critical_isolation_boundary>
+
+"""
+
     verification_wrapper = f"""<task>
 {content}
 </task>
 
-<verification_protocol>
+{isolation_boundary}<verification_protocol>
 ## Verification Loop Protocol
 
 This task uses an iterative verification loop. You may be re-run multiple times until complete.
@@ -2181,7 +2243,8 @@ def run_verification_loop(
     execution_timestamp: str,
     sandbox_config: Optional[dict] = None,
     worktree_path: Optional[str] = None,
-    branch_name: Optional[str] = None
+    branch_name: Optional[str] = None,
+    original_repo_root: Optional[str] = None,
 ) -> dict:
     """Run CLI in a verification loop until completion marker found or max iterations reached.
 
@@ -2300,13 +2363,22 @@ def run_verification_loop(
             completion_marker=completion_marker,
             worktree_path=worktree_path,
             branch_name=branch_name,
-            history=state["history"]
+            history=state["history"],
+            original_repo_root=original_repo_root,
         )
 
         print(f"[Loop] Starting iteration {iteration}/{max_iterations}...", file=sys.stderr)
         with open(loop_log, "a") as f:
             f.write(f"[Loop] Starting iteration {iteration}/{max_iterations}\n")
             f.write(f"[Loop] Iteration log: {log_file}\n")
+
+        # Snapshot the original (non-worktree) repo so we can detect isolation breaches.
+        guard_active = bool(
+            worktree_path
+            and original_repo_root
+            and Path(worktree_path).resolve() != Path(original_repo_root).resolve()
+        )
+        pre_status = repo_dirty_snapshot(original_repo_root) if guard_active else ""
 
         # Run CLI and wait for completion
         if sandbox_config and sandbox_config.get("enabled"):
@@ -2331,6 +2403,31 @@ def run_verification_loop(
             result["status"] = "error"
             result["error"] = error_msg
             break
+
+        # Worktree-isolation guard: if the original checkout changed during this
+        # iteration, the model wrote outside its sandbox (see daplug #14). Fail
+        # the loop immediately regardless of the marker — the damage is already done
+        # and continuing the loop would compound it.
+        if guard_active:
+            post_status = repo_dirty_snapshot(original_repo_root)
+            if post_status != pre_status:
+                breach_msg = (
+                    "Worktree isolation breach: the original checkout at "
+                    f"{original_repo_root} has uncommitted changes that were not "
+                    "present when this iteration started. The model wrote outside "
+                    f"its sandbox ({worktree_path}). Loop aborted to prevent "
+                    "further damage. Inspect `git status` in the original "
+                    "checkout and decide whether to commit, stash, or revert."
+                )
+                with open(loop_log, "a") as f:
+                    f.write(f"[Loop] ISOLATION_BREACH: {breach_msg}\n")
+                state["status"] = "isolation_breach"
+                state["failure_reason"] = breach_msg
+                save_loop_state(state)
+                result["final_status"] = "isolation_breach"
+                result["status"] = "isolation_breach"
+                result["error"] = breach_msg
+                break
 
         # Check for completion marker
         marker_found, retry_reason = check_completion_marker(log_file, completion_marker)
@@ -2415,6 +2512,7 @@ def run_verification_loop_background(
     sandbox_profile: str = "balanced",
     sandbox_workspace: Optional[str] = None,
     sandbox_net: Optional[str] = None,
+    original_repo_root: Optional[str] = None,
 ) -> dict:
     """Start a verification loop in background mode.
 
@@ -2501,6 +2599,8 @@ def run_verification_loop_background(
         cmd.extend(["--sandbox-workspace", sandbox_workspace])
     if sandbox_net:
         cmd.extend(["--sandbox-net", sandbox_net])
+    if original_repo_root:
+        cmd.extend(["--original-repo-root", original_repo_root])
 
     if worktree_path:
         # When in worktree, use --prompt-file to read TASK.md directly
@@ -2596,8 +2696,13 @@ def main():
                        help="Sandbox workspace path override (default: execution cwd)")
     parser.add_argument("--sandbox-net", choices=["on", "off"], default=None,
                        help="Sandbox network mode override")
-    parser.add_argument("--base-branch", "-b", default="main",
-                       help="Base branch for worktree (default: main)")
+    parser.add_argument("--base-branch", "-b", default=None,
+                       help="Base branch for worktree (default: auto-detect from origin/HEAD, "
+                            "falling back to the current branch and then 'main')")
+    parser.add_argument("--original-repo-root", default=None,
+                       help="Original (non-worktree) repo root, used to enforce the worktree "
+                            "isolation guard during --loop runs. Forwarded automatically when "
+                            "the background loop re-launches itself.")
     parser.add_argument("--on-conflict", default="error",
                        choices=["error", "remove", "reuse", "increment"],
                        help="How to handle existing worktree: error (return conflict info), "
@@ -2741,6 +2846,11 @@ def main():
                 "log": str(log_file)
             }
 
+            # Resolve the original (non-worktree) repo root for the isolation guard.
+            # Explicit --original-repo-root wins (set by background loop re-entry from
+            # within the worktree); otherwise the current repo_root is correct.
+            original_repo_root = args.original_repo_root or str(repo_root)
+
             # Create worktree if requested
             worktree_path = None
             branch_name = None
@@ -2810,6 +2920,7 @@ def main():
                                 sandbox_config=prompt_sandbox_config,
                                 worktree_path=worktree_path,
                                 branch_name=branch_name,
+                                original_repo_root=original_repo_root,
                             )
                         else:
                             loop_result = run_verification_loop(
@@ -2824,6 +2935,7 @@ def main():
                                 execution_timestamp=execution_timestamp,
                                 worktree_path=worktree_path,
                                 branch_name=branch_name,
+                                original_repo_root=original_repo_root,
                             )
                         # For loop mode, show the loop log (exists immediately and is used by monitors)
                         prompt_info["log"] = loop_result["loop_log"]
@@ -2850,6 +2962,7 @@ def main():
                             sandbox_profile=args.sandbox_profile,
                             sandbox_workspace=args.sandbox_workspace,
                             sandbox_net=args.sandbox_net,
+                            original_repo_root=original_repo_root,
                         )
                         # For background loop, update displayed log to loop log
                         prompt_info["log"] = loop_result["loop_log"]
