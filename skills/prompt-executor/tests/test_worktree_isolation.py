@@ -362,3 +362,133 @@ def test_loop_guard_inactive_when_worktree_path_equals_original(loop_env, monkey
     )
 
     assert result["status"] == "completed"
+
+
+# --------------------------------------------------------------------
+# Regression: background loop spawner must forward worktree context (#14)
+# --------------------------------------------------------------------
+#
+# In 0.27.1 the wrapper warning and the `git status` snapshot guard were
+# silently disabled on the default `/run-prompt --loop` path because
+# `run_verification_loop_background` built the re-entry command without
+# `--worktree-path`. Inside the foreground re-entry that meant
+# `args.worktree=False` -> `worktree_path=None` -> `guard_active=False` and
+# the `<critical_isolation_boundary>` block was never injected.
+#
+# The smoke run that proved this leaked files into the original checkout
+# and the guard never tripped. These tests pin the forwarding so it
+# can't silently regress again.
+
+
+class _FakePopen:
+    """Captures the spawned command and pretends to be a running process."""
+    captured_cmd = None
+    captured_cwd = None
+
+    def __init__(self, cmd, cwd=None, **_kwargs):
+        type(self).captured_cmd = list(cmd)
+        type(self).captured_cwd = cwd
+        self.pid = 4242
+
+
+def _bg_kwargs(tmp_path, *, worktree_path, branch_name):
+    log_dir = tmp_path / "logs"
+    log_dir.mkdir()
+    cli_info = {"command": ["fake"], "env": {}, "stdin_mode": "dash", "display": "fake"}
+    return dict(
+        cli_info=cli_info,
+        original_content="body",
+        cwd=str(worktree_path) if worktree_path else str(tmp_path),
+        log_dir=log_dir,
+        prompt_number="999",
+        model="fake",
+        max_iterations=1,
+        completion_marker="VERIFICATION_COMPLETE",
+        execution_timestamp="20260602-000000",
+        worktree_path=str(worktree_path) if worktree_path else None,
+        branch_name=branch_name,
+        original_repo_root=str(tmp_path / "original"),
+    )
+
+
+def test_bg_spawner_forwards_worktree_path_and_branch(tmp_path, monkeypatch):
+    """When a worktree is active, the re-entry cmd MUST carry --worktree-path
+    and --branch-name so the foreground re-entry can re-activate the isolation
+    guard and the <critical_isolation_boundary> wrapper."""
+    worktree = tmp_path / "worktree"
+    worktree.mkdir()
+    (worktree / "TASK.md").write_text("body\n")
+
+    _FakePopen.captured_cmd = None
+    monkeypatch.setattr(executor.subprocess, "Popen", _FakePopen)
+    monkeypatch.setattr(executor, "get_loop_state_dir", lambda: tmp_path / "state")
+    (tmp_path / "state").mkdir()
+
+    executor.run_verification_loop_background(
+        **_bg_kwargs(tmp_path, worktree_path=worktree, branch_name="prompt/999-test"),
+    )
+
+    cmd = _FakePopen.captured_cmd
+    assert cmd is not None, "Popen was not called"
+    assert "--worktree-path" in cmd, f"missing --worktree-path in {cmd}"
+    assert cmd[cmd.index("--worktree-path") + 1] == str(worktree)
+    assert "--branch-name" in cmd, f"missing --branch-name in {cmd}"
+    assert cmd[cmd.index("--branch-name") + 1] == "prompt/999-test"
+    # The foreground re-entry marker must be present, otherwise the re-entry
+    # would create yet another worktree.
+    assert "--loop-foreground" in cmd
+
+
+def test_bg_spawner_omits_worktree_flags_when_no_worktree(tmp_path, monkeypatch):
+    """Without a worktree, --worktree-path / --branch-name must NOT be sent —
+    the re-entry resolves the prompt by number from the current repo."""
+    _FakePopen.captured_cmd = None
+    monkeypatch.setattr(executor.subprocess, "Popen", _FakePopen)
+    monkeypatch.setattr(executor, "get_loop_state_dir", lambda: tmp_path / "state")
+    (tmp_path / "state").mkdir()
+
+    executor.run_verification_loop_background(
+        **_bg_kwargs(tmp_path, worktree_path=None, branch_name=None),
+    )
+
+    cmd = _FakePopen.captured_cmd
+    assert cmd is not None
+    assert "--worktree-path" not in cmd
+    assert "--branch-name" not in cmd
+    # The prompt number must be the positional arg instead.
+    assert cmd[-1] == "999"
+
+
+def test_parser_accepts_worktree_path_and_branch_name(monkeypatch):
+    """The new flags must round-trip through argparse so the spawner's output
+    is actually consumable by the re-entry process."""
+    parser_argv = [
+        "--loop", "--loop-foreground",
+        "--model", "codex",
+        "--cwd", "/tmp/wt",
+        "--worktree-path", "/tmp/wt",
+        "--branch-name", "prompt/999-x",
+        "--original-repo-root", "/tmp/orig",
+        "--prompt-file", "/tmp/wt/TASK.md",
+        "--prompt-number", "999",
+    ]
+    import argparse as _ap
+    monkeypatch.setattr(sys, "argv", ["executor.py"] + parser_argv)
+
+    # Short-circuit main() right after parse_args so we don't run any work.
+    called = {}
+    real_parse = _ap.ArgumentParser.parse_args
+
+    def _capture(self, *a, **kw):
+        ns = real_parse(self, *a, **kw)
+        called["ns"] = ns
+        raise SystemExit(0)
+
+    monkeypatch.setattr(_ap.ArgumentParser, "parse_args", _capture)
+    with pytest.raises(SystemExit):
+        executor.main()
+
+    ns = called["ns"]
+    assert ns.worktree_path == "/tmp/wt"
+    assert ns.branch_name == "prompt/999-x"
+

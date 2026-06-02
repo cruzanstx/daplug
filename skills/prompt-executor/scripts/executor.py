@@ -2609,8 +2609,15 @@ def run_verification_loop_background(
         cmd.extend([
             "--prompt-file", str(task_file),
             "--prompt-number", prompt_number,
-            "--cwd", cwd
+            "--cwd", cwd,
+            # Forward worktree context so the foreground re-entry can re-activate
+            # the isolation guard and the <critical_isolation_boundary> wrapper.
+            # Without these, args.worktree=False inside the re-entry and both
+            # defenses silently disable. (See smoke regression in tests.)
+            "--worktree-path", worktree_path,
         ])
+        if branch_name:
+            cmd.extend(["--branch-name", branch_name])
     else:
         # Normal mode: resolve prompt by number
         cmd.append(prompt_number)
@@ -2703,6 +2710,12 @@ def main():
                        help="Original (non-worktree) repo root, used to enforce the worktree "
                             "isolation guard during --loop runs. Forwarded automatically when "
                             "the background loop re-launches itself.")
+    parser.add_argument("--worktree-path", default=None,
+                       help="Internal flag: existing worktree path, forwarded by the background "
+                            "loop spawner so the foreground re-entry can run the isolation guard "
+                            "and inject the boundary warning without re-creating the worktree.")
+    parser.add_argument("--branch-name", default=None,
+                       help="Internal flag: worktree branch name, forwarded alongside --worktree-path.")
     parser.add_argument("--on-conflict", default="error",
                        choices=["error", "remove", "reuse", "increment"],
                        help="How to handle existing worktree: error (return conflict info), "
@@ -2868,6 +2881,13 @@ def main():
                 execution_cwd = worktree_info["worktree_path"]
                 worktree_path = worktree_info["worktree_path"]
                 branch_name = worktree_info.get("branch_name")
+            elif args.worktree_path:
+                # Loop-foreground re-entry: the spawner already created the worktree
+                # and is forwarding its path so we can re-activate the isolation
+                # guard and the boundary wrapper without re-creating anything.
+                worktree_path = args.worktree_path
+                branch_name = args.branch_name
+                execution_cwd = args.cwd or args.worktree_path
 
                 # Claude Task subagents rely on global Claude Code permissions.
                 # Ensure the (potentially out-of-repo) worktree path is permitted before execution.
