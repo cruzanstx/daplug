@@ -2,6 +2,16 @@
 
 All notable changes to daplug are documented here.
 
+## [0.27.2] - 2026-06-02
+
+### Fixed
+- **Worktree isolation defenses now actually run on the default `/run-prompt --loop` path.** The 0.27.1 mitigations (`<critical_isolation_boundary>` wrapper + post-iteration `git status --porcelain` snapshot guard) were silently disabled in practice: `run_verification_loop_background` spawned its foreground re-entry with `--cwd <worktree>` and `--original-repo-root <orig>` but no flag carrying `worktree_path`. The re-entry deliberately omits `--worktree` (it must not re-create the worktree), so inside the child `args.worktree=False` -> `worktree_path=None` -> `guard_active=False` and the boundary block's injection condition was also false. Both defenses were unreachable on the spawner path; only the direct (non-background) `run_verification_loop` call path that the existing tests covered was protected. New internal flags `--worktree-path` and `--branch-name` are now forwarded by the spawner and consumed by a new `elif args.worktree_path:` branch in main that re-populates state without calling `create_worktree` again. Smoke (`/run-prompt 240 --worktree --loop`) confirms the loop now trips `status: isolation_breach` with the full `[Loop]` diagnostic instead of returning `completed` with leaked files on disk.
+
+### Tests
+- `test_bg_spawner_forwards_worktree_path_and_branch` pins the forwarding contract via a `subprocess.Popen` stub.
+- `test_bg_spawner_omits_worktree_flags_when_no_worktree` verifies the non-worktree path keeps the positional prompt-number form.
+- `test_parser_accepts_worktree_path_and_branch_name` round-trips the new flags through argparse so the spawner's output is consumable by the re-entry.
+
 ## [0.27.1] - 2026-05-30
 
 ### Fixed
