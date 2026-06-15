@@ -498,7 +498,8 @@ All available models for /daplug:run-prompt --model:
 
 **Other Models:** (check: `zai.token_quota.percentage`)
 - `zai` - Z.AI GLM-4.7 (good for Chinese language tasks)
-- `glm5` - Z.AI GLM-5 (higher-capability Z.AI coding model)
+- `glm5` - Z.AI GLM-5.2 (latest GLM 5.x coding model, 1M context)
+- `glm52` - Z.AI GLM-5.2 via Z.AI / OpenCode (explicit pin, 1M context)
 - `kimi` - Kimi K2.5 via OpenCode (`opencode/kimi-k2.5`)
 - `local` - Local model via opencode + LMStudio (no quota limits)
 - `qwen` - Qwen via opencode + LMStudio (no quota limits)
@@ -532,10 +533,10 @@ For each model family, determine status:
 | Backend/API       | codex or gpt55-high        | codex-high, gemini3flash, claude                |              |
 | Debugging         | gpt52 or claude            | gemini25pro, codex-xhigh                         |              |
 | Performance       | codex-xhigh or claude      | gemini31pro (if available), gemini3pro, gemini25pro |         |
-| Documentation     | gemini25flash or claude    | zai, glm5                                        |              |
-| DevOps/Infra      | codex or gemini25flash     | glm5, gemini3flash                               |              |
+| Documentation     | gemini25flash or claude    | zai, glm5/glm52                                  |              |
+| DevOps/Infra      | codex or gemini25flash     | glm5/glm52, gemini3flash                         |              |
 | Database/SQL      | codex or codex-high        | gemini3flash, claude                             |              |
-| Verification      | codex or gpt55-high        | codex-high, codex-spark, glm5                    | `--loop`     |
+| Verification      | codex or gpt55-high        | codex-high, codex-spark, glm5/glm52              | `--loop`     |
 | Planning          | gpt52-xhigh or gpt52-high  | claude, gemini25pro                              |              |
 | Default           | {preferred_agent}          | Next available by preference                     |              |
 
@@ -664,9 +665,10 @@ If user chooses "Run prompt now":
 
   **Other:**
   21. zai - {X}% used - Z.AI GLM-4.7
-  22. glm5 - {X}% used - Z.AI GLM-5 (higher-capability tier)
-  23. kimi - {X}% used - Kimi K2.5 via OpenCode
-  24. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
+  22. glm5 - {X}% used - Z.AI GLM-5.2 (latest GLM 5.x, 1M context)
+  23. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin (1M context)
+  24. kimi - {X}% used - Kimi K2.5 via OpenCode
+  25. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation based on detection_logic, recommendation_logic, AND availability]
   [If preferred_agent is unavailable: "⚠️ Your preferred agent ({preferred_agent}) is at {X}% - suggesting {fallback} instead"]
@@ -812,9 +814,10 @@ If user chooses to run prompts in parallel or sequential:
 
   **Other:**
   21. zai - {X}% used
-  22. glm5 - {X}% used
-  23. kimi - {X}% used
-  24. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
+  22. glm5 - {X}% used - Z.AI GLM-5.2
+  23. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
+  24. kimi - {X}% used
+  25. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation based on detection_logic, recommendation_logic, AND availability]
   [If preferred_agent is unavailable: "⚠️ {preferred_agent} at {X}% - suggesting {fallback}"]
@@ -972,9 +975,10 @@ If user chooses "Run prompts sequentially now":
 
   **Other:**
   21. zai - {X}% used
-  22. glm5 - {X}% used
-  23. kimi - {X}% used
-  24. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
+  22. glm5 - {X}% used - Z.AI GLM-5.2
+  23. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
+  24. kimi - {X}% used
+  25. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation based on detection_logic, recommendation_logic, AND availability]
   [If preferred_agent is unavailable: "⚠️ {preferred_agent} at {X}% - suggesting {fallback}"]

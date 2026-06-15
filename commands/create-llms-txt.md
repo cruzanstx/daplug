@@ -489,7 +489,8 @@ All available models for /daplug:run-prompt --model:
 
 **Other Models:** (check: `zai.token_quota.percentage`)
 - `zai` - Z.AI GLM-4.7 (good for Chinese language tasks)
-- `glm5` - Z.AI GLM-5 (higher-capability Z.AI coding model)
+- `glm5` - Z.AI GLM-5.2 (latest GLM 5.x coding model, 1M context)
+- `glm52` - Z.AI GLM-5.2 via Z.AI / OpenCode (explicit pin, 1M context)
 - `kimi` - Kimi K2.5 via OpenCode (`opencode/kimi-k2.5`)
 - `local` - Local model via opencode + LMStudio (no quota limits)
 - `qwen` - Qwen via opencode + LMStudio (no quota limits)
@@ -512,7 +513,9 @@ For llms.txt research tasks, recommend models in this order (based on availabili
 | 7 | claude | Excellent reasoning but uses your quota |
 | 8 | codex-xhigh | Good for doc writing after research |
 | 9 | kimi | Strong OpenCode fallback for long-form drafting |
-| 10 | zai | Good fallback for documentation |
+| 10 | glm52 | GLM-5.2 explicit pin with 1M context |
+| 11 | glm5 | Latest GLM 5.x alias for GLM-5.2 |
+| 12 | zai | Good fallback for documentation |
 
 **Recommended flags for llms.txt:**
 - `--worktree` - Isolate the work (can continue working on other things)
@@ -588,9 +591,10 @@ If user chooses #1:
 
   **Other:**
   20. zai - {X}% used
-  21. glm5 - {X}% used
-  22. kimi - {X}% used - Kimi K2.5 via OpenCode
-  23. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
+  21. glm5 - {X}% used - Z.AI GLM-5.2
+  22. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
+  23. kimi - {X}% used - Kimi K2.5 via OpenCode
+  24. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation: "Recommended for llms.txt research: gpt52-xhigh --worktree --loop"]
   [If preferred_agent is set and available: "Your preferred agent: {preferred_agent} ✅"]

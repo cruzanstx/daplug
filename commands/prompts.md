@@ -77,7 +77,8 @@ Use AskUserQuestion tool with options:
 - `gemini3pro` - Gemini 3 Pro Preview (explicit shorthand)
 - `gemini31pro` - Gemini 3.1 Pro Preview (if your account has access)
 - `zai` - Z.AI GLM-4.7 via Codex CLI
-- `glm5` - Z.AI GLM-5 via OpenCode
+- `glm5` - Z.AI GLM-5.2 via OpenCode
+- `glm52` - Z.AI GLM-5.2 via OpenCode (explicit pin)
 - `kimi` - Kimi K2.5 via OpenCode
 - `opencode` - OpenCode runner with Z.AI GLM-4.7
 - `local` - Local model via opencode + LMStudio

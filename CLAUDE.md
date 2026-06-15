@@ -170,13 +170,16 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `gemini3pro` | gemini | gemini-3-pro-preview |
 | `gemini31pro` | gemini | gemini-3.1-pro-preview (if available) |
 | `zai` | codex | GLM-4.7 via Z.AI (may have issues) |
-| `glm5` | opencode | GLM-5 via OpenCode |
+| `glm5` | opencode | GLM-5.2 via OpenCode (latest GLM 5.x, 1M context) |
+| `glm52` | opencode | GLM-5.2 via OpenCode (explicit pin, 1M context) |
 | `kimi` | opencode | Kimi K2.5 via OpenCode |
 | `opencode` | opencode | GLM-4.7 via OpenCode (recommended; JSON output) |
 | `qwen`/`local` | opencode | qwen3-coder-next via LMStudio (opencode default, --cli codex for legacy) |
 | `devstral` | opencode | devstral-small-2-2512 via LMStudio (opencode default, --cli codex for legacy) |
 | `glm-local` | opencode | glm-4.7-flash via LMStudio (local Z.AI model) |
 | `qwen-small` | opencode | qwen3-4b-2507 via LMStudio (small/fast, haiku-tier) |
+
+**GLM-5.2 long-context note:** Z.AI Coding Plan uses endpoint `https://api.z.ai/api/coding/paas/v4` with raw model ID `glm-5.2` and a 1M context window. OpenCode model refs use `zai/glm-5.2`; Claude Code env vars use `glm-5.2[1m]` for `ANTHROPIC_DEFAULT_SONNET_MODEL` and `ANTHROPIC_DEFAULT_OPUS_MODEL`, plus `CLAUDE_CODE_AUTO_COMPACT_WINDOW=1000000`. daplug does not set context-window flags for OpenCode; the Coding Plan endpoint activates the 1M window.
 
 **OpenCode (opencode) note:** daplug runs OpenCode with `--format json` for clean, parseable logs (no PTY). To avoid interactive permission prompts in headless runs, configure `~/.config/opencode/opencode.json`, e.g.:
 

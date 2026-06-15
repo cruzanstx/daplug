@@ -68,7 +68,8 @@ python3 "$EXECUTOR" [prompts...] [options]
 ```
 
 **Options:**
-- `--model, -m`: claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, kimi, opencode, local, qwen, devstral, glm-local, qwen-small
+- `--model, -m`: claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, glm52, kimi, opencode, local, qwen, devstral, glm-local, qwen-small
+  - `glm52`: GLM-5.2 via Z.AI / OpenCode (1M context)
 - `--cli`: Override CLI wrapper (codex, opencode, or claude; aliases: claudecode, cc). Unsupported explicit combinations fail with a clear error (no silent fallback).
 - `--variant`: Reasoning variant override (`none|low|medium|high|xhigh`). Explicit `--variant` overrides alias defaults (`codex-high`, `gpt55-high`, `gpt54-high`, `gpt52-high`, etc.).
 - `--cwd, -c`: Working directory for execution
@@ -233,13 +234,16 @@ python3 "$EXECUTOR" --loop-status
 | gemini3pro | gemini -y -m gemini-3-pro-preview | Google Gemini 3 Pro Preview (explicit alias) |
 | gemini31pro | gemini -y -m gemini-3.1-pro-preview | Gemini 3.1 Pro Preview (if your account has access) |
 | zai | codex exec --profile zai | Z.AI GLM-4.7 (via Codex, may have issues) |
-| glm5 | opencode run --format json -m zai/glm-5 | Z.AI GLM-5 via OpenCode |
+| glm5 | opencode run --format json -m zai/glm-5.2 | Z.AI GLM-5.2 via OpenCode (latest GLM 5.x, 1M context) |
+| glm52 | opencode run --format json -m zai/glm-5.2 | Z.AI GLM-5.2 via OpenCode (explicit pin, 1M context) |
 | kimi | opencode run --format json -m opencode/kimi-k2.5 | Kimi K2.5 via OpenCode |
 | opencode | opencode run --format json -m zai/glm-4.7 | Z.AI GLM-4.7 (via OpenCode, recommended; JSON output) |
 | local/qwen | opencode run --format json -m lmstudio/qwen3-coder-next | Local qwen-coder model (default: opencode) |
 | devstral | opencode run --format json -m lmstudio/devstral-small-2-2512 | Local devstral model (default: opencode) |
 
 OpenCode runs include `--variant <value>` when a variant is set.
+
+GLM-5.2 uses the Z.AI Coding Plan endpoint (`https://api.z.ai/api/coding/paas/v4`) with raw model ID `glm-5.2`. OpenCode receives `zai/glm-5.2`; Claude Code env examples use `glm-5.2[1m]` with `ANTHROPIC_DEFAULT_SONNET_MODEL`, `ANTHROPIC_DEFAULT_OPUS_MODEL`, and `CLAUDE_CODE_AUTO_COMPACT_WINDOW=1000000`. daplug passes only the model ID; the 1M context window is provided by the Coding Plan endpoint.
 
 **OpenCode permissions (headless runs):** configure `~/.config/opencode/opencode.json` to avoid interactive permission prompts, e.g.:
 

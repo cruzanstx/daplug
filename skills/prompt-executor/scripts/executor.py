@@ -686,7 +686,8 @@ LEGACY_MODEL_DISPLAY = {
     "gemini3pro": "gemini3pro (Gemini 3 Pro Preview)",
     "gemini31pro": "gemini31pro (Gemini 3.1 Pro Preview, if available)",
     "zai": "zai (GLM-4.7 via Codex - may have issues)",
-    "glm5": "glm5 (GLM-5 via OpenCode)",
+    "glm5": "glm5 (GLM-5.2 via OpenCode — latest GLM 5.x, 1M context)",
+    "glm52": "glm52 (GLM-5.2 via OpenCode — explicit pin, 1M context)",
     "kimi": "kimi (Kimi K2.5 via OpenCode)",
     "opencode": "opencode (GLM-4.7 via OpenCode)",
     "local": "qwen-coder (local via opencode)",
@@ -806,10 +807,17 @@ MODEL_SPECS = {
         "claude_model_flag": None,
     },
     "glm5": {
-        "model_id": "zai:glm-5",
+        "model_id": "zai:glm-5.2",
         "default_cli": "opencode",
         "supports_codex_reasoning": False,
         "codex_profile": "glm5",
+        "claude_model_flag": None,
+    },
+    "glm52": {
+        "model_id": "zai:glm-5.2",
+        "default_cli": "opencode",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
         "claude_model_flag": None,
     },
     "kimi": {
@@ -922,6 +930,7 @@ CLI_OVERRIDE_SUPPORTED_MODELS = {
         "gpt52-xhigh",
         "zai",
         "glm5",
+        "glm52",
         "kimi",
         "opencode",
         "local",
@@ -1201,15 +1210,23 @@ def get_cli_info(
     repo_root = repo_root or get_repo_root()
     preferred = cli_override or _normalize_preferred_agent(_read_config_value(repo_root, "preferred_agent"))
 
-    # Preserve existing behavior: local shortcuts default to OpenCode unless
-    # explicitly overridden with --cli codex.
-    force_legacy_local_opencode = model in {"local", "qwen", "devstral", "glm-local", "qwen-small"} and cli_override is None
+    # Preserve direct OpenCode defaults for shortcuts whose model specs are tied
+    # to OpenCode-compatible provider refs instead of preferred-agent routing.
+    force_direct_opencode = model in {
+        "local",
+        "qwen",
+        "devstral",
+        "glm-local",
+        "qwen-small",
+        "glm5",
+        "glm52",
+    } and cli_override is None
 
     selected_cli = cli_override or model_spec["default_cli"]
     model_id = str(model_spec["model_id"])
     router_command: Optional[list[str]] = None
 
-    router_resolution = None if force_legacy_local_opencode else _resolve_router_command(repo_root, model, preferred)
+    router_resolution = None if force_direct_opencode else _resolve_router_command(repo_root, model, preferred)
     if router_resolution:
         router_cli, router_model_id, router_cmd = router_resolution
         if not cli_override:
@@ -2667,7 +2684,7 @@ def main():
                                 "gemini", "gemini-high", "gemini-xhigh",
                                 "gemini25pro", "gemini25flash", "gemini25lite",
                                 "gemini3flash", "gemini3pro", "gemini31pro",
-                                "zai", "glm5", "kimi", "opencode",
+                                "zai", "glm5", "glm52", "kimi", "opencode",
                                 "local", "qwen", "devstral",
                                 "glm-local", "qwen-small"],
                        help="Model/CLI to use")

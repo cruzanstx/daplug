@@ -109,7 +109,8 @@ _SHORTHAND: dict[str, _ModelRequest] = {
     "gemini31pro": _ModelRequest("gemini31pro", family="google", model_id="google:gemini-3.1-pro-preview"),
     # Z.AI
     "zai": _ModelRequest("zai", family="zai", model_id="zai:glm-4.7"),
-    "glm5": _ModelRequest("glm5", family="zai", model_id="zai:glm-5", codex_profile="glm5"),
+    "glm5": _ModelRequest("glm5", family="zai", model_id="zai:glm-5.2", codex_profile="glm5"),
+    "glm52": _ModelRequest("glm52", family="zai", model_id="zai:glm-5.2"),
     "kimi": _ModelRequest(
         "kimi",
         family="zai",

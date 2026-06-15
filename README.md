@@ -689,7 +689,8 @@ Gemini models share quotas in tiers (observed with Google One Premium):
 | Shorthand | Model | Best For |
 |-----------|-------|----------|
 | `zai` | glm-4.7 | General coding fallback |
-| `glm5` | glm-5 | Higher-capability Z.AI tasks |
+| `glm5` | glm-5.2 | Latest GLM 5.x tasks via OpenCode |
+| `glm52` | glm-5.2 | Explicit GLM-5.2 pin via OpenCode |
 | `kimi` | kimi-k2.5 | Kimi K2.5 via OpenCode |
 
 **When to use GPT-5.2 vs GPT-5.5:**
