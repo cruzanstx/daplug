@@ -84,6 +84,38 @@ def test_explicit_cli_opencode_respected_for_supported_model(no_router, tmp_path
     assert info["command"][0] == "opencode"
 
 
+def test_agy_cli_override_for_google_models(no_router, tmp_path):
+    info = executor.get_cli_info("gemini", repo_root=tmp_path, cli_override="agy")
+
+    assert info["selected_cli"] == "agy"
+    assert info["stdin_mode"] == "arg"
+    assert info["command"] == ["agy", "--model", "Gemini 3.5 Flash (Medium)", "--print"]
+
+    pro_info = executor.get_cli_info("gemini31pro", repo_root=tmp_path, cli_override="antigravity")
+    assert pro_info["selected_cli"] == "agy"
+    assert pro_info["command"] == ["agy", "--model", "Gemini 3.1 Pro (High)", "--print"]
+
+
+def test_legacy_gemini_cli_override_still_works(no_router, tmp_path):
+    info = executor.get_cli_info("gemini31pro", repo_root=tmp_path, cli_override="gemini")
+
+    assert info["selected_cli"] == "gemini"
+    assert info["stdin_mode"] == "arg"
+    assert info["command"] == ["gemini", "-y", "-m", "gemini-3.1-pro-preview", "-p"]
+
+
+def test_router_selected_agy_uses_executor_mapping(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        executor,
+        "_resolve_router_command",
+        lambda *_args, **_kwargs: ("agy", "google:gemini-2.5-pro", ["agy", "--model", "Gemini 3.1 Pro (High)", "--print"]),
+    )
+
+    info = executor.get_cli_info("gemini-high", repo_root=tmp_path)
+    assert info["selected_cli"] == "agy"
+    assert info["stdin_mode"] == "arg"
+    assert info["command"] == ["agy", "--model", "Gemini 3.1 Pro (High)", "--print"]
+
 def test_explicit_cli_opencode_errors_for_unsupported_model(no_router, tmp_path):
     with pytest.raises(ValueError, match="--cli opencode is not supported with --model gemini"):
         executor.get_cli_info("gemini", repo_root=tmp_path, cli_override="opencode")

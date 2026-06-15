@@ -14,6 +14,7 @@ def test_discover_plugins_has_tier1():
     names = [p.name for p in discover_plugins()]
     assert "claude" in names
     assert "codex" in names
+    assert "agy" in names
     assert "gemini" in names
     assert "opencode" in names
 
@@ -33,6 +34,7 @@ def test_get_plugin_unknown_returns_none():
     [
         ("claude", ".claude/settings.json"),
         ("codex", ".codex/config.toml"),
+        ("agy", ".gemini/antigravity-cli/settings.json"),
         ("gemini", ".config/gemini/config.json"),
         ("opencode", ".config/opencode/opencode.json"),
     ],
@@ -75,3 +77,49 @@ def test_get_version_runs_subprocess(monkeypatch):
 
     monkeypatch.setattr(base_mod.subprocess, "run", fake_run)
     assert plugin.get_version() == "codex 1.2.3"
+
+
+def test_agy_plugin_builds_argv_print_command(tmp_path):
+    plugin = get_plugin("agy")
+    assert plugin is not None
+
+    prompt_file = tmp_path / "prompt.md"
+    prompt_file.write_text("Say only: ok", encoding="utf-8")
+
+    assert plugin.build_command("google:gemini-3.1-pro-preview", prompt_file, tmp_path) == [
+        "agy",
+        "--model",
+        "Gemini 3.1 Pro (High)",
+        "--print",
+        "Say only: ok",
+    ]
+    assert plugin.build_command("google:gemini-3-flash-preview", prompt_file, tmp_path)[:4] == [
+        "agy",
+        "--model",
+        "Gemini 3.5 Flash (Medium)",
+        "--print",
+    ]
+
+
+def test_agy_plugin_version_command():
+    plugin = get_plugin("agy")
+    assert plugin is not None
+    assert plugin.version_cmd == ["agy", "--version"]
+    assert plugin.get_supported_providers() == ["google"]
+
+
+def test_agy_plugin_reports_error_when_required_flags_missing(monkeypatch):
+    plugin = get_plugin("agy")
+    assert plugin is not None
+
+    import plugins.agy as agy_mod
+    import plugins.base as base_mod
+
+    monkeypatch.setattr(base_mod.shutil, "which", lambda name: "/usr/local/bin/agy" if name == "agy" else None)
+    monkeypatch.setattr(agy_mod, "_run_command", lambda _cmd: "Usage: agy --print <prompt>")
+
+    issues = plugin.detect_issues()
+    assert any(
+        issue.severity == "error" and issue.type == "unsupported_command_flags"
+        for issue in issues
+    )

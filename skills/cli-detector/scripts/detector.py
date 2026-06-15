@@ -57,7 +57,7 @@ def _default_routing_for_model(model_id: str) -> RouteEntry:
     if family == "gpt":
         return RouteEntry(preferred="codex", fallbacks=["aider", "goose", "opencode"])
     if family == "gemini":
-        return RouteEntry(preferred="gemini", fallbacks=["aider", "goose", "opencode"])
+        return RouteEntry(preferred="agy", fallbacks=["gemini", "opencode", "aider", "goose"])
     if family == "glm":
         return RouteEntry(preferred="opencode", fallbacks=["codex"])
     if family == "local":

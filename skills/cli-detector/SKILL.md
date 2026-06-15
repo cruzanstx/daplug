@@ -8,7 +8,7 @@ allowed-tools:
 
 # CLI Detector
 
-Phase 1: Detect installed Tier 1 coding CLIs (Claude, Codex, Gemini, OpenCode) via an extensible plugin system.
+Phase 1: Detect installed Tier 1 coding CLIs (Claude, Codex, Antigravity/Gemini, OpenCode) via an extensible plugin system.
 
 ## Usage
 

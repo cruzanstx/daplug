@@ -476,7 +476,7 @@ All available models for /daplug:run-prompt --model:
 - `gpt52-high` - gpt-5.2 with high reasoning
 - `gpt52-xhigh` - gpt-5.2 with xhigh reasoning (30+ min tasks)
 
-**Google Gemini Family:** (check: `gemini.models.<model>.used` for each)
+**Google Gemini Family:** (check: `gemini.models.<model>.used` for each; `agy` is preferred when healthy, legacy `gemini` is fallback)
 - `gemini` - Gemini 3 Flash Preview (default, best coding performance)
 - `gemini-high` - Gemini 2.5 Pro (higher capability)
 - `gemini-xhigh` - Gemini 3 Pro Preview (maximum capability)

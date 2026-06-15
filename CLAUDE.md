@@ -56,7 +56,7 @@ Priority: project `./CLAUDE.md` → user `~/.claude/CLAUDE.md`
 1. User runs `/run-prompt 123 --model codex --worktree`
 2. `executor.py` resolves prompt from `prompts/` directory
 3. If `--worktree`: Creates isolated git worktree at configured location
-4. Launches CLI (codex/gemini/zai) with prompt content
+4. Launches CLI (codex/agy/gemini/zai) with prompt content
 5. If `--loop`: Re-runs until completion marker found or max iterations reached
 6. Logs output to `~/.claude/cli-logs/`
 
@@ -117,8 +117,9 @@ For codex-based CLIs, use stdin to avoid shell escaping issues:
 process = subprocess.Popen(["codex", "exec", "--full-auto", "-"], stdin=subprocess.PIPE, ...)
 process.stdin.write(content)
 
-# Gemini-style: pass as argument
-subprocess.Popen(["gemini", "-y", "-p", content], ...)
+# Antigravity/Gemini-style: pass as argument
+subprocess.Popen(["agy", "--model", "Gemini 3.5 Flash (Medium)", "--print", content], ...)
+subprocess.Popen(["gemini", "-y", "-p", content], ...)  # legacy fallback
 ```
 
 ### Verification Loop Protocol
@@ -160,15 +161,17 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `gpt52` | codex | gpt-5.2 |
 | `gpt52-high` | codex | gpt-5.2 (high reasoning) |
 | `gpt52-xhigh` | codex | gpt-5.2 (xhigh reasoning) |
-| `gemini` | gemini | gemini-3-flash-preview |
-| `gemini-high` | gemini | gemini-2.5-pro |
-| `gemini-xhigh` | gemini | gemini-3-pro-preview |
-| `gemini25pro` | gemini | gemini-2.5-pro |
-| `gemini25flash` | gemini | gemini-2.5-flash |
-| `gemini25lite` | gemini | gemini-2.5-flash-lite |
-| `gemini3flash` | gemini | gemini-3-flash-preview |
-| `gemini3pro` | gemini | gemini-3-pro-preview |
-| `gemini31pro` | gemini | gemini-3.1-pro-preview (if available) |
+| `gemini` | agy/gemini | gemini-3-flash-preview |
+| `gemini-high` | agy/gemini | gemini-2.5-pro |
+| `gemini-xhigh` | agy/gemini | gemini-3-pro-preview |
+| `gemini25pro` | agy/gemini | gemini-2.5-pro |
+| `gemini25flash` | agy/gemini | gemini-2.5-flash |
+| `gemini25lite` | agy/gemini | gemini-2.5-flash-lite |
+| `gemini3flash` | agy/gemini | gemini-3-flash-preview |
+| `gemini3pro` | agy/gemini | gemini-3-pro-preview |
+| `gemini31pro` | agy/gemini | gemini-3.1-pro-preview (if available) |
+
+Google shorthands prefer Antigravity CLI (`agy`) when it is installed and healthy. The legacy `gemini` CLI remains supported as fallback and for explicit `--cli gemini` runs.
 | `zai` | codex | GLM-4.7 via Z.AI (may have issues) |
 | `glm5` | opencode | GLM-5.2 via OpenCode (latest GLM 5.x, 1M context) |
 | `glm52` | opencode | GLM-5.2 via OpenCode (explicit pin, 1M context) |

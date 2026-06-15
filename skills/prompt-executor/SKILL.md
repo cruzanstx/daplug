@@ -9,6 +9,7 @@ allowed-tools:
   - Bash(python3 ~/.claude/plugins/cache/daplug/daplug/*/skills/prompt-executor/scripts/executor.py:*)
   - Bash(codex:*)
   - Bash(gemini:*)
+  - Bash(agy:*)
   - Bash(tmux:*)
   - Bash(cat:*)
   - Bash(pgrep:*)
@@ -45,15 +46,15 @@ jq '.permissions.allow += ["Bash(PLUGIN_ROOT=$(jq -r '"'"'.plugins.\"daplug@cruz
 
 ---
 
-Execute prompts from `./prompts/` (including subfolders) using various AI models (Claude, Codex, Gemini, ZAI, etc).
+Execute prompts from `./prompts/` (including subfolders) using various AI models (Claude, Codex, Antigravity/Gemini, ZAI, etc).
 
 ## When to Use This Skill
 
 - User says "run prompt 123" or "execute prompt 123"
-- User says "run that prompt with codex/gemini/zai"
+- User says "run that prompt with codex/agy/gemini/zai"
 - User wants to "run a prompt in a worktree"
 - User wants to "run prompts in parallel"
-- User asks to "delegate this to codex/gemini"
+- User asks to "delegate this to codex/agy/gemini"
 - User wants to "run with verification loop" or "keep retrying until complete"
 - User asks to "check loop status" for a running prompt
 
@@ -70,7 +71,7 @@ python3 "$EXECUTOR" [prompts...] [options]
 **Options:**
 - `--model, -m`: claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, glm52, kimi, opencode, local, qwen, devstral, glm-local, qwen-small
   - `glm52`: GLM-5.2 via Z.AI / OpenCode (1M context)
-- `--cli`: Override CLI wrapper (codex, opencode, or claude; aliases: claudecode, cc). Unsupported explicit combinations fail with a clear error (no silent fallback).
+- `--cli`: Override CLI wrapper (codex, opencode, claude, agy, or gemini; aliases: claudecode, cc, antigravity). Unsupported explicit combinations fail with a clear error (no silent fallback).
 - `--variant`: Reasoning variant override (`none|low|medium|high|xhigh`). Explicit `--variant` overrides alias defaults (`codex-high`, `gpt55-high`, `gpt54-high`, `gpt52-high`, etc.).
 - `--cwd, -c`: Working directory for execution
 - `--run, -r`: Actually run the CLI (default: just return info)

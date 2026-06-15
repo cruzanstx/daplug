@@ -95,7 +95,7 @@ _SHORTHAND: dict[str, _ModelRequest] = {
         model_id="openai:gpt-5.2",
         reasoning_effort="xhigh",
     ),
-    # Google (Gemini CLI)
+    # Google (Antigravity CLI preferred; Gemini CLI retained as legacy fallback)
     # Keep preview shorthands for backwards compatibility; availability depends on user auth/plan.
     "gemini": _ModelRequest("gemini", family="google", model_id="google:gemini-3-flash-preview"),
     "gemini-high": _ModelRequest("gemini-high", family="google", model_id="google:gemini-2.5-pro"),
@@ -206,9 +206,19 @@ _ALIASES: dict[str, str] = {
 _FALLBACK_CHAINS: dict[str, list[str]] = {
     "anthropic": ["claude", "opencode", "aider"],
     "openai": ["codex", "opencode", "aider"],
-    "google": ["gemini", "opencode", "aider"],
+    "google": ["agy", "gemini", "opencode", "aider"],
     "zai": ["opencode", "codex"],
     "local": ["opencode", "codex"],
+}
+
+_AGY_MODEL_ARGS: dict[str, str] = {
+    "google:gemini-3-flash-preview": "Gemini 3.5 Flash (Medium)",
+    "google:gemini-3.5-flash": "Gemini 3.5 Flash (Medium)",
+    "google:gemini-2.5-flash": "Gemini 3.5 Flash (Medium)",
+    "google:gemini-2.5-flash-lite": "Gemini 3.5 Flash (Low)",
+    "google:gemini-2.5-pro": "Gemini 3.1 Pro (High)",
+    "google:gemini-3-pro-preview": "Gemini 3.1 Pro (High)",
+    "google:gemini-3.1-pro-preview": "Gemini 3.1 Pro (High)",
 }
 
 
@@ -227,6 +237,10 @@ def _model_provider(model_id: Optional[str]) -> str:
 
 def _strip_provider_prefix(model_id: str) -> str:
     return model_id.split(":", 1)[1] if ":" in model_id else model_id
+
+
+def _agy_model_arg(model_id: str) -> str:
+    return _AGY_MODEL_ARGS.get(model_id, model_id)
 
 
 def _opencode_model_spec(model_id: str) -> str:
@@ -492,6 +506,11 @@ def _build_command(cli: str, model_id: str, request: _ModelRequest) -> list[str]
         if request.reasoning_effort:
             cmd.extend(["-c", f'model_reasoning_effort="{request.reasoning_effort}"'])
 
+        return cmd
+
+    if cli == "agy":
+        # agy --print requires the prompt as the flag value; the executor appends it in argv mode.
+        cmd = ["agy", "--model", _agy_model_arg(model_id), "--print"]
         return cmd
 
     if cli == "gemini":

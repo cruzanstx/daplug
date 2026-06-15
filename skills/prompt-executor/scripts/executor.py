@@ -621,6 +621,8 @@ def _normalize_preferred_agent(value: Optional[str]) -> Optional[str]:
         return "claude"
     if v.startswith("codex"):
         return "codex"
+    if v in {"agy", "antigravity"}:
+        return "agy"
     if v.startswith("gemini"):
         return "gemini"
     if v in {"qwen", "devstral", "local"}:
@@ -634,6 +636,8 @@ def _normalize_cli_override(value: Optional[str]) -> Optional[str]:
         return None
     if v in {"cc", "claudecode"}:
         return "claude"
+    if v == "antigravity":
+        return "agy"
     return v
 
 
@@ -892,8 +896,22 @@ MODEL_SPECS = {
     },
 }
 
+GOOGLE_MODEL_SHORTHANDS = {
+    "gemini",
+    "gemini-high",
+    "gemini-xhigh",
+    "gemini25pro",
+    "gemini25flash",
+    "gemini25lite",
+    "gemini3flash",
+    "gemini3pro",
+    "gemini31pro",
+}
+
 CLI_OVERRIDE_SUPPORTED_MODELS = {
     "claude": {"claude", "cc-sonnet", "cc-opus"},
+    "agy": GOOGLE_MODEL_SHORTHANDS,
+    "gemini": GOOGLE_MODEL_SHORTHANDS,
     "codex": {
         "codex",
         "codex-spark",
@@ -975,6 +993,19 @@ def _canonical_model(model: str) -> str:
 
 def _strip_provider_prefix(model_id: str) -> str:
     return model_id.split(":", 1)[1] if ":" in model_id else model_id
+
+
+def _agy_model_arg(model_id: str) -> str:
+    agy_args = {
+        "google:gemini-3-flash-preview": "Gemini 3.5 Flash (Medium)",
+        "google:gemini-3.5-flash": "Gemini 3.5 Flash (Medium)",
+        "google:gemini-2.5-flash": "Gemini 3.5 Flash (Medium)",
+        "google:gemini-2.5-flash-lite": "Gemini 3.5 Flash (Low)",
+        "google:gemini-2.5-pro": "Gemini 3.1 Pro (High)",
+        "google:gemini-3-pro-preview": "Gemini 3.1 Pro (High)",
+        "google:gemini-3.1-pro-preview": "Gemini 3.1 Pro (High)",
+    }
+    return agy_args.get(model_id, model_id)
 
 
 def _opencode_model_spec(model_id: str) -> str:
@@ -1084,6 +1115,15 @@ def _build_opencode_command(model_id: str, variant: Optional[str]) -> list[str]:
     return cmd
 
 
+def _build_agy_command(model: str, model_id: str, variant: Optional[str]) -> list[str]:
+    if variant:
+        raise ValueError(
+            f"--variant {variant} is not supported with --model {model} when using Antigravity."
+        )
+    # agy --print requires its prompt as an argv value; stdin leaves --print without an argument.
+    return ["agy", "--model", _agy_model_arg(model_id), "--print"]
+
+
 def _build_gemini_command(model: str, model_id: str, variant: Optional[str]) -> list[str]:
     if variant:
         raise ValueError(
@@ -1116,6 +1156,7 @@ def _dynamic_display(model: str, selected_cli: str, model_id: str, variant: Opti
     cli_label = {
         "codex": "Codex",
         "opencode": "OpenCode",
+        "agy": "Antigravity",
         "gemini": "Gemini",
         "claude": "Claude Code",
     }.get(selected_cli, selected_cli)
@@ -1171,7 +1212,7 @@ def get_cli_info(
 
     stdin_mode: How to pass prompt content
       - "dash": Use '-' as last arg, pipe content to stdin (codex)
-      - "arg": Pass content as command line argument (gemini)
+      - "arg": Pass content as command line argument (agy/gemini/opencode)
       - "stdin": Pipe content to stdin (claude --print)
       - None: Handled by Task subagent (claude)
     """
@@ -1243,6 +1284,9 @@ def get_cli_info(
         stdin_mode = "dash"
     elif selected_cli == "opencode":
         command = _build_opencode_command(model_id, effective_variant)
+        stdin_mode = "arg"
+    elif selected_cli == "agy":
+        command = _build_agy_command(model, model_id, effective_variant)
         stdin_mode = "arg"
     elif selected_cli == "gemini":
         command = _build_gemini_command(model, model_id, effective_variant)
@@ -1725,6 +1769,26 @@ def update_loop_iteration(
     return state
 
 
+def _extract_jsonl_text_parts(content: str) -> str:
+    """Extract assistant text events from JSONL logs, ignoring tool outputs."""
+    text_parts: list[str] = []
+    for line in content.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("{"):
+            continue
+        try:
+            event = json.loads(stripped)
+        except json.JSONDecodeError:
+            continue
+        part = event.get("part") if isinstance(event, dict) else None
+        if not isinstance(part, dict) or part.get("type") != "text":
+            continue
+        text = part.get("text")
+        if isinstance(text, str):
+            text_parts.append(text)
+    return "\n".join(text_parts)
+
+
 def check_completion_marker(log_file: Path, marker: str) -> tuple[bool, Optional[str]]:
     """Check if the completion marker exists in the log file.
 
@@ -1742,18 +1806,24 @@ def check_completion_marker(log_file: Path, marker: str) -> tuple[bool, Optional
     try:
         content = log_file.read_text()
 
-        # Find where the prompt instructions end - only look for markers after that point.
-        sentinel_pos = content.find(INSTRUCTIONS_END_SENTINEL)
-        if sentinel_pos != -1:
-            search_content = content[sentinel_pos + len(INSTRUCTIONS_END_SENTINEL):]
+        # OpenCode JSONL logs include tool output as JSON events. Tool reads can contain
+        # literal verification examples, so prefer assistant text events when present.
+        jsonl_text = _extract_jsonl_text_parts(content)
+        if jsonl_text:
+            search_content = jsonl_text
         else:
-            # Backward-compatible fallback: older prompt wrappers ended the "example marker"
-            # section at </verification_protocol>.
-            protocol_end = content.rfind("</verification_protocol>")
-            if protocol_end != -1:
-                search_content = content[protocol_end:]
+            # Find where the prompt instructions end - only look for markers after that point.
+            sentinel_pos = content.find(INSTRUCTIONS_END_SENTINEL)
+            if sentinel_pos != -1:
+                search_content = content[sentinel_pos + len(INSTRUCTIONS_END_SENTINEL):]
             else:
-                search_content = content
+                # Backward-compatible fallback: older prompt wrappers ended the "example marker"
+                # section at </verification_protocol>.
+                protocol_end = content.rfind("</verification_protocol>")
+                if protocol_end != -1:
+                    search_content = content[protocol_end:]
+                else:
+                    search_content = content
 
         # Check for NEEDS_RETRY marker first (takes precedence)
         # This ensures explicit retry requests are honored even if completion marker exists
@@ -2027,7 +2097,7 @@ def run_cli(
 
     Uses stdin_mode to determine how to pass prompts:
     - "dash": Use '-' as last arg, pipe content to stdin (codex)
-    - "arg": Pass content as command line argument (gemini)
+    - "arg": Pass content as command line argument (agy/gemini/opencode)
     - "stdin": Pipe content directly to stdin (claude --print)
 
     If needs_pty is True, wraps command with 'script' to provide a pseudo-TTY.
@@ -2093,7 +2163,7 @@ def run_cli(
             process.stdin.write(content)
             process.stdin.close()
         else:
-            # Gemini-style: pass content as argument
+            # argv-style CLIs (agy/gemini/opencode): pass content as the final argument.
             full_cmd = cli_info["command"] + [content]
 
             # Wrap with script for PTY if needed
@@ -2206,7 +2276,7 @@ def run_cli_foreground(
             process.stdin.close()
             exit_code = process.wait()
         else:
-            # Gemini-style: pass content as argument
+            # argv-style CLIs (agy/gemini/opencode): pass content as the final argument.
             full_cmd = cli_info["command"] + [content]
 
             # Wrap with script for PTY if needed
@@ -2688,7 +2758,7 @@ def main():
                                 "local", "qwen", "devstral",
                                 "glm-local", "qwen-small"],
                        help="Model/CLI to use")
-    parser.add_argument("--cli", choices=["codex", "opencode", "claude", "claudecode", "cc"],
+    parser.add_argument("--cli", choices=["codex", "opencode", "claude", "claudecode", "cc", "agy", "antigravity", "gemini"],
                        default=None,
                        help="Override CLI wrapper (default: auto-detected per model)")
     parser.add_argument(

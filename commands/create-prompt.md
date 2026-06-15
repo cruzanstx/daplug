@@ -475,7 +475,7 @@ All available models for /daplug:run-prompt --model:
 - `gpt52-high` - gpt-5.2 with high reasoning
 - `gpt52-xhigh` - gpt-5.2 with xhigh reasoning (30+ min tasks)
 
-**Google Gemini Family:** (check: `gemini.models.<model>.used` for each)
+**Google Gemini Family:** (check: `gemini.models.<model>.used` for each; `agy` is preferred when healthy, legacy `gemini` is fallback)
 - `gemini` - Gemini 3 Flash Preview (default, best coding performance)
 - `gemini-high` - Gemini 2.5 Pro (higher capability)
 - `gemini-xhigh` - Gemini 3 Pro Preview (maximum capability)
@@ -487,6 +487,7 @@ All available models for /daplug:run-prompt --model:
 - `gemini31pro` - Gemini 3.1 Pro Preview (latest, account-gated)
 
 **Gemini Model Mapping:**
+Antigravity (`agy`) maps legacy shorthands to the closest current `agy models` display names; legacy `gemini` keeps these API model IDs.
 | Shorthand | API Model | Quota Bucket |
 |-----------|-----------|--------------|
 | `gemini` / `gemini3flash` | gemini-3-flash-preview | gemini-3-flash-preview |

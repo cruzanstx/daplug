@@ -69,7 +69,7 @@ Command name mapping:
 | `/daplug:create-prompt` | Create optimized, XML-structured prompts |
 | `/daplug:devstral-cli` | Run task with local Devstral model via Codex CLI |
 | `/daplug:detect-clis` | Scan and manage available AI coding CLIs |
-| `/daplug:gemini-cli` | Run task with Google Gemini CLI |
+| `/daplug:gemini-cli` | Run task with legacy Google Gemini CLI |
 | `/daplug:install-bridges` | Install daplug command bridges for other runtimes (e.g. OpenCode) |
 | `/daplug:migrate-config` | Migrate legacy CLAUDE.md settings to <daplug_config> |
 | `/daplug:prompts` | Analyze prompts folder and recommend next steps |
@@ -157,7 +157,7 @@ Commands below are shown without the `/daplug:` prefix for readability. In Claud
 /run-prompt 005 --model codex        # OpenAI Codex
 /run-prompt 005 --model cc-sonnet    # Claude Code CLI (Sonnet)
 /run-prompt 005 --model cc-opus      # Claude Code CLI (Opus)
-/run-prompt 005 --model gemini       # Google Gemini 3 Flash
+/run-prompt 005 --model gemini       # Google Gemini (agy preferred, Gemini CLI fallback)
 /run-prompt 005 --model opencode     # Z.AI GLM-4.7 (recommended)
 /run-prompt 005 --model zai          # Z.AI GLM-4.7 (via Codex)
 ```
@@ -632,15 +632,18 @@ The executor uses stdin for codex models to avoid shell escaping issues with com
 # Codex: uses stdin with '-' flag
 codex exec --full-auto -  # reads from stdin
 
-# Gemini: uses -p flag for headless mode
+# Antigravity: uses --print with the prompt as the flag value
+agy --model "Gemini 3.5 Flash (Medium)" --print "prompt content"
+
+# Legacy Gemini CLI fallback: uses -p for headless mode
 gemini -y -p "prompt content"
 ```
 
 This prevents issues with prompts containing newlines, quotes, backticks, and XML tags.
 
-### Gemini CLI Model Tiers
+### Google Gemini Runner Model Tiers
 
-Gemini models share quotas in tiers (observed with Google One Premium):
+Google shorthands route through Antigravity CLI (`agy`) when it is installed and healthy, then fall back to the legacy `gemini` CLI. Gemini models share quotas in tiers (observed with Google One Premium):
 
 | Tier | Models | Shorthand |
 |------|--------|-----------|
@@ -653,7 +656,7 @@ Gemini models share quotas in tiers (observed with Google One Premium):
 - Has its own separate quota bucket
 - Won't eat into Pro limits for complex tasks
 
-**Check usage:** Run `gemini` interactively and type `/usage`.
+**Check usage:** Run `agy models` for Antigravity availability, or run legacy `gemini` interactively and type `/usage`.
 
 **Model shortcuts:**
 | Shorthand | Model | Use Case |
@@ -748,10 +751,10 @@ This feature is inspired by the [ralph-wiggum](https://github.com/anthropics/cla
 | **Loop control** | Hook script feeds prompt back to Claude | Executor re-runs CLI directly |
 | **State file** | `.claude/ralph-loop.local.md` | `~/.claude/loop-state/{num}.json` |
 | **Completion marker** | `<promise>COMPLETE</promise>` | `<verification>VERIFICATION_COMPLETE</verification>` |
-| **Works with** | Claude Code only | Any CLI (codex, gemini, zai, etc.) |
+| **Works with** | Claude Code only | Any CLI (codex, agy/gemini, zai, etc.) |
 | **Runs in** | Interactive Claude session | Background process |
 
-**Why no hooks?** Ralph-wiggum's hook approach only works within Claude Code sessions. Our implementation needs to support external CLIs (Codex, Gemini, Z.AI) that don't have Claude's hook system. The Python-based loop runs the CLI, waits for completion, checks logs for markers, and re-runs if needed - all without requiring hooks.
+**Why no hooks?** Ralph-wiggum's hook approach only works within Claude Code sessions. Our implementation needs to support external CLIs (Codex, Antigravity/Gemini, Z.AI) that don't have Claude's hook system. The Python-based loop runs the CLI, waits for completion, checks logs for markers, and re-runs if needed - all without requiring hooks.
 
 ### Usage
 

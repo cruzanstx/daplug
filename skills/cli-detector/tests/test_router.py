@@ -59,6 +59,85 @@ def test_resolve_model_falls_back_when_preferred_missing(monkeypatch):
     assert cmd[0] == "opencode"
 
 
+def test_google_models_prefer_agy_when_healthy(monkeypatch):
+    fake = _FakeCache(
+        {
+            "clis": {
+                "agy": {"installed": True, "issues": []},
+                "gemini": {"installed": True, "issues": []},
+                "opencode": {"installed": True, "issues": []},
+            },
+            "providers": {},
+        }
+    )
+    monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+
+    cli, model_id, cmd = router.resolve_model("gemini")
+    assert cli == "agy"
+    assert model_id == "google:gemini-3-flash-preview"
+    assert cmd == ["agy", "--model", "Gemini 3.5 Flash (Medium)", "--print"]
+
+    cli, model_id, cmd = router.resolve_model("gemini-high")
+    assert cli == "agy"
+    assert model_id == "google:gemini-2.5-pro"
+    assert cmd == ["agy", "--model", "Gemini 3.1 Pro (High)", "--print"]
+
+
+def test_google_models_fall_back_to_gemini_when_agy_missing(monkeypatch):
+    fake = _FakeCache(
+        {
+            "clis": {
+                "agy": {"installed": False, "issues": []},
+                "gemini": {"installed": True, "issues": []},
+                "opencode": {"installed": True, "issues": []},
+            },
+            "providers": {},
+        }
+    )
+    monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+
+    cli, model_id, cmd = router.resolve_model("gemini31pro")
+    assert cli == "gemini"
+    assert model_id == "google:gemini-3.1-pro-preview"
+    assert cmd == ["gemini", "-y", "-m", "gemini-3.1-pro-preview", "-p"]
+
+
+def test_google_models_skip_agy_with_error_issue(monkeypatch):
+    fake = _FakeCache(
+        {
+            "clis": {
+                "agy": {
+                    "installed": True,
+                    "issues": [{"severity": "error", "type": "invalid_json"}],
+                },
+                "gemini": {"installed": True, "issues": []},
+            },
+            "providers": {},
+        }
+    )
+    monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+
+    cli, _model_id, cmd = router.resolve_model("gemini3flash")
+    assert cli == "gemini"
+    assert cmd[0] == "gemini"
+
+
+def test_google_preferred_cli_can_force_legacy_gemini(monkeypatch):
+    fake = _FakeCache(
+        {
+            "clis": {
+                "agy": {"installed": True, "issues": []},
+                "gemini": {"installed": True, "issues": []},
+            },
+            "providers": {},
+        }
+    )
+    monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+
+    cli, _model_id, cmd = router.resolve_model("gemini", preferred_cli="gemini")
+    assert cli == "gemini"
+    assert cmd[0] == "gemini"
+
 def test_resolve_local_model_prefers_lmstudio(monkeypatch):
     fake = _FakeCache(
         {

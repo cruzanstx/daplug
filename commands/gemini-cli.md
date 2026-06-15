@@ -1,10 +1,12 @@
 ---
 name: gemini-cli
-description: Run task with Google Gemini CLI (user)
+description: Run task with legacy Google Gemini CLI (user)
 argument-hint: <task> [--model gemini|gemini-high|gemini-xhigh|gemini25pro|gemini25flash|gemini25lite|gemini3flash|gemini3pro|gemini31pro] [--worktree /path]
 ---
 
-Run a task using Google Gemini CLI in YOLO mode (auto-approve all tool calls).
+Run a task using legacy Google Gemini CLI in YOLO mode (auto-approve all tool calls).
+
+For new `/daplug:run-prompt --model gemini*` runs, daplug prefers Antigravity CLI (`agy`) when it is installed and healthy. This command remains a direct legacy Gemini CLI wrapper.
 
 ## Step 0: Check Prerequisites
 

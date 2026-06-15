@@ -108,6 +108,33 @@ class TestCompletionMarkerDetection(unittest.TestCase):
         finally:
             log_path.unlink(missing_ok=True)
 
+    def test_jsonl_marker_detection_ignores_tool_output(self):
+        # OpenCode JSONL logs can contain tool-read output with literal NEEDS_RETRY examples.
+        log_text = (
+            '{"part":{"type":"tool","state":{"output":"<verification>NEEDS_RETRY: [reason]</verification>"}}}\n'
+            '{"part":{"type":"text","text":"Done.\\n<verification>VERIFICATION_COMPLETE</verification>"}}\n'
+        )
+        log_path = self._write_temp_log(log_text)
+        try:
+            found, retry_reason = executor.check_completion_marker(log_path, executor.DEFAULT_COMPLETION_MARKER)
+            self.assertTrue(found)
+            self.assertIsNone(retry_reason)
+        finally:
+            log_path.unlink(missing_ok=True)
+
+    def test_jsonl_detects_retry_from_text_part(self):
+        log_text = (
+            '{"part":{"type":"tool","state":{"output":"<verification>VERIFICATION_COMPLETE</verification>"}}}\n'
+            '{"part":{"type":"text","text":"Still failing.\\n<verification>NEEDS_RETRY: tests failing</verification>"}}\n'
+        )
+        log_path = self._write_temp_log(log_text)
+        try:
+            found, retry_reason = executor.check_completion_marker(log_path, executor.DEFAULT_COMPLETION_MARKER)
+            self.assertFalse(found)
+            self.assertEqual(retry_reason, "tests failing")
+        finally:
+            log_path.unlink(missing_ok=True)
+
 
 class TestGetCliInfo(unittest.TestCase):
     """Tests for get_cli_info() model configuration."""
@@ -179,7 +206,7 @@ class TestGetCliInfo(unittest.TestCase):
             self.assertFalse(info.get("needs_pty", False), f"{model} should not need PTY")
 
     def test_gemini_models_no_pty(self):
-        """Verify gemini models don't require PTY."""
+        """Verify Google models don't require PTY."""
         for model in [
             "gemini",
             "gemini-high",
@@ -191,7 +218,8 @@ class TestGetCliInfo(unittest.TestCase):
             "gemini3pro",
             "gemini31pro",
         ]:
-            info = executor.get_cli_info(model)
+            info = executor.get_cli_info(model, cli_override="agy")
+            self.assertEqual(info["stdin_mode"], "arg")
             self.assertFalse(info.get("needs_pty", False), f"{model} should not need PTY")
 
     def test_all_models_have_required_keys(self):

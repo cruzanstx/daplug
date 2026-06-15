@@ -20,6 +20,14 @@ from detect_clis import (
     _collect_issues,
     _json_payload,
 )
+from detector import _default_routing_for_model
+
+
+def test_default_google_routing_prefers_agy_with_legacy_fallbacks():
+    route = _default_routing_for_model("google:gemini-3.1-pro-preview")
+
+    assert route.preferred == "agy"
+    assert route.fallbacks[:3] == ["gemini", "opencode", "aider"]
 
 
 class TestRenderMarkdownTable:

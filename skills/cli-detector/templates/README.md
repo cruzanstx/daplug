@@ -17,10 +17,16 @@ Notes:
 - Required env: `OPENAI_API_KEY` (or `~/.codex/auth.json` from interactive login)
 - Codex headless mode uses `--full-auto`.
 
+### Antigravity CLI (`~/.gemini/antigravity-cli/settings.json`)
+- Binary: `agy`
+- Prompt execution uses `agy --model <model> --print <prompt>`.
+- `agy` is preferred for Google/Gemini routing when installed and healthy.
+
 ### Gemini CLI (`~/.config/gemini/config.json`)
 - Template: `gemini.json`
 - Required env: `GEMINI_API_KEY` or `GOOGLE_API_KEY` (or `gcloud auth`)
 - Gemini auto-approve uses `-y`, model selection uses `-m`.
+- Retained as the legacy fallback when `agy` is unavailable or blocked by error issues.
 
 ### OpenCode (`~/.config/opencode/opencode.json`)
 - Template: `opencode.json`
