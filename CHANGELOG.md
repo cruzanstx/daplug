@@ -2,6 +2,15 @@
 
 All notable changes to daplug are documented here.
 
+## [0.27.5] - 2026-06-19
+
+### Fixed
+- **Bubblewrap sandbox runtime visibility** (#19): sandboxed prompt execution now read-only binds the selected CLI's PATH directory and package-manager runtime root so nvm-installed OpenCode and Bun-installed Codex resolve inside bwrap instead of failing with `opencode: not found` / `codex: not found`.
+- **OpenCode sandbox process metadata**: bwrap profiles now mount `/proc`, avoiding Bun crashes when OpenCode starts inside the sandbox.
+
+### Tests
+- Added coverage for nvm/OpenCode and Bun/Codex runtime binds.
+
 ## [0.27.2] - 2026-06-02
 
 ### Fixed

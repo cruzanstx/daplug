@@ -1462,6 +1462,74 @@ def _existing_paths(paths: list[str]) -> list[str]:
     return [p for p in paths if Path(p).exists()]
 
 
+def _path_within(path: Path, parent: Path) -> bool:
+    try:
+        path.relative_to(parent)
+        return True
+    except ValueError:
+        return False
+
+
+def _node_version_root(path: Path, home: Path) -> Optional[Path]:
+    node_versions = home / ".nvm" / "versions" / "node"
+    try:
+        rel = path.relative_to(node_versions)
+    except ValueError:
+        return None
+    if not rel.parts:
+        return None
+    return node_versions / rel.parts[0]
+
+
+def _selected_cli_runtime_paths(child_command: list[str], home: Path) -> list[str]:
+    """Return read-only bind roots needed to execute the selected CLI.
+
+    nvm/bun-installed CLIs are commonly exposed through symlinks in PATH. Binding
+    only system paths leaves those symlinks broken inside bwrap, so bind the
+    command's PATH directory and the resolved package-manager runtime root.
+    """
+    if not child_command:
+        return []
+
+    executable = child_command[0]
+    executable_path = Path(executable)
+    if executable_path.is_absolute() or executable_path.parent != Path("."):
+        found = executable_path
+    else:
+        resolved = shutil.which(executable)
+        if not resolved:
+            return []
+        found = Path(resolved)
+
+    paths: list[Path] = []
+    if found.exists():
+        paths.append(found.parent)
+        resolved_found = found.resolve()
+        node_root = _node_version_root(resolved_found, home)
+        if node_root:
+            paths.append(node_root)
+
+        bun_global = home / ".bun" / "install" / "global"
+        if _path_within(resolved_found, bun_global):
+            paths.extend([home / ".bun" / "bin", bun_global])
+
+        volta_root = home / ".volta"
+        if _path_within(resolved_found, volta_root):
+            paths.append(volta_root)
+
+    seen: set[str] = set()
+    result: list[str] = []
+    for path in paths:
+        if not path.exists():
+            continue
+        item = str(path)
+        if item in seen:
+            continue
+        seen.add(item)
+        result.append(item)
+    return result
+
+
 def build_bwrap_args(config: dict, child_command: list[str]) -> list[str]:
     workspace = config["workspace"]
     profile = config["profile"]
@@ -1478,6 +1546,8 @@ def build_bwrap_args(config: dict, child_command: list[str]) -> list[str]:
         "--die-with-parent",
         "--dev",
         "/dev",
+        "--proc",
+        "/proc",
         "--tmpfs",
         "/tmp",
         "--tmpfs",
@@ -1541,6 +1611,9 @@ def build_bwrap_args(config: dict, child_command: list[str]) -> list[str]:
                 continue
             p.mkdir(parents=True, exist_ok=True)
             cmd.extend(["--bind", str(p), str(p)])
+
+    for path in _selected_cli_runtime_paths(child_command, Path(home)):
+        cmd.extend(["--ro-bind", path, path])
 
     cmd.extend(["--", *child_command])
     return cmd

@@ -86,6 +86,8 @@ def test_build_bwrap_args_profiles(profile, expected_contains, expected_absent, 
     assert "--unshare-all" in cmd
     assert "--new-session" in cmd
     assert "--die-with-parent" in cmd
+    assert "--proc" in cmd
+    assert "/proc" in cmd
     assert "--tmpfs" in cmd
     assert "--" in cmd
     assert cmd[-4:] == ["codex", "exec", "--full-auto", "-"]
@@ -94,6 +96,61 @@ def test_build_bwrap_args_profiles(profile, expected_contains, expected_absent, 
         assert marker in joined
     for marker in expected_absent:
         assert marker not in joined
+
+
+def test_build_bwrap_args_binds_nvm_cli_runtime(tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    local_bin = home / ".local" / "bin"
+    nvm_version = home / ".nvm" / "versions" / "node" / "v24.9.0"
+    target = nvm_version / "lib" / "node_modules" / "opencode-ai" / "bin" / "opencode.exe"
+    target.parent.mkdir(parents=True)
+    target.write_text("binary")
+    local_bin.mkdir(parents=True)
+    symlink = local_bin / "opencode"
+    symlink.symlink_to(target)
+
+    monkeypatch.setattr(executor.Path, "home", lambda: home)
+    monkeypatch.setattr(executor.shutil, "which", lambda name: str(symlink) if name == "opencode" else None)
+
+    config = {
+        "enabled": True,
+        "type": "bubblewrap",
+        "profile": "strict",
+        "workspace": str(tmp_path),
+        "network": False,
+    }
+    cmd = executor.build_bwrap_args(config, ["opencode", "run"])
+
+    assert ["--ro-bind", str(local_bin), str(local_bin)] in [cmd[i : i + 3] for i in range(len(cmd) - 2)]
+    assert ["--ro-bind", str(nvm_version), str(nvm_version)] in [cmd[i : i + 3] for i in range(len(cmd) - 2)]
+
+
+def test_build_bwrap_args_binds_bun_cli_runtime(tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    bun_global = home / ".bun" / "install" / "global"
+    bun_bin = home / ".bun" / "bin"
+    target = bun_global / "node_modules" / "@openai" / "codex" / "bin" / "codex.js"
+    target.parent.mkdir(parents=True)
+    target.write_text("#!/usr/bin/env node")
+    bun_bin.mkdir(parents=True)
+    source = bun_bin / "codex"
+    source.symlink_to(target)
+
+    monkeypatch.setattr(executor.Path, "home", lambda: home)
+    monkeypatch.setattr(executor.shutil, "which", lambda name: str(source) if name == "codex" else None)
+
+    config = {
+        "enabled": True,
+        "type": "bubblewrap",
+        "profile": "strict",
+        "workspace": str(tmp_path),
+        "network": False,
+    }
+    cmd = executor.build_bwrap_args(config, ["codex", "exec", "-"])
+
+    assert ["--ro-bind", str(source.parent), str(source.parent)] in [cmd[i : i + 3] for i in range(len(cmd) - 2)]
+    assert ["--ro-bind", str(bun_bin), str(bun_bin)] in [cmd[i : i + 3] for i in range(len(cmd) - 2)]
+    assert ["--ro-bind", str(bun_global), str(bun_global)] in [cmd[i : i + 3] for i in range(len(cmd) - 2)]
 
 
 def test_build_bwrap_args_network_toggle(tmp_path, monkeypatch):
