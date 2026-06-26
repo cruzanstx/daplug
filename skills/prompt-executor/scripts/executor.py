@@ -175,20 +175,110 @@ def detect_default_branch(repo_root: Path) -> str:
     return "main"
 
 
-def repo_dirty_snapshot(repo_root: str) -> str:
-    """Return `git status --porcelain` for repo_root, or '' if git fails.
+def _empty_repo_state_snapshot() -> dict:
+    return {"modified": {}, "untracked": set()}
 
-    Used to detect worktree-isolation breaches: a `--worktree` run whose model
-    writes to the original (non-worktree) repository instead of the isolated path.
-    """
+
+def _snapshot_timeout(deadline: float) -> float:
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise subprocess.TimeoutExpired("repo_state_snapshot", 30)
+    return remaining
+
+
+def _run_snapshot_git(repo_root: str, args: list[str], deadline: float, *, text: bool):
+    return subprocess.run(
+        ["git", "-C", repo_root, *args],
+        capture_output=True,
+        text=text,
+        timeout=_snapshot_timeout(deadline),
+    )
+
+
+def _split_nul_paths(raw: bytes) -> list[str]:
+    return [
+        path
+        for path in raw.decode("utf-8", "surrogateescape").split("\0")
+        if path
+    ]
+
+
+def repo_state_snapshot(repo_root: str) -> dict:
+    """Return content-aware dirty state for repo_root, or empty state on failure."""
     try:
-        r = subprocess.run(
-            ["git", "-C", repo_root, "status", "--porcelain"],
-            capture_output=True, text=True, timeout=30,
+        deadline = time.monotonic() + 30
+        _run_snapshot_git(repo_root, ["update-index", "-q", "--refresh"], deadline, text=True)
+
+        listed_result = _run_snapshot_git(
+            repo_root,
+            ["ls-files", "-m", "-o", "--exclude-standard", "-z"],
+            deadline,
+            text=False,
         )
+        if listed_result.returncode != 0:
+            return _empty_repo_state_snapshot()
+
+        untracked_result = _run_snapshot_git(
+            repo_root,
+            ["ls-files", "-o", "--exclude-standard", "-z"],
+            deadline,
+            text=False,
+        )
+        if untracked_result.returncode != 0:
+            return _empty_repo_state_snapshot()
+
+        listed_paths = _split_nul_paths(listed_result.stdout)
+        untracked = set(_split_nul_paths(untracked_result.stdout))
+        modified = {}
+        repo_path = Path(repo_root)
+
+        for path in listed_paths:
+            if path in untracked:
+                continue
+            if not (repo_path / path).exists():
+                modified[path] = "<deleted>"
+                continue
+            hash_result = _run_snapshot_git(
+                repo_root,
+                ["hash-object", "--", path],
+                deadline,
+                text=True,
+            )
+            if hash_result.returncode != 0:
+                return _empty_repo_state_snapshot()
+            content_hash = hash_result.stdout.strip()
+            if not content_hash:
+                return _empty_repo_state_snapshot()
+            modified[path] = content_hash
+
+        return {"modified": modified, "untracked": untracked}
     except (subprocess.SubprocessError, OSError):
-        return ""
-    return r.stdout if r.returncode == 0 else ""
+        return _empty_repo_state_snapshot()
+
+
+def repo_state_delta(before: dict, after: dict) -> dict:
+    before_modified = before.get("modified", {})
+    after_modified = after.get("modified", {})
+    modified_paths = sorted(
+        path
+        for path in set(before_modified) | set(after_modified)
+        if before_modified.get(path) != after_modified.get(path)
+    )
+
+    before_untracked = set(before.get("untracked", set()))
+    after_untracked = set(after.get("untracked", set()))
+    return {
+        "modified": modified_paths,
+        "new_untracked": sorted(after_untracked - before_untracked),
+        "removed_untracked": sorted(before_untracked - after_untracked),
+    }
+
+
+def repo_state_delta_paths(delta: dict) -> list[str]:
+    paths = set(delta.get("modified", []))
+    paths.update(delta.get("new_untracked", []))
+    paths.update(delta.get("removed_untracked", []))
+    return sorted(paths)
 
 
 def get_existing_worktree(repo_root: Path, branch_name: str) -> str | None:
@@ -1797,7 +1887,8 @@ def create_loop_state(
         "last_updated_at": datetime.now().isoformat(),
         "status": "pending",  # pending, running, completed, failed, max_iterations_reached
         "history": [],
-        "suggested_next_steps": []
+        "suggested_next_steps": [],
+        "original_checkout_warnings": [],
     }
 
 
@@ -2115,7 +2206,8 @@ Hard rules:
 - DO NOT read, edit, write, build against, or run shell commands inside {original_repo_root} or any path under it.
 - When spawning subagents (e.g. via a `task` tool), your composed sub-prompt MUST NOT contain the original-checkout path. Substitute the worktree path instead.
 - If the task description below mentions {original_repo_root} anywhere, treat that mention as a stale reference and rewrite it to {worktree_path} before acting on it or forwarding it to a subagent.
-- After this run completes, the executor checks `git status --porcelain` on the original checkout. If it changed during this run, the loop is failed with status `isolation_breach` regardless of what completion marker you emit. There is no recovery.
+- When sandboxing is active, bwrap enforces the boundary at the OS level.
+- If parent-side activity dirties the original checkout during this run, the executor logs `ORIGINAL_CHECKOUT_DIRTIED` as a warning and continues normal completion-marker handling.
 </critical_isolation_boundary>
 
 """
@@ -2418,6 +2510,7 @@ def run_verification_loop(
         state = existing_state
         state.setdefault("history", [])
         state.setdefault("suggested_next_steps", [])
+        state.setdefault("original_checkout_warnings", [])
         if not state.get("iteration"):
             state["iteration"] = 1
     else:
@@ -2494,7 +2587,8 @@ def run_verification_loop(
         "max_iterations": max_iterations,
         "completion_marker": completion_marker,
         "iterations": [],
-        "final_status": None
+        "final_status": None,
+        "original_checkout_warnings": state.get("original_checkout_warnings", []),
     }
 
     while state["iteration"] <= max_iterations:
@@ -2532,13 +2626,14 @@ def run_verification_loop(
             f.write(f"[Loop] Starting iteration {iteration}/{max_iterations}\n")
             f.write(f"[Loop] Iteration log: {log_file}\n")
 
-        # Snapshot the original (non-worktree) repo so we can detect isolation breaches.
+        # Snapshot the original (non-worktree) repo so parent-side dirtiness can be logged.
         guard_active = bool(
             worktree_path
             and original_repo_root
             and Path(worktree_path).resolve() != Path(original_repo_root).resolve()
         )
-        pre_status = repo_dirty_snapshot(original_repo_root) if guard_active else ""
+        guard_repo_root = original_repo_root if guard_active and original_repo_root else None
+        pre_status = repo_state_snapshot(guard_repo_root) if guard_repo_root else _empty_repo_state_snapshot()
 
         # Run CLI and wait for completion
         if sandbox_config and sandbox_config.get("enabled"):
@@ -2564,30 +2659,32 @@ def run_verification_loop(
             result["error"] = error_msg
             break
 
-        # Worktree-isolation guard: if the original checkout changed during this
-        # iteration, the model wrote outside its sandbox (see daplug #14). Fail
-        # the loop immediately regardless of the marker — the damage is already done
-        # and continuing the loop would compound it.
-        if guard_active:
-            post_status = repo_dirty_snapshot(original_repo_root)
+        # The sandbox is the security boundary. Original checkout changes observed here
+        # are logged for operator awareness, but they do not invalidate the iteration.
+        if guard_repo_root:
+            post_status = repo_state_snapshot(guard_repo_root)
             if post_status != pre_status:
-                breach_msg = (
-                    "Worktree isolation breach: the original checkout at "
-                    f"{original_repo_root} has uncommitted changes that were not "
-                    "present when this iteration started. The model wrote outside "
-                    f"its sandbox ({worktree_path}). Loop aborted to prevent "
-                    "further damage. Inspect `git status` in the original "
-                    "checkout and decide whether to commit, stash, or revert."
-                )
+                delta = repo_state_delta(pre_status, post_status)
+                changed_paths = repo_state_delta_paths(delta)
+                shown_paths = changed_paths[:20]
+                path_summary = ", ".join(shown_paths) if shown_paths else "<unknown>"
+                if len(changed_paths) > len(shown_paths):
+                    path_summary += f", ... ({len(changed_paths) - len(shown_paths)} more)"
+                warning = {
+                    "iteration": iteration,
+                    "modified": delta["modified"],
+                    "new_untracked": delta["new_untracked"],
+                    "removed_untracked": delta["removed_untracked"],
+                }
+                state.setdefault("original_checkout_warnings", []).append(warning)
+                result["original_checkout_warnings"] = state["original_checkout_warnings"]
                 with open(loop_log, "a") as f:
-                    f.write(f"[Loop] ISOLATION_BREACH: {breach_msg}\n")
-                state["status"] = "isolation_breach"
-                state["failure_reason"] = breach_msg
+                    f.write(
+                        "[Loop] ORIGINAL_CHECKOUT_DIRTIED: "
+                        f"original checkout changed during iteration {iteration}; "
+                        f"paths: {path_summary}\n"
+                    )
                 save_loop_state(state)
-                result["final_status"] = "isolation_breach"
-                result["status"] = "isolation_breach"
-                result["error"] = breach_msg
-                break
 
         # Check for completion marker
         marker_found, retry_reason = check_completion_marker(log_file, completion_marker)
@@ -2650,6 +2747,7 @@ def run_verification_loop(
     result["state_file"] = str(get_loop_state_file(prompt_number))
     result["total_iterations"] = len(result["iterations"])
     result["suggested_next_steps"] = state.get("suggested_next_steps", [])
+    result["original_checkout_warnings"] = state.get("original_checkout_warnings", [])
     return result
 
 
