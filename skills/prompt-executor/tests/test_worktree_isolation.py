@@ -1,5 +1,7 @@
 """Tests for worktree base-branch detection (#15) and isolation guard (#14)."""
+import importlib.util
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -7,9 +9,13 @@ from pathlib import Path
 import pytest
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1] / "scripts"
-sys.path.append(str(SCRIPT_DIR))
-
-import executor  # noqa: E402
+EXECUTOR_PATH = SCRIPT_DIR / "executor.py"
+_executor_spec = importlib.util.spec_from_file_location("executor", EXECUTOR_PATH)
+if _executor_spec is None or _executor_spec.loader is None:
+    raise ImportError(f"Unable to load executor from {EXECUTOR_PATH}")
+executor = importlib.util.module_from_spec(_executor_spec)
+sys.modules["executor"] = executor
+_executor_spec.loader.exec_module(executor)
 
 
 def _run(cmd, cwd):
@@ -58,42 +64,54 @@ def test_detect_default_branch_falls_back_to_main_outside_repo(tmp_path):
 
 
 # -----------------------
-# repo_dirty_snapshot
+# repo_state_snapshot
 # -----------------------
 
-def test_repo_dirty_snapshot_clean_repo_returns_empty(tmp_path):
+def test_repo_state_snapshot_clean_repo_returns_empty(tmp_path):
     repo = _init_repo(tmp_path / "r")
-    assert executor.repo_dirty_snapshot(str(repo)) == ""
+    assert executor.repo_state_snapshot(str(repo)) == {"modified": {}, "untracked": set()}
 
 
-def test_repo_dirty_snapshot_detects_untracked(tmp_path):
+def test_repo_state_snapshot_detects_untracked(tmp_path):
     repo = _init_repo(tmp_path / "r")
     (repo / "new.txt").write_text("x")
-    snap = executor.repo_dirty_snapshot(str(repo))
-    assert "new.txt" in snap
-    assert snap.startswith("??")
+    snap = executor.repo_state_snapshot(str(repo))
+    assert snap["modified"] == {}
+    assert snap["untracked"] == {"new.txt"}
 
 
-def test_repo_dirty_snapshot_detects_modified(tmp_path):
+def test_repo_state_snapshot_detects_modified(tmp_path):
     repo = _init_repo(tmp_path / "r")
     (repo / "README.md").write_text("changed\n")
-    snap = executor.repo_dirty_snapshot(str(repo))
-    assert "README.md" in snap
-    assert " M" in snap
+    snap = executor.repo_state_snapshot(str(repo))
+    assert set(snap["modified"]) == {"README.md"}
+    assert snap["modified"]["README.md"]
+    assert snap["untracked"] == set()
 
 
-def test_repo_dirty_snapshot_bad_path_returns_empty(tmp_path):
-    assert executor.repo_dirty_snapshot(str(tmp_path / "does-not-exist")) == ""
+def test_repo_state_snapshot_bad_path_returns_empty(tmp_path):
+    assert executor.repo_state_snapshot(str(tmp_path / "does-not-exist")) == {
+        "modified": {},
+        "untracked": set(),
+    }
 
 
-def test_repo_dirty_snapshot_detects_change_between_snapshots(tmp_path):
+def test_repo_state_snapshot_detects_change_between_snapshots(tmp_path):
     """Simulates the loop's before/after comparison."""
     repo = _init_repo(tmp_path / "r")
-    before = executor.repo_dirty_snapshot(str(repo))
+    before = executor.repo_state_snapshot(str(repo))
     (repo / "leaked.txt").write_text("subagent wrote here")
-    after = executor.repo_dirty_snapshot(str(repo))
+    after = executor.repo_state_snapshot(str(repo))
     assert before != after
-    assert "leaked.txt" in after
+    assert after["untracked"] == {"leaked.txt"}
+
+
+def test_repo_state_snapshot_ignores_stat_only_mtime_change(tmp_path):
+    repo = _init_repo(tmp_path / "r")
+    before = executor.repo_state_snapshot(str(repo))
+    os.utime(repo / "README.md", None)
+    after = executor.repo_state_snapshot(str(repo))
+    assert after == before
 
 
 # ---------------------------------------------
@@ -159,13 +177,15 @@ def test_isolation_block_warns_about_subagent_prompts(tmp_path):
     assert "subagent" in out.lower() or "sub-prompt" in out.lower()
 
 
-def test_isolation_block_mentions_isolation_breach_consequence(tmp_path):
-    """The wrapper must tell the model the loop will fail if it writes outside."""
+def test_isolation_block_mentions_warning_consequence(tmp_path):
+    """The wrapper must describe warning-only original-checkout dirtiness handling."""
     out = _wrap(
         worktree_path=str(tmp_path / "wt"),
         original_repo_root=str(tmp_path / "main"),
     )
-    assert "isolation_breach" in out
+    assert "bwrap" in out
+    assert "ORIGINAL_CHECKOUT_DIRTIED" in out
+    assert "warning" in out.lower()
 
 
 # -----------------------
@@ -207,7 +227,7 @@ def test_create_worktree_honors_explicit_base_branch_override(tmp_path, monkeypa
 
 
 # --------------------------------------------------------------------
-# End-to-end: run_verification_loop detects isolation breach (#14)
+# End-to-end: run_verification_loop warns on original checkout dirtiness (#14/#20)
 # --------------------------------------------------------------------
 
 @pytest.fixture()
@@ -279,9 +299,8 @@ def _call_loop(env, *, monkeypatch, fake_cli, original_repo_root,
     )
 
 
-def test_loop_aborts_with_isolation_breach_when_original_is_dirtied(loop_env, monkeypatch):
-    """The headline #14 mitigation: the loop must fail loudly when the model
-    writes to the original checkout instead of the isolated worktree."""
+def test_loop_warns_but_continues_when_original_is_dirtied(loop_env, monkeypatch):
+    """Original checkout dirtiness is logged but marker handling still completes."""
     leak = loop_env["original"] / "leaked-by-model.txt"
     fake_cli = _make_fake_cli(write_marker=True, side_effect_file=leak)
 
@@ -293,23 +312,26 @@ def test_loop_aborts_with_isolation_breach_when_original_is_dirtied(loop_env, mo
         worktree_path=loop_env["worktree"],
     )
 
-    assert result["status"] == "isolation_breach"
-    assert result["final_status"] == "isolation_breach"
-    assert "isolation breach" in result["error"].lower()
-    # We abort before recording the iteration as a normal completion — that's
-    # intentional: the iteration was a failure, not a step toward completion.
-    assert result["iterations"] == []
+    assert result["status"] == "completed"
+    assert result["final_status"] == "completed"
+    assert len(result["iterations"]) == 1
+    assert result["iterations"][0]["marker_found"] is True
+    assert result["original_checkout_warnings"]
 
-    # State file persisted with the breach status, and only one iteration ran.
+    # State file records the warning and still persists normal completion.
     state_file = Path(result["state_file"])
     state = json.loads(state_file.read_text())
-    assert state["status"] == "isolation_breach"
+    assert state["status"] == "completed"
     assert state["iteration"] == 1
-    assert "outside its sandbox" in state["failure_reason"]
+    warning = state["original_checkout_warnings"][0]
+    assert warning["iteration"] == 1
+    assert warning["modified"] == []
+    assert warning["new_untracked"] == ["leaked-by-model.txt"]
 
-    # Loop log surfaces the breach
+    # Loop log surfaces the warning.
     loop_log_text = Path(result["loop_log"]).read_text()
-    assert "ISOLATION_BREACH" in loop_log_text
+    assert "ORIGINAL_CHECKOUT_DIRTIED" in loop_log_text
+    assert "leaked-by-model.txt" in loop_log_text
 
 
 def test_loop_completes_normally_when_original_untouched(loop_env, monkeypatch):
@@ -491,4 +513,3 @@ def test_parser_accepts_worktree_path_and_branch_name(monkeypatch):
     ns = called["ns"]
     assert ns.worktree_path == "/tmp/wt"
     assert ns.branch_name == "prompt/999-x"
-
