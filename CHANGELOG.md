@@ -2,6 +2,19 @@
 
 All notable changes to daplug are documented here.
 
+## [0.27.6] - 2026-06-26
+
+### Fixed
+- **Worktree `--loop` no longer aborts on coincidental parent-checkout dirtiness** (#20). The 0.27.1 post-iteration isolation guard compared raw `git status --porcelain` of the original checkout and aborted with `status="isolation_breach"` on any new line — but bwrap is the real boundary; the sandboxed CLI cannot write outside its bound paths. The check only caught coincidental parent-side noise and threw away verified runs (one case lost ~2h of `codex xhigh` output after the agent had already emitted `VERIFICATION_COMPLETE`). Two confirmed false-positive paths: (1) stat-only mtime changes from Go tooling (`go build`/`go test` traversal) showing as ` M` until `git update-index --refresh` clears them, and (2) parent-side writes during a long iteration (e.g. the parent chat creating `prompts/NNN-*.md` via `daplug:create-prompt` while the sandboxed CLI is running). Fix combines two changes:
+  - `repo_dirty_snapshot` is replaced with `repo_state_snapshot`, which runs `git update-index -q --refresh` first, then enumerates dirty/untracked files via `git ls-files -m -o --exclude-standard -z` and content-hashes modified-tracked files (untracked files only contribute their path). Stat-only churn is invisible to the comparison.
+  - The post-iteration delta is now logged as `[Loop] ORIGINAL_CHECKOUT_DIRTIED: <paths>` and appended to `state["original_checkout_warnings"]`, but the loop continues to the completion-marker check instead of aborting. The `isolation_breach` status no longer exists anywhere in the codebase.
+- **`<critical_isolation_boundary>` injected block** no longer threatens `isolation_breach` as the post-iter consequence. It still names both the worktree and original-checkout paths and warns subagents not to leak the original-checkout path, but the boundary-enforcement description correctly attributes it to bwrap at the OS level and notes that any parent-side dirtiness is logged as a warning.
+
+### Tests
+- New `test_repo_state_snapshot_ignores_stat_only_mtime_change` pins the stat-only regression (`os.utime` between two snapshots returns equal state).
+- `test_loop_aborts_with_isolation_breach_when_original_is_dirtied` → `test_loop_warns_but_continues_when_original_is_dirtied` (asserts the loop reaches the completion-marker check, logs `ORIGINAL_CHECKOUT_DIRTIED`, and records the warning in state).
+- `test_isolation_block_mentions_isolation_breach_consequence` → `test_isolation_block_mentions_warning_consequence` (asserts the new injected text).
+
 ## [0.27.5] - 2026-06-19
 
 ### Fixed
