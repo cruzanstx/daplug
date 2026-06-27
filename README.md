@@ -1,6 +1,6 @@
 # daplug
 
-Delegate prompts to Codex, Gemini, Z.AI, or local models from Claude Code — with worktree isolation and Ralph-Wiggum-inspired verification loops.
+Delegate prompts to Codex, Gemini, Z.AI, Synthetic, or local models from Claude Code — with worktree isolation and Ralph-Wiggum-inspired verification loops.
 
 ## Installation
 
@@ -61,7 +61,7 @@ Command name mapping:
 | Command | Description |
 |---------|-------------|
 | `/daplug:check-config` | Verify daplug configuration status and detect legacy settings |
-| `/daplug:cclimits` | Check AI CLI usage/quota (Claude, Codex, Gemini, Z.AI) |
+| `/daplug:cclimits` | Check AI CLI usage/quota (Claude, Codex, Gemini, Z.AI, Synthetic) |
 | `/daplug:check-updates` | Check if plugin has updates available |
 | `/daplug:codex-cli` | Run task with OpenAI Codex CLI |
 | `/daplug:create-at-prompt` | Create an agent-team orchestration bundle (orchestrator prompt + sub-prompts) |
@@ -94,7 +94,7 @@ Command name mapping:
 
 | Skill | Description |
 |-------|-------------|
-| `ai-usage` | Check AI CLI usage/quota (Claude, Codex, Gemini, Z.AI) |
+| `ai-usage` | Check AI CLI usage/quota (Claude, Codex, Gemini, Z.AI, Synthetic) |
 | `config-reader` | Read and manage daplug config from CLAUDE.md (<daplug_config>) |
 | `prompt-executor` | Execute prompts with AI models, worktrees, tmux |
 | `prompt-finder` | Find and resolve prompts in ./prompts/ directory |
@@ -122,7 +122,7 @@ Commands below are shown without the `/daplug:` prefix for readability. In Claud
 ### Multi-Model Delegation
 ![multi-model demo](demos/multi-model-delegation.gif)
 
-> Run prompt batches across Claude, Codex, Gemini, or Z.AI with parallel execution and quota-aware routing.
+> Run prompt batches across Claude, Codex, Gemini, Z.AI, or Synthetic with parallel execution and quota-aware routing.
 
 ### Worktree Isolation
 ![worktree demo](demos/worktree-isolation.gif)
@@ -503,6 +503,7 @@ A standalone CLI tool that checks quota/usage for AI coding tools:
 - **OpenAI Codex** - Primary and secondary rate limits
 - **Google Gemini CLI** - Per-model quotas (3-Flash, Flash, Pro tiers)
 - **Z.AI** - Token quota percentage
+- **Synthetic** - Request subscription quota via `GET https://api.synthetic.new/v2/quotas`
 - **OpenRouter** - Account balance
 
 **Integration with daplug:**
@@ -527,7 +528,7 @@ npx cclimits --json       # JSON for scripting
 
 **Example output:**
 ```
-Claude: 4.0% (5h) ✅ | Codex: 0% (5h) ✅ | Z.AI: 1% ✅ | Gemini: ( 3-Flash 7% ✅ | Flash 1% ✅ | Pro 10% ✅ )
+Claude: 4.0% (5h) ✅ | Codex: 0% (5h) ✅ | Z.AI: 1% ✅ | Synthetic: 12/100 ✅ | Gemini: ( 3-Flash 7% ✅ | Flash 1% ✅ | Pro 10% ✅ )
 ```
 
 **Status icons:**
@@ -695,6 +696,19 @@ Google shorthands route through Antigravity CLI (`agy`) when it is installed and
 | `glm5` | glm-5.2 | Latest GLM 5.x tasks via OpenCode |
 | `glm52` | glm-5.2 | Explicit GLM-5.2 pin via OpenCode |
 | `kimi` | kimi-k2.5 | Kimi K2.5 via OpenCode |
+
+### Synthetic Model Tiers
+
+Synthetic shorthands route through OpenCode's `synthetic` provider and require `SYNTHETIC_API_KEY`. Configure the provider with `https://api.synthetic.new/openai/v1` or run OpenCode `/connect` and choose Synthetic.
+
+| Shorthand | Synthetic Alias | Best For |
+|-----------|-----------------|----------|
+| `synthetic` | `syn:large:text` | GLM-5.2 default, 512k context |
+| `syn-flash` | `syn:small:text` | Fast GLM-4.7-Flash fallback |
+| `syn-kimi` | `syn:large:vision` | Kimi-K2.6 vision tasks |
+| `syn-qwen` | `syn:small:vision` | Qwen3.6-27B vision tasks |
+
+Quota check: `curl -H "Authorization: Bearer $SYNTHETIC_API_KEY" https://api.synthetic.new/v2/quotas` returns `subscription.requests`, `subscription.limit`, and `subscription.renewsAt` without counting against quota.
 
 **When to use GPT-5.2 vs GPT-5.5:**
 - **GPT-5.5**: Best when plans are clear, need fast execution (combines codex + reasoning)

@@ -783,6 +783,10 @@ LEGACY_MODEL_DISPLAY = {
     "glm5": "glm5 (GLM-5.2 via OpenCode — latest GLM 5.x, 1M context)",
     "glm52": "glm52 (GLM-5.2 via OpenCode — explicit pin, 1M context)",
     "kimi": "kimi (Kimi K2.5 via OpenCode)",
+    "synthetic": "synthetic (GLM-5.2 via Synthetic, 512k context)",
+    "syn-flash": "syn-flash (GLM-4.7-Flash via Synthetic)",
+    "syn-kimi": "syn-kimi (Kimi-K2.6 via Synthetic, vision)",
+    "syn-qwen": "syn-qwen (Qwen3.6-27B via Synthetic, vision)",
     "opencode": "opencode (GLM-4.7 via OpenCode)",
     "local": "qwen-coder (local via opencode)",
     "qwen": "qwen-coder (local via opencode)",
@@ -921,6 +925,34 @@ MODEL_SPECS = {
         "codex_profile": None,
         "claude_model_flag": None,
     },
+    "synthetic": {
+        "model_id": "synthetic:syn:large:text",
+        "default_cli": "opencode",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+    "syn-flash": {
+        "model_id": "synthetic:syn:small:text",
+        "default_cli": "opencode",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+    "syn-kimi": {
+        "model_id": "synthetic:syn:large:vision",
+        "default_cli": "opencode",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
+    "syn-qwen": {
+        "model_id": "synthetic:syn:small:vision",
+        "default_cli": "opencode",
+        "supports_codex_reasoning": False,
+        "codex_profile": None,
+        "claude_model_flag": None,
+    },
     "opencode": {
         "model_id": "zai:glm-4.7",
         "default_cli": "opencode",
@@ -986,6 +1018,13 @@ MODEL_SPECS = {
     },
 }
 
+SYNTHETIC_MODEL_SHORTHANDS = {
+    "synthetic",
+    "syn-flash",
+    "syn-kimi",
+    "syn-qwen",
+}
+
 GOOGLE_MODEL_SHORTHANDS = {
     "gemini",
     "gemini-high",
@@ -1040,6 +1079,10 @@ CLI_OVERRIDE_SUPPORTED_MODELS = {
         "glm5",
         "glm52",
         "kimi",
+        "synthetic",
+        "syn-flash",
+        "syn-kimi",
+        "syn-qwen",
         "opencode",
         "local",
         "qwen",
@@ -1230,6 +1273,18 @@ def _build_claude_command(model: str, model_spec: dict, variant: Optional[str]) 
     return _claude_cli_command(model_spec.get("claude_model_flag"))
 
 
+def _require_synthetic_api_key(model: str, model_id: str) -> None:
+    if model not in SYNTHETIC_MODEL_SHORTHANDS and not model_id.startswith("synthetic:"):
+        return
+    if os.environ.get("SYNTHETIC_API_KEY"):
+        return
+    raise RuntimeError(
+        "SYNTHETIC_API_KEY is required for Synthetic models. "
+        "Create a key at https://synthetic.new/dashboard and export it before using "
+        "--model synthetic, syn-flash, syn-kimi, or syn-qwen."
+    )
+
+
 def _env_for_command(selected_cli: str, command: list[str]) -> dict[str, str]:
     env: dict[str, str] = {}
     if selected_cli == "codex" and "--profile" in command:
@@ -1351,6 +1406,10 @@ def get_cli_info(
         "qwen-small",
         "glm5",
         "glm52",
+        "synthetic",
+        "syn-flash",
+        "syn-kimi",
+        "syn-qwen",
     } and cli_override is None
 
     selected_cli = cli_override or model_spec["default_cli"]
@@ -1368,6 +1427,8 @@ def get_cli_info(
 
     if selected_cli == "claude":
         _require_claude_cli()
+
+    _require_synthetic_api_key(model, model_id)
 
     if selected_cli == "codex":
         command = _build_codex_command(model, model_spec, model_id, effective_variant)
@@ -2925,8 +2986,9 @@ def main():
                                 "gemini", "gemini-high", "gemini-xhigh",
                                 "gemini25pro", "gemini25flash", "gemini25lite",
                                 "gemini3flash", "gemini3pro", "gemini31pro",
-                                "zai", "glm5", "glm52", "kimi", "opencode",
-                                "local", "qwen", "devstral",
+                                "zai", "glm5", "glm52", "kimi",
+                                "synthetic", "syn-flash", "syn-kimi", "syn-qwen",
+                                "opencode", "local", "qwen", "devstral",
                                 "glm-local", "qwen-small"],
                        help="Model/CLI to use")
     parser.add_argument("--cli", choices=["codex", "opencode", "claude", "claudecode", "cc", "agy", "antigravity", "gemini"],

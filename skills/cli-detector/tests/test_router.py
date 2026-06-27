@@ -23,6 +23,49 @@ class _FakeCache:
         return dict(self._data)
 
 
+
+
+SYNTHETIC_ROUTER_MODELS = {
+    "synthetic": ("synthetic:syn:large:text", "synthetic/syn:large:text"),
+    "syn-flash": ("synthetic:syn:small:text", "synthetic/syn:small:text"),
+    "syn-kimi": ("synthetic:syn:large:vision", "synthetic/syn:large:vision"),
+    "syn-qwen": ("synthetic:syn:small:vision", "synthetic/syn:small:vision"),
+}
+
+
+def test_synthetic_models_force_opencode_provider(monkeypatch):
+    fake = _FakeCache(
+        {
+            "clis": {
+                "codex": {"installed": True, "issues": []},
+                "opencode": {"installed": True, "issues": []},
+            },
+            "providers": {},
+        }
+    )
+    monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+
+    for shorthand, (model_id, opencode_ref) in SYNTHETIC_ROUTER_MODELS.items():
+        cli, resolved_model_id, cmd = router.resolve_model(shorthand)
+        assert cli == "opencode"
+        assert resolved_model_id == model_id
+        assert cmd == ["opencode", "run", "--format", "json", "-m", opencode_ref]
+
+
+def test_raw_syn_alias_routes_through_synthetic_provider(monkeypatch):
+    fake = _FakeCache(
+        {
+            "clis": {"opencode": {"installed": True, "issues": []}},
+            "providers": {},
+        }
+    )
+    monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+
+    cli, model_id, cmd = router.resolve_model("syn:large:text")
+    assert cli == "opencode"
+    assert model_id == "synthetic:syn:large:text"
+    assert cmd == ["opencode", "run", "--format", "json", "-m", "synthetic/syn:large:text"]
+
 def test_resolve_model_returns_installed_cli(monkeypatch):
     fake = _FakeCache(
         {

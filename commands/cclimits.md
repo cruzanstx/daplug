@@ -1,6 +1,6 @@
 ---
 name: cclimits
-description: Check AI CLI usage/quota for Claude, Codex, Gemini, Z.AI
+description: Check AI CLI usage/quota for Claude, Codex, Gemini, Z.AI, Synthetic
 ---
 
 Check remaining quota and usage for AI coding assistants using the [cclimits](https://www.npmjs.com/package/cclimits) npm package.
@@ -20,6 +20,9 @@ npx cclimits --codex
 npx cclimits --gemini
 npx cclimits --zai
 
+# Synthetic direct quota probe (does not count against quota)
+curl -H "Authorization: Bearer $SYNTHETIC_API_KEY" https://api.synthetic.new/v2/quotas
+
 # JSON output (for scripting)
 npx cclimits --json
 ```
@@ -37,6 +40,7 @@ If a tool shows "No credentials found", tell the user how to authenticate:
 - Codex: Run `codex login`
 - Gemini: Run `gemini` to login
 - Z.AI: Set `ZAI_KEY` environment variable
+- Synthetic: Set `SYNTHETIC_API_KEY` from https://synthetic.new dashboard
 
 ## Auto-Approve Setup (Optional)
 
