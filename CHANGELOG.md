@@ -2,6 +2,14 @@
 
 All notable changes to daplug are documented here.
 
+## [0.28.1] - 2026-07-02
+
+### Fixed
+- **`--sandbox` no longer strips env-keyed provider credentials** (#21). The `strict`/`balanced` bwrap profiles launch the CLI under `--clearenv` and only re-injected `PATH`/`HOME`/`USER`/`LANG`/`TERM`, so providers that authenticate from the environment — Synthetic (`SYNTHETIC_API_KEY`) and LMStudio local models (`LMSTUDIO_API_KEY`) — failed every request with `401 Unauthorized` while pre-launch validation still passed, burning all `--loop` iterations. `build_bwrap_args` now accepts the credentials the launcher already resolved (a `SANDBOX_ENV_PASSTHROUGH` whitelist plus any model-spec env) and re-injects them via `--setenv` after `--clearenv`. Since `--share-net` was already active in those profiles, withholding the keys protected nothing. Credentials are injected only at real launch sites — command previews and logs never contain them. The `dev` profile (no `--clearenv`) is unchanged.
+
+### Tests
+- New coverage for `--setenv` passthrough under `balanced`, the `dev` profile no-op, and `_sandbox_passthrough_env` credential collection.
+
 ## [0.28.0] - 2026-07-01
 
 ### Added
