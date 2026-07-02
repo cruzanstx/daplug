@@ -2,6 +2,11 @@
 
 All notable changes to daplug are documented here.
 
+## [0.28.0] - 2026-07-01
+
+### Added
+- **Synthetic provider** (#244) — wires [synthetic.new](https://synthetic.new) as an OpenCode-backed model provider. Four new `--model` shorthands: `synthetic` (GLM-5.2 via `syn:large:text`, 512k context), `syn-flash` (GLM-4.7-Flash), `syn-kimi` (Kimi-K2.6, vision), and `syn-qwen` (Qwen3.6-27B, vision). Requires `SYNTHETIC_API_KEY`; the executor errors clearly with a dashboard link when it's unset. Raw `hf:` IDs remain available via pass-through. Includes router registration, `ai-usage`/`cclimits` quota awareness, and full documentation across the model checklist.
+
 ## [0.27.6] - 2026-06-26
 
 ### Fixed
