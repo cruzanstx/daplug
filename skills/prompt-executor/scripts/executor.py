@@ -1791,6 +1791,70 @@ def build_bwrap_args(
     return cmd
 
 
+SANDBOX_PREFLIGHT_TIMEOUT = 60
+
+# Keyed by (binary, profile, workspace); a loop re-probes only when the
+# sandbox shape changes, not on every iteration.
+_SANDBOX_PREFLIGHT_CACHE: dict[tuple, Optional[str]] = {}
+
+
+def sandbox_preflight(cli_info: dict, sandbox_config: Optional[dict], cwd: str) -> Optional[str]:
+    """Probe the CLI inside the sandbox before real execution.
+
+    Runs `<binary> --version` under the same bwrap invocation the real run
+    will use, so environmental breakage (missing runtime binds, crashed
+    startup, stripped credentials for the probe's own launch) surfaces as an
+    immediate, diagnosable error instead of burning loop iterations.
+    Returns an error message on failure, None when the probe passes.
+    """
+    if not sandbox_config or not sandbox_config.get("enabled"):
+        return None
+    if sandbox_config.get("type") != "bubblewrap":
+        return None
+    command = cli_info.get("command") or []
+    if not command:
+        return None
+
+    binary = command[0]
+    cache_key = (binary, sandbox_config.get("profile"), sandbox_config.get("workspace"))
+    if cache_key in _SANDBOX_PREFLIGHT_CACHE:
+        return _SANDBOX_PREFLIGHT_CACHE[cache_key]
+
+    probe_cmd = build_bwrap_args(
+        sandbox_config,
+        [binary, "--version"],
+        extra_env=_sandbox_passthrough_env(cli_info),
+    )
+    error: Optional[str] = None
+    try:
+        proc = subprocess.run(
+            probe_cmd,
+            cwd=cwd,
+            capture_output=True,
+            text=True,
+            timeout=SANDBOX_PREFLIGHT_TIMEOUT,
+        )
+        if proc.returncode != 0:
+            output_lines = ((proc.stdout or "") + (proc.stderr or "")).strip().splitlines()
+            tail = output_lines[-1] if output_lines else "(no output)"
+            error = _sandbox_error_message(
+                sandbox_config,
+                f"preflight probe '{binary} --version' failed inside the sandbox "
+                f"(exit {proc.returncode}): {tail}",
+            )
+    except subprocess.TimeoutExpired:
+        error = _sandbox_error_message(
+            sandbox_config,
+            f"preflight probe '{binary} --version' timed out after "
+            f"{SANDBOX_PREFLIGHT_TIMEOUT}s inside the sandbox",
+        )
+    except OSError as exc:
+        error = _sandbox_error_message(sandbox_config, f"preflight probe could not launch: {exc}")
+
+    _SANDBOX_PREFLIGHT_CACHE[cache_key] = error
+    return error
+
+
 def _sandbox_config_summary(config: Optional[dict]) -> str:
     if not config:
         return "type=none, profile=balanced, workspace=n/a, network=off"
@@ -2361,6 +2425,9 @@ def run_cli(
     if sandbox_config and sandbox_config.get("enabled") and sandbox_config.get("type") == "bubblewrap":
         if not check_bwrap_available():
             return {"status": "error", "error": BWRAP_MISSING_ERROR, "log": str(log_file)}
+        preflight_error = sandbox_preflight(cli_info, sandbox_config, cwd)
+        if preflight_error:
+            return {"status": "error", "error": preflight_error, "log": str(log_file)}
 
     stdin_mode = cli_info.get("stdin_mode", "arg")
     needs_pty = cli_info.get("needs_pty", False)
@@ -2474,6 +2541,14 @@ def run_cli_foreground(
                 "status": "error",
                 "exit_code": 127,
                 "error": BWRAP_MISSING_ERROR,
+                "log": str(log_file),
+            }
+        preflight_error = sandbox_preflight(cli_info, sandbox_config, cwd)
+        if preflight_error:
+            return {
+                "status": "error",
+                "exit_code": 1,
+                "error": preflight_error,
                 "log": str(log_file),
             }
 

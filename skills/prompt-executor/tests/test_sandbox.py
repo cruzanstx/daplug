@@ -221,6 +221,110 @@ def test_sandbox_passthrough_env_empty_when_nothing_set(monkeypatch):
     assert executor._sandbox_passthrough_env({"env": {}}) == {}
 
 
+@pytest.fixture()
+def preflight_env(tmp_path, monkeypatch):
+    executor._SANDBOX_PREFLIGHT_CACHE.clear()
+    monkeypatch.setattr(executor.Path, "home", lambda: tmp_path)
+    yield {
+        "cli_info": {"command": ["opencode", "run"], "env": {}},
+        "sandbox_config": {
+            "enabled": True,
+            "type": "bubblewrap",
+            "profile": "balanced",
+            "workspace": str(tmp_path),
+            "network": True,
+        },
+        "cwd": str(tmp_path),
+    }
+    executor._SANDBOX_PREFLIGHT_CACHE.clear()
+
+
+class _ProbeResult:
+    def __init__(self, returncode, stdout="", stderr=""):
+        self.returncode = returncode
+        self.stdout = stdout
+        self.stderr = stderr
+
+
+def test_sandbox_preflight_passes_on_zero_exit(preflight_env, monkeypatch):
+    monkeypatch.setattr(
+        executor.subprocess, "run", lambda *a, **kw: _ProbeResult(0, stdout="1.2.3")
+    )
+    assert executor.sandbox_preflight(**preflight_env) is None
+
+
+def test_sandbox_preflight_fails_on_nonzero_exit(preflight_env, monkeypatch):
+    monkeypatch.setattr(
+        executor.subprocess,
+        "run",
+        lambda *a, **kw: _ProbeResult(127, stderr="bwrap: execvp opencode: No such file or directory"),
+    )
+    error = executor.sandbox_preflight(**preflight_env)
+
+    assert error is not None
+    assert "preflight probe 'opencode --version'" in error
+    assert "exit 127" in error
+    assert "No such file or directory" in error
+    assert "--no-sandbox" in error  # standard sandbox error hint
+
+
+def test_sandbox_preflight_caches_per_sandbox_shape(preflight_env, monkeypatch):
+    calls = []
+
+    def fake_run(*a, **kw):
+        calls.append(a)
+        return _ProbeResult(0)
+
+    monkeypatch.setattr(executor.subprocess, "run", fake_run)
+    executor.sandbox_preflight(**preflight_env)
+    executor.sandbox_preflight(**preflight_env)
+
+    assert len(calls) == 1
+
+
+def test_sandbox_preflight_skipped_when_sandbox_disabled(preflight_env, monkeypatch):
+    def boom(*a, **kw):
+        raise AssertionError("probe must not run when sandbox is disabled")
+
+    monkeypatch.setattr(executor.subprocess, "run", boom)
+    assert executor.sandbox_preflight(preflight_env["cli_info"], None, preflight_env["cwd"]) is None
+    assert (
+        executor.sandbox_preflight(
+            preflight_env["cli_info"],
+            {**preflight_env["sandbox_config"], "enabled": False},
+            preflight_env["cwd"],
+        )
+        is None
+    )
+
+
+def test_run_cli_foreground_aborts_on_preflight_failure(tmp_path, monkeypatch):
+    monkeypatch.setattr(executor, "check_bwrap_available", lambda: True)
+    monkeypatch.setattr(executor, "sandbox_preflight", lambda *a, **kw: "probe failed")
+
+    def boom(*a, **kw):
+        raise AssertionError("CLI must not launch when preflight fails")
+
+    monkeypatch.setattr(executor.subprocess, "Popen", boom)
+
+    result = executor.run_cli_foreground(
+        {"command": ["opencode", "run"], "env": {}, "stdin_mode": "arg"},
+        "hello",
+        str(tmp_path),
+        tmp_path / "preflight.log",
+        sandbox_config={
+            "enabled": True,
+            "type": "bubblewrap",
+            "profile": "balanced",
+            "workspace": str(tmp_path),
+            "network": True,
+        },
+    )
+
+    assert result["status"] == "error"
+    assert result["error"] == "probe failed"
+
+
 def test_check_bwrap_available_detection(monkeypatch):
     monkeypatch.setattr(executor.shutil, "which", lambda name: "/usr/bin/bwrap" if name == "bwrap" else None)
     assert executor.check_bwrap_available() is True
@@ -265,6 +369,7 @@ def test_run_cli_wraps_with_bwrap_when_enabled(tmp_path, monkeypatch):
         return proc
 
     monkeypatch.setattr(executor, "check_bwrap_available", lambda: True)
+    monkeypatch.setattr(executor, "sandbox_preflight", lambda *a, **kw: None)
     monkeypatch.setattr(
         executor,
         "build_bwrap_args",
