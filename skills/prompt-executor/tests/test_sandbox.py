@@ -169,6 +169,58 @@ def test_build_bwrap_args_network_toggle(tmp_path, monkeypatch):
     assert "--share-net" in cmd_net_on
 
 
+def test_build_bwrap_args_passes_extra_env_through_clearenv(tmp_path, monkeypatch):
+    monkeypatch.setattr(executor.Path, "home", lambda: tmp_path)
+    config = {
+        "enabled": True,
+        "type": "bubblewrap",
+        "profile": "balanced",
+        "workspace": str(tmp_path),
+        "network": True,
+    }
+    cmd = executor.build_bwrap_args(
+        config, ["opencode", "run"], extra_env={"SYNTHETIC_API_KEY": "sk-test"}
+    )
+
+    triples = [cmd[i : i + 3] for i in range(len(cmd) - 2)]
+    assert "--clearenv" in cmd
+    assert ["--setenv", "SYNTHETIC_API_KEY", "sk-test"] in triples
+
+
+def test_build_bwrap_args_dev_profile_skips_extra_env(tmp_path, monkeypatch):
+    monkeypatch.setattr(executor.Path, "home", lambda: tmp_path)
+    config = {
+        "enabled": True,
+        "type": "bubblewrap",
+        "profile": "dev",
+        "workspace": str(tmp_path),
+        "network": True,
+    }
+    cmd = executor.build_bwrap_args(
+        config, ["opencode", "run"], extra_env={"SYNTHETIC_API_KEY": "sk-test"}
+    )
+
+    # dev profile inherits the full environment, so no --clearenv/--setenv needed
+    assert "--clearenv" not in cmd
+    assert "sk-test" not in cmd
+
+
+def test_sandbox_passthrough_env_collects_credentials(monkeypatch):
+    monkeypatch.setenv("SYNTHETIC_API_KEY", "sk-from-env")
+    monkeypatch.delenv("LMSTUDIO_API_KEY", raising=False)
+
+    extra = executor._sandbox_passthrough_env({"env": {"LMSTUDIO_API_KEY": "lm-studio"}})
+
+    assert extra == {"LMSTUDIO_API_KEY": "lm-studio", "SYNTHETIC_API_KEY": "sk-from-env"}
+
+
+def test_sandbox_passthrough_env_empty_when_nothing_set(monkeypatch):
+    for key in executor.SANDBOX_ENV_PASSTHROUGH:
+        monkeypatch.delenv(key, raising=False)
+
+    assert executor._sandbox_passthrough_env({"env": {}}) == {}
+
+
 def test_check_bwrap_available_detection(monkeypatch):
     monkeypatch.setattr(executor.shutil, "which", lambda name: "/usr/bin/bwrap" if name == "bwrap" else None)
     assert executor.check_bwrap_available() is True
@@ -216,7 +268,7 @@ def test_run_cli_wraps_with_bwrap_when_enabled(tmp_path, monkeypatch):
     monkeypatch.setattr(
         executor,
         "build_bwrap_args",
-        lambda config, child: ["bwrap", "--unshare-all", "--", *child],
+        lambda config, child, extra_env=None: ["bwrap", "--unshare-all", "--", *child],
     )
     monkeypatch.setattr(executor.subprocess, "Popen", fake_popen)
 

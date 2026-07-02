@@ -50,6 +50,11 @@ BWRAP_PROFILES = {
     },
 }
 
+# Credential env vars that must survive bwrap --clearenv. These providers
+# authenticate from the environment (not from a bind-mounted auth store), so
+# stripping them breaks every request while --share-net is active anyway.
+SANDBOX_ENV_PASSTHROUGH = ("SYNTHETIC_API_KEY", "LMSTUDIO_API_KEY")
+
 BWRAP_MISSING_ERROR = (
     "Error: bubblewrap (bwrap) not found in PATH.\n\n"
     "Install with:\n"
@@ -1681,7 +1686,21 @@ def _selected_cli_runtime_paths(child_command: list[str], home: Path) -> list[st
     return result
 
 
-def build_bwrap_args(config: dict, child_command: list[str]) -> list[str]:
+def _sandbox_passthrough_env(cli_info: dict) -> dict[str, str]:
+    """Env-keyed credentials to re-inject after bwrap --clearenv."""
+    extra = {k: v for k, v in cli_info.get("env", {}).items() if v}
+    for key in SANDBOX_ENV_PASSTHROUGH:
+        value = os.environ.get(key)
+        if value and key not in extra:
+            extra[key] = value
+    return extra
+
+
+def build_bwrap_args(
+    config: dict,
+    child_command: list[str],
+    extra_env: Optional[dict[str, str]] = None,
+) -> list[str]:
     workspace = config["workspace"]
     profile = config["profile"]
     profile_cfg = BWRAP_PROFILES[profile]
@@ -1727,6 +1746,8 @@ def build_bwrap_args(config: dict, child_command: list[str]) -> list[str]:
             "TERM",
             os.environ.get("TERM", "xterm-256color"),
         ])
+        for key, value in (extra_env or {}).items():
+            cmd.extend(["--setenv", key, value])
 
     readonly_paths = _existing_paths([
         "/usr",
@@ -1800,13 +1821,19 @@ def raise_on_execution_error(execution: dict, sandbox_config: Optional[dict] = N
     raise RuntimeError(message)
 
 
-def maybe_wrap_command_with_sandbox(command: Optional[list[str]], sandbox_config: Optional[dict]) -> list[str]:
+def maybe_wrap_command_with_sandbox(
+    command: Optional[list[str]],
+    sandbox_config: Optional[dict],
+    extra_env: Optional[dict[str, str]] = None,
+) -> list[str]:
+    # extra_env carries credentials; omit it on preview/info paths so secrets
+    # never appear in printed commands or logs.
     if command is None:
         return []
     if not sandbox_config or not sandbox_config.get("enabled"):
         return command
     if sandbox_config.get("type") == "bubblewrap":
-        return build_bwrap_args(sandbox_config, command)
+        return build_bwrap_args(sandbox_config, command, extra_env=extra_env)
     return command
 
 
@@ -2339,6 +2366,7 @@ def run_cli(
     needs_pty = cli_info.get("needs_pty", False)
     env = os.environ.copy()
     env.update(cli_info["env"])
+    sandbox_env = _sandbox_passthrough_env(cli_info)
     if cli_info.get("selected_cli") == "opencode" or (cli_info.get("command") and cli_info["command"][0] == "opencode"):
         for key in OPENCODE_RUNTIME_SESSION_VARS:
             env.pop(key, None)
@@ -2354,7 +2382,7 @@ def run_cli(
         if stdin_mode == "dash":
             # Codex-style: use '-' to read from stdin
             full_cmd = cli_info["command"] + extra_args + ["-"]
-            full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config)
+            full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config, extra_env=sandbox_env)
             process = subprocess.Popen(
                 full_cmd,
                 cwd=cwd,
@@ -2373,7 +2401,7 @@ def run_cli(
         elif stdin_mode == "stdin":
             # Claude-style: read prompt from stdin (no extra "-" arg)
             full_cmd = cli_info["command"] + extra_args
-            full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config)
+            full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config, extra_env=sandbox_env)
             process = subprocess.Popen(
                 full_cmd,
                 cwd=cwd,
@@ -2398,7 +2426,7 @@ def run_cli(
                 cmd_str = " ".join(shlex.quote(arg) for arg in full_cmd)
                 full_cmd = ["script", "-q", "-c", cmd_str, "/dev/null"]
 
-            full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config)
+            full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config, extra_env=sandbox_env)
             process = subprocess.Popen(
                 full_cmd,
                 cwd=cwd,
@@ -2453,6 +2481,7 @@ def run_cli_foreground(
     needs_pty = cli_info.get("needs_pty", False)
     env = os.environ.copy()
     env.update(cli_info["env"])
+    sandbox_env = _sandbox_passthrough_env(cli_info)
     if cli_info.get("selected_cli") == "opencode" or (cli_info.get("command") and cli_info["command"][0] == "opencode"):
         for key in OPENCODE_RUNTIME_SESSION_VARS:
             env.pop(key, None)
@@ -2468,7 +2497,7 @@ def run_cli_foreground(
         if stdin_mode == "dash":
             # Codex-style: use '-' to read from stdin
             full_cmd = cli_info["command"] + extra_args + ["-"]
-            full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config)
+            full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config, extra_env=sandbox_env)
             process = subprocess.Popen(
                 full_cmd,
                 cwd=cwd,
@@ -2486,7 +2515,7 @@ def run_cli_foreground(
             exit_code = process.wait()
         elif stdin_mode == "stdin":
             full_cmd = cli_info["command"] + extra_args
-            full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config)
+            full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config, extra_env=sandbox_env)
             process = subprocess.Popen(
                 full_cmd,
                 cwd=cwd,
@@ -2511,7 +2540,7 @@ def run_cli_foreground(
                 cmd_str = " ".join(shlex.quote(arg) for arg in full_cmd)
                 full_cmd = ["script", "-q", "-c", cmd_str, "/dev/null"]
 
-            full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config)
+            full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config, extra_env=sandbox_env)
 
             process = subprocess.Popen(
                 full_cmd,
