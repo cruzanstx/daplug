@@ -1,0 +1,40 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install test dependencies
+        run: pip install pytest
+
+      # Suites run in separate pytest processes: each appends its own
+      # scripts/ dir to sys.path and imports modules by bare name
+      # (executor, config, detector, ...), which collide if combined.
+      - name: Run test suites
+        run: |
+          for suite in \
+            skills/prompt-executor/tests \
+            skills/cli-detector/tests \
+            skills/config-reader/tests \
+            skills/sprint/tests \
+            skills/at-prompt-runner/tests \
+            scripts/tests
+          do
+            echo "::group::$suite"
+            python -m pytest "$suite" -v
+            echo "::endgroup::"
+          done
+
+      - name: Model registry consistency
+        run: python scripts/manage-models.py check
