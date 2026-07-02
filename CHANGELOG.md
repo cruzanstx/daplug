@@ -2,6 +2,15 @@
 
 All notable changes to daplug are documented here.
 
+## [0.29.0] - 2026-07-02
+
+### Added
+- **Sandbox preflight probe**: before any sandboxed execution, `sandbox_preflight()` runs `<binary> --version` under the exact bwrap invocation the real run will use (same profile, binds, and env passthrough). Environmental breakage — missing runtime binds (#19), startup crashes, broken mounts — now fails immediately with the sandbox config summary and the probe's output instead of burning `--loop` iterations on a failure determined before the first API call. Results are cached per (binary, profile, workspace), so a loop probes once, not per iteration.
+- **GitHub Actions CI** (`.github/workflows/tests.yml`): every push to main and every PR runs all six pytest suites (prompt-executor, cli-detector, config-reader, sprint, at-prompt-runner, scripts) plus `manage-models.py check` for model-registry consistency.
+
+### Tests
+- Five new tests covering preflight pass/fail/caching/disabled paths and the `run_cli_foreground` abort.
+
 ## [0.28.1] - 2026-07-02
 
 ### Fixed
