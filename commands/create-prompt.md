@@ -419,6 +419,7 @@ Before presenting options:
    - `codex`: Check `codex.primary_window.used` and `codex.secondary_window.used`
    - `gemini`: Check `gemini.models.*` for each model's usage
    - `zai`: Check `zai.token_quota.percentage`
+   - `synthetic`: If cclimits exposes it, check `synthetic.subscription.requests / synthetic.subscription.limit`; otherwise note `GET https://api.synthetic.new/v2/quotas` with `SYNTHETIC_API_KEY`
 
    **Usage thresholds:**
    - `< 70%` → Available (show normally)
@@ -497,11 +498,15 @@ Antigravity (`agy`) maps legacy shorthands to the closest current `agy models` d
 | `gemini25flash` | gemini-2.5-flash | gemini-2.5-flash |
 | `gemini25lite` | gemini-2.5-flash-lite | gemini-2.5-flash-lite |
 
-**Other Models:** (check: `zai.token_quota.percentage`)
+**Other Models:** (check: `zai.token_quota.percentage`; Synthetic: request quota from `/v2/quotas`)
 - `zai` - Z.AI GLM-4.7 (good for Chinese language tasks)
 - `glm5` - Z.AI GLM-5.2 (latest GLM 5.x coding model, 1M context)
 - `glm52` - Z.AI GLM-5.2 via Z.AI / OpenCode (explicit pin, 1M context)
 - `kimi` - Kimi K2.5 via OpenCode (`opencode/kimi-k2.5`)
+- `synthetic` - GLM-5.2 via Synthetic (`syn:large:text`, 512k context)
+- `syn-flash` - GLM-4.7-Flash via Synthetic (`syn:small:text`)
+- `syn-kimi` - Kimi-K2.6 via Synthetic (`syn:large:vision`, vision)
+- `syn-qwen` - Qwen3.6-27B via Synthetic (`syn:small:vision`, vision)
 - `local` - Local model via opencode + LMStudio (no quota limits)
 - `qwen` - Qwen via opencode + LMStudio (no quota limits)
 - `devstral` - Devstral via opencode + LMStudio (multimodal/vision, no quota limits)
@@ -527,17 +532,17 @@ For each model family, determine status:
 | Test/Playwright   | codex or codex-high        | codex-spark, gemini3flash                        | `--loop`     |
 | Research/Analysis | gpt52-xhigh or claude      | gpt52-high, gemini31pro (if available), gemini25pro |          |
 | Refactoring       | codex or preferred_agent   | claude, gemini3flash                             |              |
-| Simple coding     | codex-spark or zai         | gemini25flash, codex                             |              |
+| Simple coding     | codex-spark or synthetic   | zai, syn-flash, gemini25flash, codex                             |              |
 | Complex logic     | gpt55-high or claude       | gpt55-xhigh, gpt52-xhigh, gemini31pro (if available), gemini3pro |         |
 | Vision/Multimodal | devstral                   | gemini25pro, claude                              |              |
 | Frontend/UI       | claude or gemini25pro      | gemini31pro (if available), gemini3pro, codex-high |          |
 | Backend/API       | codex or gpt55-high        | codex-high, gemini3flash, claude                |              |
 | Debugging         | gpt52 or claude            | gemini25pro, codex-xhigh                         |              |
 | Performance       | codex-xhigh or claude      | gemini31pro (if available), gemini3pro, gemini25pro |         |
-| Documentation     | gemini25flash or claude    | zai, glm5/glm52                                  |              |
-| DevOps/Infra      | codex or gemini25flash     | glm5/glm52, gemini3flash                         |              |
+| Documentation     | gemini25flash or claude    | synthetic, zai, glm5/glm52                                  |              |
+| DevOps/Infra      | codex or gemini25flash     | synthetic, glm5/glm52, gemini3flash                         |              |
 | Database/SQL      | codex or codex-high        | gemini3flash, claude                             |              |
-| Verification      | codex or gpt55-high        | codex-high, codex-spark, glm5/glm52              | `--loop`     |
+| Verification      | codex or gpt55-high        | codex-high, codex-spark, synthetic, glm5/glm52              | `--loop`     |
 | Planning          | gpt52-xhigh or gpt52-high  | claude, gemini25pro                              |              |
 | Default           | {preferred_agent}          | Next available by preference                     |              |
 
@@ -546,7 +551,7 @@ For each model family, determine status:
 Show a brief usage summary like:
 ```
 📊 AI Quota Status:
-  Claude: 18% (5h) ✅ | Codex: 0% (5h) ✅ | Gemini: varies | Z.AI: 1% ✅
+  Claude: 18% (5h) ✅ | Codex: 0% (5h) ✅ | Gemini: varies | Z.AI: 1% ✅ | Synthetic: 12/100 requests ✅
 
   Gemini models:
     3-flash: 7% ✅ | 2.5-pro: 10% ✅ | 3-pro: 10% ✅ | 3.1-pro: 4% ✅
@@ -624,7 +629,7 @@ If user chooses "Run prompt now":
   Then present executor options with usage status:
 
   "📊 **AI Quota Status:**
-  Claude: {X}% (5h) {status} | Codex: {X}% (5h) {status} | Z.AI: {X}% {status}
+  Claude: {X}% (5h) {status} | Codex: {X}% (5h) {status} | Z.AI: {X}% {status} | Synthetic: {requests}/{limit} requests {status}
 
   Gemini models:
     3-flash: {X}% {status} | 2.5-pro: {X}% {status} | 3-pro: {X}% {status} | 3.1-pro: {X}% {status}
@@ -669,7 +674,11 @@ If user chooses "Run prompt now":
   22. glm5 - {X}% used - Z.AI GLM-5.2 (latest GLM 5.x, 1M context)
   23. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin (1M context)
   24. kimi - {X}% used - Kimi K2.5 via OpenCode
-  25. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
+  25. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
+  26. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
+  27. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.6 vision
+  28. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
+  29. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation based on detection_logic, recommendation_logic, AND availability]
   [If preferred_agent is unavailable: "⚠️ Your preferred agent ({preferred_agent}) is at {X}% - suggesting {fallback} instead"]
@@ -682,7 +691,7 @@ If user chooses "Run prompt now":
 
   [If is_verification_prompt or is_test_prompt: "Recommended: Add --loop for automatic retry until tests/build pass"]
 
-  Choose (1-24), or type model with flags (e.g., 'codex --loop'): _"
+  Choose (1-29), or type model with flags (e.g., 'codex --loop'): _"
 
   **Execute based on selection:**
 
@@ -692,7 +701,7 @@ If user chooses "Run prompt now":
   If user selects Claude worktree (option 2):
     Invoke via Skill tool: `/daplug:run-prompt 005 --worktree`
 
-  If user selects any other model (options 3-24):
+  If user selects any other model (options 3-29):
     Invoke via Skill tool: `/daplug:run-prompt 005 --model {selected_model}`
     (Add `--worktree` and/or `--loop` if user requests)
 
@@ -775,7 +784,7 @@ If user chooses to run prompts in parallel or sequential:
   Then present model options with usage status:
 
   "📊 **AI Quota Status:**
-  Claude: {X}% (5h) {status} | Codex: {X}% (5h) {status} | Z.AI: {X}% {status}
+  Claude: {X}% (5h) {status} | Codex: {X}% (5h) {status} | Z.AI: {X}% {status} | Synthetic: {requests}/{limit} requests {status}
 
   Gemini: 3-flash {X}% | 2.5-pro {X}% | 3-pro {X}% | 3.1-pro {X}% | 2.5-flash {X}%
 
@@ -818,7 +827,11 @@ If user chooses to run prompts in parallel or sequential:
   22. glm5 - {X}% used - Z.AI GLM-5.2
   23. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
   24. kimi - {X}% used
-  25. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
+  25. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
+  26. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
+  27. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.6 vision
+  28. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
+  29. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation based on detection_logic, recommendation_logic, AND availability]
   [If preferred_agent is unavailable: "⚠️ {preferred_agent} at {X}% - suggesting {fallback}"]
@@ -830,7 +843,7 @@ If user chooses to run prompts in parallel or sequential:
 
   [If is_verification_prompt or is_test_prompt: "Recommended: Add --loop for automatic retry until tests/build pass"]
 
-  Choose (1-24), or type model with flags (e.g., 'codex --loop'): _"
+  Choose (1-29), or type model with flags (e.g., 'codex --loop'): _"
 
   **Execute based on selection:**
 
@@ -841,7 +854,7 @@ If user chooses to run prompts in parallel or sequential:
     If user selects Claude worktree (option 2):
       Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --worktree --parallel`
 
-    If user selects any other model (options 3-24):
+    If user selects any other model (options 3-29):
       Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --model {selected_model} --parallel`
       (Add `--worktree` and/or `--loop` if user requests)
 
@@ -852,7 +865,7 @@ If user chooses to run prompts in parallel or sequential:
     If user selects Claude worktree (option 2):
       Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --worktree --sequential`
 
-    If user selects any other model (options 3-24):
+    If user selects any other model (options 3-29):
       Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --model {selected_model} --sequential`
       (Add `--worktree` and/or `--loop` if user requests)
 
@@ -936,7 +949,7 @@ If user chooses "Run prompts sequentially now":
   Then present model options with usage status:
 
   "📊 **AI Quota Status:**
-  Claude: {X}% (5h) {status} | Codex: {X}% (5h) {status} | Z.AI: {X}% {status}
+  Claude: {X}% (5h) {status} | Codex: {X}% (5h) {status} | Z.AI: {X}% {status} | Synthetic: {requests}/{limit} requests {status}
 
   Gemini: 3-flash {X}% | 2.5-pro {X}% | 3-pro {X}% | 3.1-pro {X}% | 2.5-flash {X}%
 
@@ -979,7 +992,11 @@ If user chooses "Run prompts sequentially now":
   22. glm5 - {X}% used - Z.AI GLM-5.2
   23. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
   24. kimi - {X}% used
-  25. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
+  25. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
+  26. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
+  27. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.6 vision
+  28. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
+  29. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation based on detection_logic, recommendation_logic, AND availability]
   [If preferred_agent is unavailable: "⚠️ {preferred_agent} at {X}% - suggesting {fallback}"]
@@ -991,7 +1008,7 @@ If user chooses "Run prompts sequentially now":
 
   [If is_verification_prompt or is_test_prompt: "Recommended: Add --loop for automatic retry until tests/build pass"]
 
-  Choose (1-24), or type model with flags (e.g., 'codex --loop'): _"
+  Choose (1-29), or type model with flags (e.g., 'codex --loop'): _"
 
   **Execute based on selection:**
 
@@ -1001,7 +1018,7 @@ If user chooses "Run prompts sequentially now":
   If user selects Claude worktree (option 2):
     Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --worktree --sequential`
 
-  If user selects any other model (options 3-24):
+  If user selects any other model (options 3-29):
     Invoke via Skill tool: `/daplug:run-prompt 005 006 007 --model {selected_model} --sequential`
     (Add `--worktree` and/or `--loop` if user requests)
 
@@ -1021,7 +1038,7 @@ If user chooses "Run first prompt only":
   If user selects Claude worktree (option 2):
     Invoke via Skill tool: `/daplug:run-prompt 005 --worktree`
 
-  If user selects any other model (options 3-24):
+  If user selects any other model (options 3-29):
     Invoke via Skill tool: `/daplug:run-prompt 005 --model {selected_model}`
     (Add `--worktree` and/or `--loop` if user requests)
 </actions>

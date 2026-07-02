@@ -14,7 +14,7 @@ import argparse
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 from cache import default_cache_path, load_cache_file
 
@@ -118,6 +118,35 @@ _SHORTHAND: dict[str, _ModelRequest] = {
         force_cli="opencode",
         strict_cli=True,
     ),
+    # Synthetic (native OpenCode provider; models use Synthetic's syn: aliases)
+    "synthetic": _ModelRequest(
+        "synthetic",
+        family="synthetic",
+        model_id="synthetic:syn:large:text",
+        force_cli="opencode",
+        strict_cli=True,
+    ),
+    "syn-flash": _ModelRequest(
+        "syn-flash",
+        family="synthetic",
+        model_id="synthetic:syn:small:text",
+        force_cli="opencode",
+        strict_cli=True,
+    ),
+    "syn-kimi": _ModelRequest(
+        "syn-kimi",
+        family="synthetic",
+        model_id="synthetic:syn:large:vision",
+        force_cli="opencode",
+        strict_cli=True,
+    ),
+    "syn-qwen": _ModelRequest(
+        "syn-qwen",
+        family="synthetic",
+        model_id="synthetic:syn:small:vision",
+        force_cli="opencode",
+        strict_cli=True,
+    ),
     "opencode": _ModelRequest(
         "opencode",
         family="zai",
@@ -208,6 +237,7 @@ _FALLBACK_CHAINS: dict[str, list[str]] = {
     "openai": ["codex", "opencode", "aider"],
     "google": ["agy", "gemini", "opencode", "aider"],
     "zai": ["opencode", "codex"],
+    "synthetic": ["opencode"],
     "local": ["opencode", "codex"],
 }
 
@@ -407,7 +437,8 @@ def _resolve_local_model(
     vllm = providers.get("vllm") if isinstance(providers.get("vllm"), dict) else {}
 
     if isinstance(lmstudio, dict) and lmstudio.get("running"):
-        loaded = lmstudio.get("loaded_models") if isinstance(lmstudio.get("loaded_models"), list) else []
+        loaded_raw = lmstudio.get("loaded_models")
+        loaded = cast(list[Any], loaded_raw) if isinstance(loaded_raw, list) else []
         requested = _requested_model("lmstudio")
         selected = requested or _match_model_hint(model_hint, [str(x) for x in loaded if x])
         model_id = f"local:lmstudio:{selected}" if selected else "local:lmstudio"
@@ -421,7 +452,8 @@ def _resolve_local_model(
         return cli, model_id, cmd
 
     if isinstance(vllm, dict) and vllm.get("running"):
-        loaded = vllm.get("loaded_models") if isinstance(vllm.get("loaded_models"), list) else []
+        loaded_raw = vllm.get("loaded_models")
+        loaded = cast(list[Any], loaded_raw) if isinstance(loaded_raw, list) else []
         requested = _requested_model("vllm")
         selected = requested or _match_model_hint(model_hint, [str(x) for x in loaded if x])
         model_id = f"local:vllm:{selected}" if selected else "local:vllm"
@@ -435,7 +467,8 @@ def _resolve_local_model(
         return cli, model_id, cmd
 
     if isinstance(ollama, dict) and ollama.get("running"):
-        loaded = ollama.get("loaded_models") if isinstance(ollama.get("loaded_models"), list) else []
+        loaded_raw = ollama.get("loaded_models")
+        loaded = cast(list[Any], loaded_raw) if isinstance(loaded_raw, list) else []
         requested = _requested_model("ollama")
         selected = requested or _match_model_hint(model_hint, [str(x) for x in loaded if x])
         model_id = f"local:ollama:{selected}" if selected else "local:ollama"
@@ -554,6 +587,7 @@ def resolve_model(shorthand: str, preferred_cli: str | None = None) -> tuple[str
         # Accept normalized model IDs directly (e.g., "openai:gpt-5.2").
         if ":" in norm:
             provider = _model_provider(norm)
+            model_id = f"synthetic:{norm}" if provider == "syn" else norm
             family = (
                 "openai"
                 if provider == "openai"
@@ -563,11 +597,19 @@ def resolve_model(shorthand: str, preferred_cli: str | None = None) -> tuple[str
                 if provider == "google"
                 else "zai"
                 if provider == "zai"
+                else "synthetic"
+                if provider in {"synthetic", "syn"}
                 else "local"
                 if provider in {"local", "ollama", "lmstudio"}
                 else provider or "openai"
             )
-            request = _ModelRequest(shorthand=norm, family=family, model_id=norm)
+            request = _ModelRequest(
+                shorthand=norm,
+                family=family,
+                model_id=model_id,
+                force_cli="opencode" if family == "synthetic" else None,
+                strict_cli=True if family == "synthetic" else False,
+            )
         else:
             raise ModelNotAvailable(f"Unknown model shorthand: {shorthand}")
 

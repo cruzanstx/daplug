@@ -81,6 +81,10 @@ Use AskUserQuestion tool with options:
 - `glm5` - Z.AI GLM-5.2 via OpenCode
 - `glm52` - Z.AI GLM-5.2 via OpenCode (explicit pin)
 - `kimi` - Kimi K2.5 via OpenCode
+- `synthetic` - GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, 512k context)
+- `syn-flash` - GLM-4.7-Flash via Synthetic / OpenCode
+- `syn-kimi` - Kimi-K2.6 via Synthetic / OpenCode (vision)
+- `syn-qwen` - Qwen3.6-27B via Synthetic / OpenCode (vision)
 - `opencode` - OpenCode runner with Z.AI GLM-4.7
 - `local` - Local model via opencode + LMStudio
 - `qwen` - Qwen via opencode + LMStudio

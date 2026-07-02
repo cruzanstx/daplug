@@ -49,6 +49,51 @@ def _reasoning_value(command: list[str]) -> str:
     return ""
 
 
+
+
+SYNTHETIC_MODELS = {
+    "synthetic": ("synthetic:syn:large:text", "synthetic/syn:large:text"),
+    "syn-flash": ("synthetic:syn:small:text", "synthetic/syn:small:text"),
+    "syn-kimi": ("synthetic:syn:large:vision", "synthetic/syn:large:vision"),
+    "syn-qwen": ("synthetic:syn:small:vision", "synthetic/syn:small:vision"),
+}
+
+
+def test_synthetic_model_specs_are_opencode_provider_refs():
+    for shorthand, (model_id, _opencode_ref) in SYNTHETIC_MODELS.items():
+        assert executor.MODEL_SPECS[shorthand]["model_id"] == model_id
+        assert executor.MODEL_SPECS[shorthand]["default_cli"] == "opencode"
+        assert executor.MODEL_SPECS[shorthand]["supports_codex_reasoning"] is False
+
+
+def test_synthetic_models_build_opencode_commands(no_router, tmp_path, monkeypatch):
+    monkeypatch.setenv("SYNTHETIC_API_KEY", "test-key")
+
+    for shorthand, (model_id, opencode_ref) in SYNTHETIC_MODELS.items():
+        info = executor.get_cli_info(shorthand, repo_root=tmp_path)
+        assert info["selected_cli"] == "opencode"
+        assert info["model_id"] == model_id
+        assert info["command"] == ["opencode", "run", "--format", "json", "-m", opencode_ref]
+        assert info["env"] == {}
+
+
+def test_synthetic_models_require_api_key(no_router, tmp_path, monkeypatch):
+    monkeypatch.delenv("SYNTHETIC_API_KEY", raising=False)
+
+    with pytest.raises(RuntimeError, match="SYNTHETIC_API_KEY is required"):
+        executor.get_cli_info("synthetic", repo_root=tmp_path)
+
+
+def test_main_argparse_accepts_synthetic_shorthands(prompt_repo, monkeypatch, capsys):
+    monkeypatch.setenv("SYNTHETIC_API_KEY", "test-key")
+    repo_root, _logs_dir, _prompt_file = prompt_repo
+
+    for shorthand in SYNTHETIC_MODELS:
+        monkeypatch.setattr(sys, "argv", ["executor.py", "001", "--model", shorthand])
+        executor.main()
+        output = json.loads(capsys.readouterr().out)
+        assert output["prompts"][0]["cli_command"][5].startswith("synthetic/syn:")
+
 def test_variant_parsing_precedence_over_alias_defaults(no_router, tmp_path):
     info_default = executor.get_cli_info("codex-high", repo_root=tmp_path)
     assert _reasoning_value(info_default["command"]) == "high"

@@ -1,7 +1,7 @@
 ---
 name: run-prompt
 description: Execute prompts from ./prompts/ with various AI models, optional worktree isolation, tmux sessions, and iterative verification loops
-argument-hint: <prompt(s)> [--model claude|cc-sonnet|cc-opus|codex|codex-spark|codex-high|codex-xhigh|gpt54|gpt54-high|gpt54-xhigh|gpt55|gpt55-high|gpt55-xhigh|gpt52|gpt52-high|gpt52-xhigh|gemini|gemini-high|gemini-xhigh|gemini25pro|gemini25flash|gemini25lite|gemini3flash|gemini3pro|gemini31pro|zai|glm5|glm52|kimi|opencode|local|qwen|devstral|glm-local|qwen-small] [--cli codex|opencode|claude|agy|gemini] [--variant none|low|medium|high|xhigh] [--worktree] [--sandbox|--no-sandbox] [--sandbox-type bubblewrap] [--sandbox-profile strict|balanced|dev] [--sandbox-workspace <path>] [--sandbox-net on|off] [--tmux] [--parallel] [--loop]
+argument-hint: <prompt(s)> [--model claude|cc-sonnet|cc-opus|codex|codex-spark|codex-high|codex-xhigh|gpt54|gpt54-high|gpt54-xhigh|gpt55|gpt55-high|gpt55-xhigh|gpt52|gpt52-high|gpt52-xhigh|gemini|gemini-high|gemini-xhigh|gemini25pro|gemini25flash|gemini25lite|gemini3flash|gemini3pro|gemini31pro|zai|glm5|glm52|kimi|synthetic|syn-flash|syn-kimi|syn-qwen|opencode|local|qwen|devstral|glm-local|qwen-small] [--cli codex|opencode|claude|agy|gemini] [--variant none|low|medium|high|xhigh] [--worktree] [--sandbox|--no-sandbox] [--sandbox-type bubblewrap] [--sandbox-profile strict|balanced|dev] [--sandbox-workspace <path>] [--sandbox-net on|off] [--tmux] [--parallel] [--loop]
 ---
 
 # Run Prompt
@@ -13,7 +13,7 @@ Execute prompts from `./prompts/` (including subfolders) using various AI models
 | Argument | Description |
 |----------|-------------|
 | `<prompt>` | Prompt number(s), range(s), or name(s) - defaults to latest |
-| `--model, -m` | claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, glm52, kimi, opencode, local, qwen, devstral, glm-local, qwen-small (codex/codex-high/codex-xhigh default to GPT-5.5; `gpt55*` are explicit GPT-5.5 shorthands) |
+| `--model, -m` | claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, glm52, kimi, synthetic, syn-flash, syn-kimi, syn-qwen, opencode, local, qwen, devstral, glm-local, qwen-small (codex/codex-high/codex-xhigh default to GPT-5.5; `gpt55*` are explicit GPT-5.5 shorthands) |
 | `--cli` | Override CLI wrapper: codex, opencode, claude, agy, or gemini (aliases: claudecode, cc, antigravity). Unsupported explicit combinations error clearly. |
 | `--variant` | Reasoning variant override: `none`, `low`, `medium`, `high`, `xhigh`. Explicit `--variant` overrides alias defaults. |
 | `--worktree, -w` | Run in isolated git worktree |
@@ -67,6 +67,7 @@ When the `/detect-clis` cache is present, `executor.py` routes `--model` shortha
 - Falls back gracefully when the preferred CLI isn’t installed/ready (example: `gemini-*` → `opencode`).
 - Explicit `--cli` override intent is strict: if that CLI cannot run the selected model, executor returns an actionable error instead of silently rerouting.
 - Local routing (`local`, `qwen`, `devstral`) uses the detected running provider (LM Studio / Ollama / vLLM).
+- Synthetic routing (`synthetic`, `syn-flash`, `syn-kimi`, `syn-qwen`) uses OpenCode's `synthetic` provider and requires `SYNTHETIC_API_KEY`.
 - `devstral` is treated as a multimodal local model (`vision` capability metadata in router).
 - If the cache is missing, daplug falls back to the legacy hardcoded model map for backward compatibility.
 
@@ -380,6 +381,8 @@ Task(
 /daplug:run-prompt 123 --model codex --cli opencode --variant high  # Force OpenCode + variant
 /daplug:run-prompt 123 --model glm5              # Z.AI GLM-5.2
 /daplug:run-prompt 123 --model glm52             # Z.AI GLM-5.2 explicit pin
+/daplug:run-prompt 123 --model synthetic         # Synthetic GLM-5.2 (`syn:large:text`)
+/daplug:run-prompt 123 --model syn-kimi          # Synthetic Kimi-K2.6 vision alias
 /daplug:run-prompt 123 --model codex --worktree  # Codex in isolated worktree
 /daplug:run-prompt 123 --model codex --sandbox   # Codex in bubblewrap sandbox (Linux)
 /daplug:run-prompt 123 --model codex --sandbox --sandbox-profile strict  # strict isolation

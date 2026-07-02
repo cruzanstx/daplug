@@ -441,6 +441,7 @@ Before presenting options:
    - `codex`: Check `codex.primary_window.used` and `codex.secondary_window.used`
    - `gemini`: Check `gemini.models.*` for each model's usage
    - `zai`: Check `zai.token_quota.percentage`
+   - `synthetic`: If cclimits exposes it, check `synthetic.subscription.requests / synthetic.subscription.limit`; otherwise note `GET https://api.synthetic.new/v2/quotas` with `SYNTHETIC_API_KEY`
 
    **Usage thresholds:**
    - `< 70%` → Available (show normally)
@@ -487,11 +488,15 @@ All available models for /daplug:run-prompt --model:
 - `gemini3pro` - Gemini 3 Pro Preview (most capable)
 - `gemini31pro` - Gemini 3.1 Pro Preview (latest, account-gated)
 
-**Other Models:** (check: `zai.token_quota.percentage`)
+**Other Models:** (check: `zai.token_quota.percentage`; Synthetic: request quota from `/v2/quotas`)
 - `zai` - Z.AI GLM-4.7 (good for Chinese language tasks)
 - `glm5` - Z.AI GLM-5.2 (latest GLM 5.x coding model, 1M context)
 - `glm52` - Z.AI GLM-5.2 via Z.AI / OpenCode (explicit pin, 1M context)
 - `kimi` - Kimi K2.5 via OpenCode (`opencode/kimi-k2.5`)
+- `synthetic` - GLM-5.2 via Synthetic (`syn:large:text`, 512k context)
+- `syn-flash` - GLM-4.7-Flash via Synthetic (`syn:small:text`)
+- `syn-kimi` - Kimi-K2.6 via Synthetic (`syn:large:vision`, vision)
+- `syn-qwen` - Qwen3.6-27B via Synthetic (`syn:small:vision`, vision)
 - `local` - Local model via opencode + LMStudio (no quota limits)
 - `qwen` - Qwen via opencode + LMStudio (no quota limits)
 - `devstral` - Devstral via opencode + LMStudio (no quota limits)
@@ -512,10 +517,11 @@ For llms.txt research tasks, recommend models in this order (based on availabili
 | 6 | gemini3pro | Strong Gemini fallback |
 | 7 | claude | Excellent reasoning but uses your quota |
 | 8 | codex-xhigh | Good for doc writing after research |
-| 9 | kimi | Strong OpenCode fallback for long-form drafting |
-| 10 | glm52 | GLM-5.2 explicit pin with 1M context |
-| 11 | glm5 | Latest GLM 5.x alias for GLM-5.2 |
-| 12 | zai | Good fallback for documentation |
+| 9 | synthetic | GLM-5.2 via Synthetic with request-count quota |
+| 10 | kimi | Strong OpenCode fallback for long-form drafting |
+| 11 | glm52 | GLM-5.2 explicit pin with 1M context |
+| 12 | glm5 | Latest GLM 5.x alias for GLM-5.2 |
+| 13 | zai | Good fallback for documentation |
 
 **Recommended flags for llms.txt:**
 - `--worktree` - Isolate the work (can continue working on other things)
@@ -550,7 +556,7 @@ If user chooses #1:
   Then present executor options with usage status:
 
   "📊 **AI Quota Status:**
-  Claude: {X}% (5h) {status} | Codex: {X}% (5h) {status} | Z.AI: {X}% {status}
+  Claude: {X}% (5h) {status} | Codex: {X}% (5h) {status} | Z.AI: {X}% {status} | Synthetic: {requests}/{limit} requests {status}
 
   Gemini models:
     3-flash: {X}% {status} | 2.5-pro: {X}% {status} | 3-pro: {X}% {status} | 3.1-pro: {X}% {status}
@@ -594,7 +600,11 @@ If user chooses #1:
   21. glm5 - {X}% used - Z.AI GLM-5.2
   22. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
   23. kimi - {X}% used - Kimi K2.5 via OpenCode
-  24. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
+  24. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
+  25. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
+  26. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.6 vision
+  27. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
+  28. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
 
   [Show recommendation: "Recommended for llms.txt research: gpt52-xhigh --worktree --loop"]
   [If preferred_agent is set and available: "Your preferred agent: {preferred_agent} ✅"]
@@ -604,7 +614,7 @@ If user chooses #1:
   - `--loop` - Auto-retry until verification passes (recommended: ensures quality)
   - `--loop --max-iterations N` - Limit loop retries (default: 3)
 
-  Choose (1-23), or type model with flags (e.g., 'gpt52-xhigh --worktree --loop'): _"
+  Choose (1-28), or type model with flags (e.g., 'gpt52-xhigh --worktree --loop'): _"
 
   **Execute based on selection:**
 
@@ -618,7 +628,7 @@ If user chooses #1:
   If user selects Claude worktree (option 2):
     Invoke via Skill tool: `/daplug:run-prompt {NUMBER} --prompt-file "$LLMS_TXT_DIR/prompts/{NUMBER}-create-llms-txt-{library-name}.md" --worktree`
 
-  If user selects any other model (options 3-23):
+  If user selects any other model (options 3-28):
     Invoke via Skill tool: `/daplug:run-prompt {NUMBER} --prompt-file "$LLMS_TXT_DIR/prompts/{NUMBER}-create-llms-txt-{library-name}.md" --model {selected_model}`
     (Add `--worktree` and/or `--loop` if user requests)
 

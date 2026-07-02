@@ -69,8 +69,9 @@ python3 "$EXECUTOR" [prompts...] [options]
 ```
 
 **Options:**
-- `--model, -m`: claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, glm52, kimi, opencode, local, qwen, devstral, glm-local, qwen-small
+- `--model, -m`: claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, glm52, kimi, synthetic, syn-flash, syn-kimi, syn-qwen, opencode, local, qwen, devstral, glm-local, qwen-small
   - `glm52`: GLM-5.2 via Z.AI / OpenCode (1M context)
+  - `synthetic`: GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, requires `SYNTHETIC_API_KEY`)
 - `--cli`: Override CLI wrapper (codex, opencode, claude, agy, or gemini; aliases: claudecode, cc, antigravity). Unsupported explicit combinations fail with a clear error (no silent fallback).
 - `--variant`: Reasoning variant override (`none|low|medium|high|xhigh`). Explicit `--variant` overrides alias defaults (`codex-high`, `gpt55-high`, `gpt54-high`, `gpt52-high`, etc.).
 - `--cwd, -c`: Working directory for execution
@@ -238,6 +239,10 @@ python3 "$EXECUTOR" --loop-status
 | glm5 | opencode run --format json -m zai/glm-5.2 | Z.AI GLM-5.2 via OpenCode (latest GLM 5.x, 1M context) |
 | glm52 | opencode run --format json -m zai/glm-5.2 | Z.AI GLM-5.2 via OpenCode (explicit pin, 1M context) |
 | kimi | opencode run --format json -m opencode/kimi-k2.5 | Kimi K2.5 via OpenCode |
+| synthetic | opencode run --format json -m synthetic/syn:large:text | GLM-5.2 via Synthetic (512k context) |
+| syn-flash | opencode run --format json -m synthetic/syn:small:text | GLM-4.7-Flash via Synthetic |
+| syn-kimi | opencode run --format json -m synthetic/syn:large:vision | Kimi-K2.6 via Synthetic (vision) |
+| syn-qwen | opencode run --format json -m synthetic/syn:small:vision | Qwen3.6-27B via Synthetic (vision) |
 | opencode | opencode run --format json -m zai/glm-4.7 | Z.AI GLM-4.7 (via OpenCode, recommended; JSON output) |
 | local/qwen | opencode run --format json -m lmstudio/qwen3-coder-next | Local qwen-coder model (default: opencode) |
 | devstral | opencode run --format json -m lmstudio/devstral-small-2-2512 | Local devstral model (default: opencode) |
@@ -245,6 +250,8 @@ python3 "$EXECUTOR" --loop-status
 OpenCode runs include `--variant <value>` when a variant is set.
 
 GLM-5.2 uses the Z.AI Coding Plan endpoint (`https://api.z.ai/api/coding/paas/v4`) with raw model ID `glm-5.2`. OpenCode receives `zai/glm-5.2`; Claude Code env examples use `glm-5.2[1m]` with `ANTHROPIC_DEFAULT_SONNET_MODEL`, `ANTHROPIC_DEFAULT_OPUS_MODEL`, and `CLAUDE_CODE_AUTO_COMPACT_WINDOW=1000000`. daplug passes only the model ID; the 1M context window is provided by the Coding Plan endpoint.
+
+Synthetic shorthands use OpenCode provider refs such as `synthetic/syn:large:text`; set `SYNTHETIC_API_KEY` and configure OpenCode's `synthetic` provider with `https://api.synthetic.new/openai/v1`. Raw `hf:` IDs are intentionally not daplug shorthands; add them to OpenCode as `synthetic/hf:owner/model` pass-through refs when needed.
 
 **OpenCode permissions (headless runs):** configure `~/.config/opencode/opencode.json` to avoid interactive permission prompts, e.g.:
 

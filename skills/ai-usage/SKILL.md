@@ -1,6 +1,6 @@
 ---
 name: ai-usage
-description: Check AI CLI usage/quota for Claude Code, OpenAI Codex, Google Gemini CLI, and Z.AI. Use when user asks about remaining quota, usage limits, rate limits, or wants to check how much capacity is left.
+description: Check AI CLI usage/quota for Claude Code, OpenAI Codex, Google Gemini CLI, Z.AI, and Synthetic. Use when user asks about remaining quota, usage limits, rate limits, or wants to check how much capacity is left.
 allowed-tools:
   - Bash(npx cclimits:*)
   - Bash(cclimits:*)
@@ -8,7 +8,7 @@ allowed-tools:
 
 # AI CLI Usage Checker
 
-Check remaining quota and usage for AI coding assistants: Claude Code, OpenAI Codex, Gemini CLI, and Z.AI.
+Check remaining quota and usage for AI coding assistants: Claude Code, OpenAI Codex, Gemini CLI, Z.AI, and Synthetic.
 
 Uses the [cclimits](https://www.npmjs.com/package/cclimits) npm package.
 
@@ -38,6 +38,9 @@ npx cclimits --codex
 npx cclimits --gemini
 npx cclimits --zai
 
+# Synthetic direct quota probe (does not count against quota)
+curl -H "Authorization: Bearer $SYNTHETIC_API_KEY" https://api.synthetic.new/v2/quotas
+
 # JSON output (for scripting)
 npx cclimits --json
 ```
@@ -52,6 +55,7 @@ Credentials are auto-discovered from these locations:
 | **Codex** | `~/.codex/auth.json` |
 | **Gemini** | `~/.gemini/oauth_creds.json` (auto-refreshes) |
 | **Z.AI** | `$ZAI_KEY` or `$ZAI_API_KEY` environment variable |
+| **Synthetic** | `$SYNTHETIC_API_KEY` environment variable |
 
 ## Setup (One-Time)
 
@@ -62,6 +66,7 @@ claude           # Login to Claude Code
 codex login      # Login to OpenAI Codex
 gemini           # Login to Gemini CLI
 export ZAI_KEY=your-key  # Add to ~/.zshrc
+export SYNTHETIC_API_KEY=your-key  # Get from https://synthetic.new dashboard
 ```
 
 ## Output Interpretation
