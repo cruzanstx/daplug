@@ -16,7 +16,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install test dependencies
-        run: pip install pytest
+        run: pip install pytest pyyaml
 
       # Suites run in separate pytest processes: each appends its own
       # scripts/ dir to sys.path and imports modules by bare name
