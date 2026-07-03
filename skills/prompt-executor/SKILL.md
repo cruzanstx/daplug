@@ -91,6 +91,7 @@ python3 "$EXECUTOR" [prompts...] [options]
 - `--loop, -l`: Enable iterative verification loop until completion
 - `--max-iterations`: Max loop iterations before giving up (default: 3)
 - `--completion-marker`: Text pattern signaling completion (default: VERIFICATION_COMPLETE)
+- `--require-diff`: Reject completion marker when no file changes detected (created, modified, or committed) in the execution directory. Excludes TASK.md and .sisyphus/.
 - `--loop-status`: Check status of an existing verification loop
 
 **Output:** JSON with prompt content, CLI command, log path, worktree info, and loop state if enabled
@@ -178,6 +179,9 @@ python3 "$EXECUTOR" 123 --model codex --run --loop --completion-marker "TASK_DON
 
 # Worktree + loop combo
 python3 "$EXECUTOR" 123 --model codex --worktree --run --loop
+
+# Require file changes before accepting completion (--require-diff)
+python3 "$EXECUTOR" 123 --model codex --run --loop --require-diff
 ```
 
 **Output includes:**
@@ -200,6 +204,16 @@ Log paths follow `cli_logs_dir` from `<daplug_config>` if configured (default `~
 - To end the loop, the model must output a final-line verification tag: `<verification>VERIFICATION_COMPLETE</verification>`.
 - To request another iteration, output: `<verification>NEEDS_RETRY: [reason]</verification>`.
 - The executor ignores any markers that appear inside echoed prompt instructions (some CLIs print the full prompt into logs).
+
+**`--require-diff` (optional):**
+- When enabled, the completion marker is rejected if the execution directory has no file changes (created, modified, or committed since the loop started).
+- Executor-injected artifacts (`TASK.md`, `.sisyphus/`) are excluded from the diff.
+- A rejected completion injects a synthetic retry reason so the model sees why it was rejected and gets another chance.
+- Terminal status on the final iteration with no diff: `completed_unverified` (not `completed`).
+
+**Dead-loop detection (always on):**
+- **Stalled**: Two consecutive iterations with the same retry reason (case/whitespace-insensitive) → loop aborts with status `stalled`.
+- **Blocked**: A retry reason matching impossible-gate patterns (references to paths outside the worktree, isolation-boundary refusals) → loop aborts immediately with status `blocked` and a suggested next step.
 
 ### Check Loop Status
 
