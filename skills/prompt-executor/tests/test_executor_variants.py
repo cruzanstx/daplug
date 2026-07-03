@@ -14,10 +14,13 @@ executor = importlib.util.module_from_spec(EXECUTOR_SPEC)
 sys.modules["executor"] = executor
 EXECUTOR_SPEC.loader.exec_module(executor)
 
+import models  # noqa: E402  -- needed so monkeypatch can target models' namespace
+import loop  # noqa: E402
+
 
 @pytest.fixture()
 def no_router(monkeypatch):
-    monkeypatch.setattr(executor, "_resolve_router_command", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(models, "_resolve_router_command", lambda *_args, **_kwargs: None)
 
 
 @pytest.fixture()
@@ -32,7 +35,7 @@ def prompt_repo(tmp_path, monkeypatch):
 
     monkeypatch.setattr(executor, "get_repo_root", lambda: tmp_path)
     monkeypatch.setattr(executor, "get_cli_logs_dir", lambda _repo_root: logs_dir)
-    monkeypatch.setattr(executor, "_resolve_router_command", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(models, "_resolve_router_command", lambda *_args, **_kwargs: None)
 
     return tmp_path, logs_dir, prompt_file
 
@@ -42,6 +45,7 @@ def loop_state_dir(tmp_path, monkeypatch):
     state_dir = tmp_path / "loop-state"
     state_dir.mkdir()
     monkeypatch.setattr(executor, "get_loop_state_dir", lambda: state_dir)
+    monkeypatch.setattr(loop, "get_loop_state_dir", lambda: state_dir)
     return state_dir
 
 
@@ -156,7 +160,7 @@ def test_legacy_gemini_cli_override_still_works(no_router, tmp_path):
 
 def test_router_selected_agy_uses_executor_mapping(tmp_path, monkeypatch):
     monkeypatch.setattr(
-        executor,
+        models,
         "_resolve_router_command",
         lambda *_args, **_kwargs: ("agy", "google:gemini-2.5-pro", ["agy", "--model", "Gemini 3.1 Pro (High)", "--print"]),
     )
@@ -173,7 +177,7 @@ def test_explicit_cli_opencode_errors_for_unsupported_model(no_router, tmp_path)
 
 def test_explicit_cli_override_takes_precedence_over_router_default(tmp_path, monkeypatch):
     monkeypatch.setattr(
-        executor,
+        models,
         "_resolve_router_command",
         lambda *_args, **_kwargs: ("codex", "openai:gpt-5.3-codex", ["codex", "exec", "--full-auto"]),
     )
@@ -189,7 +193,7 @@ def test_explicit_cli_override_takes_precedence_over_router_default(tmp_path, mo
 
 def test_default_router_selection_unchanged_without_cli_override(tmp_path, monkeypatch):
     monkeypatch.setattr(
-        executor,
+        models,
         "_resolve_router_command",
         lambda *_args, **_kwargs: ("opencode", "openai:gpt-5.3-codex", ["opencode", "run", "--format", "json"]),
     )
@@ -405,7 +409,7 @@ def test_registry_models_have_required_fields():
 
 def test_default_runtime_uses_registry_command_env_and_stdin(no_router, tmp_path, monkeypatch):
     monkeypatch.setenv("SYNTHETIC_API_KEY", "test-key")
-    monkeypatch.setattr(executor, "_require_claude_cli", lambda: None)
+    monkeypatch.setattr(models, "_require_claude_cli", lambda: None)
 
     for key in executor.MODEL_CHOICES:
         info = executor.get_cli_info(key, repo_root=tmp_path)
