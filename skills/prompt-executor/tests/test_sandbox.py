@@ -8,6 +8,7 @@ SCRIPT_DIR = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.append(str(SCRIPT_DIR))
 
 import executor  # noqa: E402
+import loop  # noqa: E402
 
 
 def _args(**overrides):
@@ -299,8 +300,8 @@ def test_sandbox_preflight_skipped_when_sandbox_disabled(preflight_env, monkeypa
 
 
 def test_run_cli_foreground_aborts_on_preflight_failure(tmp_path, monkeypatch):
-    monkeypatch.setattr(executor, "check_bwrap_available", lambda: True)
-    monkeypatch.setattr(executor, "sandbox_preflight", lambda *a, **kw: "probe failed")
+    monkeypatch.setattr(loop, "check_bwrap_available", lambda: True)
+    monkeypatch.setattr(loop, "sandbox_preflight", lambda *a, **kw: "probe failed")
 
     def boom(*a, **kw):
         raise AssertionError("CLI must not launch when preflight fails")
@@ -368,10 +369,10 @@ def test_run_cli_wraps_with_bwrap_when_enabled(tmp_path, monkeypatch):
         captured["stdin"] = proc.stdin
         return proc
 
-    monkeypatch.setattr(executor, "check_bwrap_available", lambda: True)
-    monkeypatch.setattr(executor, "sandbox_preflight", lambda *a, **kw: None)
+    monkeypatch.setattr(loop, "check_bwrap_available", lambda: True)
+    monkeypatch.setattr(loop, "sandbox_preflight", lambda *a, **kw: None)
     monkeypatch.setattr(
-        executor,
+        loop,
         "build_bwrap_args",
         lambda config, child, extra_env=None: ["bwrap", "--unshare-all", "--", *child],
     )

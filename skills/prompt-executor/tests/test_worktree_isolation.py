@@ -17,6 +17,9 @@ executor = importlib.util.module_from_spec(_executor_spec)
 sys.modules["executor"] = executor
 _executor_spec.loader.exec_module(executor)
 
+import loop  # noqa: E402
+import paths  # noqa: E402
+
 
 def _run(cmd, cwd):
     subprocess.run(cmd, cwd=cwd, check=True, capture_output=True)
@@ -195,7 +198,7 @@ def test_isolation_block_mentions_warning_consequence(tmp_path):
 def test_create_worktree_auto_detects_master_when_base_branch_none(tmp_path, monkeypatch):
     """Regression for #15: must not hardcode 'main' when repo uses 'master'."""
     repo = _init_repo(tmp_path / "r", initial_branch="master")
-    monkeypatch.setattr(executor, "_read_config_value", lambda *a, **kw: None)
+    monkeypatch.setattr(paths, "_read_config_value", lambda *a, **kw: None)
     prompts_dir = repo / "prompts"
     prompts_dir.mkdir()
     prompt_file = prompts_dir / "001-test.md"
@@ -215,7 +218,7 @@ def test_create_worktree_honors_explicit_base_branch_override(tmp_path, monkeypa
     _run(["git", "checkout", "-b", "develop"], cwd=repo)
     _run(["git", "checkout", "main"], cwd=repo)
 
-    monkeypatch.setattr(executor, "_read_config_value", lambda *a, **kw: None)
+    monkeypatch.setattr(paths, "_read_config_value", lambda *a, **kw: None)
     prompts_dir = repo / "prompts"
     prompts_dir.mkdir()
     prompt_file = prompts_dir / "001-test.md"
@@ -241,7 +244,7 @@ def loop_env(tmp_path, monkeypatch):
     state_dir = tmp_path / "loop-state"
     state_dir.mkdir()
 
-    monkeypatch.setattr(executor, "get_loop_state_dir", lambda: state_dir)
+    monkeypatch.setattr(loop, "get_loop_state_dir", lambda: state_dir)
 
     cli_info = {
         "command": ["fake-cli", "exec"],
@@ -282,7 +285,7 @@ def _make_fake_cli(*, write_marker: bool, side_effect_file: Path | None,
 
 def _call_loop(env, *, monkeypatch, fake_cli, original_repo_root,
                worktree_path, max_iterations=2):
-    monkeypatch.setattr(executor, "run_cli_foreground", fake_cli)
+    monkeypatch.setattr(loop, "run_cli_foreground", fake_cli)
     return executor.run_verification_loop(
         cli_info=env["cli_info"],
         original_content="do the thing",
@@ -443,7 +446,7 @@ def test_bg_spawner_forwards_worktree_path_and_branch(tmp_path, monkeypatch):
 
     _FakePopen.captured_cmd = None
     monkeypatch.setattr(executor.subprocess, "Popen", _FakePopen)
-    monkeypatch.setattr(executor, "get_loop_state_dir", lambda: tmp_path / "state")
+    monkeypatch.setattr(loop, "get_loop_state_dir", lambda: tmp_path / "state")
     (tmp_path / "state").mkdir()
 
     executor.run_verification_loop_background(
@@ -466,7 +469,7 @@ def test_bg_spawner_omits_worktree_flags_when_no_worktree(tmp_path, monkeypatch)
     the re-entry resolves the prompt by number from the current repo."""
     _FakePopen.captured_cmd = None
     monkeypatch.setattr(executor.subprocess, "Popen", _FakePopen)
-    monkeypatch.setattr(executor, "get_loop_state_dir", lambda: tmp_path / "state")
+    monkeypatch.setattr(loop, "get_loop_state_dir", lambda: tmp_path / "state")
     (tmp_path / "state").mkdir()
 
     executor.run_verification_loop_background(

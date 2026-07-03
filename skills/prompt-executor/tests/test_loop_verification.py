@@ -20,6 +20,8 @@ executor = importlib.util.module_from_spec(_executor_spec)
 sys.modules["executor"] = executor
 _executor_spec.loader.exec_module(executor)
 
+import loop  # noqa: E402  -- needed so monkeypatch can target loop's namespace
+
 
 def _run(cmd, cwd):
     subprocess.run(cmd, cwd=cwd, check=True, capture_output=True)
@@ -49,7 +51,7 @@ def loop_env(tmp_path, monkeypatch):
     state_dir = tmp_path / "loop-state"
     state_dir.mkdir()
 
-    monkeypatch.setattr(executor, "get_loop_state_dir", lambda: state_dir)
+    monkeypatch.setattr(loop, "get_loop_state_dir", lambda: state_dir)
 
     cli_info = {
         "command": ["fake-cli", "exec"],
@@ -138,7 +140,7 @@ def _call_loop(
     max_iterations=2,
     require_diff=False,
 ):
-    monkeypatch.setattr(executor, "run_cli_foreground", fake_cli)
+    monkeypatch.setattr(loop, "run_cli_foreground", fake_cli)
     return executor.run_verification_loop(
         cli_info=env["cli_info"],
         original_content="do the thing",
@@ -419,7 +421,7 @@ def test_require_diff_forwarded_in_background_reentry(tmp_path, monkeypatch):
     worktree.mkdir()
     (worktree / "TASK.md").write_text("body\n")
 
-    monkeypatch.setattr(executor, "get_loop_state_dir", lambda: state_dir)
+    monkeypatch.setattr(loop, "get_loop_state_dir", lambda: state_dir)
     _FakePopen.captured_cmd = None
     monkeypatch.setattr(executor.subprocess, "Popen", _FakePopen)
 
@@ -455,7 +457,7 @@ def test_require_diff_absent_when_not_set_in_background(tmp_path, monkeypatch):
     worktree.mkdir()
     (worktree / "TASK.md").write_text("body\n")
 
-    monkeypatch.setattr(executor, "get_loop_state_dir", lambda: state_dir)
+    monkeypatch.setattr(loop, "get_loop_state_dir", lambda: state_dir)
     _FakePopen.captured_cmd = None
     monkeypatch.setattr(executor.subprocess, "Popen", _FakePopen)
 

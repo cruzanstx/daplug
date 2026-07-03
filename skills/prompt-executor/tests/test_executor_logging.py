@@ -8,6 +8,7 @@ SCRIPT_DIR = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.append(str(SCRIPT_DIR))
 
 import executor  # noqa: E402
+import loop  # noqa: E402
 
 
 @pytest.fixture()
@@ -15,6 +16,7 @@ def loop_state_dir(tmp_path, monkeypatch):
     state_dir = tmp_path / "loop-state"
     state_dir.mkdir()
     monkeypatch.setattr(executor, "get_loop_state_dir", lambda: state_dir)
+    monkeypatch.setattr(loop, "get_loop_state_dir", lambda: state_dir)
     return state_dir
 
 
@@ -32,7 +34,7 @@ def test_run_verification_loop_creates_loop_log_and_uses_timestamp(tmp_path, loo
         )
         return {"status": "completed", "exit_code": 0, "log": str(log_file)}
 
-    monkeypatch.setattr(executor, "run_cli_foreground", fake_run_cli_foreground)
+    monkeypatch.setattr(loop, "run_cli_foreground", fake_run_cli_foreground)
 
     result = executor.run_verification_loop(
         cli_info={"command": ["codex"], "env": {}, "stdin_mode": "dash"},
@@ -133,7 +135,7 @@ def test_main_loop_foreground_sets_prompt_log_to_loop_log(tmp_path, loop_state_d
         )
         return {"status": "completed", "exit_code": 0, "log": str(log_file)}
 
-    monkeypatch.setattr(executor, "run_cli_foreground", fake_run_cli_foreground)
+    monkeypatch.setattr(loop, "run_cli_foreground", fake_run_cli_foreground)
 
     argv = [
         "executor.py",
@@ -279,7 +281,7 @@ def test_loop_resume_preserves_timestamp(tmp_path, loop_state_dir, monkeypatch):
         )
         return {"status": "completed", "exit_code": 0, "log": str(log_file)}
 
-    monkeypatch.setattr(executor, "run_cli_foreground", fake_run_cli_foreground)
+    monkeypatch.setattr(loop, "run_cli_foreground", fake_run_cli_foreground)
 
     # Resume with a DIFFERENT current timestamp - should use original
     new_timestamp = "20260119-120000"
@@ -347,7 +349,7 @@ def test_loop_resume_updates_execution_cwd(tmp_path, loop_state_dir, monkeypatch
         )
         return {"status": "completed", "exit_code": 0, "log": str(log_file)}
 
-    monkeypatch.setattr(executor, "run_cli_foreground", fake_run_cli_foreground)
+    monkeypatch.setattr(loop, "run_cli_foreground", fake_run_cli_foreground)
 
     result = executor.run_verification_loop(
         cli_info={"command": ["codex"], "env": {}, "stdin_mode": "dash"},
@@ -380,7 +382,7 @@ def test_run_verification_loop_fails_cleanly_when_execution_cwd_missing(tmp_path
     def fake_run_cli_foreground(*_args, **_kwargs):
         raise AssertionError("run_cli_foreground should not be called when execution_cwd is missing")
 
-    monkeypatch.setattr(executor, "run_cli_foreground", fake_run_cli_foreground)
+    monkeypatch.setattr(loop, "run_cli_foreground", fake_run_cli_foreground)
 
     result = executor.run_verification_loop(
         cli_info={"command": ["codex"], "env": {}, "stdin_mode": "dash"},
