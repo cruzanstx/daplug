@@ -2,6 +2,20 @@
 
 All notable changes to daplug are documented here.
 
+## [0.30.0] - 2026-07-03
+
+### Added
+- **`--require-diff` loop flag + dead-loop detection** (#14, #18): with `--require-diff`, the `--loop` completion marker is rejected when the execution dir has no real file changes (uncommitted, untracked, or commits since loop start; TASK.md/.sisyphus excluded) — a final-iteration rejection ends as the new `completed_unverified` terminal status instead of silent success. Always-on dead-loop detection aborts as `stalled` on two identical consecutive retry reasons, or `blocked` (with a suggested next step) on an isolation-boundary refusal. Default loop behavior is byte-identical when `--require-diff` is absent.
+- **Registry↔router consistency tripwire**: `test_registry_consistency.py` fails CI if `router._SHORTHAND` and `scripts/models.json` disagree on shorthand keys, model_id, family, or reasoning_effort.
+
+### Changed
+- **Model registry is now a single source of truth** (`scripts/models.json`): `executor.py` loads the registry at runtime and `manage-models.py generate` rewrites 13 marker-delimited regions across 7 docs; `check` is a real drift verifier. Adding a model is now edit-json + generate. Regeneration also fixed real drift (9 shorthands were missing from create-prompt/create-llms menus).
+- **`executor.py` split into focused modules** (3,508 → 710 lines): extracted `paths.py`, `repostate.py`, `worktree.py`, `models.py`, `sandbox.py`, `loop.py`; `executor.py` remains the CLI entry point and re-exports the full public surface (pinned by `test_facade.py`). Pure structural move, zero behavior change.
+- **CI**: bumped `actions/checkout@v5` / `actions/setup-python@v6` (Node 20 deprecation).
+
+### Fixed
+- Closed #14 (silent false success on `--loop`) and #18 (wasted iterations on impossible external read-gates) via the loop-verification work above.
+
 ## [0.29.0] - 2026-07-02
 
 ### Added
