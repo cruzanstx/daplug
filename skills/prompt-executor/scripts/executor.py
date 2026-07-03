@@ -286,6 +286,138 @@ def repo_state_delta_paths(delta: dict) -> list[str]:
     return sorted(paths)
 
 
+# ------------------------------------------------------------------
+# Loop verification helpers (--require-diff and dead-loop detection)
+# ------------------------------------------------------------------
+
+# Executor-injected artifacts that should NOT count as "real" file changes
+# when --require-diff is active.
+_EXECUTOR_ARTIFACT_PATHS = {"TASK.md"}
+_EXECUTOR_ARTIFACT_PREFIXES = (".sisyphus/",)
+
+
+def _is_executor_artifact(path: str) -> bool:
+    """Return True for files injected by the executor itself (not by the agent)."""
+    if path in _EXECUTOR_ARTIFACT_PATHS:
+        return True
+    return any(path.startswith(prefix) for prefix in _EXECUTOR_ARTIFACT_PREFIXES)
+
+
+def _get_git_head(repo_root: str) -> Optional[str]:
+    """Get the current HEAD commit hash, or None if not a git repo."""
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=repo_root, capture_output=True, text=True, timeout=10,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+    except (subprocess.SubprocessError, OSError):
+        pass
+    return None
+
+
+def _snapshot_to_jsonable(snapshot: dict) -> dict:
+    """Convert repo_state_snapshot to JSON-serializable form for state persistence."""
+    return {
+        "modified": dict(snapshot.get("modified", {})),
+        "untracked": sorted(snapshot.get("untracked", set())),
+    }
+
+
+def _snapshot_from_jsonable(data: Optional[dict]) -> dict:
+    """Convert JSON-serializable snapshot back to repo_state_snapshot form."""
+    if not data:
+        return _empty_repo_state_snapshot()
+    return {
+        "modified": dict(data.get("modified", {})),
+        "untracked": set(data.get("untracked", [])),
+    }
+
+
+def _has_real_file_changes(
+    before_snapshot: dict,
+    after_snapshot: dict,
+    before_head: Optional[str],
+    after_head: Optional[str],
+) -> bool:
+    """Check if the execution cwd has real file changes, excluding executor artifacts.
+
+    Detects:
+    - Uncommitted tracked modifications (via snapshot delta)
+    - New or removed untracked files (via snapshot delta)
+    - Commits made since the loop started (via HEAD ref comparison)
+    """
+    delta = repo_state_delta(before_snapshot, after_snapshot)
+    changed_paths = repo_state_delta_paths(delta)
+
+    filtered = [p for p in changed_paths if not _is_executor_artifact(p)]
+    if filtered:
+        return True
+
+    # Agent may have committed its work, leaving the tree clean.
+    if before_head and after_head and before_head != after_head:
+        return True
+
+    return False
+
+
+def _normalize_retry_reason(reason: str) -> str:
+    """Normalize retry reason for case/whitespace-insensitive comparison."""
+    return " ".join(reason.lower().split())
+
+
+def _detect_stalled(history: list) -> bool:
+    """Return True if the last two iterations share the same normalized retry_reason."""
+    if len(history) < 2:
+        return False
+    current = history[-1].get("retry_reason")
+    previous = history[-2].get("retry_reason")
+    if not current or not previous:
+        return False
+    return _normalize_retry_reason(current) == _normalize_retry_reason(previous)
+
+
+# Impossible-gate patterns: retry reasons that no amount of retrying can fix.
+_IMPOSSIBLE_GATE_PHRASES = (
+    "outside the isolated worktree",
+    "isolation boundary",
+)
+
+
+def _detect_impossible_gate(retry_reason: str, execution_cwd: str) -> bool:
+    """Return True if a retry_reason indicates an impossible gate condition.
+
+    Detects:
+    - Explicit worktree/isolation boundary refusal phrases
+    - "cannot read" / "can't read" combined with an absolute path not under the
+      execution cwd (the model is refusing to proceed because a required file
+      lives outside the worktree — retrying will never help)
+    """
+    normalized = retry_reason.lower().strip()
+
+    for phrase in _IMPOSSIBLE_GATE_PHRASES:
+        if phrase in normalized:
+            return True
+
+    if "cannot read" in normalized or "can't read" in normalized:
+        # Extract absolute Unix paths from the reason text.
+        paths = re.findall(r'(?<![A-Za-z0-9])(/[\w./-]+)', retry_reason)
+        try:
+            cwd_resolved = Path(execution_cwd).resolve()
+        except (OSError, ValueError):
+            return False
+        for path_str in paths:
+            try:
+                resolved = Path(path_str).resolve()
+                resolved.relative_to(cwd_resolved)
+            except (ValueError, OSError):
+                # Path is not under execution cwd → impossible gate.
+                return True
+
+    return False
+
+
 def get_existing_worktree(repo_root: Path, branch_name: str) -> str | None:
     """Check if a worktree already exists for the given branch."""
     result = subprocess.run(
@@ -1834,10 +1966,13 @@ def create_loop_state(
         "completion_marker": completion_marker,
         "started_at": datetime.now().isoformat(),
         "last_updated_at": datetime.now().isoformat(),
-        "status": "pending",  # pending, running, completed, failed, max_iterations_reached
+        "status": "pending",  # pending, running, completed, completed_unverified, failed, max_iterations_reached, stalled, blocked
         "history": [],
         "suggested_next_steps": [],
         "original_checkout_warnings": [],
+        "require_diff": False,
+        "start_snapshot": None,   # JSON-serializable repo_state_snapshot at loop start
+        "start_head": None,      # git HEAD hash at loop start (for commit detection)
     }
 
 
@@ -2123,6 +2258,7 @@ def wrap_prompt_with_verification_protocol(
     branch_name: Optional[str] = None,
     history: Optional[list] = None,
     original_repo_root: Optional[str] = None,
+    require_diff: bool = False,
 ) -> str:
     """Wrap prompt content with verification protocol instructions."""
     history = history or []
@@ -2175,6 +2311,8 @@ Important:
 - The controller determines completion based on a required verification tag you output.
 - Do not claim completion unless the task is genuinely complete.
 - Current iteration: {iteration} of {max_iterations}.
+{"- Your completion claims are independently verified against the file system. The completion marker will be REJECTED if no file changes (created, modified, or committed) are detected in the execution directory. Executor-injected artifacts (TASK.md, .sisyphus/) do not count." if require_diff else ""}
+{"- If your NEEDS_RETRY reason cannot change between iterations (e.g., a required file is outside the isolated worktree), describe it as a blocking condition in your retry reason rather than requesting a retry, to avoid wasting iterations." if require_diff else ""}
 </verification_protocol>
 
 {previous_feedback}<environment>
@@ -2459,6 +2597,7 @@ def run_verification_loop(
     worktree_path: Optional[str] = None,
     branch_name: Optional[str] = None,
     original_repo_root: Optional[str] = None,
+    require_diff: bool = False,
 ) -> dict:
     """Run CLI in a verification loop until completion marker found or max iterations reached.
 
@@ -2540,6 +2679,17 @@ def run_verification_loop(
         }
 
     state["status"] = "running"
+    state["require_diff"] = require_diff
+
+    # Capture the execution-cwd state at loop start for --require-diff.
+    # This persists across resumes so the baseline is the original loop start.
+    if require_diff:
+        if not state.get("start_snapshot"):
+            state["start_snapshot"] = _snapshot_to_jsonable(
+                repo_state_snapshot(state["execution_cwd"])
+            )
+        if not state.get("start_head"):
+            state["start_head"] = _get_git_head(state["execution_cwd"])
     save_loop_state(state)
 
     result = {
@@ -2581,6 +2731,7 @@ def run_verification_loop(
             branch_name=branch_name,
             history=state["history"],
             original_repo_root=original_repo_root,
+            require_diff=require_diff,
         )
 
         print(f"[Loop] Starting iteration {iteration}/{max_iterations}...", file=sys.stderr)
@@ -2651,6 +2802,34 @@ def run_verification_loop(
         # Check for completion marker
         marker_found, retry_reason = check_completion_marker(log_file, completion_marker)
 
+        # --require-diff: verify the execution cwd actually changed before accepting
+        # the completion marker.  If not, reject and convert to a synthetic retry so
+        # the model gets feedback and another chance (issue #14).
+        diff_rejected = False
+        if marker_found and require_diff:
+            after_snapshot = repo_state_snapshot(execution_cwd)
+            after_head = _get_git_head(execution_cwd)
+            before_snapshot = _snapshot_from_jsonable(state.get("start_snapshot"))
+            before_head = state.get("start_head")
+            if not _has_real_file_changes(
+                before_snapshot, after_snapshot, before_head, after_head,
+            ):
+                marker_found = False
+                retry_reason = (
+                    "completion marker found but no file changes detected (--require-diff)"
+                )
+                diff_rejected = True
+                print(
+                    "[Loop] Completion marker rejected (--require-diff): "
+                    "no file changes detected",
+                    file=sys.stderr,
+                )
+                with open(loop_log, "a") as f:
+                    f.write(
+                        "[Loop] Completion marker rejected (--require-diff): "
+                        "no file changes detected\n"
+                    )
+
         # Extract suggested next steps from this iteration's log
         next_steps = extract_next_steps(log_file)
         if next_steps:
@@ -2684,19 +2863,87 @@ def run_verification_loop(
             result["final_status"] = "completed"
             result["status"] = "completed"
             break
-        elif retry_reason:
+
+        # Dead-loop detection (always on, no flag).
+        if retry_reason:
             print(f"[Loop] Retry requested: {retry_reason}", file=sys.stderr)
             with open(loop_log, "a") as f:
                 f.write(f"[Loop] NEEDS_RETRY: {retry_reason}\n")
 
+            # Impossible-gate detection: abort immediately on the FIRST occurrence
+            # (issue #18 — retrying will never fix an isolation-boundary refusal).
+            if _detect_impossible_gate(retry_reason, execution_cwd):
+                failure_reason = (
+                    f"Retry reason indicates an impossible gate that no retry can fix: "
+                    f"{retry_reason}"
+                )
+                suggested = (
+                    "the prompt requires resources unavailable under --worktree isolation; "
+                    "re-run without --worktree or copy the required file into the repo"
+                )
+                state["status"] = "blocked"
+                state["failure_reason"] = failure_reason
+                state.setdefault("suggested_next_steps", []).append({
+                    "text": suggested,
+                    "original": suggested,
+                    "source_iteration": iteration,
+                })
+                save_loop_state(state)
+                with open(loop_log, "a") as f:
+                    f.write(f"[Loop] BLOCKED: impossible gate detected: {retry_reason}\n")
+                    f.write(f"[Loop] Suggested next step: {suggested}\n")
+                result["final_status"] = "blocked"
+                result["status"] = "blocked"
+                result["failure_reason"] = failure_reason
+                result["suggested_next_steps"] = state.get("suggested_next_steps", [])
+                break
+
+            # Stalled detection: two consecutive identical retry_reasons mean no
+            # progress is possible — abort instead of burning more iterations.
+            if _detect_stalled(state["history"]):
+                failure_reason = (
+                    f"Repeated identical retry reasons indicate no progress is possible: "
+                    f"{retry_reason}"
+                )
+                state["status"] = "stalled"
+                state["failure_reason"] = failure_reason
+                save_loop_state(state)
+                with open(loop_log, "a") as f:
+                    f.write(
+                        f"[Loop] STALLED: repeated identical retry reason: "
+                        f"{retry_reason}\n"
+                    )
+                result["final_status"] = "stalled"
+                result["status"] = "stalled"
+                result["failure_reason"] = failure_reason
+                break
+
         if state["iteration"] >= max_iterations:
-            print(f"[Loop] Max iterations ({max_iterations}) reached without completion.", file=sys.stderr)
-            with open(loop_log, "a") as f:
-                f.write(f"[Loop] Max iterations reached ({max_iterations})\n")
-            state["status"] = "max_iterations_reached"
-            save_loop_state(state)
-            result["final_status"] = "max_iterations_reached"
-            result["status"] = "max_iterations_reached"
+            if diff_rejected:
+                # Marker was found but rejected by --require-diff on the final
+                # iteration — distinct from both "completed" and "max_iterations".
+                state["status"] = "completed_unverified"
+                save_loop_state(state)
+                print(
+                    "[Loop] Completed unverified: marker found but no file changes "
+                    "(--require-diff), max iterations reached",
+                    file=sys.stderr,
+                )
+                with open(loop_log, "a") as f:
+                    f.write(
+                        "[Loop] Completed unverified: marker found but no file changes "
+                        "(--require-diff), max iterations reached\n"
+                    )
+                result["final_status"] = "completed_unverified"
+                result["status"] = "completed_unverified"
+            else:
+                print(f"[Loop] Max iterations ({max_iterations}) reached without completion.", file=sys.stderr)
+                with open(loop_log, "a") as f:
+                    f.write(f"[Loop] Max iterations reached ({max_iterations})\n")
+                state["status"] = "max_iterations_reached"
+                save_loop_state(state)
+                result["final_status"] = "max_iterations_reached"
+                result["status"] = "max_iterations_reached"
             break
 
         # Prepare for next iteration
@@ -2710,6 +2957,8 @@ def run_verification_loop(
     result["total_iterations"] = len(result["iterations"])
     result["suggested_next_steps"] = state.get("suggested_next_steps", [])
     result["original_checkout_warnings"] = state.get("original_checkout_warnings", [])
+    if state.get("failure_reason"):
+        result["failure_reason"] = state["failure_reason"]
     return result
 
 
@@ -2733,6 +2982,7 @@ def run_verification_loop_background(
     sandbox_workspace: Optional[str] = None,
     sandbox_net: Optional[str] = None,
     original_repo_root: Optional[str] = None,
+    require_diff: bool = False,
 ) -> dict:
     """Start a verification loop in background mode.
 
@@ -2821,6 +3071,8 @@ def run_verification_loop_background(
         cmd.extend(["--sandbox-net", sandbox_net])
     if original_repo_root:
         cmd.extend(["--original-repo-root", original_repo_root])
+    if require_diff:
+        cmd.append("--require-diff")
 
     if worktree_path:
         # When in worktree, use --prompt-file to read TASK.md directly
@@ -2939,6 +3191,10 @@ def main():
                        help=f"Max iterations before giving up (default: {DEFAULT_MAX_ITERATIONS})")
     parser.add_argument("--completion-marker", default=DEFAULT_COMPLETION_MARKER,
                        help=f"Text pattern that signals completion (default: {DEFAULT_COMPLETION_MARKER})")
+    parser.add_argument("--require-diff", action="store_true",
+                       help="Reject the completion marker when no file changes (created, modified, "
+                            "or committed) are detected in the execution directory. "
+                            "Excludes executor-injected artifacts (TASK.md, .sisyphus/).")
     parser.add_argument("--loop-foreground", action="store_true",
                        help="Internal flag: run loop in foreground (used by background spawner)")
     parser.add_argument("--loop-status", action="store_true",
@@ -3027,6 +3283,7 @@ def main():
             result["loop_mode"] = True
             result["max_iterations"] = args.max_iterations
             result["completion_marker"] = args.completion_marker
+            result["require_diff"] = args.require_diff
 
         for prompt_file in prompt_files:
             # Use --prompt-number if provided (for worktree loops), otherwise extract from filename
@@ -3151,6 +3408,7 @@ def main():
                                 worktree_path=worktree_path,
                                 branch_name=branch_name,
                                 original_repo_root=original_repo_root,
+                                require_diff=args.require_diff,
                             )
                         else:
                             loop_result = run_verification_loop(
@@ -3166,6 +3424,7 @@ def main():
                                 worktree_path=worktree_path,
                                 branch_name=branch_name,
                                 original_repo_root=original_repo_root,
+                                require_diff=args.require_diff,
                             )
                         # For loop mode, show the loop log (exists immediately and is used by monitors)
                         prompt_info["log"] = loop_result["loop_log"]
@@ -3193,6 +3452,7 @@ def main():
                             sandbox_workspace=args.sandbox_workspace,
                             sandbox_net=args.sandbox_net,
                             original_repo_root=original_repo_root,
+                            require_diff=args.require_diff,
                         )
                         # For background loop, update displayed log to loop log
                         prompt_info["log"] = loop_result["loop_log"]

@@ -30,6 +30,7 @@ Execute prompts from `./prompts/` (including subfolders) using various AI models
 | `--loop, -l` | Enable iterative verification loop until completion |
 | `--max-iterations <n>` | Max loop iterations before giving up (default: 3) |
 | `--completion-marker <text>` | Text pattern signaling completion (default: VERIFICATION_COMPLETE) |
+| `--require-diff` | Reject the completion marker when no file changes (created, modified, or committed) are detected in the execution directory. Excludes executor-injected artifacts (TASK.md, .sisyphus/). |
 
 ### Prompt Selection Syntax
 
@@ -274,8 +275,21 @@ The `--loop` flag enables automatic re-running until the task is genuinely compl
 1. **Prompt Wrapping**: The original prompt is wrapped with a verification protocol
 2. **Execution**: CLI runs with the wrapped prompt
 3. **Completion Check**: Log is scanned for completion markers
-4. **Iteration**: If not complete, the process repeats with updated context
-5. **Termination**: Loop ends when marker found OR max iterations reached
+4. **Diff Verification** (when `--require-diff`): The execution directory is checked for actual file changes before accepting the completion marker
+5. **Dead-Loop Detection** (always on): Identical consecutive retry reasons trigger "stalled"; impossible-gate refusals trigger "blocked"
+6. **Iteration**: If not complete, the process repeats with updated context
+7. **Termination**: Loop ends when marker found (and verified), stalled, blocked, OR max iterations reached
+
+### Terminal Statuses
+
+| Status | Meaning |
+|--------|---------|
+| `completed` | Completion marker found and accepted |
+| `completed_unverified` | Completion marker found but `--require-diff` detected no file changes on the final iteration |
+| `max_iterations_reached` | Ran out of iterations without finding the completion marker |
+| `stalled` | Two consecutive iterations had the same retry reason (no progress possible) |
+| `blocked` | Retry reason indicates an impossible gate (e.g., file outside worktree); retrying will never help |
+| `failed` | Execution error or invalid working directory |
 
 ### Completion Protocol
 
@@ -336,11 +350,12 @@ python3 "$EXECUTOR" {PROMPT} --model {MODEL} {--worktree if requested} --run --l
 ```
 
 Parse the JSON output for:
-- `prompts[].execution.status` - "loop_running" for background, "completed"/"max_iterations_reached" for foreground
+- `prompts[].execution.status` - "loop_running" for background; "completed", "completed_unverified", "max_iterations_reached", "stalled", or "blocked" for foreground
 - `prompts[].execution.loop_log` - Log file for the loop process
 - `prompts[].execution.state_file` - Path to loop state JSON
 - `prompts[].execution.iterations` - Array of iteration results (foreground mode)
 - `prompts[].execution.suggested_next_steps` - Suggested follow-ups extracted from logs (foreground mode)
+- `prompts[].execution.failure_reason` - Present when status is "stalled" or "blocked"
 
 ### Monitor Agent for Loop Mode (variation of Step 2 Part B)
 
@@ -397,6 +412,7 @@ Task(
 /daplug:run-prompt 123 --model codex --loop      # With verification loop
 /daplug:run-prompt 123 --model codex --loop --max-iterations 5  # Custom max
 /daplug:run-prompt 123 --model codex --worktree --loop  # Worktree + loop
+/daplug:run-prompt 123 --model codex --loop --require-diff  # Verify file changes before accepting completion
 ```
 
 ## Cleanup (after completion)
