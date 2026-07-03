@@ -51,22 +51,23 @@ echo "${PREFERRED_AGENT:-not_set}"
 
 2. **If not found, prompt the user:**
 Use AskUserQuestion tool with options:
-- `claude` - Claude Code (default, most capable)
-- `cc-sonnet` - Claude Code Sonnet alias
-- `cc-opus` - Claude Code Opus alias
+<!-- BEGIN GENERATED: preferred-agent-options -->
+- `claude` - Claude Code Task subagent (default, current context)
+- `cc-sonnet` - Claude Code CLI Sonnet alias
+- `cc-opus` - Claude Code CLI Opus alias
 - `codex` - OpenAI Codex CLI (gpt-5.5, fast execution)
 - `codex-spark` - OpenAI Codex Spark (lowest-latency tier)
 - `codex-high` - OpenAI Codex CLI with high reasoning effort
-- `codex-xhigh` - OpenAI Codex CLI with extra-high reasoning effort
+- `codex-xhigh` - OpenAI Codex CLI with xhigh reasoning effort
 - `gpt54` - OpenAI GPT-5.4 (direct shorthand)
 - `gpt54-high` - OpenAI GPT-5.4 with high reasoning effort
-- `gpt54-xhigh` - OpenAI GPT-5.4 with extra-high reasoning
+- `gpt54-xhigh` - OpenAI GPT-5.4 with xhigh reasoning
 - `gpt55` - OpenAI GPT-5.5 (direct shorthand)
 - `gpt55-high` - OpenAI GPT-5.5 with high reasoning effort
-- `gpt55-xhigh` - OpenAI GPT-5.5 with extra-high reasoning
+- `gpt55-xhigh` - OpenAI GPT-5.5 with xhigh reasoning
 - `gpt52` - OpenAI GPT-5.2 (planning, research, analysis)
 - `gpt52-high` - OpenAI GPT-5.2 with high reasoning effort
-- `gpt52-xhigh` - OpenAI GPT-5.2 with extra-high reasoning (30+ min tasks)
+- `gpt52-xhigh` - OpenAI GPT-5.2 with xhigh reasoning (30+ min tasks)
 - `gemini` - Gemini 3 Flash Preview (default Gemini shorthand)
 - `gemini-high` - Gemini 2.5 Pro
 - `gemini-xhigh` - Gemini 3 Pro Preview
@@ -78,19 +79,20 @@ Use AskUserQuestion tool with options:
 - `gemini31pro` - Gemini 3.1 Pro Preview (if your account has access)
 - Google shorthands prefer Antigravity CLI (`agy`) when healthy and fall back to legacy `gemini`.
 - `zai` - Z.AI GLM-4.7 via Codex CLI
-- `glm5` - Z.AI GLM-5.2 via OpenCode
-- `glm52` - Z.AI GLM-5.2 via OpenCode (explicit pin)
+- `glm5` - Z.AI GLM-5.2 via OpenCode (latest GLM 5.x, 1M context)
+- `glm52` - Z.AI GLM-5.2 via OpenCode (explicit pin, 1M context)
 - `kimi` - Kimi K2.5 via OpenCode
 - `synthetic` - GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, 512k context)
 - `syn-flash` - GLM-4.7-Flash via Synthetic / OpenCode
 - `syn-kimi` - Kimi-K2.6 via Synthetic / OpenCode (vision)
 - `syn-qwen` - Qwen3.6-27B via Synthetic / OpenCode (vision)
 - `opencode` - OpenCode runner with Z.AI GLM-4.7
-- `local` - Local model via opencode + LMStudio
+- `local` - Local qwen3-coder-next via opencode + LMStudio
 - `qwen` - Qwen via opencode + LMStudio
 - `devstral` - Devstral via opencode + LMStudio
 - `glm-local` - Local GLM-4.7-Flash via opencode + LMStudio
 - `qwen-small` - Local qwen3-4b model via opencode + LMStudio
+<!-- END GENERATED: preferred-agent-options -->
 
 3. **After user selects, save to user-level `~/.claude/CLAUDE.md`** (applies to all projects):
 ```bash

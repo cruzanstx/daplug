@@ -1,0 +1,1812 @@
+{
+  "schema_version": 1,
+  "model_order_note": "This file is the single source of truth for daplug model shorthands. Run python3 scripts/manage-models.py generate after editing.",
+  "models": [
+    {
+      "name": "claude",
+      "display": "claude (Claude Sonnet)",
+      "model_id": "anthropic:claude",
+      "default_cli": "subagent",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": null,
+      "command": [],
+      "routing": {
+        "cli_overrides": [
+          "claude"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Claude",
+        "cli_label": "subagent",
+        "actual_model": "Claude Code Task subagent (configured in Claude Code)",
+        "option_description": "Claude Code Task subagent (default, current context)",
+        "reference_cli": "(Task subagent)",
+        "reference_description": "Complex reasoning in current Claude Code context",
+        "readme_section": "Claude",
+        "readme_model": "claude",
+        "best_for": "Complex reasoning in current Claude Code context",
+        "prompt_description": "Claude Code Task subagent (default, current context)",
+        "menu_note": "sub-agent in current context",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "cc-sonnet",
+      "display": "cc-sonnet (Claude Sonnet 4.6 via Claude Code)",
+      "model_id": "anthropic:sonnet",
+      "default_cli": "claude",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": "sonnet",
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "stdin",
+      "command": [
+        "claude",
+        "--print",
+        "--no-session-persistence",
+        "--output-format",
+        "text",
+        "--input-format",
+        "text",
+        "--permission-mode",
+        "dontAsk",
+        "--model",
+        "sonnet"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "claude"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Claude",
+        "cli_label": "claude",
+        "actual_model": "sonnet (Claude Sonnet 4.6 alias)",
+        "option_description": "Claude Code CLI Sonnet alias",
+        "reference_cli": "claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model sonnet",
+        "reference_description": "Claude Code CLI Sonnet runs",
+        "readme_section": "Claude",
+        "readme_model": "sonnet",
+        "best_for": "Claude Code CLI Sonnet runs",
+        "prompt_description": "Claude Code CLI Sonnet alias",
+        "menu_note": "Claude Code CLI Sonnet",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "cc-opus",
+      "display": "cc-opus (Claude Opus 4.6 via Claude Code)",
+      "model_id": "anthropic:opus",
+      "default_cli": "claude",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": "opus",
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "stdin",
+      "command": [
+        "claude",
+        "--print",
+        "--no-session-persistence",
+        "--output-format",
+        "text",
+        "--input-format",
+        "text",
+        "--permission-mode",
+        "dontAsk",
+        "--model",
+        "opus"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "claude"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Claude",
+        "cli_label": "claude",
+        "actual_model": "opus (Claude Opus 4.6 alias)",
+        "option_description": "Claude Code CLI Opus alias",
+        "reference_cli": "claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model opus",
+        "reference_description": "Claude Code CLI Opus runs",
+        "readme_section": "Claude",
+        "readme_model": "opus",
+        "best_for": "Claude Code CLI Opus runs",
+        "prompt_description": "Claude Code CLI Opus alias",
+        "menu_note": "Claude Code CLI Opus",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "codex",
+      "display": "codex (gpt-5.5)",
+      "model_id": "openai:gpt-5.5",
+      "default_cli": "codex",
+      "supports_codex_reasoning": true,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "dash",
+      "command": [
+        "codex",
+        "exec",
+        "--full-auto"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "OpenAI Codex",
+        "cli_label": "codex",
+        "actual_model": "gpt-5.5",
+        "option_description": "OpenAI Codex CLI (gpt-5.5, fast execution)",
+        "reference_cli": "codex exec --full-auto",
+        "reference_description": "Fast coding execution (default Codex shorthand)",
+        "readme_section": "OpenAI",
+        "readme_model": "gpt-5.5",
+        "best_for": "Fast coding execution (default Codex shorthand)",
+        "prompt_description": "OpenAI Codex CLI (gpt-5.5, fast execution)",
+        "menu_note": "gpt-5.5 standard",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "codex-spark",
+      "display": "codex-spark (gpt-5.3-codex-spark, low latency)",
+      "model_id": "openai:gpt-5.3-codex-spark",
+      "default_cli": "codex",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "dash",
+      "command": [
+        "codex",
+        "exec",
+        "--full-auto",
+        "-m",
+        "gpt-5.3-codex-spark"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "OpenAI Codex",
+        "cli_label": "codex",
+        "actual_model": "gpt-5.3-codex-spark (low latency)",
+        "option_description": "OpenAI Codex Spark (lowest-latency tier)",
+        "reference_cli": "codex exec --full-auto -m gpt-5.3-codex-spark",
+        "reference_description": "Lowest-latency quick edits",
+        "readme_section": "OpenAI",
+        "readme_model": "gpt-5.3-codex-spark",
+        "best_for": "Lowest-latency quick edits",
+        "prompt_description": "OpenAI Codex Spark (lowest-latency tier)",
+        "menu_note": "fast/low-cost coding tier",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "codex-high",
+      "display": "codex-high (gpt-5.5, high reasoning)",
+      "model_id": "openai:gpt-5.5",
+      "default_cli": "codex",
+      "supports_codex_reasoning": true,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": "codex",
+      "default_variant": "high",
+      "env": {},
+      "stdin_mode": "dash",
+      "command": [
+        "codex",
+        "exec",
+        "--full-auto",
+        "-c",
+        "model_reasoning_effort=\"high\""
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "OpenAI Codex",
+        "cli_label": "codex",
+        "actual_model": "gpt-5.5 (high reasoning)",
+        "option_description": "OpenAI Codex CLI with high reasoning effort",
+        "reference_cli": "codex exec --full-auto -c model_reasoning_effort=\"high\"",
+        "reference_description": "Complex coding",
+        "readme_section": "OpenAI",
+        "readme_model": "gpt-5.5",
+        "best_for": "Complex coding",
+        "prompt_description": "OpenAI Codex CLI with high reasoning effort",
+        "menu_note": "higher reasoning",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "codex-xhigh",
+      "display": "codex-xhigh (gpt-5.5, xhigh reasoning)",
+      "model_id": "openai:gpt-5.5",
+      "default_cli": "codex",
+      "supports_codex_reasoning": true,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": "codex",
+      "default_variant": "xhigh",
+      "env": {},
+      "stdin_mode": "dash",
+      "command": [
+        "codex",
+        "exec",
+        "--full-auto",
+        "-c",
+        "model_reasoning_effort=\"xhigh\""
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "OpenAI Codex",
+        "cli_label": "codex",
+        "actual_model": "gpt-5.5 (xhigh reasoning)",
+        "option_description": "OpenAI Codex CLI with xhigh reasoning effort",
+        "reference_cli": "codex exec --full-auto -c model_reasoning_effort=\"xhigh\"",
+        "reference_description": "Large refactors",
+        "readme_section": "OpenAI",
+        "readme_model": "gpt-5.5",
+        "best_for": "Large refactors",
+        "prompt_description": "OpenAI Codex CLI with xhigh reasoning effort",
+        "menu_note": "maximum reasoning",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "gpt54",
+      "display": "gpt54 (GPT-5.4, direct shorthand)",
+      "model_id": "openai:gpt-5.4",
+      "default_cli": "codex",
+      "supports_codex_reasoning": true,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "dash",
+      "command": [
+        "codex",
+        "exec",
+        "--full-auto",
+        "-m",
+        "gpt-5.4"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "OpenAI Codex",
+        "cli_label": "codex",
+        "actual_model": "gpt-5.4",
+        "option_description": "OpenAI GPT-5.4 (direct shorthand)",
+        "reference_cli": "codex exec --full-auto -m gpt-5.4",
+        "reference_description": "Explicit GPT-5.4 shorthand",
+        "readme_section": "OpenAI",
+        "readme_model": "gpt-5.4",
+        "best_for": "Explicit GPT-5.4 shorthand",
+        "prompt_description": "OpenAI GPT-5.4 (direct shorthand)",
+        "menu_note": "gpt-5.4 explicit shorthand",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "gpt54-high",
+      "display": "gpt54-high (GPT-5.4, high reasoning)",
+      "model_id": "openai:gpt-5.4",
+      "default_cli": "codex",
+      "supports_codex_reasoning": true,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": "gpt54",
+      "default_variant": "high",
+      "env": {},
+      "stdin_mode": "dash",
+      "command": [
+        "codex",
+        "exec",
+        "--full-auto",
+        "-m",
+        "gpt-5.4",
+        "-c",
+        "model_reasoning_effort=\"high\""
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "OpenAI Codex",
+        "cli_label": "codex",
+        "actual_model": "gpt-5.4 (high reasoning)",
+        "option_description": "OpenAI GPT-5.4 with high reasoning effort",
+        "reference_cli": "codex exec --full-auto -m gpt-5.4 -c model_reasoning_effort=\"high\"",
+        "reference_description": "Deep reasoning with GPT-5.4",
+        "readme_section": "OpenAI",
+        "readme_model": "gpt-5.4",
+        "best_for": "Deep reasoning with GPT-5.4",
+        "prompt_description": "OpenAI GPT-5.4 with high reasoning effort",
+        "menu_note": "deep reasoning",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "gpt54-xhigh",
+      "display": "gpt54-xhigh (GPT-5.4, xhigh reasoning)",
+      "model_id": "openai:gpt-5.4",
+      "default_cli": "codex",
+      "supports_codex_reasoning": true,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": "gpt54",
+      "default_variant": "xhigh",
+      "env": {},
+      "stdin_mode": "dash",
+      "command": [
+        "codex",
+        "exec",
+        "--full-auto",
+        "-m",
+        "gpt-5.4",
+        "-c",
+        "model_reasoning_effort=\"xhigh\""
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "OpenAI Codex",
+        "cli_label": "codex",
+        "actual_model": "gpt-5.4 (xhigh reasoning)",
+        "option_description": "OpenAI GPT-5.4 with xhigh reasoning",
+        "reference_cli": "codex exec --full-auto -m gpt-5.4 -c model_reasoning_effort=\"xhigh\"",
+        "reference_description": "Maximum reasoning with GPT-5.4",
+        "readme_section": "OpenAI",
+        "readme_model": "gpt-5.4",
+        "best_for": "Maximum reasoning with GPT-5.4",
+        "prompt_description": "OpenAI GPT-5.4 with xhigh reasoning",
+        "menu_note": "maximum reasoning",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "gpt55",
+      "display": "gpt55 (GPT-5.5, direct shorthand)",
+      "model_id": "openai:gpt-5.5",
+      "default_cli": "codex",
+      "supports_codex_reasoning": true,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "dash",
+      "command": [
+        "codex",
+        "exec",
+        "--full-auto"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "OpenAI Codex",
+        "cli_label": "codex",
+        "actual_model": "gpt-5.5",
+        "option_description": "OpenAI GPT-5.5 (direct shorthand)",
+        "reference_cli": "codex exec --full-auto",
+        "reference_description": "Explicit GPT-5.5 shorthand",
+        "readme_section": "OpenAI",
+        "readme_model": "gpt-5.5",
+        "best_for": "Explicit GPT-5.5 shorthand",
+        "prompt_description": "OpenAI GPT-5.5 (direct shorthand)",
+        "menu_note": "gpt-5.5 explicit shorthand",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "gpt55-high",
+      "display": "gpt55-high (GPT-5.5, high reasoning)",
+      "model_id": "openai:gpt-5.5",
+      "default_cli": "codex",
+      "supports_codex_reasoning": true,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": "gpt55",
+      "default_variant": "high",
+      "env": {},
+      "stdin_mode": "dash",
+      "command": [
+        "codex",
+        "exec",
+        "--full-auto",
+        "-c",
+        "model_reasoning_effort=\"high\""
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "OpenAI Codex",
+        "cli_label": "codex",
+        "actual_model": "gpt-5.5 (high reasoning)",
+        "option_description": "OpenAI GPT-5.5 with high reasoning effort",
+        "reference_cli": "codex exec --full-auto -c model_reasoning_effort=\"high\"",
+        "reference_description": "Deep reasoning with GPT-5.5",
+        "readme_section": "OpenAI",
+        "readme_model": "gpt-5.5",
+        "best_for": "Deep reasoning with GPT-5.5",
+        "prompt_description": "OpenAI GPT-5.5 with high reasoning effort",
+        "menu_note": "deep reasoning",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "gpt55-xhigh",
+      "display": "gpt55-xhigh (GPT-5.5, xhigh reasoning)",
+      "model_id": "openai:gpt-5.5",
+      "default_cli": "codex",
+      "supports_codex_reasoning": true,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": "gpt55",
+      "default_variant": "xhigh",
+      "env": {},
+      "stdin_mode": "dash",
+      "command": [
+        "codex",
+        "exec",
+        "--full-auto",
+        "-c",
+        "model_reasoning_effort=\"xhigh\""
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "OpenAI Codex",
+        "cli_label": "codex",
+        "actual_model": "gpt-5.5 (xhigh reasoning)",
+        "option_description": "OpenAI GPT-5.5 with xhigh reasoning",
+        "reference_cli": "codex exec --full-auto -c model_reasoning_effort=\"xhigh\"",
+        "reference_description": "Maximum reasoning with GPT-5.5",
+        "readme_section": "OpenAI",
+        "readme_model": "gpt-5.5",
+        "best_for": "Maximum reasoning with GPT-5.5",
+        "prompt_description": "OpenAI GPT-5.5 with xhigh reasoning",
+        "menu_note": "maximum reasoning",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "gpt52",
+      "display": "gpt52 (GPT-5.2, planning/research)",
+      "model_id": "openai:gpt-5.2",
+      "default_cli": "codex",
+      "supports_codex_reasoning": true,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "dash",
+      "command": [
+        "codex",
+        "exec",
+        "--full-auto",
+        "-m",
+        "gpt-5.2"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "OpenAI Codex",
+        "cli_label": "codex",
+        "actual_model": "gpt-5.2",
+        "option_description": "OpenAI GPT-5.2 (planning, research, analysis)",
+        "reference_cli": "codex exec --full-auto -m gpt-5.2",
+        "reference_description": "Planning, research, analysis",
+        "readme_section": "OpenAI",
+        "readme_model": "gpt-5.2",
+        "best_for": "Planning, research, analysis",
+        "prompt_description": "OpenAI GPT-5.2 (planning, research, analysis)",
+        "menu_note": "planning, research, analysis",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "gpt52-high",
+      "display": "gpt52-high (GPT-5.2, high reasoning)",
+      "model_id": "openai:gpt-5.2",
+      "default_cli": "codex",
+      "supports_codex_reasoning": true,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": "gpt52",
+      "default_variant": "high",
+      "env": {},
+      "stdin_mode": "dash",
+      "command": [
+        "codex",
+        "exec",
+        "--full-auto",
+        "-m",
+        "gpt-5.2",
+        "-c",
+        "model_reasoning_effort=\"high\""
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "OpenAI Codex",
+        "cli_label": "codex",
+        "actual_model": "gpt-5.2 (high reasoning)",
+        "option_description": "OpenAI GPT-5.2 with high reasoning effort",
+        "reference_cli": "codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort=\"high\"",
+        "reference_description": "Deep reasoning",
+        "readme_section": "OpenAI",
+        "readme_model": "gpt-5.2",
+        "best_for": "Deep reasoning",
+        "prompt_description": "OpenAI GPT-5.2 with high reasoning effort",
+        "menu_note": "deep reasoning",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "gpt52-xhigh",
+      "display": "gpt52-xhigh (GPT-5.2, xhigh reasoning, 30+ min tasks)",
+      "model_id": "openai:gpt-5.2",
+      "default_cli": "codex",
+      "supports_codex_reasoning": true,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": "gpt52",
+      "default_variant": "xhigh",
+      "env": {},
+      "stdin_mode": "dash",
+      "command": [
+        "codex",
+        "exec",
+        "--full-auto",
+        "-m",
+        "gpt-5.2",
+        "-c",
+        "model_reasoning_effort=\"xhigh\""
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "OpenAI Codex",
+        "cli_label": "codex",
+        "actual_model": "gpt-5.2 (xhigh reasoning)",
+        "option_description": "OpenAI GPT-5.2 with xhigh reasoning (30+ min tasks)",
+        "reference_cli": "codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort=\"xhigh\"",
+        "reference_description": "Maximum reasoning (30+ min)",
+        "readme_section": "OpenAI",
+        "readme_model": "gpt-5.2",
+        "best_for": "Maximum reasoning (30+ min)",
+        "prompt_description": "OpenAI GPT-5.2 with xhigh reasoning (30+ min tasks)",
+        "menu_note": "maximum reasoning (30+ min tasks)",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "gemini",
+      "display": "gemini (Gemini 3 Flash)",
+      "model_id": "google:gemini-3-flash-preview",
+      "default_cli": "gemini",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "gemini",
+        "-y",
+        "-m",
+        "gemini-3-flash-preview",
+        "-p"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "agy",
+          "gemini"
+        ],
+        "force_direct_opencode": false,
+        "google": true,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Google Gemini",
+        "cli_label": "agy/gemini",
+        "actual_model": "gemini-3-flash-preview",
+        "option_description": "Gemini 3 Flash Preview (default Gemini shorthand)",
+        "reference_cli": "gemini -y -m gemini-3-flash-preview",
+        "reference_description": "Fast daily driver (default)",
+        "readme_section": "Google Gemini",
+        "readme_model": "gemini-3-flash-preview",
+        "best_for": "Fast daily driver (default)",
+        "prompt_description": "Gemini 3 Flash Preview (default Gemini shorthand)",
+        "menu_note": "3-flash, best coding performance",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "gemini-high",
+      "display": "gemini-high (Gemini 2.5 Pro)",
+      "model_id": "google:gemini-2.5-pro",
+      "default_cli": "gemini",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "gemini",
+        "-y",
+        "-m",
+        "gemini-2.5-pro",
+        "-p"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "agy",
+          "gemini"
+        ],
+        "force_direct_opencode": false,
+        "google": true,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Google Gemini",
+        "cli_label": "agy/gemini",
+        "actual_model": "gemini-2.5-pro",
+        "option_description": "Gemini 2.5 Pro",
+        "reference_cli": "gemini -y -m gemini-2.5-pro",
+        "reference_description": "Stable, more capable",
+        "readme_section": "Google Gemini",
+        "readme_model": "gemini-2.5-pro",
+        "best_for": "Stable, more capable",
+        "prompt_description": "Gemini 2.5 Pro",
+        "menu_note": "2.5-pro",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "gemini-xhigh",
+      "display": "gemini-xhigh (Gemini 3 Pro)",
+      "model_id": "google:gemini-3-pro-preview",
+      "default_cli": "gemini",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "gemini",
+        "-y",
+        "-m",
+        "gemini-3-pro-preview",
+        "-p"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "agy",
+          "gemini"
+        ],
+        "force_direct_opencode": false,
+        "google": true,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Google Gemini",
+        "cli_label": "agy/gemini",
+        "actual_model": "gemini-3-pro-preview",
+        "option_description": "Gemini 3 Pro Preview",
+        "reference_cli": "gemini -y -m gemini-3-pro-preview",
+        "reference_description": "Most capable Gemini fallback",
+        "readme_section": "Google Gemini",
+        "readme_model": "gemini-3-pro-preview",
+        "best_for": "Most capable Gemini fallback",
+        "prompt_description": "Gemini 3 Pro Preview",
+        "menu_note": "3-pro preview",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "gemini25pro",
+      "display": "gemini25pro (Gemini 2.5 Pro)",
+      "model_id": "google:gemini-2.5-pro",
+      "default_cli": "gemini",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "gemini",
+        "-y",
+        "-m",
+        "gemini-2.5-pro",
+        "-p"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "agy",
+          "gemini"
+        ],
+        "force_direct_opencode": false,
+        "google": true,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Google Gemini",
+        "cli_label": "agy/gemini",
+        "actual_model": "gemini-2.5-pro",
+        "option_description": "Gemini 2.5 Pro (explicit shorthand)",
+        "reference_cli": "gemini -y -m gemini-2.5-pro",
+        "reference_description": "Explicit stable Pro selection",
+        "readme_section": "Google Gemini",
+        "readme_model": "gemini-2.5-pro",
+        "best_for": "Explicit stable Pro selection",
+        "prompt_description": "Gemini 2.5 Pro (explicit shorthand)",
+        "menu_note": "2.5-pro, stable/capable",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "gemini25flash",
+      "display": "gemini25flash (Gemini 2.5 Flash)",
+      "model_id": "google:gemini-2.5-flash",
+      "default_cli": "gemini",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "gemini",
+        "-y",
+        "-m",
+        "gemini-2.5-flash",
+        "-p"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "agy",
+          "gemini"
+        ],
+        "force_direct_opencode": false,
+        "google": true,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Google Gemini",
+        "cli_label": "agy/gemini",
+        "actual_model": "gemini-2.5-flash",
+        "option_description": "Gemini 2.5 Flash",
+        "reference_cli": "gemini -y -m gemini-2.5-flash",
+        "reference_description": "Fast, cost-effective",
+        "readme_section": "Google Gemini",
+        "readme_model": "gemini-2.5-flash",
+        "best_for": "Fast, cost-effective",
+        "prompt_description": "Gemini 2.5 Flash",
+        "menu_note": "2.5-flash, fast/cost-effective",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "gemini25lite",
+      "display": "gemini25lite (Gemini 2.5 Flash-Lite)",
+      "model_id": "google:gemini-2.5-flash-lite",
+      "default_cli": "gemini",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "gemini",
+        "-y",
+        "-m",
+        "gemini-2.5-flash-lite",
+        "-p"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "agy",
+          "gemini"
+        ],
+        "force_direct_opencode": false,
+        "google": true,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Google Gemini",
+        "cli_label": "agy/gemini",
+        "actual_model": "gemini-2.5-flash-lite",
+        "option_description": "Gemini 2.5 Flash-Lite",
+        "reference_cli": "gemini -y -m gemini-2.5-flash-lite",
+        "reference_description": "Fastest Gemini option",
+        "readme_section": "Google Gemini",
+        "readme_model": "gemini-2.5-flash-lite",
+        "best_for": "Fastest Gemini option",
+        "prompt_description": "Gemini 2.5 Flash-Lite",
+        "menu_note": "2.5-flash-lite, fastest",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "gemini3flash",
+      "display": "gemini3flash (Gemini 3 Flash Preview)",
+      "model_id": "google:gemini-3-flash-preview",
+      "default_cli": "gemini",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "gemini",
+        "-y",
+        "-m",
+        "gemini-3-flash-preview",
+        "-p"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "agy",
+          "gemini"
+        ],
+        "force_direct_opencode": false,
+        "google": true,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Google Gemini",
+        "cli_label": "agy/gemini",
+        "actual_model": "gemini-3-flash-preview",
+        "option_description": "Gemini 3 Flash Preview (explicit shorthand)",
+        "reference_cli": "gemini -y -m gemini-3-flash-preview",
+        "reference_description": "Explicit 3 Flash selection",
+        "readme_section": "Google Gemini",
+        "readme_model": "gemini-3-flash-preview",
+        "best_for": "Explicit 3 Flash selection",
+        "prompt_description": "Gemini 3 Flash Preview (explicit shorthand)",
+        "menu_note": "3-flash explicit",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "gemini3pro",
+      "display": "gemini3pro (Gemini 3 Pro Preview)",
+      "model_id": "google:gemini-3-pro-preview",
+      "default_cli": "gemini",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "gemini",
+        "-y",
+        "-m",
+        "gemini-3-pro-preview",
+        "-p"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "agy",
+          "gemini"
+        ],
+        "force_direct_opencode": false,
+        "google": true,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Google Gemini",
+        "cli_label": "agy/gemini",
+        "actual_model": "gemini-3-pro-preview",
+        "option_description": "Gemini 3 Pro Preview (explicit shorthand)",
+        "reference_cli": "gemini -y -m gemini-3-pro-preview",
+        "reference_description": "Explicit 3 Pro selection",
+        "readme_section": "Google Gemini",
+        "readme_model": "gemini-3-pro-preview",
+        "best_for": "Explicit 3 Pro selection",
+        "prompt_description": "Gemini 3 Pro Preview (explicit shorthand)",
+        "menu_note": "3-pro, most capable",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "gemini31pro",
+      "display": "gemini31pro (Gemini 3.1 Pro Preview, if available)",
+      "model_id": "google:gemini-3.1-pro-preview",
+      "default_cli": "gemini",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "gemini",
+        "-y",
+        "-m",
+        "gemini-3.1-pro-preview",
+        "-p"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "agy",
+          "gemini"
+        ],
+        "force_direct_opencode": false,
+        "google": true,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Google Gemini",
+        "cli_label": "agy/gemini",
+        "actual_model": "gemini-3.1-pro-preview (if available)",
+        "option_description": "Gemini 3.1 Pro Preview (if your account has access)",
+        "reference_cli": "gemini -y -m gemini-3.1-pro-preview",
+        "reference_description": "Latest Pro model (if available)",
+        "readme_section": "Google Gemini",
+        "readme_model": "gemini-3.1-pro-preview",
+        "best_for": "Latest Pro model (if available)",
+        "prompt_description": "Gemini 3.1 Pro Preview (if your account has access)",
+        "menu_note": "3.1 Pro Preview if available",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "zai",
+      "display": "zai (GLM-4.7 via Codex - may have issues)",
+      "model_id": "zai:glm-4.7",
+      "default_cli": "codex",
+      "supports_codex_reasoning": false,
+      "codex_profile": "zai",
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "dash",
+      "command": [
+        "codex",
+        "exec",
+        "--full-auto",
+        "--profile",
+        "zai"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Z.AI / OpenCode",
+        "cli_label": "codex",
+        "actual_model": "GLM-4.7 via Z.AI (may have issues)",
+        "option_description": "Z.AI GLM-4.7 via Codex CLI",
+        "reference_cli": "codex exec --full-auto --profile zai",
+        "reference_description": "General coding fallback",
+        "readme_section": "Z.AI / OpenCode",
+        "readme_model": "glm-4.7",
+        "best_for": "General coding fallback",
+        "prompt_description": "Z.AI GLM-4.7 via Codex CLI",
+        "menu_note": "Z.AI GLM-4.7",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "glm5",
+      "display": "glm5 (GLM-5.2 via OpenCode \u2014 latest GLM 5.x, 1M context)",
+      "model_id": "zai:glm-5.2",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": "glm5",
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "zai/glm-5.2"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Z.AI / OpenCode",
+        "cli_label": "opencode",
+        "actual_model": "GLM-5.2 via OpenCode (latest GLM 5.x, 1M context)",
+        "option_description": "Z.AI GLM-5.2 via OpenCode (latest GLM 5.x, 1M context)",
+        "reference_cli": "opencode run --format json -m zai/glm-5.2",
+        "reference_description": "Latest GLM 5.x tasks via OpenCode",
+        "readme_section": "Z.AI / OpenCode",
+        "readme_model": "glm-5.2",
+        "best_for": "Latest GLM 5.x tasks via OpenCode",
+        "prompt_description": "Z.AI GLM-5.2 via OpenCode (latest GLM 5.x, 1M context)",
+        "menu_note": "Z.AI GLM-5.2 latest alias",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "glm52",
+      "display": "glm52 (GLM-5.2 via OpenCode \u2014 explicit pin, 1M context)",
+      "model_id": "zai:glm-5.2",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "zai/glm-5.2"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Z.AI / OpenCode",
+        "cli_label": "opencode",
+        "actual_model": "GLM-5.2 via OpenCode (explicit pin, 1M context)",
+        "option_description": "Z.AI GLM-5.2 via OpenCode (explicit pin, 1M context)",
+        "reference_cli": "opencode run --format json -m zai/glm-5.2",
+        "reference_description": "Explicit GLM-5.2 pin via OpenCode",
+        "readme_section": "Z.AI / OpenCode",
+        "readme_model": "glm-5.2",
+        "best_for": "Explicit GLM-5.2 pin via OpenCode",
+        "prompt_description": "Z.AI GLM-5.2 via OpenCode (explicit pin, 1M context)",
+        "menu_note": "Z.AI GLM-5.2 explicit pin",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "kimi",
+      "display": "kimi (Kimi K2.5 via OpenCode)",
+      "model_id": "opencode:kimi-k2.5",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "opencode/kimi-k2.5"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Z.AI / OpenCode",
+        "cli_label": "opencode",
+        "actual_model": "Kimi K2.5 via OpenCode",
+        "option_description": "Kimi K2.5 via OpenCode",
+        "reference_cli": "opencode run --format json -m opencode/kimi-k2.5",
+        "reference_description": "Kimi K2.5 via OpenCode",
+        "readme_section": "Z.AI / OpenCode",
+        "readme_model": "kimi-k2.5",
+        "best_for": "Kimi K2.5 via OpenCode",
+        "prompt_description": "Kimi K2.5 via OpenCode",
+        "menu_note": "Kimi K2.5 via OpenCode",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "synthetic",
+      "display": "synthetic (GLM-5.2 via Synthetic, 512k context)",
+      "model_id": "synthetic:syn:large:text",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "synthetic/syn:large:text"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": true
+      },
+      "docs": {
+        "family": "Synthetic",
+        "cli_label": "opencode",
+        "actual_model": "GLM-5.2 via Synthetic (`syn:large:text`, 512k context)",
+        "option_description": "GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, 512k context)",
+        "reference_cli": "opencode run --format json -m synthetic/syn:large:text",
+        "reference_description": "GLM-5.2 default, 512k context",
+        "readme_section": "Synthetic",
+        "readme_model": "`syn:large:text`",
+        "best_for": "GLM-5.2 default, 512k context",
+        "prompt_description": "GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, 512k context)",
+        "menu_note": "Synthetic GLM-5.2",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "syn-flash",
+      "display": "syn-flash (GLM-4.7-Flash via Synthetic)",
+      "model_id": "synthetic:syn:small:text",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "synthetic/syn:small:text"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": true
+      },
+      "docs": {
+        "family": "Synthetic",
+        "cli_label": "opencode",
+        "actual_model": "GLM-4.7-Flash via Synthetic (`syn:small:text`)",
+        "option_description": "GLM-4.7-Flash via Synthetic / OpenCode",
+        "reference_cli": "opencode run --format json -m synthetic/syn:small:text",
+        "reference_description": "Fast GLM-4.7-Flash fallback",
+        "readme_section": "Synthetic",
+        "readme_model": "`syn:small:text`",
+        "best_for": "Fast GLM-4.7-Flash fallback",
+        "prompt_description": "GLM-4.7-Flash via Synthetic / OpenCode",
+        "menu_note": "Synthetic GLM-4.7-Flash",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "syn-kimi",
+      "display": "syn-kimi (Kimi-K2.6 via Synthetic, vision)",
+      "model_id": "synthetic:syn:large:vision",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "synthetic/syn:large:vision"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": true
+      },
+      "docs": {
+        "family": "Synthetic",
+        "cli_label": "opencode",
+        "actual_model": "Kimi-K2.6 via Synthetic (`syn:large:vision`, vision)",
+        "option_description": "Kimi-K2.6 via Synthetic / OpenCode (vision)",
+        "reference_cli": "opencode run --format json -m synthetic/syn:large:vision",
+        "reference_description": "Kimi-K2.6 vision tasks",
+        "readme_section": "Synthetic",
+        "readme_model": "`syn:large:vision`",
+        "best_for": "Kimi-K2.6 vision tasks",
+        "prompt_description": "Kimi-K2.6 via Synthetic / OpenCode (vision)",
+        "menu_note": "Synthetic Kimi-K2.6 vision",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "syn-qwen",
+      "display": "syn-qwen (Qwen3.6-27B via Synthetic, vision)",
+      "model_id": "synthetic:syn:small:vision",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "synthetic/syn:small:vision"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": true
+      },
+      "docs": {
+        "family": "Synthetic",
+        "cli_label": "opencode",
+        "actual_model": "Qwen3.6-27B via Synthetic (`syn:small:vision`, vision)",
+        "option_description": "Qwen3.6-27B via Synthetic / OpenCode (vision)",
+        "reference_cli": "opencode run --format json -m synthetic/syn:small:vision",
+        "reference_description": "Qwen3.6-27B vision tasks",
+        "readme_section": "Synthetic",
+        "readme_model": "`syn:small:vision`",
+        "best_for": "Qwen3.6-27B vision tasks",
+        "prompt_description": "Qwen3.6-27B via Synthetic / OpenCode (vision)",
+        "menu_note": "Synthetic Qwen3.6-27B vision",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "opencode",
+      "display": "opencode (GLM-4.7 via OpenCode)",
+      "model_id": "zai:glm-4.7",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "zai/glm-4.7"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Z.AI / OpenCode",
+        "cli_label": "opencode",
+        "actual_model": "GLM-4.7 via OpenCode (recommended; JSON output)",
+        "option_description": "OpenCode runner with Z.AI GLM-4.7",
+        "reference_cli": "opencode run --format json -m zai/glm-4.7",
+        "reference_description": "Recommended OpenCode JSON runner",
+        "readme_section": "Z.AI / OpenCode",
+        "readme_model": "glm-4.7",
+        "best_for": "Recommended OpenCode JSON runner",
+        "prompt_description": "OpenCode runner with Z.AI GLM-4.7",
+        "menu_note": "OpenCode GLM-4.7",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "local",
+      "display": "qwen-coder (local via opencode)",
+      "model_id": "lmstudio:qwen3-coder-next",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": "local",
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "lmstudio/qwen3-coder-next"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Local",
+        "cli_label": "opencode",
+        "actual_model": "qwen3-coder-next via LMStudio (opencode default, --cli codex for legacy)",
+        "option_description": "Local qwen3-coder-next via opencode + LMStudio",
+        "reference_cli": "opencode run --format json -m lmstudio/qwen3-coder-next",
+        "reference_description": "Local qwen-coder model with no quota",
+        "readme_section": "Local",
+        "readme_model": "qwen3-coder-next",
+        "best_for": "Local qwen-coder model with no quota",
+        "prompt_description": "Local qwen3-coder-next via opencode + LMStudio",
+        "menu_note": "local qwen3-coder-next, no quota",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "qwen",
+      "display": "qwen-coder (local via opencode)",
+      "model_id": "lmstudio:qwen3-coder-next",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": "local",
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "lmstudio/qwen3-coder-next"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Local",
+        "cli_label": "opencode",
+        "actual_model": "qwen3-coder-next via LMStudio (opencode default, --cli codex for legacy)",
+        "option_description": "Qwen via opencode + LMStudio",
+        "reference_cli": "opencode run --format json -m lmstudio/qwen3-coder-next",
+        "reference_description": "Local qwen-coder model with no quota",
+        "readme_section": "Local",
+        "readme_model": "qwen3-coder-next",
+        "best_for": "Local qwen-coder model with no quota",
+        "prompt_description": "Qwen via opencode + LMStudio",
+        "menu_note": "local qwen3-coder-next, no quota",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "devstral",
+      "display": "devstral (local via opencode)",
+      "model_id": "lmstudio:devstral-small-2-2512",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": "local-devstral",
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "lmstudio/devstral-small-2-2512"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Local",
+        "cli_label": "opencode",
+        "actual_model": "devstral-small-2-2512 via LMStudio (opencode default, --cli codex for legacy)",
+        "option_description": "Devstral via opencode + LMStudio",
+        "reference_cli": "opencode run --format json -m lmstudio/devstral-small-2-2512",
+        "reference_description": "Local Devstral model with no quota",
+        "readme_section": "Local",
+        "readme_model": "devstral-small-2-2512",
+        "best_for": "Local Devstral model with no quota",
+        "prompt_description": "Devstral via opencode + LMStudio",
+        "menu_note": "local Devstral, no quota",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "glm-local",
+      "display": "glm-4.7-flash (local via opencode)",
+      "model_id": "lmstudio:glm-4.7-flash",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "lmstudio/glm-4.7-flash"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Local",
+        "cli_label": "opencode",
+        "actual_model": "glm-4.7-flash via LMStudio (local Z.AI model)",
+        "option_description": "Local GLM-4.7-Flash via opencode + LMStudio",
+        "reference_cli": "opencode run --format json -m lmstudio/glm-4.7-flash",
+        "reference_description": "Local GLM-4.7 Flash model with no quota",
+        "readme_section": "Local",
+        "readme_model": "glm-4.7-flash",
+        "best_for": "Local GLM-4.7 Flash model with no quota",
+        "prompt_description": "Local GLM-4.7-Flash via opencode + LMStudio",
+        "menu_note": "local GLM-4.7 Flash, no quota",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "qwen-small",
+      "display": "qwen-3-4b (local small/fast via opencode)",
+      "model_id": "lmstudio:qwen3-4b-2507",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "lmstudio/qwen3-4b-2507"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Local",
+        "cli_label": "opencode",
+        "actual_model": "qwen3-4b-2507 via LMStudio (small/fast, haiku-tier)",
+        "option_description": "Local qwen3-4b model via opencode + LMStudio",
+        "reference_cli": "opencode run --format json -m lmstudio/qwen3-4b-2507",
+        "reference_description": "Small/fast local Qwen model",
+        "readme_section": "Local",
+        "readme_model": "qwen3-4b-2507",
+        "best_for": "Small/fast local Qwen model",
+        "prompt_description": "Local qwen3-4b model via opencode + LMStudio",
+        "menu_note": "local qwen3-4b, no quota",
+        "include_in_prompt_guides": true
+      }
+    }
+  ],
+  "docs": {
+    "create_prompt_recommendations": [
+      {
+        "condition": "is_test_prompt or is_verification_prompt",
+        "model": "codex-high",
+        "reason": "Reliable test/build iteration; add `--loop`"
+      },
+      {
+        "condition": "is_research_prompt",
+        "model": "gpt52-xhigh",
+        "reason": "Best for methodical research and long reasoning"
+      },
+      {
+        "condition": "is_refactor_prompt",
+        "model": "codex-xhigh",
+        "reason": "Maximum OpenAI reasoning for broad code changes"
+      },
+      {
+        "condition": "is_frontend_prompt",
+        "model": "gemini3pro",
+        "reason": "Strong visual/frontend reasoning when available"
+      },
+      {
+        "condition": "is_backend_prompt",
+        "model": "codex-high",
+        "reason": "Strong default for backend implementation"
+      },
+      {
+        "condition": "is_debug_prompt",
+        "model": "gpt55-high",
+        "reason": "Fast high-reasoning debugging"
+      },
+      {
+        "condition": "is_perf_prompt",
+        "model": "gpt52-high",
+        "reason": "Methodical analysis for bottlenecks"
+      },
+      {
+        "condition": "is_docs_prompt",
+        "model": "gpt55-high",
+        "reason": "Fast synthesis and writing"
+      },
+      {
+        "condition": "is_devops_prompt",
+        "model": "codex-high",
+        "reason": "Reliable CI/CD and infrastructure edits"
+      },
+      {
+        "condition": "is_database_prompt",
+        "model": "codex-high",
+        "reason": "Good structured implementation default"
+      },
+      {
+        "condition": "is_vision_prompt",
+        "model": "syn-kimi",
+        "reason": "Synthetic vision model via OpenCode"
+      },
+      {
+        "condition": "default",
+        "model": "codex",
+        "reason": "Fast default for straightforward coding"
+      }
+    ],
+    "llms_txt_recommendations": [
+      {
+        "model": "gpt52-xhigh",
+        "reason": "Best for research - deep reasoning, can work 30+ min"
+      },
+      {
+        "model": "gpt52-high",
+        "reason": "Great for methodical research"
+      },
+      {
+        "model": "gpt55-high",
+        "reason": "Fast, high-quality synthesis after research"
+      },
+      {
+        "model": "gemini31pro",
+        "reason": "Most capable Gemini for research (if available)"
+      },
+      {
+        "model": "gemini25pro",
+        "reason": "Great at comprehensive research"
+      },
+      {
+        "model": "gemini3pro",
+        "reason": "Strong Gemini fallback"
+      },
+      {
+        "model": "claude",
+        "reason": "Excellent reasoning but uses your quota"
+      },
+      {
+        "model": "codex-xhigh",
+        "reason": "Good for doc writing after research"
+      },
+      {
+        "model": "synthetic",
+        "reason": "GLM-5.2 via Synthetic with request-count quota"
+      },
+      {
+        "model": "kimi",
+        "reason": "Strong OpenCode fallback for long-form drafting"
+      },
+      {
+        "model": "glm52",
+        "reason": "GLM-5.2 explicit pin with 1M context"
+      },
+      {
+        "model": "glm5",
+        "reason": "Latest GLM 5.x alias for GLM-5.2"
+      },
+      {
+        "model": "zai",
+        "reason": "Good fallback for documentation"
+      }
+    ]
+  }
+}

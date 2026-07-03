@@ -143,6 +143,7 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 
 ## Model Shorthand Reference
 
+<!-- BEGIN GENERATED: model-shorthand-table -->
 | Shorthand | CLI | Actual Model |
 |-----------|-----|--------------|
 | `claude` | subagent | Claude Code Task subagent (configured in Claude Code) |
@@ -170,8 +171,6 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `gemini3flash` | agy/gemini | gemini-3-flash-preview |
 | `gemini3pro` | agy/gemini | gemini-3-pro-preview |
 | `gemini31pro` | agy/gemini | gemini-3.1-pro-preview (if available) |
-
-Google shorthands prefer Antigravity CLI (`agy`) when it is installed and healthy. The legacy `gemini` CLI remains supported as fallback and for explicit `--cli gemini` runs.
 | `zai` | codex | GLM-4.7 via Z.AI (may have issues) |
 | `glm5` | opencode | GLM-5.2 via OpenCode (latest GLM 5.x, 1M context) |
 | `glm52` | opencode | GLM-5.2 via OpenCode (explicit pin, 1M context) |
@@ -181,30 +180,23 @@ Google shorthands prefer Antigravity CLI (`agy`) when it is installed and health
 | `syn-kimi` | opencode | Kimi-K2.6 via Synthetic (`syn:large:vision`, vision) |
 | `syn-qwen` | opencode | Qwen3.6-27B via Synthetic (`syn:small:vision`, vision) |
 | `opencode` | opencode | GLM-4.7 via OpenCode (recommended; JSON output) |
-| `qwen`/`local` | opencode | qwen3-coder-next via LMStudio (opencode default, --cli codex for legacy) |
+| `local` | opencode | qwen3-coder-next via LMStudio (opencode default, --cli codex for legacy) |
+| `qwen` | opencode | qwen3-coder-next via LMStudio (opencode default, --cli codex for legacy) |
 | `devstral` | opencode | devstral-small-2-2512 via LMStudio (opencode default, --cli codex for legacy) |
 | `glm-local` | opencode | glm-4.7-flash via LMStudio (local Z.AI model) |
 | `qwen-small` | opencode | qwen3-4b-2507 via LMStudio (small/fast, haiku-tier) |
+
+Google shorthands prefer Antigravity CLI (`agy`) when it is installed and healthy. The legacy `gemini` CLI remains supported as fallback and for explicit `--cli gemini` runs.
 
 **GLM-5.2 long-context note:** Z.AI Coding Plan uses endpoint `https://api.z.ai/api/coding/paas/v4` with raw model ID `glm-5.2` and a 1M context window. OpenCode model refs use `zai/glm-5.2`; Claude Code env vars use `glm-5.2[1m]` for `ANTHROPIC_DEFAULT_SONNET_MODEL` and `ANTHROPIC_DEFAULT_OPUS_MODEL`, plus `CLAUDE_CODE_AUTO_COMPACT_WINDOW=1000000`. daplug does not set context-window flags for OpenCode; the Coding Plan endpoint activates the 1M window.
 
 **Synthetic note:** Synthetic shorthands use OpenCode provider refs such as `synthetic/syn:large:text` and require `SYNTHETIC_API_KEY`. OpenAI-compatible base URL: `https://api.synthetic.new/openai/v1`; Anthropic-compatible base URL: `https://api.synthetic.new/anthropic`; quota endpoint: `GET https://api.synthetic.new/v2/quotas` returns `subscription.requests`, `subscription.limit`, and `subscription.renewsAt` without counting against quota. Minimal `opencode.json` provider example: `{"provider":{"synthetic":{"npm":"@ai-sdk/openai-compatible","options":{"baseURL":"https://api.synthetic.new/openai/v1","apiKey":"{env:SYNTHETIC_API_KEY}"},"models":{"syn:large:text":{"name":"Synthetic GLM-5.2"}}}}}`.
 
-**OpenCode (opencode) note:** daplug runs OpenCode with `--format json` for clean, parseable logs (no PTY). To avoid interactive permission prompts in headless runs, configure `~/.config/opencode/opencode.json`, e.g.:
-
-```json
-{
-  "permission": {
-    "*": "allow",
-    "external_directory": "allow",
-    "doom_loop": "allow"
-  }
-}
-```
-
+**OpenCode (opencode) note:** daplug runs OpenCode with `--format json` for clean, parseable logs (no PTY). To avoid interactive permission prompts in headless runs, configure `~/.config/opencode/opencode.json`.
+<!-- END GENERATED: model-shorthand-table -->
 ## Managing Models
 
-When adding, removing, or modifying models, multiple files must be updated. Use the management script or follow the checklist below.
+Model definitions live in `scripts/models.json`. Adding, removing, or modifying a model should require editing that file, then regenerating derived documentation.
 
 ### Using the Management Script
 
@@ -212,46 +204,38 @@ When adding, removing, or modifying models, multiple files must be updated. Use 
 # List all current models
 python3 scripts/manage-models.py list
 
-# Show which files need updating for a new model
+# Regenerate markdown sections from scripts/models.json
+python3 scripts/manage-models.py generate
+
+# CI verifier: exits non-zero if generate would change files
 python3 scripts/manage-models.py check
 
-# Add a new model (interactive)
+# Add a new model interactively, then regenerate docs
 python3 scripts/manage-models.py add
 ```
 
-### Manual Checklist
+### Generated Locations
 
-When adding a new model, update these files in order:
-
-| # | File | Section to Update |
-|---|------|-------------------|
-| 1 | `skills/prompt-executor/scripts/executor.py` | `models = {` dict (~line 478) |
-| 2 | `skills/prompt-executor/scripts/executor.py` | `--model` argparse choices (~line 1300) |
+<!-- BEGIN GENERATED: generated-model-locations -->
+| # | File | Generated Region |
+|---|------|------------------|
+| 1 | `scripts/models.json` | Runtime model registry source of truth |
+| 2 | `skills/prompt-executor/scripts/executor.py` | Runtime maps and `--model` argparse choices derived from registry |
 | 3 | `skills/prompt-executor/SKILL.md` | `--model` options list |
 | 4 | `skills/prompt-executor/SKILL.md` | Model Reference table |
 | 5 | `commands/run-prompt.md` | `--model` argument description |
 | 6 | `commands/prompts.md` | preferred_agent options list |
 | 7 | `commands/create-prompt.md` | `<available_models>` section |
 | 8 | `commands/create-prompt.md` | Recommendation logic table |
-| 9 | `commands/create-prompt.md` | Model selection menus (3 instances) |
+| 9 | `commands/create-prompt.md` | Model selection menus (3 generated regions) |
 | 10 | `commands/create-llms-txt.md` | `<available_models>` section |
 | 11 | `commands/create-llms-txt.md` | Recommendation logic table |
 | 12 | `commands/create-llms-txt.md` | Model selection menu |
 | 13 | `README.md` | Model Tiers section |
-| 14 | `CLAUDE.md` | Model Shorthand Reference table (above) |
+| 14 | `CLAUDE.md` | Model Shorthand Reference table and generated-location map |
+<!-- END GENERATED: generated-model-locations -->
 
-### Model Entry Template
-
-For `executor.py`, use this template:
-
-```python
-"model-name": {
-    "command": ["codex", "exec", "--full-auto", "-m", "model-id"],
-    "display": "model-name (Description)",
-    "env": {},
-    "stdin_mode": "dash"  # or "arg" for gemini
-},
-```
+Generated regions are bounded by HTML comments like `<!-- BEGIN GENERATED: model-shorthand-table -->` and `<!-- END GENERATED: model-shorthand-table -->`. Hand-written prose around those markers is preserved.
 
 ### Verification
 
@@ -262,7 +246,7 @@ After adding a model, verify it works:
 python3 skills/prompt-executor/scripts/executor.py --help | grep model-name
 
 # Test command generation
-python3 skills/prompt-executor/scripts/executor.py 001 --model model-name
+python3 skills/prompt-executor/scripts/executor.py 009 --model model-name
 ```
 
 ## Releasing

@@ -69,9 +69,11 @@ python3 "$EXECUTOR" [prompts...] [options]
 ```
 
 **Options:**
+<!-- BEGIN GENERATED: skill-model-options -->
 - `--model, -m`: claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, glm52, kimi, synthetic, syn-flash, syn-kimi, syn-qwen, opencode, local, qwen, devstral, glm-local, qwen-small
   - `glm52`: GLM-5.2 via Z.AI / OpenCode (1M context)
   - `synthetic`: GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, requires `SYNTHETIC_API_KEY`)
+<!-- END GENERATED: skill-model-options -->
 - `--cli`: Override CLI wrapper (codex, opencode, claude, agy, or gemini; aliases: claudecode, cc, antigravity). Unsupported explicit combinations fail with a clear error (no silent fallback).
 - `--variant`: Reasoning variant override (`none|low|medium|high|xhigh`). Explicit `--variant` overrides alias defaults (`codex-high`, `gpt55-high`, `gpt54-high`, `gpt52-high`, etc.).
 - `--cwd, -c`: Working directory for execution
@@ -211,41 +213,49 @@ python3 "$EXECUTOR" --loop-status
 
 ## Model Reference
 
+<!-- BEGIN GENERATED: skill-model-reference -->
 | Model | CLI | Description |
 |-------|-----|-------------|
-| claude | (Task subagent) | Claude Sonnet via subagent |
-| codex | codex exec --full-auto | OpenAI Codex (gpt-5.5) |
-| codex-high | codex exec --full-auto -c model_reasoning_effort="high" | Codex alias with default `--variant high` |
-| codex-xhigh | codex exec --full-auto -c model_reasoning_effort="xhigh" | Codex alias with default `--variant xhigh` |
-| gpt54 | codex exec --full-auto -m gpt-5.4 | GPT-5.4 direct shorthand |
-| gpt54-high | codex exec --full-auto -m gpt-5.4 -c model_reasoning_effort="high" | GPT-5.4 alias with default `--variant high` |
-| gpt54-xhigh | codex exec --full-auto -m gpt-5.4 -c model_reasoning_effort="xhigh" | GPT-5.4 alias with default `--variant xhigh` |
-| gpt55 | codex exec --full-auto | GPT-5.5 direct shorthand |
-| gpt55-high | codex exec --full-auto -c model_reasoning_effort="high" | GPT-5.5 alias with default `--variant high` |
-| gpt55-xhigh | codex exec --full-auto -c model_reasoning_effort="xhigh" | GPT-5.5 alias with default `--variant xhigh` |
-| gpt52 | codex exec --full-auto -m gpt-5.2 | GPT-5.2 for planning/research |
-| gpt52-high | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="high" | GPT-5.2 alias with default `--variant high` |
-| gpt52-xhigh | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="xhigh" | GPT-5.2 alias with default `--variant xhigh` |
-| gemini | gemini -y -m gemini-3-flash-preview | Google Gemini 3 Flash Preview (default) |
-| gemini-high | gemini -y -m gemini-2.5-pro | Google Gemini 2.5 Pro (stable) |
-| gemini-xhigh | gemini -y -m gemini-3-pro-preview | Google Gemini 3 Pro Preview |
-| gemini25pro | gemini -y -m gemini-2.5-pro | Google Gemini 2.5 Pro (explicit alias) |
-| gemini25flash | gemini -y -m gemini-2.5-flash | Google Gemini 2.5 Flash |
-| gemini25lite | gemini -y -m gemini-2.5-flash-lite | Google Gemini 2.5 Flash-Lite |
-| gemini3flash | gemini -y -m gemini-3-flash-preview | Google Gemini 3 Flash Preview (explicit alias) |
-| gemini3pro | gemini -y -m gemini-3-pro-preview | Google Gemini 3 Pro Preview (explicit alias) |
-| gemini31pro | gemini -y -m gemini-3.1-pro-preview | Gemini 3.1 Pro Preview (if your account has access) |
-| zai | codex exec --profile zai | Z.AI GLM-4.7 (via Codex, may have issues) |
-| glm5 | opencode run --format json -m zai/glm-5.2 | Z.AI GLM-5.2 via OpenCode (latest GLM 5.x, 1M context) |
-| glm52 | opencode run --format json -m zai/glm-5.2 | Z.AI GLM-5.2 via OpenCode (explicit pin, 1M context) |
+| claude | (Task subagent) | Complex reasoning in current Claude Code context |
+| cc-sonnet | claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model sonnet | Claude Code CLI Sonnet runs |
+| cc-opus | claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model opus | Claude Code CLI Opus runs |
+| codex | codex exec --full-auto | Fast coding execution (default Codex shorthand) |
+| codex-spark | codex exec --full-auto -m gpt-5.3-codex-spark | Lowest-latency quick edits |
+| codex-high | codex exec --full-auto -c model_reasoning_effort="high" | Complex coding |
+| codex-xhigh | codex exec --full-auto -c model_reasoning_effort="xhigh" | Large refactors |
+| gpt54 | codex exec --full-auto -m gpt-5.4 | Explicit GPT-5.4 shorthand |
+| gpt54-high | codex exec --full-auto -m gpt-5.4 -c model_reasoning_effort="high" | Deep reasoning with GPT-5.4 |
+| gpt54-xhigh | codex exec --full-auto -m gpt-5.4 -c model_reasoning_effort="xhigh" | Maximum reasoning with GPT-5.4 |
+| gpt55 | codex exec --full-auto | Explicit GPT-5.5 shorthand |
+| gpt55-high | codex exec --full-auto -c model_reasoning_effort="high" | Deep reasoning with GPT-5.5 |
+| gpt55-xhigh | codex exec --full-auto -c model_reasoning_effort="xhigh" | Maximum reasoning with GPT-5.5 |
+| gpt52 | codex exec --full-auto -m gpt-5.2 | Planning, research, analysis |
+| gpt52-high | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="high" | Deep reasoning |
+| gpt52-xhigh | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="xhigh" | Maximum reasoning (30+ min) |
+| gemini | gemini -y -m gemini-3-flash-preview | Fast daily driver (default) |
+| gemini-high | gemini -y -m gemini-2.5-pro | Stable, more capable |
+| gemini-xhigh | gemini -y -m gemini-3-pro-preview | Most capable Gemini fallback |
+| gemini25pro | gemini -y -m gemini-2.5-pro | Explicit stable Pro selection |
+| gemini25flash | gemini -y -m gemini-2.5-flash | Fast, cost-effective |
+| gemini25lite | gemini -y -m gemini-2.5-flash-lite | Fastest Gemini option |
+| gemini3flash | gemini -y -m gemini-3-flash-preview | Explicit 3 Flash selection |
+| gemini3pro | gemini -y -m gemini-3-pro-preview | Explicit 3 Pro selection |
+| gemini31pro | gemini -y -m gemini-3.1-pro-preview | Latest Pro model (if available) |
+| zai | codex exec --full-auto --profile zai | General coding fallback |
+| glm5 | opencode run --format json -m zai/glm-5.2 | Latest GLM 5.x tasks via OpenCode |
+| glm52 | opencode run --format json -m zai/glm-5.2 | Explicit GLM-5.2 pin via OpenCode |
 | kimi | opencode run --format json -m opencode/kimi-k2.5 | Kimi K2.5 via OpenCode |
-| synthetic | opencode run --format json -m synthetic/syn:large:text | GLM-5.2 via Synthetic (512k context) |
-| syn-flash | opencode run --format json -m synthetic/syn:small:text | GLM-4.7-Flash via Synthetic |
-| syn-kimi | opencode run --format json -m synthetic/syn:large:vision | Kimi-K2.6 via Synthetic (vision) |
-| syn-qwen | opencode run --format json -m synthetic/syn:small:vision | Qwen3.6-27B via Synthetic (vision) |
-| opencode | opencode run --format json -m zai/glm-4.7 | Z.AI GLM-4.7 (via OpenCode, recommended; JSON output) |
-| local/qwen | opencode run --format json -m lmstudio/qwen3-coder-next | Local qwen-coder model (default: opencode) |
-| devstral | opencode run --format json -m lmstudio/devstral-small-2-2512 | Local devstral model (default: opencode) |
+| synthetic | opencode run --format json -m synthetic/syn:large:text | GLM-5.2 default, 512k context |
+| syn-flash | opencode run --format json -m synthetic/syn:small:text | Fast GLM-4.7-Flash fallback |
+| syn-kimi | opencode run --format json -m synthetic/syn:large:vision | Kimi-K2.6 vision tasks |
+| syn-qwen | opencode run --format json -m synthetic/syn:small:vision | Qwen3.6-27B vision tasks |
+| opencode | opencode run --format json -m zai/glm-4.7 | Recommended OpenCode JSON runner |
+| local | opencode run --format json -m lmstudio/qwen3-coder-next | Local qwen-coder model with no quota |
+| qwen | opencode run --format json -m lmstudio/qwen3-coder-next | Local qwen-coder model with no quota |
+| devstral | opencode run --format json -m lmstudio/devstral-small-2-2512 | Local Devstral model with no quota |
+| glm-local | opencode run --format json -m lmstudio/glm-4.7-flash | Local GLM-4.7 Flash model with no quota |
+| qwen-small | opencode run --format json -m lmstudio/qwen3-4b-2507 | Small/fast local Qwen model |
+<!-- END GENERATED: skill-model-reference -->
 
 OpenCode runs include `--variant <value>` when a variant is set.
 

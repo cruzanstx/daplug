@@ -1,3 +1,4 @@
+import importlib.util
 import json
 import sys
 from pathlib import Path
@@ -5,9 +6,13 @@ from pathlib import Path
 import pytest
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1] / "scripts"
-sys.path.append(str(SCRIPT_DIR))
-
-import executor  # noqa: E402
+EXECUTOR_PATH = SCRIPT_DIR / "executor.py"
+EXECUTOR_SPEC = importlib.util.spec_from_file_location("executor", EXECUTOR_PATH)
+if EXECUTOR_SPEC is None or EXECUTOR_SPEC.loader is None:
+    raise RuntimeError(f"Unable to load executor from {EXECUTOR_PATH}")
+executor = importlib.util.module_from_spec(EXECUTOR_SPEC)
+sys.modules["executor"] = executor
+EXECUTOR_SPEC.loader.exec_module(executor)
 
 
 @pytest.fixture()
@@ -336,3 +341,108 @@ def test_loop_background_propagates_cli_and_variant_flags(tmp_path, loop_state_d
     assert cmd[cmd.index("--cli") + 1] == "opencode"
     assert "--variant" in cmd
     assert cmd[cmd.index("--variant") + 1] == "none"
+
+EXPECTED_MODEL_KEYS = [
+    "claude",
+    "cc-sonnet",
+    "cc-opus",
+    "codex",
+    "codex-spark",
+    "codex-high",
+    "codex-xhigh",
+    "gpt54",
+    "gpt54-high",
+    "gpt54-xhigh",
+    "gpt55",
+    "gpt55-high",
+    "gpt55-xhigh",
+    "gpt52",
+    "gpt52-high",
+    "gpt52-xhigh",
+    "gemini",
+    "gemini-high",
+    "gemini-xhigh",
+    "gemini25pro",
+    "gemini25flash",
+    "gemini25lite",
+    "gemini3flash",
+    "gemini3pro",
+    "gemini31pro",
+    "zai",
+    "glm5",
+    "glm52",
+    "kimi",
+    "synthetic",
+    "syn-flash",
+    "syn-kimi",
+    "syn-qwen",
+    "opencode",
+    "local",
+    "qwen",
+    "devstral",
+    "glm-local",
+    "qwen-small",
+]
+
+
+def test_registry_contains_exact_model_key_list():
+    assert list(executor.MODEL_CHOICES) == EXPECTED_MODEL_KEYS
+    assert list(executor.LEGACY_MODEL_DISPLAY) == EXPECTED_MODEL_KEYS
+
+
+def test_registry_models_have_required_fields():
+    required = executor._REQUIRED_MODEL_FIELDS
+    for key in EXPECTED_MODEL_KEYS:
+        model = executor.MODEL_REGISTRY_BY_NAME[key]
+        assert required <= set(model), key
+        assert isinstance(model["routing"], dict)
+        assert isinstance(model["docs"], dict)
+        assert isinstance(model["command"], list)
+        assert all(isinstance(item, str) for item in model["command"])
+        assert isinstance(model["env"], dict)
+        assert model["stdin_mode"] in executor._ALLOWED_STDIN_MODES
+
+
+def test_default_runtime_uses_registry_command_env_and_stdin(no_router, tmp_path, monkeypatch):
+    monkeypatch.setenv("SYNTHETIC_API_KEY", "test-key")
+    monkeypatch.setattr(executor, "_require_claude_cli", lambda: None)
+
+    for key in executor.MODEL_CHOICES:
+        info = executor.get_cli_info(key, repo_root=tmp_path)
+        model = executor.MODEL_REGISTRY_BY_NAME[key]
+        assert info["command"] == model["command"], key
+        assert info["env"] == model["env"], key
+        assert info["stdin_mode"] == model["stdin_mode"], key
+
+
+def test_main_argparse_accepts_every_registry_key(monkeypatch):
+    import argparse as _argparse
+
+    real_parse = _argparse.ArgumentParser.parse_args
+
+    def capture(self, *args, **kwargs):
+        namespace = real_parse(self, *args, **kwargs)
+        raise SystemExit((0, namespace.model))
+
+    monkeypatch.setattr(_argparse.ArgumentParser, "parse_args", capture)
+
+    for key in executor.MODEL_CHOICES:
+        monkeypatch.setattr(sys, "argv", ["executor.py", "--model", key])
+        with pytest.raises(SystemExit) as exc:
+            executor.main()
+        assert exc.value.code == (0, key)
+
+
+def test_main_argparse_rejects_unknown_model(monkeypatch):
+    monkeypatch.setattr(sys, "argv", ["executor.py", "--model", "not-a-model"])
+    with pytest.raises(SystemExit) as exc:
+        executor.main()
+    assert exc.value.code == 2
+
+
+def test_model_registry_loads_when_cwd_is_not_repo_root(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    _registry, by_name = executor._load_model_registry()
+    assert list(by_name) == EXPECTED_MODEL_KEYS
+    assert by_name["glm52"]["model_id"] == "zai:glm-5.2"
+
