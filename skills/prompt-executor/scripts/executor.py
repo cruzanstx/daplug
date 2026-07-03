@@ -739,362 +739,150 @@ def _normalize_cli_override(value: Optional[str]) -> Optional[str]:
 SUPPORTED_VARIANTS = ("none", "low", "medium", "high", "xhigh")
 CODEX_REASONING_VARIANTS = {"high", "xhigh"}
 
+MODEL_REGISTRY_PATH = Path(__file__).resolve().parents[3] / "scripts" / "models.json"
+
+
+class ModelRegistryError(RuntimeError):
+    """Raised when the model registry cannot be loaded."""
+
+
+_REQUIRED_MODEL_FIELDS = {
+    "name",
+    "display",
+    "model_id",
+    "default_cli",
+    "supports_codex_reasoning",
+    "codex_profile",
+    "claude_model_flag",
+    "alias_of",
+    "default_variant",
+    "env",
+    "stdin_mode",
+    "command",
+    "routing",
+    "docs",
+}
+
+
+_RUNTIME_SPEC_FIELDS = (
+    "model_id",
+    "default_cli",
+    "supports_codex_reasoning",
+    "codex_profile",
+    "claude_model_flag",
+    "env",
+    "stdin_mode",
+    "command",
+)
+
+_ALLOWED_STDIN_MODES = {None, "dash", "arg", "stdin"}
+
+
+def _load_model_registry(path: Optional[Path] = None) -> tuple[dict, dict[str, dict]]:
+    """Load scripts/models.json relative to the plugin, not the current CWD."""
+    registry_path = path or MODEL_REGISTRY_PATH
+    if not registry_path.exists():
+        raise ModelRegistryError(f"Model registry not found: {registry_path}")
+
+    try:
+        data = json.loads(registry_path.read_text())
+    except json.JSONDecodeError as exc:
+        raise ModelRegistryError(f"Model registry is invalid JSON: {registry_path}: {exc}") from exc
+    except OSError as exc:
+        raise ModelRegistryError(f"Model registry cannot be read: {registry_path}: {exc}") from exc
+
+    if not isinstance(data, dict):
+        raise ModelRegistryError(f"Model registry must be a JSON object: {registry_path}")
+    if data.get("schema_version") != 1:
+        raise ModelRegistryError(f"Unsupported model registry schema_version in {registry_path}")
+    models = data.get("models")
+    if not isinstance(models, list) or not models:
+        raise ModelRegistryError(f"Model registry must contain a non-empty models list: {registry_path}")
+
+    by_name: dict[str, dict] = {}
+    for index, model in enumerate(models):
+        if not isinstance(model, dict):
+            raise ModelRegistryError(f"Model registry entry #{index + 1} must be an object")
+        missing = sorted(_REQUIRED_MODEL_FIELDS - set(model))
+        if missing:
+            name = model.get("name", f"#{index + 1}")
+            raise ModelRegistryError(f"Model registry entry {name} missing fields: {', '.join(missing)}")
+        name = model.get("name")
+        if not isinstance(name, str) or not name:
+            raise ModelRegistryError(f"Model registry entry #{index + 1} has invalid name")
+        if name in by_name:
+            raise ModelRegistryError(f"Duplicate model registry entry: {name}")
+        command = model.get("command")
+        if not isinstance(command, list) or not all(isinstance(item, str) for item in command):
+            raise ModelRegistryError(f"Model registry entry {name} command must be a list of strings")
+        env = model.get("env")
+        if not isinstance(env, dict) or not all(isinstance(key, str) and isinstance(value, str) for key, value in env.items()):
+            raise ModelRegistryError(f"Model registry entry {name} env must be a string map")
+        if model.get("stdin_mode") not in _ALLOWED_STDIN_MODES:
+            raise ModelRegistryError(f"Model registry entry {name} has invalid stdin_mode")
+        routing = model.get("routing")
+        if not isinstance(routing, dict):
+            raise ModelRegistryError(f"Model registry entry {name} has invalid routing")
+        docs = model.get("docs")
+        if not isinstance(docs, dict):
+            raise ModelRegistryError(f"Model registry entry {name} has invalid docs metadata")
+        by_name[name] = model
+
+    for name, model in by_name.items():
+        alias_of = model.get("alias_of")
+        if alias_of is not None and alias_of not in by_name:
+            raise ModelRegistryError(f"Model registry entry {name} aliases unknown model: {alias_of}")
+
+    return data, by_name
+
+
+MODEL_REGISTRY, MODEL_REGISTRY_BY_NAME = _load_model_registry()
+MODEL_CHOICES = tuple(MODEL_REGISTRY_BY_NAME.keys())
+
 MODEL_ALIAS_BASE = {
-    "codex-high": "codex",
-    "codex-xhigh": "codex",
-    "gpt54-high": "gpt54",
-    "gpt54-xhigh": "gpt54",
-    "gpt55-high": "gpt55",
-    "gpt55-xhigh": "gpt55",
-    "gpt52-high": "gpt52",
-    "gpt52-xhigh": "gpt52",
+    name: str(model["alias_of"])
+    for name, model in MODEL_REGISTRY_BY_NAME.items()
+    if model.get("alias_of")
 }
 
 MODEL_ALIAS_DEFAULT_VARIANT = {
-    "codex-high": "high",
-    "codex-xhigh": "xhigh",
-    "gpt54-high": "high",
-    "gpt54-xhigh": "xhigh",
-    "gpt55-high": "high",
-    "gpt55-xhigh": "xhigh",
-    "gpt52-high": "high",
-    "gpt52-xhigh": "xhigh",
+    name: str(model["default_variant"])
+    for name, model in MODEL_REGISTRY_BY_NAME.items()
+    if model.get("default_variant")
 }
 
 LEGACY_MODEL_DISPLAY = {
-    "codex": "codex (gpt-5.5)",
-    "codex-spark": "codex-spark (gpt-5.3-codex-spark, low latency)",
-    "codex-high": "codex-high (gpt-5.5, high reasoning)",
-    "codex-xhigh": "codex-xhigh (gpt-5.5, xhigh reasoning)",
-    "gpt54": "gpt54 (GPT-5.4, direct shorthand)",
-    "gpt54-high": "gpt54-high (GPT-5.4, high reasoning)",
-    "gpt54-xhigh": "gpt54-xhigh (GPT-5.4, xhigh reasoning)",
-    "gpt55": "gpt55 (GPT-5.5, direct shorthand)",
-    "gpt55-high": "gpt55-high (GPT-5.5, high reasoning)",
-    "gpt55-xhigh": "gpt55-xhigh (GPT-5.5, xhigh reasoning)",
-    "gpt52": "gpt52 (GPT-5.2, planning/research)",
-    "gpt52-high": "gpt52-high (GPT-5.2, high reasoning)",
-    "gpt52-xhigh": "gpt52-xhigh (GPT-5.2, xhigh reasoning, 30+ min tasks)",
-    "gemini": "gemini (Gemini 3 Flash)",
-    "gemini-high": "gemini-high (Gemini 2.5 Pro)",
-    "gemini-xhigh": "gemini-xhigh (Gemini 3 Pro)",
-    "gemini25pro": "gemini25pro (Gemini 2.5 Pro)",
-    "gemini25flash": "gemini25flash (Gemini 2.5 Flash)",
-    "gemini25lite": "gemini25lite (Gemini 2.5 Flash-Lite)",
-    "gemini3flash": "gemini3flash (Gemini 3 Flash Preview)",
-    "gemini3pro": "gemini3pro (Gemini 3 Pro Preview)",
-    "gemini31pro": "gemini31pro (Gemini 3.1 Pro Preview, if available)",
-    "zai": "zai (GLM-4.7 via Codex - may have issues)",
-    "glm5": "glm5 (GLM-5.2 via OpenCode — latest GLM 5.x, 1M context)",
-    "glm52": "glm52 (GLM-5.2 via OpenCode — explicit pin, 1M context)",
-    "kimi": "kimi (Kimi K2.5 via OpenCode)",
-    "synthetic": "synthetic (GLM-5.2 via Synthetic, 512k context)",
-    "syn-flash": "syn-flash (GLM-4.7-Flash via Synthetic)",
-    "syn-kimi": "syn-kimi (Kimi-K2.6 via Synthetic, vision)",
-    "syn-qwen": "syn-qwen (Qwen3.6-27B via Synthetic, vision)",
-    "opencode": "opencode (GLM-4.7 via OpenCode)",
-    "local": "qwen-coder (local via opencode)",
-    "qwen": "qwen-coder (local via opencode)",
-    "devstral": "devstral (local via opencode)",
-    "glm-local": "glm-4.7-flash (local via opencode)",
-    "qwen-small": "qwen-3-4b (local small/fast via opencode)",
-    "cc-sonnet": "cc-sonnet (Claude Sonnet 4.6 via Claude Code)",
-    "cc-opus": "cc-opus (Claude Opus 4.6 via Claude Code)",
-    "claude": "claude (Claude Sonnet)",
+    name: str(model["display"])
+    for name, model in MODEL_REGISTRY_BY_NAME.items()
 }
 
 MODEL_SPECS = {
-    "codex": {
-        "model_id": "openai:gpt-5.5",
-        "default_cli": "codex",
-        "supports_codex_reasoning": True,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "codex-spark": {
-        "model_id": "openai:gpt-5.3-codex-spark",
-        "default_cli": "codex",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "gpt54": {
-        "model_id": "openai:gpt-5.4",
-        "default_cli": "codex",
-        "supports_codex_reasoning": True,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "gpt55": {
-        "model_id": "openai:gpt-5.5",
-        "default_cli": "codex",
-        "supports_codex_reasoning": True,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "gpt52": {
-        "model_id": "openai:gpt-5.2",
-        "default_cli": "codex",
-        "supports_codex_reasoning": True,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "gemini": {
-        "model_id": "google:gemini-3-flash-preview",
-        "default_cli": "gemini",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "gemini-high": {
-        "model_id": "google:gemini-2.5-pro",
-        "default_cli": "gemini",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "gemini-xhigh": {
-        "model_id": "google:gemini-3-pro-preview",
-        "default_cli": "gemini",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "gemini25pro": {
-        "model_id": "google:gemini-2.5-pro",
-        "default_cli": "gemini",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "gemini25flash": {
-        "model_id": "google:gemini-2.5-flash",
-        "default_cli": "gemini",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "gemini25lite": {
-        "model_id": "google:gemini-2.5-flash-lite",
-        "default_cli": "gemini",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "gemini3flash": {
-        "model_id": "google:gemini-3-flash-preview",
-        "default_cli": "gemini",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "gemini3pro": {
-        "model_id": "google:gemini-3-pro-preview",
-        "default_cli": "gemini",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "gemini31pro": {
-        "model_id": "google:gemini-3.1-pro-preview",
-        "default_cli": "gemini",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "zai": {
-        "model_id": "zai:glm-4.7",
-        "default_cli": "codex",
-        "supports_codex_reasoning": False,
-        "codex_profile": "zai",
-        "claude_model_flag": None,
-    },
-    "glm5": {
-        "model_id": "zai:glm-5.2",
-        "default_cli": "opencode",
-        "supports_codex_reasoning": False,
-        "codex_profile": "glm5",
-        "claude_model_flag": None,
-    },
-    "glm52": {
-        "model_id": "zai:glm-5.2",
-        "default_cli": "opencode",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "kimi": {
-        "model_id": "opencode:kimi-k2.5",
-        "default_cli": "opencode",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "synthetic": {
-        "model_id": "synthetic:syn:large:text",
-        "default_cli": "opencode",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "syn-flash": {
-        "model_id": "synthetic:syn:small:text",
-        "default_cli": "opencode",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "syn-kimi": {
-        "model_id": "synthetic:syn:large:vision",
-        "default_cli": "opencode",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "syn-qwen": {
-        "model_id": "synthetic:syn:small:vision",
-        "default_cli": "opencode",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "opencode": {
-        "model_id": "zai:glm-4.7",
-        "default_cli": "opencode",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "local": {
-        "model_id": "lmstudio:qwen3-coder-next",
-        "default_cli": "opencode",
-        "supports_codex_reasoning": False,
-        "codex_profile": "local",
-        "claude_model_flag": None,
-    },
-    "qwen": {
-        "model_id": "lmstudio:qwen3-coder-next",
-        "default_cli": "opencode",
-        "supports_codex_reasoning": False,
-        "codex_profile": "local",
-        "claude_model_flag": None,
-    },
-    "devstral": {
-        "model_id": "lmstudio:devstral-small-2-2512",
-        "default_cli": "opencode",
-        "supports_codex_reasoning": False,
-        "codex_profile": "local-devstral",
-        "claude_model_flag": None,
-    },
-    "glm-local": {
-        "model_id": "lmstudio:glm-4.7-flash",
-        "default_cli": "opencode",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "qwen-small": {
-        "model_id": "lmstudio:qwen3-4b-2507",
-        "default_cli": "opencode",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
-    "cc-sonnet": {
-        "model_id": "anthropic:sonnet",
-        "default_cli": "claude",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": "sonnet",
-    },
-    "cc-opus": {
-        "model_id": "anthropic:opus",
-        "default_cli": "claude",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": "opus",
-    },
-    "claude": {
-        "model_id": "anthropic:claude",
-        "default_cli": "subagent",
-        "supports_codex_reasoning": False,
-        "codex_profile": None,
-        "claude_model_flag": None,
-    },
+    name: {field: model[field] for field in _RUNTIME_SPEC_FIELDS}
+    for name, model in MODEL_REGISTRY_BY_NAME.items()
+    if not model.get("alias_of")
 }
 
 SYNTHETIC_MODEL_SHORTHANDS = {
-    "synthetic",
-    "syn-flash",
-    "syn-kimi",
-    "syn-qwen",
+    name
+    for name, model in MODEL_REGISTRY_BY_NAME.items()
+    if model.get("routing", {}).get("synthetic")
 }
 
 GOOGLE_MODEL_SHORTHANDS = {
-    "gemini",
-    "gemini-high",
-    "gemini-xhigh",
-    "gemini25pro",
-    "gemini25flash",
-    "gemini25lite",
-    "gemini3flash",
-    "gemini3pro",
-    "gemini31pro",
+    name
+    for name, model in MODEL_REGISTRY_BY_NAME.items()
+    if model.get("routing", {}).get("google")
 }
 
-CLI_OVERRIDE_SUPPORTED_MODELS = {
-    "claude": {"claude", "cc-sonnet", "cc-opus"},
-    "agy": GOOGLE_MODEL_SHORTHANDS,
-    "gemini": GOOGLE_MODEL_SHORTHANDS,
-    "codex": {
-        "codex",
-        "codex-spark",
-        "codex-high",
-        "codex-xhigh",
-        "gpt54",
-        "gpt54-high",
-        "gpt54-xhigh",
-        "gpt55",
-        "gpt55-high",
-        "gpt55-xhigh",
-        "gpt52",
-        "gpt52-high",
-        "gpt52-xhigh",
-        "zai",
-        "glm5",
-        "local",
-        "qwen",
-        "devstral",
-    },
-    "opencode": {
-        "codex",
-        "codex-spark",
-        "codex-high",
-        "codex-xhigh",
-        "gpt54",
-        "gpt54-high",
-        "gpt54-xhigh",
-        "gpt55",
-        "gpt55-high",
-        "gpt55-xhigh",
-        "gpt52",
-        "gpt52-high",
-        "gpt52-xhigh",
-        "zai",
-        "glm5",
-        "glm52",
-        "kimi",
-        "synthetic",
-        "syn-flash",
-        "syn-kimi",
-        "syn-qwen",
-        "opencode",
-        "local",
-        "qwen",
-        "devstral",
-        "glm-local",
-        "qwen-small",
-    },
+CLI_OVERRIDE_SUPPORTED_MODELS: dict[str, set[str]] = {}
+for _model_name, _model in MODEL_REGISTRY_BY_NAME.items():
+    for _cli in _model.get("routing", {}).get("cli_overrides", []):
+        CLI_OVERRIDE_SUPPORTED_MODELS.setdefault(str(_cli), set()).add(_model_name)
+
+FORCE_DIRECT_OPENCODE_MODELS = {
+    name
+    for name, model in MODEL_REGISTRY_BY_NAME.items()
+    if model.get("routing", {}).get("force_direct_opencode")
 }
 
 
@@ -1302,6 +1090,14 @@ def _env_for_command(selected_cli: str, command: list[str]) -> dict[str, str]:
     return env
 
 
+def _registry_runtime(model_spec: dict) -> tuple[list[str], dict[str, str], Optional[str]]:
+    return (
+        list(model_spec["command"]),
+        dict(model_spec["env"]),
+        model_spec["stdin_mode"],
+    )
+
+
 def _dynamic_display(model: str, selected_cli: str, model_id: str, variant: Optional[str]) -> str:
     cli_label = {
         "codex": "Codex",
@@ -1378,8 +1174,9 @@ def get_cli_info(
     _validate_cli_override(model, cli_override)
 
     base_model = _canonical_model(model)
+    requested_model_spec = MODEL_REGISTRY_BY_NAME.get(model)
     model_spec = MODEL_SPECS.get(base_model)
-    if model_spec is None:
+    if requested_model_spec is None or model_spec is None:
         raise ValueError(f"Unknown model shorthand: {model}")
 
     if model == "claude" and cli_override is None:
@@ -1390,8 +1187,8 @@ def get_cli_info(
         return {
             "command": [],
             "display": LEGACY_MODEL_DISPLAY["claude"],
-            "env": {},
-            "stdin_mode": None,
+            "env": dict(requested_model_spec["env"]),
+            "stdin_mode": requested_model_spec["stdin_mode"],
             "selected_cli": "subagent",
             "base_model": base_model,
             "model_id": model_spec["model_id"],
@@ -1403,22 +1200,10 @@ def get_cli_info(
 
     # Preserve direct OpenCode defaults for shortcuts whose model specs are tied
     # to OpenCode-compatible provider refs instead of preferred-agent routing.
-    force_direct_opencode = model in {
-        "local",
-        "qwen",
-        "devstral",
-        "glm-local",
-        "qwen-small",
-        "glm5",
-        "glm52",
-        "synthetic",
-        "syn-flash",
-        "syn-kimi",
-        "syn-qwen",
-    } and cli_override is None
+    force_direct_opencode = model in FORCE_DIRECT_OPENCODE_MODELS and cli_override is None
 
-    selected_cli = cli_override or model_spec["default_cli"]
-    model_id = str(model_spec["model_id"])
+    selected_cli = cli_override or requested_model_spec["default_cli"]
+    model_id = str(requested_model_spec["model_id"])
     router_command: Optional[list[str]] = None
 
     router_resolution = None if force_direct_opencode else _resolve_router_command(repo_root, model, preferred)
@@ -1435,17 +1220,30 @@ def get_cli_info(
 
     _require_synthetic_api_key(model, model_id)
 
-    if selected_cli == "codex":
+    use_registry_runtime = (
+        router_resolution is None
+        and cli_override is None
+        and not explicit_variant
+        and selected_cli == requested_model_spec["default_cli"]
+    )
+
+    if use_registry_runtime:
+        command, env, stdin_mode = _registry_runtime(requested_model_spec)
+    elif selected_cli == "codex":
         command = _build_codex_command(model, model_spec, model_id, effective_variant)
+        env = _env_for_command(selected_cli, command)
         stdin_mode = "dash"
     elif selected_cli == "opencode":
         command = _build_opencode_command(model_id, effective_variant)
+        env = _env_for_command(selected_cli, command)
         stdin_mode = "arg"
     elif selected_cli == "agy":
         command = _build_agy_command(model, model_id, effective_variant)
+        env = _env_for_command(selected_cli, command)
         stdin_mode = "arg"
     elif selected_cli == "gemini":
         command = _build_gemini_command(model, model_id, effective_variant)
+        env = _env_for_command(selected_cli, command)
         stdin_mode = "arg"
     elif selected_cli == "claude":
         # Keep default claude model unpinned unless a cc-* alias selected a concrete flag.
@@ -1455,6 +1253,7 @@ def get_cli_info(
             command = _build_claude_command(model, {**model_spec, "claude_model_flag": None}, effective_variant)
         else:
             command = _build_claude_command(model, model_spec, effective_variant)
+        env = _env_for_command(selected_cli, command)
         stdin_mode = "stdin"
     else:
         # Preserve compatibility with router-only CLIs (for example aider) when no
@@ -1474,8 +1273,6 @@ def get_cli_info(
             "variant": None,
         })
         return info
-
-    env = _env_for_command(selected_cli, command)
 
     display = LEGACY_MODEL_DISPLAY.get(model, _dynamic_display(model, selected_cli, model_id, effective_variant))
     if cli_override or explicit_variant or selected_cli != model_spec["default_cli"]:
@@ -3082,18 +2879,7 @@ def main():
     parser = argparse.ArgumentParser(description="Resolve and execute prompts")
     parser.add_argument("prompts", nargs="*", default=[], help="Prompt number(s) or name(s)")
     parser.add_argument("--model", "-m", default="claude",
-                       choices=["claude", "cc-sonnet", "cc-opus",
-                                "codex", "codex-spark", "codex-high", "codex-xhigh",
-                                "gpt54", "gpt54-high", "gpt54-xhigh",
-                                "gpt55", "gpt55-high", "gpt55-xhigh",
-                                "gpt52", "gpt52-high", "gpt52-xhigh",
-                                "gemini", "gemini-high", "gemini-xhigh",
-                                "gemini25pro", "gemini25flash", "gemini25lite",
-                                "gemini3flash", "gemini3pro", "gemini31pro",
-                                "zai", "glm5", "glm52", "kimi",
-                                "synthetic", "syn-flash", "syn-kimi", "syn-qwen",
-                                "opencode", "local", "qwen", "devstral",
-                                "glm-local", "qwen-small"],
+                       choices=list(MODEL_CHOICES),
                        help="Model/CLI to use")
     parser.add_argument("--cli", choices=["codex", "opencode", "claude", "claudecode", "cc", "agy", "antigravity", "gemini"],
                        default=None,

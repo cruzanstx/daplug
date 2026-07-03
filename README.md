@@ -642,53 +642,52 @@ gemini -y -p "prompt content"
 
 This prevents issues with prompts containing newlines, quotes, backticks, and XML tags.
 
-### Google Gemini Runner Model Tiers
+<!-- BEGIN GENERATED: readme-model-tiers -->
+### Model Tiers
 
-Google shorthands route through Antigravity CLI (`agy`) when it is installed and healthy, then fall back to the legacy `gemini` CLI. Gemini models share quotas in tiers (observed with Google One Premium):
+These tables are generated from `scripts/models.json`.
 
-| Tier | Models | Shorthand |
-|------|--------|-----------|
-| **Pro** | gemini-2.5-pro, gemini-3-pro-preview, gemini-3.1-pro-preview | `gemini-high`, `gemini-xhigh`, `gemini31pro` |
-| **Flash** | gemini-2.5-flash, gemini-2.5-flash-lite | `gemini25flash`, `gemini25lite` |
-| **3 Flash** | gemini-3-flash-preview | `gemini` (default) |
+#### Claude
 
-**Why `gemini` defaults to 3 Flash:**
-- Best coding performance (78% SWE-bench score)
-- Has its own separate quota bucket
-- Won't eat into Pro limits for complex tasks
-
-**Check usage:** Run `agy models` for Antigravity availability, or run legacy `gemini` interactively and type `/usage`.
-
-**Model shortcuts:**
-| Shorthand | Model | Use Case |
+| Shorthand | Model | Best For |
 |-----------|-------|----------|
-| `gemini` | 3 Flash | Fast, daily driver (default) |
-| `gemini-high` | 2.5 Pro | Stable, more capable |
-| `gemini-xhigh` | 3 Pro | Most capable, complex tasks |
-| `gemini25pro` | 2.5 Pro | Explicit stable Pro selection |
-| `gemini3flash` | 3 Flash | Explicit 3 Flash selection |
-| `gemini3pro` | 3 Pro | Explicit 3 Pro selection |
-| `gemini31pro` | 3.1 Pro Preview | Latest Pro model (if your account has access) |
+| `claude` | claude | Complex reasoning in current Claude Code context |
+| `cc-sonnet` | sonnet | Claude Code CLI Sonnet runs |
+| `cc-opus` | opus | Claude Code CLI Opus runs |
 
-### OpenAI Model Tiers
+#### OpenAI
 
 | Shorthand | Model | Best For |
 |-----------|-------|----------|
 | `codex` | gpt-5.5 | Fast coding execution (default Codex shorthand) |
 | `codex-spark` | gpt-5.3-codex-spark | Lowest-latency quick edits |
-| `codex-high` | gpt-5.5 (high) | Complex coding |
-| `codex-xhigh` | gpt-5.5 (xhigh) | Large refactors |
+| `codex-high` | gpt-5.5 | Complex coding |
+| `codex-xhigh` | gpt-5.5 | Large refactors |
 | `gpt54` | gpt-5.4 | Explicit GPT-5.4 shorthand |
-| `gpt54-high` | gpt-5.4 (high) | Deep reasoning with GPT-5.4 |
-| `gpt54-xhigh` | gpt-5.4 (xhigh) | Maximum reasoning with GPT-5.4 |
+| `gpt54-high` | gpt-5.4 | Deep reasoning with GPT-5.4 |
+| `gpt54-xhigh` | gpt-5.4 | Maximum reasoning with GPT-5.4 |
 | `gpt55` | gpt-5.5 | Explicit GPT-5.5 shorthand |
-| `gpt55-high` | gpt-5.5 (high) | Deep reasoning with GPT-5.5 |
-| `gpt55-xhigh` | gpt-5.5 (xhigh) | Maximum reasoning with GPT-5.5 |
+| `gpt55-high` | gpt-5.5 | Deep reasoning with GPT-5.5 |
+| `gpt55-xhigh` | gpt-5.5 | Maximum reasoning with GPT-5.5 |
 | `gpt52` | gpt-5.2 | Planning, research, analysis |
-| `gpt52-high` | gpt-5.2 (high) | Deep reasoning |
-| `gpt52-xhigh` | gpt-5.2 (xhigh) | Maximum reasoning (30+ min) |
+| `gpt52-high` | gpt-5.2 | Deep reasoning |
+| `gpt52-xhigh` | gpt-5.2 | Maximum reasoning (30+ min) |
 
-### Z.AI Model Tiers
+#### Google Gemini
+
+| Shorthand | Model | Best For |
+|-----------|-------|----------|
+| `gemini` | gemini-3-flash-preview | Fast daily driver (default) |
+| `gemini-high` | gemini-2.5-pro | Stable, more capable |
+| `gemini-xhigh` | gemini-3-pro-preview | Most capable Gemini fallback |
+| `gemini25pro` | gemini-2.5-pro | Explicit stable Pro selection |
+| `gemini25flash` | gemini-2.5-flash | Fast, cost-effective |
+| `gemini25lite` | gemini-2.5-flash-lite | Fastest Gemini option |
+| `gemini3flash` | gemini-3-flash-preview | Explicit 3 Flash selection |
+| `gemini3pro` | gemini-3-pro-preview | Explicit 3 Pro selection |
+| `gemini31pro` | gemini-3.1-pro-preview | Latest Pro model (if available) |
+
+#### Z.AI / OpenCode
 
 | Shorthand | Model | Best For |
 |-----------|-------|----------|
@@ -696,24 +695,33 @@ Google shorthands route through Antigravity CLI (`agy`) when it is installed and
 | `glm5` | glm-5.2 | Latest GLM 5.x tasks via OpenCode |
 | `glm52` | glm-5.2 | Explicit GLM-5.2 pin via OpenCode |
 | `kimi` | kimi-k2.5 | Kimi K2.5 via OpenCode |
+| `opencode` | glm-4.7 | Recommended OpenCode JSON runner |
 
-### Synthetic Model Tiers
+#### Synthetic
 
-Synthetic shorthands route through OpenCode's `synthetic` provider and require `SYNTHETIC_API_KEY`. Configure the provider with `https://api.synthetic.new/openai/v1` or run OpenCode `/connect` and choose Synthetic.
+Synthetic shorthands route through OpenCode's `synthetic` provider and require `SYNTHETIC_API_KEY`.
 
-| Shorthand | Synthetic Alias | Best For |
-|-----------|-----------------|----------|
+| Shorthand | Model | Best For |
+|-----------|-------|----------|
 | `synthetic` | `syn:large:text` | GLM-5.2 default, 512k context |
 | `syn-flash` | `syn:small:text` | Fast GLM-4.7-Flash fallback |
 | `syn-kimi` | `syn:large:vision` | Kimi-K2.6 vision tasks |
 | `syn-qwen` | `syn:small:vision` | Qwen3.6-27B vision tasks |
 
-Quota check: `curl -H "Authorization: Bearer $SYNTHETIC_API_KEY" https://api.synthetic.new/v2/quotas` returns `subscription.requests`, `subscription.limit`, and `subscription.renewsAt` without counting against quota.
+#### Local
+
+| Shorthand | Model | Best For |
+|-----------|-------|----------|
+| `local` | qwen3-coder-next | Local qwen-coder model with no quota |
+| `qwen` | qwen3-coder-next | Local qwen-coder model with no quota |
+| `devstral` | devstral-small-2-2512 | Local Devstral model with no quota |
+| `glm-local` | glm-4.7-flash | Local GLM-4.7 Flash model with no quota |
+| `qwen-small` | qwen3-4b-2507 | Small/fast local Qwen model |
 
 **When to use GPT-5.2 vs GPT-5.5:**
 - **GPT-5.5**: Best when plans are clear, need fast execution (combines codex + reasoning)
 - **GPT-5.2**: Best for ambiguous problems, research, methodical analysis
-
+<!-- END GENERATED: readme-model-tiers -->
 ## Worktree Auto-Install
 
 When using `--worktree`, the executor automatically detects and installs project dependencies after creating the worktree. This ensures verification commands (build, test, lint) work correctly in the isolated environment.

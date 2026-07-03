@@ -457,56 +457,80 @@ Before presenting options:
 </detection_logic>
 
 <available_models>
+<!-- BEGIN GENERATED: create-llms-available-models -->
 All available models for /daplug:run-prompt --model:
 
 **Claude Family:** (check: `claude.five_hour.used`, `claude.seven_day.used`)
-- `claude` - Claude sub-agent in current context (best for complex reasoning, multi-step tasks)
+- `claude` - Claude Code Task subagent (default, current context)
+- `cc-sonnet` - Claude Code CLI Sonnet alias
+- `cc-opus` - Claude Code CLI Opus alias
 
 **OpenAI Codex Family:** (check: `codex.primary_window.used`, `codex.secondary_window.used`)
-- `codex` - gpt-5.5 (default Codex shorthand, fast for straightforward coding)
-- `codex-spark` - gpt-5.3-codex-spark (near-instant responses, lowest Codex cost tier)
-- `codex-high` - gpt-5.5 with high reasoning
-- `codex-xhigh` - gpt-5.5 with xhigh reasoning (complex projects)
-- `gpt54` - gpt-5.4 (explicit shorthand)
-- `gpt54-high` - gpt-5.4 with high reasoning
-- `gpt54-xhigh` - gpt-5.4 with xhigh reasoning
-- `gpt55` - gpt-5.5 (explicit shorthand)
-- `gpt55-high` - gpt-5.5 with high reasoning
-- `gpt55-xhigh` - gpt-5.5 with xhigh reasoning
-- `gpt52` - gpt-5.2 (planning, research, analysis)
-- `gpt52-high` - gpt-5.2 with high reasoning
-- `gpt52-xhigh` - gpt-5.2 with xhigh reasoning (30+ min tasks)
+- `codex` - OpenAI Codex CLI (gpt-5.5, fast execution)
+- `codex-spark` - OpenAI Codex Spark (lowest-latency tier)
+- `codex-high` - OpenAI Codex CLI with high reasoning effort
+- `codex-xhigh` - OpenAI Codex CLI with xhigh reasoning effort
+- `gpt54` - OpenAI GPT-5.4 (direct shorthand)
+- `gpt54-high` - OpenAI GPT-5.4 with high reasoning effort
+- `gpt54-xhigh` - OpenAI GPT-5.4 with xhigh reasoning
+- `gpt55` - OpenAI GPT-5.5 (direct shorthand)
+- `gpt55-high` - OpenAI GPT-5.5 with high reasoning effort
+- `gpt55-xhigh` - OpenAI GPT-5.5 with xhigh reasoning
+- `gpt52` - OpenAI GPT-5.2 (planning, research, analysis)
+- `gpt52-high` - OpenAI GPT-5.2 with high reasoning effort
+- `gpt52-xhigh` - OpenAI GPT-5.2 with xhigh reasoning (30+ min tasks)
 
 **Google Gemini Family:** (check: `gemini.models.<model>.used` for each; `agy` is preferred when healthy, legacy `gemini` is fallback)
-- `gemini` - Gemini 3 Flash Preview (default, best coding performance)
-- `gemini-high` - Gemini 2.5 Pro (higher capability)
-- `gemini-xhigh` - Gemini 3 Pro Preview (maximum capability)
-- `gemini25pro` - Gemini 2.5 Pro (stable, capable)
-- `gemini25flash` - Gemini 2.5 Flash (fast, cost-effective)
-- `gemini25lite` - Gemini 2.5 Flash Lite (fastest)
-- `gemini3flash` - Gemini 3 Flash Preview (best coding)
-- `gemini3pro` - Gemini 3 Pro Preview (most capable)
-- `gemini31pro` - Gemini 3.1 Pro Preview (latest, account-gated)
+- `gemini` - Gemini 3 Flash Preview (default Gemini shorthand)
+- `gemini-high` - Gemini 2.5 Pro
+- `gemini-xhigh` - Gemini 3 Pro Preview
+- `gemini25pro` - Gemini 2.5 Pro (explicit shorthand)
+- `gemini25flash` - Gemini 2.5 Flash
+- `gemini25lite` - Gemini 2.5 Flash-Lite
+- `gemini3flash` - Gemini 3 Flash Preview (explicit shorthand)
+- `gemini3pro` - Gemini 3 Pro Preview (explicit shorthand)
+- `gemini31pro` - Gemini 3.1 Pro Preview (if your account has access)
 
-**Other Models:** (check: `zai.token_quota.percentage`; Synthetic: request quota from `/v2/quotas`)
-- `zai` - Z.AI GLM-4.7 (good for Chinese language tasks)
-- `glm5` - Z.AI GLM-5.2 (latest GLM 5.x coding model, 1M context)
-- `glm52` - Z.AI GLM-5.2 via Z.AI / OpenCode (explicit pin, 1M context)
-- `kimi` - Kimi K2.5 via OpenCode (`opencode/kimi-k2.5`)
-- `synthetic` - GLM-5.2 via Synthetic (`syn:large:text`, 512k context)
-- `syn-flash` - GLM-4.7-Flash via Synthetic (`syn:small:text`)
-- `syn-kimi` - Kimi-K2.6 via Synthetic (`syn:large:vision`, vision)
-- `syn-qwen` - Qwen3.6-27B via Synthetic (`syn:small:vision`, vision)
-- `local` - Local model via opencode + LMStudio (no quota limits)
-- `qwen` - Qwen via opencode + LMStudio (no quota limits)
-- `devstral` - Devstral via opencode + LMStudio (no quota limits)
-- `glm-local` - Local GLM-4.7 Flash via opencode + LMStudio (no quota limits)
-- `qwen-small` - Local qwen3-4b model via opencode + LMStudio (small/fast)
+**Z.AI / OpenCode Models:** (check: `zai.token_quota.percentage` where applicable)
+- `zai` - Z.AI GLM-4.7 via Codex CLI
+- `glm5` - Z.AI GLM-5.2 via OpenCode (latest GLM 5.x, 1M context)
+- `glm52` - Z.AI GLM-5.2 via OpenCode (explicit pin, 1M context)
+- `kimi` - Kimi K2.5 via OpenCode
+- `opencode` - OpenCode runner with Z.AI GLM-4.7
+
+**Synthetic Models:** (check request quota from `/v2/quotas`; requires `SYNTHETIC_API_KEY`)
+- `synthetic` - GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, 512k context)
+- `syn-flash` - GLM-4.7-Flash via Synthetic / OpenCode
+- `syn-kimi` - Kimi-K2.6 via Synthetic / OpenCode (vision)
+- `syn-qwen` - Qwen3.6-27B via Synthetic / OpenCode (vision)
+
+**Local Models:** (opencode + LMStudio; no hosted quota)
+- `local` - Local qwen3-coder-next via opencode + LMStudio
+- `qwen` - Qwen via opencode + LMStudio
+- `devstral` - Devstral via opencode + LMStudio
+- `glm-local` - Local GLM-4.7-Flash via opencode + LMStudio
+- `qwen-small` - Local qwen3-4b model via opencode + LMStudio
+
+**Gemini Model Mapping:**
+Antigravity (`agy`) maps legacy shorthands to the closest current `agy models` display names; legacy `gemini` keeps these API model IDs.
+| Shorthand | API Model | Quota Bucket |
+|-----------|-----------|--------------|
+| `gemini` | gemini-3-flash-preview | gemini-3-flash-preview |
+| `gemini-high` | gemini-2.5-pro | gemini-2.5-pro |
+| `gemini-xhigh` | gemini-3-pro-preview | gemini-3-pro-preview |
+| `gemini25pro` | gemini-2.5-pro | gemini-2.5-pro |
+| `gemini25flash` | gemini-2.5-flash | gemini-2.5-flash |
+| `gemini25lite` | gemini-2.5-flash-lite | gemini-2.5-flash-lite |
+| `gemini3flash` | gemini-3-flash-preview | gemini-3-flash-preview |
+| `gemini3pro` | gemini-3-pro-preview | gemini-3-pro-preview |
+| `gemini31pro` | gemini-3.1-pro-preview | gemini-3.1-pro-preview |
+<!-- END GENERATED: create-llms-available-models -->
 </available_models>
 
 <recommendation_logic>
 For llms.txt research tasks, recommend models in this order (based on availability):
 
+<!-- BEGIN GENERATED: create-llms-recommendations -->
 | Priority | Model | Reason |
 |----------|-------|--------|
 | 1 | gpt52-xhigh | Best for research - deep reasoning, can work 30+ min |
@@ -522,6 +546,7 @@ For llms.txt research tasks, recommend models in this order (based on availabili
 | 11 | glm52 | GLM-5.2 explicit pin with 1M context |
 | 12 | glm5 | Latest GLM 5.x alias for GLM-5.2 |
 | 13 | zai | Good fallback for documentation |
+<!-- END GENERATED: create-llms-recommendations -->
 
 **Recommended flags for llms.txt:**
 - `--worktree` - Isolate the work (can continue working on other things)
@@ -564,57 +589,60 @@ If user chooses #1:
 
   Execute via:
 
+<!-- BEGIN GENERATED: create-llms-selection-menu -->
   **Claude:** {usage status}
-  1. Claude - sub-agent in current context
-  2. Claude (worktree) - isolated git worktree
+  1. claude - sub-agent in current context
+  2. cc-sonnet - Claude Code CLI Sonnet
+  3. cc-opus - Claude Code CLI Opus
 
   **Codex (OpenAI):** {usage status}
-  3. codex - gpt-5.5 standard
-  4. codex-high - higher reasoning
-  5. codex-xhigh - maximum reasoning
-
-  **GPT-5.4 (OpenAI explicit):** {usage status}
-  6. gpt54 - gpt-5.4 explicit shorthand
-  7. gpt54-high - deep reasoning
-  8. gpt54-xhigh - maximum reasoning
-
-  **GPT-5.5 (OpenAI explicit):** {usage status}
-  9. gpt55 - gpt-5.5 explicit shorthand
-  10. gpt55-high - deep reasoning
-  11. gpt55-xhigh - maximum reasoning
-
-  **GPT-5.2 (OpenAI):** {usage status} - Best for research/planning
-  12. gpt52 - planning, research, analysis
-  13. gpt52-high - deep reasoning
-  14. gpt52-xhigh - maximum reasoning (30+ min) (Recommended for llms.txt)
+  4. codex - {X}% used - gpt-5.5 standard
+  5. codex-spark - {X}% used - fast/low-cost coding tier
+  6. codex-high - {X}% used - higher reasoning
+  7. codex-xhigh - {X}% used - maximum reasoning
+  8. gpt54 - {X}% used - gpt-5.4 explicit shorthand
+  9. gpt54-high - {X}% used - deep reasoning
+  10. gpt54-xhigh - {X}% used - maximum reasoning
+  11. gpt55 - {X}% used - gpt-5.5 explicit shorthand
+  12. gpt55-high - {X}% used - deep reasoning
+  13. gpt55-xhigh - {X}% used - maximum reasoning
+  14. gpt52 - {X}% used - planning, research, analysis
+  15. gpt52-high - {X}% used - deep reasoning
+  16. gpt52-xhigh - {X}% used - maximum reasoning (30+ min tasks)
 
   **Gemini (Google):** {show each model's usage}
-  15. gemini (3-flash) - {X}% used
-  16. gemini25flash - {X}% used
-  17. gemini25pro - {X}% used - great for research
-  18. gemini3pro - {X}% used - most capable
-  19. gemini31pro - {X}% used - Gemini 3.1 Pro Preview (if available)
+  17. gemini - {X}% used - 3-flash, best coding performance
+  18. gemini-high - {X}% used - 2.5-pro
+  19. gemini-xhigh - {X}% used - 3-pro preview
+  20. gemini25pro - {X}% used - 2.5-pro, stable/capable
+  21. gemini25flash - {X}% used - 2.5-flash, fast/cost-effective
+  22. gemini25lite - {X}% used - 2.5-flash-lite, fastest
+  23. gemini3flash - {X}% used - 3-flash explicit
+  24. gemini3pro - {X}% used - 3-pro, most capable
+  25. gemini31pro - {X}% used - 3.1 Pro Preview if available
 
-  **Other:**
-  20. zai - {X}% used
-  21. glm5 - {X}% used - Z.AI GLM-5.2
-  22. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
-  23. kimi - {X}% used - Kimi K2.5 via OpenCode
-  24. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
-  25. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
-  26. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.6 vision
-  27. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
-  28. local/qwen/devstral - Local models via opencode + LMStudio (no quota)
+  **Z.AI / OpenCode:** {usage status}
+  26. zai - {X}% used - Z.AI GLM-4.7
+  27. glm5 - {X}% used - Z.AI GLM-5.2 latest alias
+  28. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
+  29. kimi - {X}% used - Kimi K2.5 via OpenCode
+  30. opencode - {X}% used - OpenCode GLM-4.7
 
-  [Show recommendation: "Recommended for llms.txt research: gpt52-xhigh --worktree --loop"]
-  [If preferred_agent is set and available: "Your preferred agent: {preferred_agent} ✅"]
+  **Synthetic:** {usage status}
+  31. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
+  32. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
+  33. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.6 vision
+  34. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
 
-  **Additional flags (can combine):**
-  - `--worktree` - Isolated git worktree (recommended: can work on other things)
-  - `--loop` - Auto-retry until verification passes (recommended: ensures quality)
-  - `--loop --max-iterations N` - Limit loop retries (default: 3)
+  **Local:** {usage status}
+  35. local - local qwen3-coder-next, no quota
+  36. qwen - local qwen3-coder-next, no quota
+  37. devstral - local Devstral, no quota
+  38. glm-local - local GLM-4.7 Flash, no quota
+  39. qwen-small - local qwen3-4b, no quota
 
-  Choose (1-28), or type model with flags (e.g., 'gpt52-xhigh --worktree --loop'): _"
+  Choose (1-39), or type model with flags (e.g., 'codex --worktree --loop'): _
+<!-- END GENERATED: create-llms-selection-menu -->
 
   **Execute based on selection:**
 
@@ -622,19 +650,15 @@ If user chooses #1:
   - Prefer invoking with `--prompt-file "$LLMS_TXT_DIR/prompts/{NUMBER}-create-llms-txt-{library-name}.md"` so the executor reads the correct file from any project.
   - If `--worktree` is requested, run from within `$LLMS_TXT_DIR` so the worktree is created off the llms_txt repo. If you're not already there, ask the user to confirm running from that repo.
 
-  If user selects Claude (option 1):
-    Invoke via Skill tool: `/daplug:run-prompt {NUMBER} --prompt-file "$LLMS_TXT_DIR/prompts/{NUMBER}-create-llms-txt-{library-name}.md"`
-
-  If user selects Claude worktree (option 2):
-    Invoke via Skill tool: `/daplug:run-prompt {NUMBER} --prompt-file "$LLMS_TXT_DIR/prompts/{NUMBER}-create-llms-txt-{library-name}.md" --worktree`
-
-  If user selects any other model (options 3-28):
-    Invoke via Skill tool: `/daplug:run-prompt {NUMBER} --prompt-file "$LLMS_TXT_DIR/prompts/{NUMBER}-create-llms-txt-{library-name}.md" --model {selected_model}`
-    (Add `--worktree` and/or `--loop` if user requests)
+  After selection:
+  - If the user typed model flags, append those flags after the `--prompt-file` argument.
+  - If the user selected a listed model, invoke `/daplug:run-prompt {NUMBER} --prompt-file "$LLMS_TXT_DIR/prompts/{NUMBER}-create-llms-txt-{library-name}.md" --model {selected_model}`.
+  - If the selected model is `claude`, `--model claude` may be omitted, but keeping it is valid.
+  - Add `--worktree` and/or `--loop` if the user requests them.
 
   **User can also type custom model names with flags:**
-  - "codex-xhigh --worktree --loop" → `/daplug:run-prompt {NUMBER} --prompt-file "$LLMS_TXT_DIR/prompts/{NUMBER}-create-llms-txt-{library-name}.md" --model codex-xhigh --worktree --loop`
-  - "gemini25pro --loop" → `/daplug:run-prompt {NUMBER} --prompt-file "$LLMS_TXT_DIR/prompts/{NUMBER}-create-llms-txt-{library-name}.md" --model gemini25pro --loop`
+  - "codex-xhigh --worktree --loop" → append `--model codex-xhigh --worktree --loop`
+  - "gemini25pro --loop" → append `--model gemini25pro --loop`
 </action>
 
 ## Example Interaction Flows
