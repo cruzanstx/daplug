@@ -2,6 +2,11 @@
 
 All notable changes to daplug are documented here.
 
+## [0.32.0] - 2026-07-04
+
+### Changed
+- **Local LMStudio models run with `--pure --agent build`**: the opencode plugin default agent (Sisyphus) plus oh-my-openagent tool schemas cost ~63k input tokens per turn; the lean built-in `build` agent without plugins drops that to ~24k (measured on qwen3.6-35b-a3b). Applied to all 7 `lmstudio:` shorthands across the registry, the cli-detector router, and the `manage-models.py` command builder, so future local models inherit it automatically. Cloud models keep the plugin default agent.
+
 ## [0.31.0] - 2026-07-04
 
 ### Added
