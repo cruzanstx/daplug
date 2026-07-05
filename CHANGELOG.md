@@ -2,6 +2,14 @@
 
 All notable changes to daplug are documented here.
 
+## [0.31.0] - 2026-07-04
+
+### Added
+- **Local Qwen 3.6 shorthands**: `qwen36` (`lmstudio/qwen3.6-35b-a3b`, MoE 35B) and `qwen36-27b` (`lmstudio/qwen3.6-27b`, dense 27B) via opencode + LMStudio. Both smoke-tested end-to-end.
+
+### Changed
+- **`local`/`qwen` repointed to `qwen3.6-35b-a3b`**: the previous target `qwen3-coder-next` is no longer served by LMStudio. Router (`cli-detector`) and executor registry updated together; consistency tripwire and router tests updated to match.
+
 ## [0.30.0] - 2026-07-03
 
 ### Added
