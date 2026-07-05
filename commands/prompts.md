@@ -87,11 +87,13 @@ Use AskUserQuestion tool with options:
 - `syn-kimi` - Kimi-K2.6 via Synthetic / OpenCode (vision)
 - `syn-qwen` - Qwen3.6-27B via Synthetic / OpenCode (vision)
 - `opencode` - OpenCode runner with Z.AI GLM-4.7
-- `local` - Local qwen3-coder-next via opencode + LMStudio
+- `local` - Local qwen3.6-35b-a3b via opencode + LMStudio
 - `qwen` - Qwen via opencode + LMStudio
 - `devstral` - Devstral via opencode + LMStudio
 - `glm-local` - Local GLM-4.7-Flash via opencode + LMStudio
 - `qwen-small` - Local qwen3-4b model via opencode + LMStudio
+- `qwen36` - Local Qwen 3.6 35b-a3b via opencode + LMStudio
+- `qwen36-27b` - Local Qwen 3.6 27b via opencode + LMStudio
 <!-- END GENERATED: preferred-agent-options -->
 
 3. **After user selects, save to user-level `~/.claude/CLAUDE.md`** (applies to all projects):

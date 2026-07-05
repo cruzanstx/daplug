@@ -14,7 +14,7 @@ Execute prompts from `./prompts/` (including subfolders) using various AI models
 |----------|-------------|
 | `<prompt>` | Prompt number(s), range(s), or name(s) - defaults to latest |
 <!-- BEGIN GENERATED: run-prompt-model-argument -->
-| `--model, -m` | claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, glm52, kimi, synthetic, syn-flash, syn-kimi, syn-qwen, opencode, local, qwen, devstral, glm-local, qwen-small (codex/codex-high/codex-xhigh default to GPT-5.5; `gpt55*` are explicit GPT-5.5 shorthands) |
+| `--model, -m` | claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, glm52, kimi, synthetic, syn-flash, syn-kimi, syn-qwen, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b (codex/codex-high/codex-xhigh default to GPT-5.5; `gpt55*` are explicit GPT-5.5 shorthands) |
 <!-- END GENERATED: run-prompt-model-argument -->
 | `--cli` | Override CLI wrapper: codex, opencode, claude, agy, or gemini (aliases: claudecode, cc, antigravity). Unsupported explicit combinations error clearly. |
 | `--variant` | Reasoning variant override: `none`, `low`, `medium`, `high`, `xhigh`. Explicit `--variant` overrides alias defaults. |

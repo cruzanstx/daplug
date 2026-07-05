@@ -1474,8 +1474,8 @@
     },
     {
       "name": "local",
-      "display": "qwen-coder (local via opencode)",
-      "model_id": "lmstudio:qwen3-coder-next",
+      "display": "qwen3.6-35b (local via opencode)",
+      "model_id": "lmstudio:qwen3.6-35b-a3b",
       "default_cli": "opencode",
       "supports_codex_reasoning": false,
       "codex_profile": "local",
@@ -1490,7 +1490,7 @@
         "--format",
         "json",
         "-m",
-        "lmstudio/qwen3-coder-next"
+        "lmstudio/qwen3.6-35b-a3b"
       ],
       "routing": {
         "cli_overrides": [
@@ -1504,22 +1504,22 @@
       "docs": {
         "family": "Local",
         "cli_label": "opencode",
-        "actual_model": "qwen3-coder-next via LMStudio (opencode default, --cli codex for legacy)",
-        "option_description": "Local qwen3-coder-next via opencode + LMStudio",
-        "reference_cli": "opencode run --format json -m lmstudio/qwen3-coder-next",
+        "actual_model": "qwen3.6-35b-a3b via LMStudio (opencode default, --cli codex for legacy)",
+        "option_description": "Local qwen3.6-35b-a3b via opencode + LMStudio",
+        "reference_cli": "opencode run --format json -m lmstudio/qwen3.6-35b-a3b",
         "reference_description": "Local qwen-coder model with no quota",
         "readme_section": "Local",
-        "readme_model": "qwen3-coder-next",
+        "readme_model": "qwen3.6-35b-a3b",
         "best_for": "Local qwen-coder model with no quota",
-        "prompt_description": "Local qwen3-coder-next via opencode + LMStudio",
-        "menu_note": "local qwen3-coder-next, no quota",
+        "prompt_description": "Local qwen3.6-35b-a3b via opencode + LMStudio",
+        "menu_note": "local qwen3.6-35b-a3b, no quota",
         "include_in_prompt_guides": true
       }
     },
     {
       "name": "qwen",
-      "display": "qwen-coder (local via opencode)",
-      "model_id": "lmstudio:qwen3-coder-next",
+      "display": "qwen3.6-35b (local via opencode)",
+      "model_id": "lmstudio:qwen3.6-35b-a3b",
       "default_cli": "opencode",
       "supports_codex_reasoning": false,
       "codex_profile": "local",
@@ -1534,7 +1534,7 @@
         "--format",
         "json",
         "-m",
-        "lmstudio/qwen3-coder-next"
+        "lmstudio/qwen3.6-35b-a3b"
       ],
       "routing": {
         "cli_overrides": [
@@ -1548,15 +1548,15 @@
       "docs": {
         "family": "Local",
         "cli_label": "opencode",
-        "actual_model": "qwen3-coder-next via LMStudio (opencode default, --cli codex for legacy)",
+        "actual_model": "qwen3.6-35b-a3b via LMStudio (opencode default, --cli codex for legacy)",
         "option_description": "Qwen via opencode + LMStudio",
-        "reference_cli": "opencode run --format json -m lmstudio/qwen3-coder-next",
+        "reference_cli": "opencode run --format json -m lmstudio/qwen3.6-35b-a3b",
         "reference_description": "Local qwen-coder model with no quota",
         "readme_section": "Local",
-        "readme_model": "qwen3-coder-next",
+        "readme_model": "qwen3.6-35b-a3b",
         "best_for": "Local qwen-coder model with no quota",
         "prompt_description": "Qwen via opencode + LMStudio",
-        "menu_note": "local qwen3-coder-next, no quota",
+        "menu_note": "local qwen3.6-35b-a3b, no quota",
         "include_in_prompt_guides": true
       }
     },
@@ -1687,6 +1687,92 @@
         "best_for": "Small/fast local Qwen model",
         "prompt_description": "Local qwen3-4b model via opencode + LMStudio",
         "menu_note": "local qwen3-4b, no quota",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "qwen36",
+      "display": "qwen3.6-35b-a3b (local via opencode)",
+      "model_id": "lmstudio:qwen3.6-35b-a3b",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "lmstudio/qwen3.6-35b-a3b"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Local",
+        "cli_label": "opencode",
+        "actual_model": "qwen3.6-35b-a3b via LMStudio",
+        "option_description": "Local Qwen 3.6 35b-a3b via opencode + LMStudio",
+        "reference_cli": "opencode run --format json -m lmstudio/qwen3.6-35b-a3b",
+        "reference_description": "Best local coding model, MoE 35B, no quota",
+        "readme_section": "Local",
+        "readme_model": "qwen3.6-35b-a3b",
+        "best_for": "Best local coding model, MoE 35B, no quota",
+        "prompt_description": "Local Qwen 3.6 35b-a3b via opencode + LMStudio",
+        "menu_note": "local qwen3.6-35b-a3b, no quota",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "qwen36-27b",
+      "display": "qwen3.6-27b (local via opencode)",
+      "model_id": "lmstudio:qwen3.6-27b",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "lmstudio/qwen3.6-27b"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Local",
+        "cli_label": "opencode",
+        "actual_model": "qwen3.6-27b via LMStudio",
+        "option_description": "Local Qwen 3.6 27b via opencode + LMStudio",
+        "reference_cli": "opencode run --format json -m lmstudio/qwen3.6-27b",
+        "reference_description": "Local Qwen 3.6 dense 27B, no quota",
+        "readme_section": "Local",
+        "readme_model": "qwen3.6-27b",
+        "best_for": "Local Qwen 3.6 dense 27B, no quota",
+        "prompt_description": "Local Qwen 3.6 27b via opencode + LMStudio",
+        "menu_note": "local qwen3.6-27b, no quota",
         "include_in_prompt_guides": true
       }
     }

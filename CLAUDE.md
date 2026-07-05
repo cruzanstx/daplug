@@ -180,11 +180,13 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `syn-kimi` | opencode | Kimi-K2.6 via Synthetic (`syn:large:vision`, vision) |
 | `syn-qwen` | opencode | Qwen3.6-27B via Synthetic (`syn:small:vision`, vision) |
 | `opencode` | opencode | GLM-4.7 via OpenCode (recommended; JSON output) |
-| `local` | opencode | qwen3-coder-next via LMStudio (opencode default, --cli codex for legacy) |
-| `qwen` | opencode | qwen3-coder-next via LMStudio (opencode default, --cli codex for legacy) |
+| `local` | opencode | qwen3.6-35b-a3b via LMStudio (opencode default, --cli codex for legacy) |
+| `qwen` | opencode | qwen3.6-35b-a3b via LMStudio (opencode default, --cli codex for legacy) |
 | `devstral` | opencode | devstral-small-2-2512 via LMStudio (opencode default, --cli codex for legacy) |
 | `glm-local` | opencode | glm-4.7-flash via LMStudio (local Z.AI model) |
 | `qwen-small` | opencode | qwen3-4b-2507 via LMStudio (small/fast, haiku-tier) |
+| `qwen36` | opencode | qwen3.6-35b-a3b via LMStudio |
+| `qwen36-27b` | opencode | qwen3.6-27b via LMStudio |
 
 Google shorthands prefer Antigravity CLI (`agy`) when it is installed and healthy. The legacy `gemini` CLI remains supported as fallback and for explicit `--cli gemini` runs.
 

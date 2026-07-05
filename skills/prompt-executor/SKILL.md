@@ -70,7 +70,7 @@ python3 "$EXECUTOR" [prompts...] [options]
 
 **Options:**
 <!-- BEGIN GENERATED: skill-model-options -->
-- `--model, -m`: claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, glm52, kimi, synthetic, syn-flash, syn-kimi, syn-qwen, opencode, local, qwen, devstral, glm-local, qwen-small
+- `--model, -m`: claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, glm52, kimi, synthetic, syn-flash, syn-kimi, syn-qwen, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b
   - `glm52`: GLM-5.2 via Z.AI / OpenCode (1M context)
   - `synthetic`: GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, requires `SYNTHETIC_API_KEY`)
 <!-- END GENERATED: skill-model-options -->
@@ -264,11 +264,13 @@ python3 "$EXECUTOR" --loop-status
 | syn-kimi | opencode run --format json -m synthetic/syn:large:vision | Kimi-K2.6 vision tasks |
 | syn-qwen | opencode run --format json -m synthetic/syn:small:vision | Qwen3.6-27B vision tasks |
 | opencode | opencode run --format json -m zai/glm-4.7 | Recommended OpenCode JSON runner |
-| local | opencode run --format json -m lmstudio/qwen3-coder-next | Local qwen-coder model with no quota |
-| qwen | opencode run --format json -m lmstudio/qwen3-coder-next | Local qwen-coder model with no quota |
+| local | opencode run --format json -m lmstudio/qwen3.6-35b-a3b | Local qwen-coder model with no quota |
+| qwen | opencode run --format json -m lmstudio/qwen3.6-35b-a3b | Local qwen-coder model with no quota |
 | devstral | opencode run --format json -m lmstudio/devstral-small-2-2512 | Local Devstral model with no quota |
 | glm-local | opencode run --format json -m lmstudio/glm-4.7-flash | Local GLM-4.7 Flash model with no quota |
 | qwen-small | opencode run --format json -m lmstudio/qwen3-4b-2507 | Small/fast local Qwen model |
+| qwen36 | opencode run --format json -m lmstudio/qwen3.6-35b-a3b | Best local coding model, MoE 35B, no quota |
+| qwen36-27b | opencode run --format json -m lmstudio/qwen3.6-27b | Local Qwen 3.6 dense 27B, no quota |
 <!-- END GENERATED: skill-model-reference -->
 
 OpenCode runs include `--variant <value>` when a variant is set.

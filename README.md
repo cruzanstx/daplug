@@ -712,11 +712,13 @@ Synthetic shorthands route through OpenCode's `synthetic` provider and require `
 
 | Shorthand | Model | Best For |
 |-----------|-------|----------|
-| `local` | qwen3-coder-next | Local qwen-coder model with no quota |
-| `qwen` | qwen3-coder-next | Local qwen-coder model with no quota |
+| `local` | qwen3.6-35b-a3b | Local qwen-coder model with no quota |
+| `qwen` | qwen3.6-35b-a3b | Local qwen-coder model with no quota |
 | `devstral` | devstral-small-2-2512 | Local Devstral model with no quota |
 | `glm-local` | glm-4.7-flash | Local GLM-4.7 Flash model with no quota |
 | `qwen-small` | qwen3-4b-2507 | Small/fast local Qwen model |
+| `qwen36` | qwen3.6-35b-a3b | Best local coding model, MoE 35B, no quota |
+| `qwen36-27b` | qwen3.6-27b | Local Qwen 3.6 dense 27B, no quota |
 
 **When to use GPT-5.2 vs GPT-5.5:**
 - **GPT-5.5**: Best when plans are clear, need fast execution (combines codex + reasoning)
