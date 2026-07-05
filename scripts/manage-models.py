@@ -514,7 +514,7 @@ def update_skill(path: Path, registry: dict) -> str:
 
 def update_run_prompt(path: Path, registry: dict) -> str:
     text = path.read_text()
-    text = re.sub(r"argument-hint: <prompt\(s\)> \[--model .*?\] \[--cli", "argument-hint: <prompt(s)> [--model <model>] [--cli", text, count=1)
+    text = re.sub(r"argument-hint: <prompt\(s\)> \[--model .*?\] \[--cli", "argument-hint: <prompt(s)> [--model <model>] [--moa <m1,m2,...>] [--cli", text, count=1)
     text = replace_region(text, "run-prompt-model-argument", render_run_prompt_model_argument(registry), r"\| `--model, -m` \| .*? \|")
     return text
 

@@ -33,12 +33,17 @@ def get_existing_worktree(repo_root: Path, branch_name: str) -> str | None:
 
 
 def create_worktree(repo_root: Path, prompt_file: Path, base_branch: Optional[str] = None,
-                    on_conflict: str = "error") -> dict:
+                    on_conflict: str = "error", name_suffix: Optional[str] = None) -> dict:
     """Create a git worktree for the prompt.
 
     base_branch:
       If None, auto-detect via detect_default_branch (origin/HEAD -> current branch -> "main").
       Pass an explicit value to override.
+
+    name_suffix:
+      Optional suffix appended to the branch name and worktree directory, used to
+      create multiple distinct worktrees for the same prompt (e.g. --moa per-model
+      runs use "moa-<model>").
 
     on_conflict options:
       - "error": Return conflict info for user decision (default)
@@ -67,7 +72,13 @@ def create_worktree(repo_root: Path, prompt_file: Path, base_branch: Optional[st
 
     branch_folder = re.sub(r"[^a-zA-Z0-9._/-]+", "-", branch_folder).strip("/")
     branch_name = f"prompt/{branch_folder}/{prompt_slug}" if branch_folder else f"prompt/{prompt_slug}"
-    worktree_path = worktrees_dir / f"{repo_name}-prompt-{prompt_num}-{timestamp}"
+    dir_name = f"{repo_name}-prompt-{prompt_num}"
+    if name_suffix:
+        clean_suffix = re.sub(r"[^a-zA-Z0-9._-]+", "-", name_suffix).strip("-")
+        if clean_suffix:
+            branch_name = f"{branch_name}-{clean_suffix}"
+            dir_name = f"{dir_name}-{clean_suffix}"
+    worktree_path = worktrees_dir / f"{dir_name}-{timestamp}"
 
     # Create worktrees directory
     worktrees_dir.mkdir(parents=True, exist_ok=True)

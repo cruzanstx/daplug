@@ -328,12 +328,238 @@ def resolve_prompts(prompts_dir: Path, prompt_inputs: list[str]) -> list[Path]:
     return [resolve_prompt(prompts_dir, inp) for inp in unique]
 
 
+_MOA_CLI_TOKENS = {"codex", "opencode", "claude", "claudecode", "cc", "agy", "antigravity", "gemini"}
+
+
+def parse_moa_models(raw: str) -> list[dict]:
+    """Parse and validate a --moa comma-separated model list.
+
+    Each entry is `model` or `model:cli` (per-entry CLI override, e.g.
+    `codex:opencode`). Requires at least 2 distinct entries. Returns dicts with
+    keys: model, cli (normalized override or None), label (unique run key),
+    spec (normalized entry text).
+
+    The bare 'claude' Task-subagent shorthand is rejected because MoA runs
+    must be headless; `claude:claude` (headless Claude Code CLI) is allowed.
+    """
+    entries: list[dict] = []
+    seen: set[str] = set()
+    for part in raw.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        model, sep, cli_token = part.partition(":")
+        model = model.strip()
+        cli_token = cli_token.strip()
+        if model not in MODEL_CHOICES:
+            raise ValueError(f"Unknown model in --moa: '{model}'")
+        cli = None
+        if sep:
+            if cli_token.lower() not in _MOA_CLI_TOKENS:
+                raise ValueError(
+                    f"Unknown CLI in --moa entry '{part}'. "
+                    "Supported: codex, opencode, claude, agy, gemini"
+                )
+            cli = _normalize_cli_override(cli_token)
+            _validate_cli_override(model, cli)
+        if model == "claude" and cli is None:
+            raise ValueError(
+                "--moa does not support the 'claude' Task-subagent shorthand. "
+                "Use cc-sonnet, cc-opus, or claude:claude for headless Claude Code runs."
+            )
+        label = f"{model}-{cli}" if cli else model
+        if label in seen:
+            continue
+        seen.add(label)
+        entries.append({
+            "model": model,
+            "cli": cli,
+            "label": label,
+            "spec": f"{model}:{cli}" if cli else model,
+        })
+    if len(entries) < 2:
+        raise ValueError("--moa requires at least 2 distinct models (comma-separated)")
+    return entries
+
+
+def _moa_cli_info(
+    model: str,
+    repo_root: Path,
+    variant: Optional[str],
+    cli_override: Optional[str] = None,
+) -> tuple[dict, Optional[str], bool]:
+    """Resolve cli_info for a MoA model, dropping --variant where unsupported.
+
+    Returns (cli_info, effective_variant, variant_dropped). The effective
+    variant is what gets forwarded to background loop re-invocations. Errors
+    unrelated to the variant (unknown model, unsupported CLI combo) still
+    raise from the fallback attempt.
+    """
+    if variant is not None:
+        try:
+            return (
+                get_cli_info(model, repo_root=repo_root, cli_override=cli_override, variant=variant),
+                variant,
+                False,
+            )
+        except ValueError:
+            pass
+    info = get_cli_info(model, repo_root=repo_root, cli_override=cli_override, variant=None)
+    return info, None, variant is not None
+
+
+def get_moa_manifest_dir() -> Path:
+    """Directory for MoA run manifests (consumed by the judge/consolidation phase)."""
+    manifest_dir = get_loop_state_dir() / "moa"
+    manifest_dir.mkdir(parents=True, exist_ok=True)
+    return manifest_dir
+
+
+def _execute_moa_prompt(
+    moa_cli_infos: list[dict],
+    prompt_file: Path,
+    prompt_info: dict,
+    repo_root: Path,
+    args,
+    log_dir: Path,
+    execution_timestamp: str,
+    prompt_num: str,
+    original_repo_root: str,
+) -> dict:
+    """Fan out one prompt across MoA models, each in its own worktree.
+
+    Returns the MoA summary dict (also persisted as a manifest file) with one
+    entry per model run: worktree, branch, log, loop state file, and launch
+    status. Per-model failures are recorded, not raised, so one bad run does
+    not abort the rest of the fan-out.
+    """
+    runs: list[dict] = []
+    for entry in moa_cli_infos:
+        model = entry["model"]
+        label = entry["label"]
+        cli_info = entry["cli_info"]
+        run: dict = {
+            "model": model,
+            "cli": entry["cli"],
+            "label": label,
+            "cli_display": cli_info["display"],
+            "variant": entry["variant"],
+            "variant_dropped": entry["variant_dropped"],
+        }
+
+        try:
+            worktree_info = create_worktree(
+                repo_root, prompt_file, args.base_branch, args.on_conflict,
+                name_suffix=f"moa-{label}",
+            )
+        except Exception as exc:
+            run["status"] = "error"
+            run["error"] = f"worktree creation failed: {exc}"
+            runs.append(run)
+            continue
+
+        run["worktree"] = worktree_info
+        if worktree_info.get("conflict"):
+            run["status"] = "conflict"
+            runs.append(run)
+            continue
+
+        execution_cwd = worktree_info["worktree_path"]
+        run["worktree_path"] = execution_cwd
+        run["branch_name"] = worktree_info.get("branch_name")
+
+        sandbox_config = resolve_sandbox_config(sys.platform, args, execution_cwd)
+        moa_prompt_number = f"{prompt_num}-moa-{label}"
+        log_file = log_dir / f"{label}-{prompt_num}-moa-{execution_timestamp}.log"
+
+        if not args.info_only:
+            preview_command = cli_info["command"]
+            if cli_info.get("stdin_mode") == "dash":
+                preview_command = preview_command + ["-"]
+            run["cli_command"] = maybe_wrap_command_with_sandbox(preview_command, sandbox_config)
+            run["sandbox"] = sandbox_config
+
+        if not args.run:
+            run["status"] = "info"
+            run["log"] = str(log_file)
+            runs.append(run)
+            continue
+
+        if sandbox_config.get("enabled") and sandbox_config.get("type") == "bubblewrap":
+            if not check_bwrap_available():
+                run["status"] = "error"
+                run["error"] = BWRAP_MISSING_ERROR
+                runs.append(run)
+                continue
+
+        if args.loop:
+            exec_result = run_verification_loop_background(
+                cli_info=cli_info,
+                original_content=prompt_info["content"],
+                cwd=execution_cwd,
+                log_dir=log_dir,
+                prompt_number=moa_prompt_number,
+                model=model,
+                max_iterations=args.max_iterations,
+                completion_marker=args.completion_marker,
+                execution_timestamp=execution_timestamp,
+                worktree_path=execution_cwd,
+                branch_name=run["branch_name"],
+                cli_override=entry["cli"],
+                variant=entry["variant"],
+                sandbox_enabled=bool(args.sandbox and not args.no_sandbox),
+                sandbox_type=args.sandbox_type,
+                sandbox_profile=args.sandbox_profile,
+                sandbox_workspace=args.sandbox_workspace,
+                sandbox_net=args.sandbox_net,
+                original_repo_root=original_repo_root,
+                require_diff=args.require_diff,
+            )
+            run["log"] = exec_result.get("loop_log", str(log_file))
+            run["state_file"] = exec_result.get("state_file")
+        else:
+            exec_result = run_cli(
+                cli_info,
+                prompt_info["content"],
+                execution_cwd,
+                log_file,
+                sandbox_config=sandbox_config if sandbox_config.get("enabled") else None,
+            )
+            run["log"] = str(log_file)
+
+        run["execution"] = exec_result
+        run["status"] = exec_result.get("status", "unknown")
+        runs.append(run)
+
+    manifest = {
+        "prompt_number": prompt_num,
+        "prompt_file": str(prompt_file),
+        "title": prompt_info["title"],
+        "execution_timestamp": execution_timestamp,
+        "models": [entry["spec"] for entry in moa_cli_infos],
+        "loop": bool(args.loop),
+        "launched": bool(args.run),
+        "runs": runs,
+    }
+    manifest_path = get_moa_manifest_dir() / f"{prompt_num}-{execution_timestamp}.json"
+    manifest_path.write_text(json.dumps(manifest, indent=2))
+    manifest["manifest_file"] = str(manifest_path)
+    return manifest
+
+
 def main():
     parser = argparse.ArgumentParser(description="Resolve and execute prompts")
     parser.add_argument("prompts", nargs="*", default=[], help="Prompt number(s) or name(s)")
-    parser.add_argument("--model", "-m", default="claude",
+    model_group = parser.add_mutually_exclusive_group()
+    model_group.add_argument("--model", "-m", default="claude",
                        choices=list(MODEL_CHOICES),
                        help="Model/CLI to use")
+    model_group.add_argument("--moa", default=None, metavar="MODELS",
+                       help="Mixture-of-agents: comma-separated list of 2+ models that each "
+                            "run the prompt in their own worktree (implies --worktree). "
+                            "Entries may carry a per-model CLI override as model:cli. "
+                            "Mutually exclusive with --model and --cli. "
+                            "Example: --moa codex:opencode,synthetic,qwen36")
     parser.add_argument("--cli", choices=["codex", "opencode", "claude", "claudecode", "cc", "agy", "antigravity", "gemini"],
                        default=None,
                        help="Override CLI wrapper (default: auto-detected per model)")
@@ -413,6 +639,22 @@ def main():
 
     args = parser.parse_args()
 
+    moa_models: Optional[list[str]] = None
+    if args.moa is not None:
+        if args.cli:
+            parser.error("--cli cannot be combined with --moa; use per-entry overrides instead "
+                         "(e.g. --moa codex:opencode,qwen36)")
+        if args.worktree_path or args.prompt_file:
+            parser.error("--moa cannot be combined with --worktree-path/--prompt-file (internal loop flags)")
+        if args.loop_status:
+            parser.error("--moa cannot be combined with --loop-status")
+        try:
+            moa_models = parse_moa_models(args.moa)
+        except ValueError as exc:
+            parser.error(str(exc))
+        # MoA always isolates each model in its own worktree
+        args.worktree = True
+
     try:
         repo_root = get_repo_root()
         prompts_dir = repo_root / "prompts"
@@ -456,28 +698,60 @@ def main():
         else:
             prompt_files = resolve_prompts(prompts_dir, args.prompts)
 
-        cli_info = get_cli_info(
-            args.model,
-            repo_root=repo_root,
-            cli_override=args.cli,
-            variant=args.variant,
-        )
+        moa_cli_infos: list[dict] = []
+        if moa_models:
+            # Resolve all models up front so bad shorthands / missing API keys
+            # fail fast before any worktrees are created.
+            for entry in moa_models:
+                info, effective_variant, variant_dropped = _moa_cli_info(
+                    entry["model"], repo_root, args.variant, cli_override=entry["cli"]
+                )
+                moa_cli_infos.append({
+                    **entry,
+                    "cli_info": info,
+                    "variant": effective_variant,
+                    "variant_dropped": variant_dropped,
+                })
+            cli_info = None
+        else:
+            cli_info = get_cli_info(
+                args.model,
+                repo_root=repo_root,
+                cli_override=args.cli,
+                variant=args.variant,
+            )
         log_dir = get_cli_logs_dir(repo_root)
         log_dir.mkdir(parents=True, exist_ok=True)
 
         execution_timestamp = args.execution_timestamp or datetime.now().strftime("%Y%m%d-%H%M%S")
 
-        result = {
-            "repo": repo_root.name,
-            "model": args.model,
-            "cli_display": cli_info["display"],
-            "cli_command": maybe_wrap_command_with_sandbox(cli_info.get("command"), sandbox_config),
-            "selected_cli": cli_info.get("selected_cli"),
-            "variant": cli_info.get("variant"),
-            "stdin_mode": cli_info.get("stdin_mode"),
-            "sandbox": sandbox_config,
-            "prompts": []
-        }
+        if moa_models:
+            result = {
+                "repo": repo_root.name,
+                "model": "moa",
+                "moa_models": [entry["spec"] for entry in moa_models],
+                "cli_display": "MoA: " + ", ".join(
+                    entry["cli_info"]["display"] for entry in moa_cli_infos
+                ),
+                "cli_command": None,
+                "selected_cli": None,
+                "variant": args.variant,
+                "stdin_mode": None,
+                "sandbox": sandbox_config,
+                "prompts": []
+            }
+        else:
+            result = {
+                "repo": repo_root.name,
+                "model": args.model,
+                "cli_display": cli_info["display"],
+                "cli_command": maybe_wrap_command_with_sandbox(cli_info.get("command"), sandbox_config),
+                "selected_cli": cli_info.get("selected_cli"),
+                "variant": cli_info.get("variant"),
+                "stdin_mode": cli_info.get("stdin_mode"),
+                "sandbox": sandbox_config,
+                "prompts": []
+            }
 
         # Add loop info to result if loop mode enabled
         if args.loop:
@@ -531,6 +805,23 @@ def main():
             # Explicit --original-repo-root wins (set by background loop re-entry from
             # within the worktree); otherwise the current repo_root is correct.
             original_repo_root = args.original_repo_root or str(repo_root)
+
+            if moa_models:
+                moa_summary = _execute_moa_prompt(
+                    moa_cli_infos,
+                    prompt_file,
+                    prompt_info,
+                    repo_root,
+                    args,
+                    log_dir,
+                    execution_timestamp,
+                    prompt_num,
+                    original_repo_root,
+                )
+                prompt_info["moa"] = moa_summary
+                prompt_info["log"] = moa_summary["manifest_file"]
+                result["prompts"].append(prompt_info)
+                continue
 
             # Create worktree if requested
             worktree_path = None

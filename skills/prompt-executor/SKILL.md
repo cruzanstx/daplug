@@ -74,7 +74,8 @@ python3 "$EXECUTOR" [prompts...] [options]
   - `glm52`: GLM-5.2 via Z.AI / OpenCode (1M context)
   - `synthetic`: GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, requires `SYNTHETIC_API_KEY`)
 <!-- END GENERATED: skill-model-options -->
-- `--cli`: Override CLI wrapper (codex, opencode, claude, agy, or gemini; aliases: claudecode, cc, antigravity). Unsupported explicit combinations fail with a clear error (no silent fallback).
+- `--moa`: Mixture-of-agents — comma-separated list of 2+ models (e.g. `codex,synthetic,qwen36`). Entries may carry a per-model CLI override as `model:cli` (e.g. `codex:opencode`). Each run gets its own worktree (implies `--worktree`); a manifest for the judge/consolidation phase is written to `~/.claude/loop-state/moa/`. Mutually exclusive with `--model` and the global `--cli`; the bare `claude` Task-subagent shorthand is not allowed (use `cc-sonnet`, `cc-opus`, or `claude:claude`).
+- `--cli`: Override CLI wrapper (codex, opencode, claude, agy, or gemini; aliases: claudecode, cc, antigravity). Unsupported explicit combinations fail with a clear error (no silent fallback). Not allowed with `--moa`.
 - `--variant`: Reasoning variant override (`none|low|medium|high|xhigh`). Explicit `--variant` overrides alias defaults (`codex-high`, `gpt55-high`, `gpt54-high`, `gpt52-high`, etc.).
 - `--cwd, -c`: Working directory for execution
 - `--run, -r`: Actually run the CLI (default: just return info)
@@ -143,6 +144,26 @@ python3 "$EXECUTOR" 123 --worktree --base-branch develop --model codex
 ```
 
 The worktree directory is read from `worktree_dir` in `<daplug_config>` within CLAUDE.md (via config-reader), or defaults to `../worktrees/`.
+
+### Mixture of Agents (--moa)
+
+Run the same prompt with multiple models in parallel, one worktree per model, then judge and consolidate the results in the main session:
+
+```bash
+# 3 models, 3 worktrees, launched in parallel
+python3 "$EXECUTOR" 123 --moa codex,synthetic,qwen36 --run
+
+# With per-runner verification loops (state keyed as 123-moa-<label>)
+python3 "$EXECUTOR" 123 --moa codex,glm5 --run --loop
+
+# Per-entry CLI override: run the codex model through OpenCode
+python3 "$EXECUTOR" 123 --moa codex:opencode,qwen36 --run
+
+# Same model on two CLIs (distinct labels: codex, codex-opencode)
+python3 "$EXECUTOR" 123 --moa codex,codex:opencode --run
+```
+
+Per-run info lands in `prompts[].moa.runs[]` (worktree, branch, log, state file, launch status); the same data is persisted as a manifest at `~/.claude/loop-state/moa/{N}-{timestamp}.json`. One model failing to launch does not abort the other runs. `--variant` applies per model where supported and is dropped (with `variant_dropped: true`) where not. After all runs finish, compare diffs and test results across the worktrees, pick or synthesize a winner, and merge — see the run-prompt command's "Judge & Consolidation Phase".
 
 ### With tmux (use tmux-manager skill)
 

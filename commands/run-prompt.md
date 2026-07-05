@@ -1,7 +1,7 @@
 ---
 name: run-prompt
 description: Execute prompts from ./prompts/ with various AI models, optional worktree isolation, tmux sessions, and iterative verification loops
-argument-hint: <prompt(s)> [--model <model>] [--cli codex|opencode|claude|agy|gemini] [--variant none|low|medium|high|xhigh] [--worktree] [--sandbox|--no-sandbox] [--sandbox-type bubblewrap] [--sandbox-profile strict|balanced|dev] [--sandbox-workspace <path>] [--sandbox-net on|off] [--tmux] [--parallel] [--loop]
+argument-hint: <prompt(s)> [--model <model>] [--moa <m1,m2,...>] [--cli codex|opencode|claude|agy|gemini] [--variant none|low|medium|high|xhigh] [--worktree] [--sandbox|--no-sandbox] [--sandbox-type bubblewrap] [--sandbox-profile strict|balanced|dev] [--sandbox-workspace <path>] [--sandbox-net on|off] [--tmux] [--parallel] [--loop]
 ---
 
 # Run Prompt
@@ -16,7 +16,8 @@ Execute prompts from `./prompts/` (including subfolders) using various AI models
 <!-- BEGIN GENERATED: run-prompt-model-argument -->
 | `--model, -m` | claude, cc-sonnet, cc-opus, codex, codex-spark, codex-high, codex-xhigh, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, glm52, kimi, synthetic, syn-flash, syn-kimi, syn-qwen, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b (codex/codex-high/codex-xhigh default to GPT-5.5; `gpt55*` are explicit GPT-5.5 shorthands) |
 <!-- END GENERATED: run-prompt-model-argument -->
-| `--cli` | Override CLI wrapper: codex, opencode, claude, agy, or gemini (aliases: claudecode, cc, antigravity). Unsupported explicit combinations error clearly. |
+| `--moa` | Mixture-of-agents: comma-separated list of 2+ models (e.g. `codex,synthetic,qwen36`). Each model runs the prompt in its own worktree; you (Claude) judge and consolidate the results afterwards. Entries may carry a per-model CLI override as `model:cli` (e.g. `codex:opencode`). Mutually exclusive with `--model` and the global `--cli`; implies `--worktree`. The bare `claude` Task-subagent shorthand is not allowed (use `cc-sonnet`, `cc-opus`, or `claude:claude`). |
+| `--cli` | Override CLI wrapper: codex, opencode, claude, agy, or gemini (aliases: claudecode, cc, antigravity). Unsupported explicit combinations error clearly. Not allowed with `--moa`. |
 | `--variant` | Reasoning variant override: `none`, `low`, `medium`, `high`, `xhigh`. Explicit `--variant` overrides alias defaults. |
 | `--worktree, -w` | Run in isolated git worktree |
 | `--sandbox` | Enable sandboxing (Linux default backend: bubblewrap) |
@@ -387,6 +388,50 @@ Task(
 
 **Remember: This is still part of Step 2 Part B - spawn monitors IMMEDIATELY after showing status.**
 
+## Mixture of Agents (--moa)
+
+`--moa model1,model2[,model3...]` runs the same prompt with multiple models in parallel, each in its own isolated worktree. When all runs finish, **you (the Claude Code session) act as the judge**: compare the diffs, run the tests in each worktree, and consolidate the best result onto one branch.
+
+### Launch
+
+```bash
+python3 "$EXECUTOR" {PROMPT} --moa codex,synthetic,qwen36 --run [--loop] [--sandbox ...]
+```
+
+Rules enforced by the executor:
+- Mutually exclusive with `--model` and the global `--cli`. Per-model CLI overrides use inline `model:cli` syntax instead: `--moa codex:opencode,qwen36` (aliases `cc`/`claudecode`/`antigravity` accepted; unsupported model+CLI combos error up front).
+- The same model on different CLIs counts as two distinct runs: `--moa codex,codex:opencode` compares the Codex CLI against OpenCode. Each run's unique key ("label") is `model` or `model-cli`.
+- Implies `--worktree` — one worktree + branch per run (`prompt/{slug}-moa-{label}`).
+- `--variant` is applied per model where supported and silently dropped otherwise (`variant_dropped: true` in the run entry).
+- `--loop` applies per runner; loop state is keyed per run: `~/.claude/loop-state/{N}-moa-{label}.json`.
+
+**CLI override caveat:** `codex:opencode` routes GPT-5.5 through OpenCode's `openai` provider, which typically authenticates with an OpenAI API key rather than the ChatGPT/Codex subscription — quota/billing may differ from a plain `codex` run.
+
+**Cost note:** MoA multiplies quota usage by the number of models. If `ai_usage_awareness` is enabled, consider a quick `/daplug:ai-usage` check before launching a 3+ model fan-out.
+
+### JSON Output
+
+Top-level: `model: "moa"`, `moa_models: [...]`. Per prompt, `prompts[].moa`:
+- `manifest_file` - persisted manifest at `~/.claude/loop-state/moa/{N}-{timestamp}.json` (the judge phase reads this)
+- `runs[]` - one entry per run: `model`, `cli` (per-entry override or null), `label`, `status`, `worktree_path`, `branch_name`, `log`, `state_file` (loop mode), `execution`, `variant`, `variant_dropped`
+- Per-run `status`: `running` / `loop_running` (launched), `conflict` (worktree exists — handle like the single-model conflict flow, per run), `error` (that run failed; others continue), `info` (no `--run`)
+
+### Monitoring
+
+Spawn ONE monitor per model run (same pattern as Step 2 Part B), pointing at each run's `log` (and `state_file` when `--loop`). When every monitor reports a terminal state, proceed to the judge phase.
+
+### Judge & Consolidation Phase (you do this)
+
+When all runs complete:
+
+1. **Collect**: Read the manifest, then for each worktree: `git -C {worktree_path} diff {base_branch} --stat` and the full diff.
+2. **Verify**: Run the project's tests/build in each worktree. Record pass/fail.
+3. **Score**: Compare on correctness (tests pass), completeness vs the prompt, code quality/fit with the codebase, and scope discipline (no unrelated changes).
+4. **Report**: Show the user a scorecard table (model, tests, diff size, notable strengths/weaknesses) and your recommendation.
+5. **Consolidate** (after user picks, or immediately if the user pre-authorized): merge the winning branch; optionally cherry-pick superior pieces from the other worktrees onto it. Delete `TASK.md` before merging.
+6. **Attribute**: Credit contributing agents in the merge commit footer per the user's commit conventions (e.g. `Co-Authored-By: Codex <noreply@openai.com>`).
+7. **Cleanup**: After merge, remove the losing worktrees/branches (ask first if the user may want to inspect them).
+
 ## Examples
 
 ```
@@ -413,6 +458,10 @@ Task(
 /daplug:run-prompt 123 --model codex --loop --max-iterations 5  # Custom max
 /daplug:run-prompt 123 --model codex --worktree --loop  # Worktree + loop
 /daplug:run-prompt 123 --model codex --loop --require-diff  # Verify file changes before accepting completion
+/daplug:run-prompt 123 --moa codex,synthetic,qwen36  # Mixture-of-agents: 3 models, 3 worktrees, you judge
+/daplug:run-prompt 123 --moa codex,glm5 --loop       # MoA with per-runner verification loops
+/daplug:run-prompt 123 --moa codex:opencode,qwen36   # MoA with per-entry CLI override
+/daplug:run-prompt 123 --moa codex,codex:opencode    # Same model, two CLIs — compare harnesses
 ```
 
 ## Cleanup (after completion)
