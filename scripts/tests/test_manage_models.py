@@ -34,7 +34,7 @@ def copy_model_targets(tmp_path: Path) -> Path:
 def test_models_json_loads_and_has_required_fields():
     registry = manage_models.load_registry(REPO_ROOT)
     assert registry["schema_version"] == 1
-    assert len(registry["models"]) == 39
+    assert len(registry["models"]) == 41
     for model in registry["models"]:
         assert manage_models.REQUIRED_MODEL_FIELDS <= set(model)
         assert manage_models.REQUIRED_DOC_FIELDS <= set(model["docs"])

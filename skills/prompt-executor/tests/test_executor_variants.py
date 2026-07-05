@@ -386,6 +386,8 @@ EXPECTED_MODEL_KEYS = [
     "devstral",
     "glm-local",
     "qwen-small",
+    "qwen36",
+    "qwen36-27b",
 ]
 
 

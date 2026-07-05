@@ -678,10 +678,10 @@ class TestLocalModels:
     def test_qwen_routes_to_local_profile(self, full_cache):
         cli, model_id, cmd = router.resolve_model("qwen")
         assert cli == "opencode"
-        assert "qwen3-coder-next" in model_id
+        assert "qwen3.6-35b-a3b" in model_id
         assert cmd[0:4] == ["opencode", "run", "--format", "json"]
         idx_m = cmd.index("-m")
-        assert cmd[idx_m + 1] == "lmstudio/qwen3-coder-next"
+        assert cmd[idx_m + 1] == "lmstudio/qwen3.6-35b-a3b"
 
     def test_devstral_routes_to_local_devstral_profile(self, full_cache):
         cli, model_id, cmd = router.resolve_model("devstral")

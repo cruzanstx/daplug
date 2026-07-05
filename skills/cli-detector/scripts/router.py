@@ -158,13 +158,13 @@ _SHORTHAND: dict[str, _ModelRequest] = {
     "local": _ModelRequest(
         "local",
         family="local",
-        model_id="lmstudio:qwen3-coder-next",
+        model_id="lmstudio:qwen3.6-35b-a3b",
         force_cli="opencode",
     ),
     "qwen": _ModelRequest(
         "qwen",
         family="local",
-        model_id="lmstudio:qwen3-coder-next",
+        model_id="lmstudio:qwen3.6-35b-a3b",
         local_hint="qwen",
         force_cli="opencode",
         codex_profile="local",
@@ -188,6 +188,18 @@ _SHORTHAND: dict[str, _ModelRequest] = {
         "qwen-small",
         family="local",
         model_id="lmstudio:qwen3-4b-2507",
+        force_cli="opencode",
+    ),
+    "qwen36": _ModelRequest(
+        "qwen36",
+        family="local",
+        model_id="lmstudio:qwen3.6-35b-a3b",
+        force_cli="opencode",
+    ),
+    "qwen36-27b": _ModelRequest(
+        "qwen36-27b",
+        family="local",
+        model_id="lmstudio:qwen3.6-27b",
         force_cli="opencode",
     ),
     # Claude Code (claude CLI)
