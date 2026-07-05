@@ -2,6 +2,13 @@
 
 All notable changes to daplug are documented here.
 
+## [0.33.0] - 2026-07-05
+
+### Added
+- **`--moa` mixture-of-agents fan-out**: `/run-prompt 123 --moa codex,synthetic,qwen36` runs one prompt across 2+ models in parallel, each in its own isolated worktree (`prompt/{slug}-moa-{label}` branches), then the main Claude session judges — compares diffs, runs tests per worktree, presents a scorecard — and consolidates the winner. Mutually exclusive with `--model`/global `--cli`; implies `--worktree`; `--loop` applies per runner with per-run state keys (`{N}-moa-{label}.json`); `--variant` applies where supported and is dropped per model otherwise. A manifest for the judge phase is written to `~/.claude/loop-state/moa/`. Per-model launch failures and worktree conflicts are recorded per run without aborting the rest of the fan-out.
+- **Per-entry CLI overrides in `--moa`**: `model:cli` syntax (e.g. `--moa codex:opencode,qwen36`) routes a single entry through a different CLI; the same model on two CLIs (`codex,codex:opencode`) is a valid two-run harness comparison. Aliases (`cc`, `claudecode`, `antigravity`) normalize; unsupported model+CLI combos fail fast. Bare `claude` (Task subagent) is rejected — `cc-sonnet`, `cc-opus`, or `claude:claude` cover headless Claude runs.
+- **`create_worktree(name_suffix=...)`**: worktree helper can suffix branch and directory names so multiple worktrees for the same prompt coexist (used by MoA per-model runs).
+
 ## [0.32.0] - 2026-07-04
 
 ### Changed
