@@ -564,6 +564,11 @@ def _build_command(cli: str, model_id: str, request: _ModelRequest) -> list[str]
 
     if cli == "opencode":
         cmd = ["opencode", "run", "--format", "json", "-m", _opencode_model_spec(model_id)]
+        if request.family == "local":
+            # Local models get the lean built-in agent: the plugin default agent
+            # (Sisyphus) plus oh-my-openagent tool schemas cost ~63k input tokens
+            # per turn, which small local context windows can't afford.
+            cmd += ["--pure", "--agent", "build"]
         return cmd
 
     if cli == "aider":

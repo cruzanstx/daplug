@@ -264,13 +264,13 @@ python3 "$EXECUTOR" --loop-status
 | syn-kimi | opencode run --format json -m synthetic/syn:large:vision | Kimi-K2.6 vision tasks |
 | syn-qwen | opencode run --format json -m synthetic/syn:small:vision | Qwen3.6-27B vision tasks |
 | opencode | opencode run --format json -m zai/glm-4.7 | Recommended OpenCode JSON runner |
-| local | opencode run --format json -m lmstudio/qwen3.6-35b-a3b | Local qwen-coder model with no quota |
-| qwen | opencode run --format json -m lmstudio/qwen3.6-35b-a3b | Local qwen-coder model with no quota |
-| devstral | opencode run --format json -m lmstudio/devstral-small-2-2512 | Local Devstral model with no quota |
-| glm-local | opencode run --format json -m lmstudio/glm-4.7-flash | Local GLM-4.7 Flash model with no quota |
-| qwen-small | opencode run --format json -m lmstudio/qwen3-4b-2507 | Small/fast local Qwen model |
-| qwen36 | opencode run --format json -m lmstudio/qwen3.6-35b-a3b | Best local coding model, MoE 35B, no quota |
-| qwen36-27b | opencode run --format json -m lmstudio/qwen3.6-27b | Local Qwen 3.6 dense 27B, no quota |
+| local | opencode run --format json -m lmstudio/qwen3.6-35b-a3b --pure --agent build | Local qwen-coder model with no quota |
+| qwen | opencode run --format json -m lmstudio/qwen3.6-35b-a3b --pure --agent build | Local qwen-coder model with no quota |
+| devstral | opencode run --format json -m lmstudio/devstral-small-2-2512 --pure --agent build | Local Devstral model with no quota |
+| glm-local | opencode run --format json -m lmstudio/glm-4.7-flash --pure --agent build | Local GLM-4.7 Flash model with no quota |
+| qwen-small | opencode run --format json -m lmstudio/qwen3-4b-2507 --pure --agent build | Small/fast local Qwen model |
+| qwen36 | opencode run --format json -m lmstudio/qwen3.6-35b-a3b --pure --agent build | Best local coding model, MoE 35B, no quota |
+| qwen36-27b | opencode run --format json -m lmstudio/qwen3.6-27b --pure --agent build | Local Qwen 3.6 dense 27B, no quota |
 <!-- END GENERATED: skill-model-reference -->
 
 OpenCode runs include `--variant <value>` when a variant is set.

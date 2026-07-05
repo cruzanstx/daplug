@@ -201,6 +201,11 @@ def default_command(
         return command
     if default_cli == "opencode":
         command = ["opencode", "run", "--format", "json", "-m", opencode_model_spec(model_id)]
+        if model_id.startswith("lmstudio:"):
+            # Local models use the lean built-in agent without plugins: the plugin
+            # default agent (Sisyphus) plus oh-my-openagent tool schemas cost ~63k
+            # input tokens per turn, which local context windows can't afford.
+            command.extend(["--pure", "--agent", "build"])
         if default_variant:
             command.extend(["--variant", default_variant])
         return command

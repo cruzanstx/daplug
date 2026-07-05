@@ -1490,7 +1490,10 @@
         "--format",
         "json",
         "-m",
-        "lmstudio/qwen3.6-35b-a3b"
+        "lmstudio/qwen3.6-35b-a3b",
+        "--pure",
+        "--agent",
+        "build"
       ],
       "routing": {
         "cli_overrides": [
@@ -1506,7 +1509,7 @@
         "cli_label": "opencode",
         "actual_model": "qwen3.6-35b-a3b via LMStudio (opencode default, --cli codex for legacy)",
         "option_description": "Local qwen3.6-35b-a3b via opencode + LMStudio",
-        "reference_cli": "opencode run --format json -m lmstudio/qwen3.6-35b-a3b",
+        "reference_cli": "opencode run --format json -m lmstudio/qwen3.6-35b-a3b --pure --agent build",
         "reference_description": "Local qwen-coder model with no quota",
         "readme_section": "Local",
         "readme_model": "qwen3.6-35b-a3b",
@@ -1534,7 +1537,10 @@
         "--format",
         "json",
         "-m",
-        "lmstudio/qwen3.6-35b-a3b"
+        "lmstudio/qwen3.6-35b-a3b",
+        "--pure",
+        "--agent",
+        "build"
       ],
       "routing": {
         "cli_overrides": [
@@ -1550,7 +1556,7 @@
         "cli_label": "opencode",
         "actual_model": "qwen3.6-35b-a3b via LMStudio (opencode default, --cli codex for legacy)",
         "option_description": "Qwen via opencode + LMStudio",
-        "reference_cli": "opencode run --format json -m lmstudio/qwen3.6-35b-a3b",
+        "reference_cli": "opencode run --format json -m lmstudio/qwen3.6-35b-a3b --pure --agent build",
         "reference_description": "Local qwen-coder model with no quota",
         "readme_section": "Local",
         "readme_model": "qwen3.6-35b-a3b",
@@ -1578,7 +1584,10 @@
         "--format",
         "json",
         "-m",
-        "lmstudio/devstral-small-2-2512"
+        "lmstudio/devstral-small-2-2512",
+        "--pure",
+        "--agent",
+        "build"
       ],
       "routing": {
         "cli_overrides": [
@@ -1594,7 +1603,7 @@
         "cli_label": "opencode",
         "actual_model": "devstral-small-2-2512 via LMStudio (opencode default, --cli codex for legacy)",
         "option_description": "Devstral via opencode + LMStudio",
-        "reference_cli": "opencode run --format json -m lmstudio/devstral-small-2-2512",
+        "reference_cli": "opencode run --format json -m lmstudio/devstral-small-2-2512 --pure --agent build",
         "reference_description": "Local Devstral model with no quota",
         "readme_section": "Local",
         "readme_model": "devstral-small-2-2512",
@@ -1622,7 +1631,10 @@
         "--format",
         "json",
         "-m",
-        "lmstudio/glm-4.7-flash"
+        "lmstudio/glm-4.7-flash",
+        "--pure",
+        "--agent",
+        "build"
       ],
       "routing": {
         "cli_overrides": [
@@ -1637,7 +1649,7 @@
         "cli_label": "opencode",
         "actual_model": "glm-4.7-flash via LMStudio (local Z.AI model)",
         "option_description": "Local GLM-4.7-Flash via opencode + LMStudio",
-        "reference_cli": "opencode run --format json -m lmstudio/glm-4.7-flash",
+        "reference_cli": "opencode run --format json -m lmstudio/glm-4.7-flash --pure --agent build",
         "reference_description": "Local GLM-4.7 Flash model with no quota",
         "readme_section": "Local",
         "readme_model": "glm-4.7-flash",
@@ -1665,7 +1677,10 @@
         "--format",
         "json",
         "-m",
-        "lmstudio/qwen3-4b-2507"
+        "lmstudio/qwen3-4b-2507",
+        "--pure",
+        "--agent",
+        "build"
       ],
       "routing": {
         "cli_overrides": [
@@ -1680,7 +1695,7 @@
         "cli_label": "opencode",
         "actual_model": "qwen3-4b-2507 via LMStudio (small/fast, haiku-tier)",
         "option_description": "Local qwen3-4b model via opencode + LMStudio",
-        "reference_cli": "opencode run --format json -m lmstudio/qwen3-4b-2507",
+        "reference_cli": "opencode run --format json -m lmstudio/qwen3-4b-2507 --pure --agent build",
         "reference_description": "Small/fast local Qwen model",
         "readme_section": "Local",
         "readme_model": "qwen3-4b-2507",
@@ -1708,7 +1723,10 @@
         "--format",
         "json",
         "-m",
-        "lmstudio/qwen3.6-35b-a3b"
+        "lmstudio/qwen3.6-35b-a3b",
+        "--pure",
+        "--agent",
+        "build"
       ],
       "routing": {
         "cli_overrides": [
@@ -1723,7 +1741,7 @@
         "cli_label": "opencode",
         "actual_model": "qwen3.6-35b-a3b via LMStudio",
         "option_description": "Local Qwen 3.6 35b-a3b via opencode + LMStudio",
-        "reference_cli": "opencode run --format json -m lmstudio/qwen3.6-35b-a3b",
+        "reference_cli": "opencode run --format json -m lmstudio/qwen3.6-35b-a3b --pure --agent build",
         "reference_description": "Best local coding model, MoE 35B, no quota",
         "readme_section": "Local",
         "readme_model": "qwen3.6-35b-a3b",
@@ -1751,7 +1769,10 @@
         "--format",
         "json",
         "-m",
-        "lmstudio/qwen3.6-27b"
+        "lmstudio/qwen3.6-27b",
+        "--pure",
+        "--agent",
+        "build"
       ],
       "routing": {
         "cli_overrides": [
@@ -1766,7 +1787,7 @@
         "cli_label": "opencode",
         "actual_model": "qwen3.6-27b via LMStudio",
         "option_description": "Local Qwen 3.6 27b via opencode + LMStudio",
-        "reference_cli": "opencode run --format json -m lmstudio/qwen3.6-27b",
+        "reference_cli": "opencode run --format json -m lmstudio/qwen3.6-27b --pure --agent build",
         "reference_description": "Local Qwen 3.6 dense 27B, no quota",
         "readme_section": "Local",
         "readme_model": "qwen3.6-27b",
