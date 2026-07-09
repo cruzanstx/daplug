@@ -2,6 +2,14 @@
 
 All notable changes to daplug are documented here.
 
+## [0.34.0] - 2026-07-09
+
+### Changed
+- **`codex`/`codex-high`/`codex-xhigh` default to gpt-5.6-terra** (was gpt-5.5). The model is now pinned explicitly with `-m gpt-5.6-terra` instead of relying on the Codex CLI config default, so the shorthand stays honest if `~/.codex/config.toml` drifts.
+
+### Added
+- **GPT-5.6 family shorthands**: `sol` (gpt-5.6-sol, latest frontier agentic coding), `terra` (gpt-5.6-terra, balanced everyday — same as the new codex default), `luna` (gpt-5.6-luna, fast/affordable). All support `--variant high/xhigh`; raw slugs like `gpt-5.6-sol` resolve via router aliases. `gpt55`/`gpt54` explicit shorthands remain as legacy pins.
+
 ## [0.33.0] - 2026-07-05
 
 ### Added
