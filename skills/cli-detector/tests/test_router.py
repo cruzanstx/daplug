@@ -80,7 +80,7 @@ def test_resolve_model_returns_installed_cli(monkeypatch):
 
     cli, model_id, cmd = router.resolve_model("codex")
     assert cli == "codex"
-    assert model_id == "openai:gpt-5.5"
+    assert model_id == "openai:gpt-5.6-terra"
     assert cmd[:3] == ["codex", "exec", "--full-auto"]
 
 
@@ -545,9 +545,12 @@ class TestOpenAIModels:
     @pytest.mark.parametrize(
         "shorthand,expected_model,expected_reasoning",
         [
-            ("codex", "gpt-5.5", None),
-            ("codex-high", "gpt-5.5", "high"),
-            ("codex-xhigh", "gpt-5.5", "xhigh"),
+            ("codex", "gpt-5.6-terra", None),
+            ("codex-high", "gpt-5.6-terra", "high"),
+            ("codex-xhigh", "gpt-5.6-terra", "xhigh"),
+            ("sol", "gpt-5.6-sol", None),
+            ("terra", "gpt-5.6-terra", None),
+            ("luna", "gpt-5.6-luna", None),
             ("gpt54", "gpt-5.4", None),
             ("gpt54-high", "gpt-5.4", "high"),
             ("gpt54-xhigh", "gpt-5.4", "xhigh"),

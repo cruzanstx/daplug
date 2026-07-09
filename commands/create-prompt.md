@@ -465,10 +465,13 @@ All available models for /daplug:run-prompt --model:
 - `cc-opus` - Claude Code CLI Opus alias
 
 **OpenAI Codex Family:** (check: `codex.primary_window.used`, `codex.secondary_window.used`)
-- `codex` - OpenAI Codex CLI (gpt-5.5, fast execution)
+- `codex` - OpenAI Codex CLI (gpt-5.6-terra, balanced everyday coding)
 - `codex-spark` - OpenAI Codex Spark (lowest-latency tier)
-- `codex-high` - OpenAI Codex CLI with high reasoning effort
-- `codex-xhigh` - OpenAI Codex CLI with xhigh reasoning effort
+- `codex-high` - OpenAI Codex CLI (gpt-5.6-terra) with high reasoning effort
+- `codex-xhigh` - OpenAI Codex CLI (gpt-5.6-terra) with xhigh reasoning effort
+- `sol` - OpenAI GPT-5.6 Sol (latest frontier agentic coding model)
+- `terra` - OpenAI GPT-5.6 Terra (balanced everyday agentic coding)
+- `luna` - OpenAI GPT-5.6 Luna (fast and affordable agentic coding)
 - `gpt54` - OpenAI GPT-5.4 (direct shorthand)
 - `gpt54-high` - OpenAI GPT-5.4 with high reasoning effort
 - `gpt54-xhigh` - OpenAI GPT-5.4 with xhigh reasoning
@@ -612,54 +615,57 @@ If user chooses "Run prompt now", run `npx cclimits --json 2>/dev/null`, summari
   3. cc-opus - Claude Code CLI Opus
 
   **Codex (OpenAI):** {usage status}
-  4. codex - {X}% used - gpt-5.5 standard
+  4. codex - {X}% used - gpt-5.6-terra standard
   5. codex-spark - {X}% used - fast/low-cost coding tier
   6. codex-high - {X}% used - higher reasoning
   7. codex-xhigh - {X}% used - maximum reasoning
-  8. gpt54 - {X}% used - gpt-5.4 explicit shorthand
-  9. gpt54-high - {X}% used - deep reasoning
-  10. gpt54-xhigh - {X}% used - maximum reasoning
-  11. gpt55 - {X}% used - gpt-5.5 explicit shorthand
-  12. gpt55-high - {X}% used - deep reasoning
-  13. gpt55-xhigh - {X}% used - maximum reasoning
-  14. gpt52 - {X}% used - planning, research, analysis
-  15. gpt52-high - {X}% used - deep reasoning
-  16. gpt52-xhigh - {X}% used - maximum reasoning (30+ min tasks)
+  8. sol - {X}% used - gpt-5.6-sol frontier tier
+  9. terra - {X}% used - gpt-5.6-terra balanced tier
+  10. luna - {X}% used - gpt-5.6-luna fast/affordable tier
+  11. gpt54 - {X}% used - gpt-5.4 explicit shorthand
+  12. gpt54-high - {X}% used - deep reasoning
+  13. gpt54-xhigh - {X}% used - maximum reasoning
+  14. gpt55 - {X}% used - gpt-5.5 explicit shorthand
+  15. gpt55-high - {X}% used - deep reasoning
+  16. gpt55-xhigh - {X}% used - maximum reasoning
+  17. gpt52 - {X}% used - planning, research, analysis
+  18. gpt52-high - {X}% used - deep reasoning
+  19. gpt52-xhigh - {X}% used - maximum reasoning (30+ min tasks)
 
   **Gemini (Google):** {show each model's usage}
-  17. gemini - {X}% used - 3-flash, best coding performance
-  18. gemini-high - {X}% used - 2.5-pro
-  19. gemini-xhigh - {X}% used - 3-pro preview
-  20. gemini25pro - {X}% used - 2.5-pro, stable/capable
-  21. gemini25flash - {X}% used - 2.5-flash, fast/cost-effective
-  22. gemini25lite - {X}% used - 2.5-flash-lite, fastest
-  23. gemini3flash - {X}% used - 3-flash explicit
-  24. gemini3pro - {X}% used - 3-pro, most capable
-  25. gemini31pro - {X}% used - 3.1 Pro Preview if available
+  20. gemini - {X}% used - 3-flash, best coding performance
+  21. gemini-high - {X}% used - 2.5-pro
+  22. gemini-xhigh - {X}% used - 3-pro preview
+  23. gemini25pro - {X}% used - 2.5-pro, stable/capable
+  24. gemini25flash - {X}% used - 2.5-flash, fast/cost-effective
+  25. gemini25lite - {X}% used - 2.5-flash-lite, fastest
+  26. gemini3flash - {X}% used - 3-flash explicit
+  27. gemini3pro - {X}% used - 3-pro, most capable
+  28. gemini31pro - {X}% used - 3.1 Pro Preview if available
 
   **Z.AI / OpenCode:** {usage status}
-  26. zai - {X}% used - Z.AI GLM-4.7
-  27. glm5 - {X}% used - Z.AI GLM-5.2 latest alias
-  28. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
-  29. kimi - {X}% used - Kimi K2.5 via OpenCode
-  30. opencode - {X}% used - OpenCode GLM-4.7
+  29. zai - {X}% used - Z.AI GLM-4.7
+  30. glm5 - {X}% used - Z.AI GLM-5.2 latest alias
+  31. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
+  32. kimi - {X}% used - Kimi K2.5 via OpenCode
+  33. opencode - {X}% used - OpenCode GLM-4.7
 
   **Synthetic:** {usage status}
-  31. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
-  32. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
-  33. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.6 vision
-  34. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
+  34. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
+  35. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
+  36. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.6 vision
+  37. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
 
   **Local:** {usage status}
-  35. local - local qwen3.6-35b-a3b, no quota
-  36. qwen - local qwen3.6-35b-a3b, no quota
-  37. devstral - local Devstral, no quota
-  38. glm-local - local GLM-4.7 Flash, no quota
-  39. qwen-small - local qwen3-4b, no quota
-  40. qwen36 - local qwen3.6-35b-a3b, no quota
-  41. qwen36-27b - local qwen3.6-27b, no quota
+  38. local - local qwen3.6-35b-a3b, no quota
+  39. qwen - local qwen3.6-35b-a3b, no quota
+  40. devstral - local Devstral, no quota
+  41. glm-local - local GLM-4.7 Flash, no quota
+  42. qwen-small - local qwen3-4b, no quota
+  43. qwen36 - local qwen3.6-35b-a3b, no quota
+  44. qwen36-27b - local qwen3.6-27b, no quota
 
-  Choose (1-41), or type model with flags (e.g., 'codex --worktree --loop'): _
+  Choose (1-44), or type model with flags (e.g., 'codex --worktree --loop'): _
 <!-- END GENERATED: create-prompt-selection-menu -->
 
 After selection:
@@ -710,54 +716,57 @@ If running now, run `npx cclimits --json 2>/dev/null`, summarize current quota s
   3. cc-opus - Claude Code CLI Opus
 
   **Codex (OpenAI):** {usage status}
-  4. codex - {X}% used - gpt-5.5 standard
+  4. codex - {X}% used - gpt-5.6-terra standard
   5. codex-spark - {X}% used - fast/low-cost coding tier
   6. codex-high - {X}% used - higher reasoning
   7. codex-xhigh - {X}% used - maximum reasoning
-  8. gpt54 - {X}% used - gpt-5.4 explicit shorthand
-  9. gpt54-high - {X}% used - deep reasoning
-  10. gpt54-xhigh - {X}% used - maximum reasoning
-  11. gpt55 - {X}% used - gpt-5.5 explicit shorthand
-  12. gpt55-high - {X}% used - deep reasoning
-  13. gpt55-xhigh - {X}% used - maximum reasoning
-  14. gpt52 - {X}% used - planning, research, analysis
-  15. gpt52-high - {X}% used - deep reasoning
-  16. gpt52-xhigh - {X}% used - maximum reasoning (30+ min tasks)
+  8. sol - {X}% used - gpt-5.6-sol frontier tier
+  9. terra - {X}% used - gpt-5.6-terra balanced tier
+  10. luna - {X}% used - gpt-5.6-luna fast/affordable tier
+  11. gpt54 - {X}% used - gpt-5.4 explicit shorthand
+  12. gpt54-high - {X}% used - deep reasoning
+  13. gpt54-xhigh - {X}% used - maximum reasoning
+  14. gpt55 - {X}% used - gpt-5.5 explicit shorthand
+  15. gpt55-high - {X}% used - deep reasoning
+  16. gpt55-xhigh - {X}% used - maximum reasoning
+  17. gpt52 - {X}% used - planning, research, analysis
+  18. gpt52-high - {X}% used - deep reasoning
+  19. gpt52-xhigh - {X}% used - maximum reasoning (30+ min tasks)
 
   **Gemini (Google):** {show each model's usage}
-  17. gemini - {X}% used - 3-flash, best coding performance
-  18. gemini-high - {X}% used - 2.5-pro
-  19. gemini-xhigh - {X}% used - 3-pro preview
-  20. gemini25pro - {X}% used - 2.5-pro, stable/capable
-  21. gemini25flash - {X}% used - 2.5-flash, fast/cost-effective
-  22. gemini25lite - {X}% used - 2.5-flash-lite, fastest
-  23. gemini3flash - {X}% used - 3-flash explicit
-  24. gemini3pro - {X}% used - 3-pro, most capable
-  25. gemini31pro - {X}% used - 3.1 Pro Preview if available
+  20. gemini - {X}% used - 3-flash, best coding performance
+  21. gemini-high - {X}% used - 2.5-pro
+  22. gemini-xhigh - {X}% used - 3-pro preview
+  23. gemini25pro - {X}% used - 2.5-pro, stable/capable
+  24. gemini25flash - {X}% used - 2.5-flash, fast/cost-effective
+  25. gemini25lite - {X}% used - 2.5-flash-lite, fastest
+  26. gemini3flash - {X}% used - 3-flash explicit
+  27. gemini3pro - {X}% used - 3-pro, most capable
+  28. gemini31pro - {X}% used - 3.1 Pro Preview if available
 
   **Z.AI / OpenCode:** {usage status}
-  26. zai - {X}% used - Z.AI GLM-4.7
-  27. glm5 - {X}% used - Z.AI GLM-5.2 latest alias
-  28. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
-  29. kimi - {X}% used - Kimi K2.5 via OpenCode
-  30. opencode - {X}% used - OpenCode GLM-4.7
+  29. zai - {X}% used - Z.AI GLM-4.7
+  30. glm5 - {X}% used - Z.AI GLM-5.2 latest alias
+  31. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
+  32. kimi - {X}% used - Kimi K2.5 via OpenCode
+  33. opencode - {X}% used - OpenCode GLM-4.7
 
   **Synthetic:** {usage status}
-  31. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
-  32. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
-  33. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.6 vision
-  34. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
+  34. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
+  35. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
+  36. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.6 vision
+  37. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
 
   **Local:** {usage status}
-  35. local - local qwen3.6-35b-a3b, no quota
-  36. qwen - local qwen3.6-35b-a3b, no quota
-  37. devstral - local Devstral, no quota
-  38. glm-local - local GLM-4.7 Flash, no quota
-  39. qwen-small - local qwen3-4b, no quota
-  40. qwen36 - local qwen3.6-35b-a3b, no quota
-  41. qwen36-27b - local qwen3.6-27b, no quota
+  38. local - local qwen3.6-35b-a3b, no quota
+  39. qwen - local qwen3.6-35b-a3b, no quota
+  40. devstral - local Devstral, no quota
+  41. glm-local - local GLM-4.7 Flash, no quota
+  42. qwen-small - local qwen3-4b, no quota
+  43. qwen36 - local qwen3.6-35b-a3b, no quota
+  44. qwen36-27b - local qwen3.6-27b, no quota
 
-  Choose (1-41), or type model with flags (e.g., 'codex --worktree --loop'): _
+  Choose (1-44), or type model with flags (e.g., 'codex --worktree --loop'): _
 <!-- END GENERATED: create-prompt-parallel-selection-menu -->
 
 After selection:
@@ -809,54 +818,57 @@ If running now, run `npx cclimits --json 2>/dev/null`, summarize current quota s
   3. cc-opus - Claude Code CLI Opus
 
   **Codex (OpenAI):** {usage status}
-  4. codex - {X}% used - gpt-5.5 standard
+  4. codex - {X}% used - gpt-5.6-terra standard
   5. codex-spark - {X}% used - fast/low-cost coding tier
   6. codex-high - {X}% used - higher reasoning
   7. codex-xhigh - {X}% used - maximum reasoning
-  8. gpt54 - {X}% used - gpt-5.4 explicit shorthand
-  9. gpt54-high - {X}% used - deep reasoning
-  10. gpt54-xhigh - {X}% used - maximum reasoning
-  11. gpt55 - {X}% used - gpt-5.5 explicit shorthand
-  12. gpt55-high - {X}% used - deep reasoning
-  13. gpt55-xhigh - {X}% used - maximum reasoning
-  14. gpt52 - {X}% used - planning, research, analysis
-  15. gpt52-high - {X}% used - deep reasoning
-  16. gpt52-xhigh - {X}% used - maximum reasoning (30+ min tasks)
+  8. sol - {X}% used - gpt-5.6-sol frontier tier
+  9. terra - {X}% used - gpt-5.6-terra balanced tier
+  10. luna - {X}% used - gpt-5.6-luna fast/affordable tier
+  11. gpt54 - {X}% used - gpt-5.4 explicit shorthand
+  12. gpt54-high - {X}% used - deep reasoning
+  13. gpt54-xhigh - {X}% used - maximum reasoning
+  14. gpt55 - {X}% used - gpt-5.5 explicit shorthand
+  15. gpt55-high - {X}% used - deep reasoning
+  16. gpt55-xhigh - {X}% used - maximum reasoning
+  17. gpt52 - {X}% used - planning, research, analysis
+  18. gpt52-high - {X}% used - deep reasoning
+  19. gpt52-xhigh - {X}% used - maximum reasoning (30+ min tasks)
 
   **Gemini (Google):** {show each model's usage}
-  17. gemini - {X}% used - 3-flash, best coding performance
-  18. gemini-high - {X}% used - 2.5-pro
-  19. gemini-xhigh - {X}% used - 3-pro preview
-  20. gemini25pro - {X}% used - 2.5-pro, stable/capable
-  21. gemini25flash - {X}% used - 2.5-flash, fast/cost-effective
-  22. gemini25lite - {X}% used - 2.5-flash-lite, fastest
-  23. gemini3flash - {X}% used - 3-flash explicit
-  24. gemini3pro - {X}% used - 3-pro, most capable
-  25. gemini31pro - {X}% used - 3.1 Pro Preview if available
+  20. gemini - {X}% used - 3-flash, best coding performance
+  21. gemini-high - {X}% used - 2.5-pro
+  22. gemini-xhigh - {X}% used - 3-pro preview
+  23. gemini25pro - {X}% used - 2.5-pro, stable/capable
+  24. gemini25flash - {X}% used - 2.5-flash, fast/cost-effective
+  25. gemini25lite - {X}% used - 2.5-flash-lite, fastest
+  26. gemini3flash - {X}% used - 3-flash explicit
+  27. gemini3pro - {X}% used - 3-pro, most capable
+  28. gemini31pro - {X}% used - 3.1 Pro Preview if available
 
   **Z.AI / OpenCode:** {usage status}
-  26. zai - {X}% used - Z.AI GLM-4.7
-  27. glm5 - {X}% used - Z.AI GLM-5.2 latest alias
-  28. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
-  29. kimi - {X}% used - Kimi K2.5 via OpenCode
-  30. opencode - {X}% used - OpenCode GLM-4.7
+  29. zai - {X}% used - Z.AI GLM-4.7
+  30. glm5 - {X}% used - Z.AI GLM-5.2 latest alias
+  31. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
+  32. kimi - {X}% used - Kimi K2.5 via OpenCode
+  33. opencode - {X}% used - OpenCode GLM-4.7
 
   **Synthetic:** {usage status}
-  31. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
-  32. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
-  33. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.6 vision
-  34. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
+  34. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
+  35. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
+  36. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.6 vision
+  37. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
 
   **Local:** {usage status}
-  35. local - local qwen3.6-35b-a3b, no quota
-  36. qwen - local qwen3.6-35b-a3b, no quota
-  37. devstral - local Devstral, no quota
-  38. glm-local - local GLM-4.7 Flash, no quota
-  39. qwen-small - local qwen3-4b, no quota
-  40. qwen36 - local qwen3.6-35b-a3b, no quota
-  41. qwen36-27b - local qwen3.6-27b, no quota
+  38. local - local qwen3.6-35b-a3b, no quota
+  39. qwen - local qwen3.6-35b-a3b, no quota
+  40. devstral - local Devstral, no quota
+  41. glm-local - local GLM-4.7 Flash, no quota
+  42. qwen-small - local qwen3-4b, no quota
+  43. qwen36 - local qwen3.6-35b-a3b, no quota
+  44. qwen36-27b - local qwen3.6-27b, no quota
 
-  Choose (1-41), or type model with flags (e.g., 'codex --worktree --loop'): _
+  Choose (1-44), or type model with flags (e.g., 'codex --worktree --loop'): _
 <!-- END GENERATED: create-prompt-sequential-selection-menu -->
 
 After selection:

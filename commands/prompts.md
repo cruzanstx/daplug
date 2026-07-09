@@ -55,10 +55,13 @@ Use AskUserQuestion tool with options:
 - `claude` - Claude Code Task subagent (default, current context)
 - `cc-sonnet` - Claude Code CLI Sonnet alias
 - `cc-opus` - Claude Code CLI Opus alias
-- `codex` - OpenAI Codex CLI (gpt-5.5, fast execution)
+- `codex` - OpenAI Codex CLI (gpt-5.6-terra, balanced everyday coding)
 - `codex-spark` - OpenAI Codex Spark (lowest-latency tier)
-- `codex-high` - OpenAI Codex CLI with high reasoning effort
-- `codex-xhigh` - OpenAI Codex CLI with xhigh reasoning effort
+- `codex-high` - OpenAI Codex CLI (gpt-5.6-terra) with high reasoning effort
+- `codex-xhigh` - OpenAI Codex CLI (gpt-5.6-terra) with xhigh reasoning effort
+- `sol` - OpenAI GPT-5.6 Sol (latest frontier agentic coding model)
+- `terra` - OpenAI GPT-5.6 Terra (balanced everyday agentic coding)
+- `luna` - OpenAI GPT-5.6 Luna (fast and affordable agentic coding)
 - `gpt54` - OpenAI GPT-5.4 (direct shorthand)
 - `gpt54-high` - OpenAI GPT-5.4 with high reasoning effort
 - `gpt54-xhigh` - OpenAI GPT-5.4 with xhigh reasoning
@@ -74,10 +77,10 @@ Use AskUserQuestion tool with options:
 - `gemini25pro` - Gemini 2.5 Pro (explicit shorthand)
 - `gemini25flash` - Gemini 2.5 Flash
 - `gemini25lite` - Gemini 2.5 Flash-Lite
+- Google shorthands prefer Antigravity CLI (`agy`) when healthy and fall back to legacy `gemini`.
 - `gemini3flash` - Gemini 3 Flash Preview (explicit shorthand)
 - `gemini3pro` - Gemini 3 Pro Preview (explicit shorthand)
 - `gemini31pro` - Gemini 3.1 Pro Preview (if your account has access)
-- Google shorthands prefer Antigravity CLI (`agy`) when healthy and fall back to legacy `gemini`.
 - `zai` - Z.AI GLM-4.7 via Codex CLI
 - `glm5` - Z.AI GLM-5.2 via OpenCode (latest GLM 5.x, 1M context)
 - `glm52` - Z.AI GLM-5.2 via OpenCode (explicit pin, 1M context)

@@ -38,7 +38,7 @@ class _ModelRequest:
 
 _SHORTHAND: dict[str, _ModelRequest] = {
     # OpenAI (Codex CLI)
-    "codex": _ModelRequest("codex", family="openai", model_id="openai:gpt-5.5"),
+    "codex": _ModelRequest("codex", family="openai", model_id="openai:gpt-5.6-terra"),
     "codex-spark": _ModelRequest(
         "codex-spark",
         family="openai",
@@ -47,15 +47,18 @@ _SHORTHAND: dict[str, _ModelRequest] = {
     "codex-high": _ModelRequest(
         "codex-high",
         family="openai",
-        model_id="openai:gpt-5.5",
+        model_id="openai:gpt-5.6-terra",
         reasoning_effort="high",
     ),
     "codex-xhigh": _ModelRequest(
         "codex-xhigh",
         family="openai",
-        model_id="openai:gpt-5.5",
+        model_id="openai:gpt-5.6-terra",
         reasoning_effort="xhigh",
     ),
+    "sol": _ModelRequest("sol", family="openai", model_id="openai:gpt-5.6-sol"),
+    "terra": _ModelRequest("terra", family="openai", model_id="openai:gpt-5.6-terra"),
+    "luna": _ModelRequest("luna", family="openai", model_id="openai:gpt-5.6-luna"),
     "gpt54": _ModelRequest("gpt54", family="openai", model_id="openai:gpt-5.4"),
     "gpt54-high": _ModelRequest(
         "gpt54-high",
@@ -229,6 +232,12 @@ _SHORTHAND: dict[str, _ModelRequest] = {
 
 _ALIASES: dict[str, str] = {
     "spark": "codex-spark",
+    "gpt-5.6-sol": "sol",
+    "gpt-5.6-terra": "terra",
+    "gpt-5.6-luna": "luna",
+    "gpt5.6-sol": "sol",
+    "gpt5.6-terra": "terra",
+    "gpt5.6-luna": "luna",
     "gpt-5.5": "gpt55",
     "gpt5.5": "gpt55",
     "gpt-5.5-high": "gpt55-high",

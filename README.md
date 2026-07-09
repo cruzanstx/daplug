@@ -659,10 +659,13 @@ These tables are generated from `scripts/models.json`.
 
 | Shorthand | Model | Best For |
 |-----------|-------|----------|
-| `codex` | gpt-5.5 | Fast coding execution (default Codex shorthand) |
+| `codex` | gpt-5.6-terra | Fast coding execution (default Codex shorthand) |
 | `codex-spark` | gpt-5.3-codex-spark | Lowest-latency quick edits |
-| `codex-high` | gpt-5.5 | Complex coding |
-| `codex-xhigh` | gpt-5.5 | Large refactors |
+| `codex-high` | gpt-5.6-terra | Complex coding |
+| `codex-xhigh` | gpt-5.6-terra | Large refactors |
+| `sol` | gpt-5.6-sol | Hardest agentic coding tasks |
+| `terra` | gpt-5.6-terra | Balanced everyday coding (codex default) |
+| `luna` | gpt-5.6-luna | Fast, cost-efficient coding |
 | `gpt54` | gpt-5.4 | Explicit GPT-5.4 shorthand |
 | `gpt54-high` | gpt-5.4 | Deep reasoning with GPT-5.4 |
 | `gpt54-xhigh` | gpt-5.4 | Maximum reasoning with GPT-5.4 |

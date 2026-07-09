@@ -136,8 +136,8 @@
     },
     {
       "name": "codex",
-      "display": "codex (gpt-5.5)",
-      "model_id": "openai:gpt-5.5",
+      "display": "codex (gpt-5.6-terra)",
+      "model_id": "openai:gpt-5.6-terra",
       "default_cli": "codex",
       "supports_codex_reasoning": true,
       "codex_profile": null,
@@ -149,7 +149,9 @@
       "command": [
         "codex",
         "exec",
-        "--full-auto"
+        "--full-auto",
+        "-m",
+        "gpt-5.6-terra"
       ],
       "routing": {
         "cli_overrides": [
@@ -163,15 +165,15 @@
       "docs": {
         "family": "OpenAI Codex",
         "cli_label": "codex",
-        "actual_model": "gpt-5.5",
-        "option_description": "OpenAI Codex CLI (gpt-5.5, fast execution)",
-        "reference_cli": "codex exec --full-auto",
+        "actual_model": "gpt-5.6-terra",
+        "option_description": "OpenAI Codex CLI (gpt-5.6-terra, balanced everyday coding)",
+        "reference_cli": "codex exec --full-auto -m gpt-5.6-terra",
         "reference_description": "Fast coding execution (default Codex shorthand)",
         "readme_section": "OpenAI",
-        "readme_model": "gpt-5.5",
+        "readme_model": "gpt-5.6-terra",
         "best_for": "Fast coding execution (default Codex shorthand)",
-        "prompt_description": "OpenAI Codex CLI (gpt-5.5, fast execution)",
-        "menu_note": "gpt-5.5 standard",
+        "prompt_description": "OpenAI Codex CLI (gpt-5.6-terra, balanced everyday coding)",
+        "menu_note": "gpt-5.6-terra standard",
         "include_in_prompt_guides": true
       }
     },
@@ -220,8 +222,8 @@
     },
     {
       "name": "codex-high",
-      "display": "codex-high (gpt-5.5, high reasoning)",
-      "model_id": "openai:gpt-5.5",
+      "display": "codex-high (gpt-5.6-terra, high reasoning)",
+      "model_id": "openai:gpt-5.6-terra",
       "default_cli": "codex",
       "supports_codex_reasoning": true,
       "codex_profile": null,
@@ -234,6 +236,8 @@
         "codex",
         "exec",
         "--full-auto",
+        "-m",
+        "gpt-5.6-terra",
         "-c",
         "model_reasoning_effort=\"high\""
       ],
@@ -249,22 +253,22 @@
       "docs": {
         "family": "OpenAI Codex",
         "cli_label": "codex",
-        "actual_model": "gpt-5.5 (high reasoning)",
-        "option_description": "OpenAI Codex CLI with high reasoning effort",
-        "reference_cli": "codex exec --full-auto -c model_reasoning_effort=\"high\"",
+        "actual_model": "gpt-5.6-terra (high reasoning)",
+        "option_description": "OpenAI Codex CLI (gpt-5.6-terra) with high reasoning effort",
+        "reference_cli": "codex exec --full-auto -m gpt-5.6-terra -c model_reasoning_effort=\"high\"",
         "reference_description": "Complex coding",
         "readme_section": "OpenAI",
-        "readme_model": "gpt-5.5",
+        "readme_model": "gpt-5.6-terra",
         "best_for": "Complex coding",
-        "prompt_description": "OpenAI Codex CLI with high reasoning effort",
+        "prompt_description": "OpenAI Codex CLI (gpt-5.6-terra) with high reasoning effort",
         "menu_note": "higher reasoning",
         "include_in_prompt_guides": true
       }
     },
     {
       "name": "codex-xhigh",
-      "display": "codex-xhigh (gpt-5.5, xhigh reasoning)",
-      "model_id": "openai:gpt-5.5",
+      "display": "codex-xhigh (gpt-5.6-terra, xhigh reasoning)",
+      "model_id": "openai:gpt-5.6-terra",
       "default_cli": "codex",
       "supports_codex_reasoning": true,
       "codex_profile": null,
@@ -277,6 +281,8 @@
         "codex",
         "exec",
         "--full-auto",
+        "-m",
+        "gpt-5.6-terra",
         "-c",
         "model_reasoning_effort=\"xhigh\""
       ],
@@ -292,15 +298,144 @@
       "docs": {
         "family": "OpenAI Codex",
         "cli_label": "codex",
-        "actual_model": "gpt-5.5 (xhigh reasoning)",
-        "option_description": "OpenAI Codex CLI with xhigh reasoning effort",
-        "reference_cli": "codex exec --full-auto -c model_reasoning_effort=\"xhigh\"",
+        "actual_model": "gpt-5.6-terra (xhigh reasoning)",
+        "option_description": "OpenAI Codex CLI (gpt-5.6-terra) with xhigh reasoning effort",
+        "reference_cli": "codex exec --full-auto -m gpt-5.6-terra -c model_reasoning_effort=\"xhigh\"",
         "reference_description": "Large refactors",
         "readme_section": "OpenAI",
-        "readme_model": "gpt-5.5",
+        "readme_model": "gpt-5.6-terra",
         "best_for": "Large refactors",
-        "prompt_description": "OpenAI Codex CLI with xhigh reasoning effort",
+        "prompt_description": "OpenAI Codex CLI (gpt-5.6-terra) with xhigh reasoning effort",
         "menu_note": "maximum reasoning",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "sol",
+      "display": "sol (gpt-5.6-sol)",
+      "model_id": "openai:gpt-5.6-sol",
+      "default_cli": "codex",
+      "supports_codex_reasoning": true,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "dash",
+      "command": [
+        "codex",
+        "exec",
+        "--full-auto",
+        "-m",
+        "gpt-5.6-sol"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "OpenAI Codex",
+        "cli_label": "codex",
+        "actual_model": "gpt-5.6-sol",
+        "option_description": "OpenAI GPT-5.6 Sol (latest frontier agentic coding model)",
+        "reference_cli": "codex exec --full-auto -m gpt-5.6-sol",
+        "reference_description": "Hardest agentic coding tasks",
+        "readme_section": "OpenAI",
+        "readme_model": "gpt-5.6-sol",
+        "best_for": "Hardest agentic coding tasks",
+        "prompt_description": "OpenAI GPT-5.6 Sol (latest frontier agentic coding model)",
+        "menu_note": "gpt-5.6-sol frontier tier",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "terra",
+      "display": "terra (gpt-5.6-terra)",
+      "model_id": "openai:gpt-5.6-terra",
+      "default_cli": "codex",
+      "supports_codex_reasoning": true,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "dash",
+      "command": [
+        "codex",
+        "exec",
+        "--full-auto",
+        "-m",
+        "gpt-5.6-terra"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "OpenAI Codex",
+        "cli_label": "codex",
+        "actual_model": "gpt-5.6-terra",
+        "option_description": "OpenAI GPT-5.6 Terra (balanced everyday agentic coding)",
+        "reference_cli": "codex exec --full-auto -m gpt-5.6-terra",
+        "reference_description": "Balanced everyday coding (codex default)",
+        "readme_section": "OpenAI",
+        "readme_model": "gpt-5.6-terra",
+        "best_for": "Balanced everyday coding (codex default)",
+        "prompt_description": "OpenAI GPT-5.6 Terra (balanced everyday agentic coding)",
+        "menu_note": "gpt-5.6-terra balanced tier",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "luna",
+      "display": "luna (gpt-5.6-luna)",
+      "model_id": "openai:gpt-5.6-luna",
+      "default_cli": "codex",
+      "supports_codex_reasoning": true,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "dash",
+      "command": [
+        "codex",
+        "exec",
+        "--full-auto",
+        "-m",
+        "gpt-5.6-luna"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex",
+          "opencode"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "OpenAI Codex",
+        "cli_label": "codex",
+        "actual_model": "gpt-5.6-luna",
+        "option_description": "OpenAI GPT-5.6 Luna (fast and affordable agentic coding)",
+        "reference_cli": "codex exec --full-auto -m gpt-5.6-luna",
+        "reference_description": "Fast, cost-efficient coding",
+        "readme_section": "OpenAI",
+        "readme_model": "gpt-5.6-luna",
+        "best_for": "Fast, cost-efficient coding",
+        "prompt_description": "OpenAI GPT-5.6 Luna (fast and affordable agentic coding)",
+        "menu_note": "gpt-5.6-luna fast/affordable tier",
         "include_in_prompt_guides": true
       }
     },
