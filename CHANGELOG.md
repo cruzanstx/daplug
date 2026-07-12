@@ -2,6 +2,11 @@
 
 All notable changes to daplug are documented here.
 
+## [0.35.0] - 2026-07-12
+
+### Added
+- **`fable` model shorthand** — Claude Fable 5 (Anthropic's Mythos-class tier above Opus) via headless Claude Code CLI (`--model fable`). Mirrors the `cc-opus`/`cc-sonnet` shape and inherits the sandbox permission escalation from 0.34.1, so `--worktree --sandbox --loop` runs work out of the box.
+
 ## [0.34.1] - 2026-07-12
 
 ### Fixed

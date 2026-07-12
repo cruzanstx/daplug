@@ -1,6 +1,6 @@
 {
   "name": "daplug",
-  "version": "0.34.1",
+  "version": "0.35.0",
   "description": "AI-assisted development workflows with multi-model prompt execution",
   "author": {
     "name": "CruzanSTX",
