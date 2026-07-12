@@ -106,6 +106,7 @@ from models import (
     _resolve_router_command,
     _strip_provider_prefix,
     _validate_cli_override,
+    apply_claude_sandbox_permissions,
     get_cli_info,
 )
 from sandbox import (
@@ -149,6 +150,7 @@ from loop import (
     merge_suggested_next_steps,
     normalize_next_step_key,
     normalize_next_step_text,
+    reconcile_stale_running_state,
     run_cli,
     run_cli_foreground,
     run_verification_loop,
@@ -158,6 +160,26 @@ from loop import (
     validate_execution_cwd,
     wrap_prompt_with_verification_protocol,
 )
+
+
+def _bwrap_active(sandbox_config: Optional[dict]) -> bool:
+    """True when an external Bubblewrap sandbox is the active filesystem boundary."""
+    return bool(
+        sandbox_config
+        and sandbox_config.get("enabled")
+        and sandbox_config.get("type") == "bubblewrap"
+    )
+
+
+def _permission_adjusted_command(
+    cli_info: dict, sandbox_config: Optional[dict]
+) -> Optional[list[str]]:
+    """Preview command reflecting the Claude permission mode that will actually run."""
+    return apply_claude_sandbox_permissions(
+        cli_info.get("command"),
+        sandbox_active=_bwrap_active(sandbox_config),
+        allow_bypass_without_sandbox=bool(cli_info.get("allow_bypass_without_sandbox")),
+    )
 
 
 def extract_prompt_title(content: str) -> str:
@@ -473,7 +495,7 @@ def _execute_moa_prompt(
         log_file = log_dir / f"{label}-{prompt_num}-moa-{execution_timestamp}.log"
 
         if not args.info_only:
-            preview_command = cli_info["command"]
+            preview_command = _permission_adjusted_command(cli_info, sandbox_config)
             if cli_info.get("stdin_mode") == "dash":
                 preview_command = preview_command + ["-"]
             run["cli_command"] = maybe_wrap_command_with_sandbox(preview_command, sandbox_config)
@@ -514,6 +536,7 @@ def _execute_moa_prompt(
                 sandbox_net=args.sandbox_net,
                 original_repo_root=original_repo_root,
                 require_diff=args.require_diff,
+                allow_bypass_without_sandbox=args.dangerously_bypass_permissions,
             )
             run["log"] = exec_result.get("loop_log", str(log_file))
             run["state_file"] = exec_result.get("state_file")
@@ -586,6 +609,11 @@ def main():
                        help="Sandbox backend override")
     parser.add_argument("--no-sandbox", action="store_true",
                        help="Explicitly disable sandboxing")
+    parser.add_argument("--dangerously-bypass-permissions", action="store_true",
+                       help="Allow Claude Code to run with bypassPermissions even without a "
+                            "sandbox. UNSAFE: Claude can then write anywhere the executor can. "
+                            "Only meaningful for cc-* models; when a Bubblewrap sandbox is active "
+                            "the bypass is applied automatically and this flag is unnecessary.")
     parser.add_argument("--sandbox-profile", choices=["strict", "balanced", "dev"], default="balanced",
                        help="Sandbox profile preset (default: balanced)")
     parser.add_argument("--sandbox-workspace", default=None,
@@ -670,6 +698,7 @@ def main():
                 for state_file in state_dir.glob("*.json"):
                     try:
                         state = json.loads(state_file.read_text())
+                        reconcile_stale_running_state(state)
                         states.append(state)
                     except (json.JSONDecodeError, IOError):
                         pass
@@ -684,6 +713,7 @@ def main():
                 prompt_num = token.zfill(3)
                 state = load_loop_state(prompt_num)
                 if state:
+                    reconcile_stale_running_state(state)
                     print(json.dumps({"loop_state": state}, indent=2))
                 else:
                     print(json.dumps({"error": f"No loop state found for prompt {prompt_num}"}))
@@ -706,6 +736,8 @@ def main():
                 info, effective_variant, variant_dropped = _moa_cli_info(
                     entry["model"], repo_root, args.variant, cli_override=entry["cli"]
                 )
+                if args.dangerously_bypass_permissions:
+                    info["allow_bypass_without_sandbox"] = True
                 moa_cli_infos.append({
                     **entry,
                     "cli_info": info,
@@ -720,6 +752,8 @@ def main():
                 cli_override=args.cli,
                 variant=args.variant,
             )
+            if args.dangerously_bypass_permissions:
+                cli_info["allow_bypass_without_sandbox"] = True
         log_dir = get_cli_logs_dir(repo_root)
         log_dir.mkdir(parents=True, exist_ok=True)
 
@@ -745,7 +779,8 @@ def main():
                 "repo": repo_root.name,
                 "model": args.model,
                 "cli_display": cli_info["display"],
-                "cli_command": maybe_wrap_command_with_sandbox(cli_info.get("command"), sandbox_config),
+                "cli_command": maybe_wrap_command_with_sandbox(
+                    _permission_adjusted_command(cli_info, sandbox_config), sandbox_config),
                 "selected_cli": cli_info.get("selected_cli"),
                 "variant": cli_info.get("variant"),
                 "stdin_mode": cli_info.get("stdin_mode"),
@@ -873,7 +908,7 @@ def main():
                     raise RuntimeError(BWRAP_MISSING_ERROR)
 
             if not args.info_only:
-                preview_command = cli_info["command"]
+                preview_command = _permission_adjusted_command(cli_info, prompt_sandbox_config)
                 if cli_info.get("stdin_mode") == "dash":
                     preview_command = preview_command + ["-"]
                 prompt_info["cli_command"] = maybe_wrap_command_with_sandbox(preview_command, prompt_sandbox_config)
@@ -945,6 +980,7 @@ def main():
                             sandbox_net=args.sandbox_net,
                             original_repo_root=original_repo_root,
                             require_diff=args.require_diff,
+                            allow_bypass_without_sandbox=args.dangerously_bypass_permissions,
                         )
                         # For background loop, update displayed log to loop log
                         prompt_info["log"] = loop_result["loop_log"]

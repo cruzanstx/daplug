@@ -10,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+from models import apply_claude_sandbox_permissions
 from paths import get_cli_logs_dir, get_repo_root
 from repostate import (
     _detect_impossible_gate,
@@ -96,6 +97,47 @@ def save_loop_state(state: dict) -> None:
     state_file.write_text(json.dumps(state, indent=2))
 
 
+def _pid_alive(pid: Optional[int]) -> bool:
+    """Return True if a process with pid exists and is signalable."""
+    if not pid or pid <= 0:
+        return False
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    except OSError:
+        return False
+    return True
+
+
+def reconcile_stale_running_state(state: Optional[dict]) -> Optional[dict]:
+    """Terminalize a loop state stuck at 'running' with no live executor.
+
+    A hard-killed executor (SIGKILL, crash, reboot) never reaches the state
+    finalizer, leaving status='running' forever. When the recorded executor PID
+    no longer exists, mark the state 'executor_missing' so callers observe a
+    terminal status instead of a phantom in-flight loop. States without a
+    recorded PID are left untouched (their liveness cannot be determined).
+    """
+    if not state or state.get("status") != "running":
+        return state
+    pid = state.get("executor_pid")
+    if pid is None or _pid_alive(int(pid)):
+        return state
+    state["status"] = "executor_missing"
+    state["failure_reason"] = (
+        f"executor process {pid} is no longer running; loop state was left "
+        "marked 'running' (killed or crashed before finalizing)"
+    )
+    try:
+        save_loop_state(state)
+    except (IOError, OSError):
+        pass
+    return state
+
+
 def create_loop_state(
     prompt_number: str,
     prompt_file: str,
@@ -121,7 +163,8 @@ def create_loop_state(
         "completion_marker": completion_marker,
         "started_at": datetime.now().isoformat(),
         "last_updated_at": datetime.now().isoformat(),
-        "status": "pending",  # pending, running, completed, completed_unverified, failed, max_iterations_reached, stalled, blocked
+        "status": "pending",  # pending, running, completed, completed_unverified, failed, max_iterations_reached, stalled, blocked, executor_missing
+        "executor_pid": None,  # PID of the process driving the loop while 'running'
         "history": [],
         "suggested_next_steps": [],
         "original_checkout_warnings": [],
@@ -535,10 +578,35 @@ def run_cli(
     if stdin_mode == "dash" and cli_info["command"] and cli_info["command"][0] == "codex":
         extra_args = get_sandbox_add_dirs(cwd)
 
+    # When Claude runs inside an external Bubblewrap sandbox, bwrap is the
+    # filesystem boundary, so escalate dontAsk -> bypassPermissions; otherwise
+    # keep dontAsk unless the caller explicitly opted into the unsafe bypass.
+    sandbox_active = bool(
+        sandbox_config
+        and sandbox_config.get("enabled")
+        and sandbox_config.get("type") == "bubblewrap"
+    )
+    base_command = apply_claude_sandbox_permissions(
+        cli_info["command"],
+        sandbox_active=sandbox_active,
+        allow_bypass_without_sandbox=bool(cli_info.get("allow_bypass_without_sandbox")),
+    )
+
+    # Claude Code refuses bypassPermissions when running as root/sudo unless it
+    # believes it is sandboxed (IS_SANDBOX). Under bwrap that is genuinely true;
+    # for the explicit --no-sandbox opt-in the caller has accepted the risk.
+    if (
+        base_command
+        and Path(base_command[0]).name == "claude"
+        and "bypassPermissions" in base_command
+    ):
+        env["IS_SANDBOX"] = "1"
+        sandbox_env["IS_SANDBOX"] = "1"
+
     try:
         if stdin_mode == "dash":
             # Codex-style: use '-' to read from stdin
-            full_cmd = cli_info["command"] + extra_args + ["-"]
+            full_cmd = base_command + extra_args + ["-"]
             full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config, extra_env=sandbox_env)
             process = subprocess.Popen(
                 full_cmd,
@@ -557,7 +625,7 @@ def run_cli(
             process.stdin.close()
         elif stdin_mode == "stdin":
             # Claude-style: read prompt from stdin (no extra "-" arg)
-            full_cmd = cli_info["command"] + extra_args
+            full_cmd = base_command + extra_args
             full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config, extra_env=sandbox_env)
             process = subprocess.Popen(
                 full_cmd,
@@ -575,7 +643,7 @@ def run_cli(
             process.stdin.close()
         else:
             # argv-style CLIs (agy/gemini/opencode): pass content as the final argument.
-            full_cmd = cli_info["command"] + [content]
+            full_cmd = base_command + [content]
 
             # Wrap with script for PTY if needed
             if needs_pty:
@@ -658,10 +726,35 @@ def run_cli_foreground(
     if stdin_mode == "dash" and cli_info["command"] and cli_info["command"][0] == "codex":
         extra_args = get_sandbox_add_dirs(cwd)
 
+    # When Claude runs inside an external Bubblewrap sandbox, bwrap is the
+    # filesystem boundary, so escalate dontAsk -> bypassPermissions; otherwise
+    # keep dontAsk unless the caller explicitly opted into the unsafe bypass.
+    sandbox_active = bool(
+        sandbox_config
+        and sandbox_config.get("enabled")
+        and sandbox_config.get("type") == "bubblewrap"
+    )
+    base_command = apply_claude_sandbox_permissions(
+        cli_info["command"],
+        sandbox_active=sandbox_active,
+        allow_bypass_without_sandbox=bool(cli_info.get("allow_bypass_without_sandbox")),
+    )
+
+    # Claude Code refuses bypassPermissions when running as root/sudo unless it
+    # believes it is sandboxed (IS_SANDBOX). Under bwrap that is genuinely true;
+    # for the explicit --no-sandbox opt-in the caller has accepted the risk.
+    if (
+        base_command
+        and Path(base_command[0]).name == "claude"
+        and "bypassPermissions" in base_command
+    ):
+        env["IS_SANDBOX"] = "1"
+        sandbox_env["IS_SANDBOX"] = "1"
+
     try:
         if stdin_mode == "dash":
             # Codex-style: use '-' to read from stdin
-            full_cmd = cli_info["command"] + extra_args + ["-"]
+            full_cmd = base_command + extra_args + ["-"]
             full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config, extra_env=sandbox_env)
             process = subprocess.Popen(
                 full_cmd,
@@ -679,7 +772,7 @@ def run_cli_foreground(
             process.stdin.close()
             exit_code = process.wait()
         elif stdin_mode == "stdin":
-            full_cmd = cli_info["command"] + extra_args
+            full_cmd = base_command + extra_args
             full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config, extra_env=sandbox_env)
             process = subprocess.Popen(
                 full_cmd,
@@ -697,7 +790,7 @@ def run_cli_foreground(
             exit_code = process.wait()
         else:
             # argv-style CLIs (agy/gemini/opencode): pass content as the final argument.
-            full_cmd = cli_info["command"] + [content]
+            full_cmd = base_command + [content]
 
             # Wrap with script for PTY if needed
             if needs_pty:
@@ -834,6 +927,7 @@ def run_verification_loop(
         }
 
     state["status"] = "running"
+    state["executor_pid"] = os.getpid()
     state["require_diff"] = require_diff
 
     # Capture the execution-cwd state at loop start for --require-diff.
@@ -1138,6 +1232,7 @@ def run_verification_loop_background(
     sandbox_net: Optional[str] = None,
     original_repo_root: Optional[str] = None,
     require_diff: bool = False,
+    allow_bypass_without_sandbox: bool = False,
 ) -> dict:
     """Start a verification loop in background mode.
 
@@ -1228,6 +1323,8 @@ def run_verification_loop_background(
         cmd.extend(["--original-repo-root", original_repo_root])
     if require_diff:
         cmd.append("--require-diff")
+    if allow_bypass_without_sandbox:
+        cmd.append("--dangerously-bypass-permissions")
 
     if worktree_path:
         # When in worktree, use --prompt-file to read TASK.md directly

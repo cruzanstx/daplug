@@ -267,6 +267,39 @@ def _claude_cli_command(model_flag: Optional[str] = None) -> list[str]:
     return cmd
 
 
+def apply_claude_sandbox_permissions(
+    command: Optional[list[str]],
+    *,
+    sandbox_active: bool,
+    allow_bypass_without_sandbox: bool = False,
+) -> Optional[list[str]]:
+    """Escalate Claude's headless permission mode when a filesystem boundary exists.
+
+    Headless Claude runs with ``--permission-mode dontAsk``, which cannot prompt
+    for approval and therefore denies Write/Edit/Bash — the model can read but
+    not implement. When an external Bubblewrap sandbox is the filesystem
+    boundary, switch to ``bypassPermissions`` so the task can actually run;
+    bwrap still confines writes to the worktree. Without a sandbox, only
+    escalate when the caller explicitly opts into the unsafe bypass.
+
+    Returns the command unchanged for non-Claude commands or when no escalation
+    applies, so it is safe to call unconditionally.
+    """
+    if not command or Path(command[0]).name != "claude":
+        return command
+    try:
+        idx = command.index("--permission-mode")
+    except ValueError:
+        return command
+    if idx + 1 >= len(command) or command[idx + 1] != "dontAsk":
+        return command
+    if not (sandbox_active or allow_bypass_without_sandbox):
+        return command
+    updated = list(command)
+    updated[idx + 1] = "bypassPermissions"
+    return updated
+
+
 def _require_claude_cli() -> None:
     if shutil.which("claude"):
         return

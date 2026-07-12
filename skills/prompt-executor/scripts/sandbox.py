@@ -2,6 +2,7 @@
 """Bubblewrap sandbox configuration, argument building, and preflight checks."""
 
 import argparse
+import json
 import os
 import shutil
 import subprocess
@@ -173,6 +174,40 @@ def _node_version_root(path: Path, home: Path) -> Optional[Path]:
     return node_versions / rel.parts[0]
 
 
+def _symlink_chain_dirs(start: Path, max_hops: int = 40) -> list[Path]:
+    """Directories that must be bound so ``start`` resolves hop-by-hop in bwrap.
+
+    ``execvp`` (and the loader) follow one symlink at a time, so an intermediate
+    hop whose parent directory is not mounted breaks resolution even when the
+    PATH directory and the final target directory are both bound. The real-world
+    Claude install chains through three trees:
+
+        ~/.nvm/.../bin/claude -> /usr/local/bin/claude
+                              -> ~/.local/bin/claude
+                              -> ~/.local/share/claude/versions/<v>
+
+    Collapsing with ``Path.resolve()`` skips ``~/.local/bin``, leaving a dangling
+    link inside the sandbox. Walk the chain and bind every hop's parent instead.
+    """
+    dirs: list[Path] = []
+    current = start
+    seen: set[str] = set()
+    for _ in range(max_hops):
+        dirs.append(current.parent)
+        key = str(current)
+        if key in seen:
+            break
+        seen.add(key)
+        try:
+            if not current.is_symlink():
+                break
+            target = Path(os.readlink(current))
+        except OSError:
+            break
+        current = target if target.is_absolute() else (current.parent / target)
+    return dirs
+
+
 def _selected_cli_runtime_paths(child_command: list[str], home: Path) -> list[str]:
     """Return read-only bind roots needed to execute the selected CLI.
 
@@ -195,8 +230,13 @@ def _selected_cli_runtime_paths(child_command: list[str], home: Path) -> list[st
 
     paths: list[Path] = []
     if found.exists():
-        paths.append(found.parent)
         resolved_found = found.resolve()
+
+        # Bind every directory along the symlink chain, not just the PATH dir and
+        # the fully-resolved target: execvp follows one hop at a time, so an
+        # intermediate symlink in an unmounted directory dangles inside bwrap.
+        paths.extend(_symlink_chain_dirs(found))
+
         node_root = _node_version_root(resolved_found, home)
         if node_root:
             paths.append(node_root)
@@ -220,6 +260,26 @@ def _selected_cli_runtime_paths(child_command: list[str], home: Path) -> list[st
         seen.add(item)
         result.append(item)
     return result
+
+
+def _is_claude_command(child_command: Optional[list[str]]) -> bool:
+    """True when the sandboxed command launches the Claude Code CLI."""
+    return bool(child_command) and Path(child_command[0]).name == "claude"
+
+
+def _claude_auth_bind_files(home: Path) -> list[str]:
+    """Minimal host files Claude Code needs to authenticate inside the sandbox.
+
+    Only the OAuth credential store and top-level config are exposed. The rest
+    of ~/.claude (sessions, plugins, logs, MCP state) is intentionally kept out
+    of the sandbox. bwrap auto-creates the parent directories for these bind
+    targets as tmpfs, so ~/.claude inside the sandbox contains only these files.
+    """
+    candidates = [
+        home / ".claude" / ".credentials.json",
+        home / ".claude.json",
+    ]
+    return [str(p) for p in candidates if p.exists()]
 
 
 def _sandbox_passthrough_env(cli_info: dict) -> dict[str, str]:
@@ -323,15 +383,86 @@ def build_bwrap_args(
     for path in _selected_cli_runtime_paths(child_command, Path(home)):
         cmd.extend(["--ro-bind", path, path])
 
+    # Claude Code authenticates from host credential files, not the environment.
+    # Expose only the minimum auth files read-only so the CLI can log in without
+    # leaking the rest of ~/.claude into the sandbox.
+    if _is_claude_command(child_command):
+        for path in _claude_auth_bind_files(Path(home)):
+            cmd.extend(["--ro-bind", path, path])
+
     cmd.extend(["--", *child_command])
     return cmd
 
 
 SANDBOX_PREFLIGHT_TIMEOUT = 60
+CLAUDE_AUTH_PREFLIGHT_TIMEOUT = 60
 
 # Keyed by (binary, profile, workspace); a loop re-probes only when the
 # sandbox shape changes, not on every iteration.
 _SANDBOX_PREFLIGHT_CACHE: dict[tuple, Optional[str]] = {}
+
+
+def _claude_auth_preflight(
+    binary: str, sandbox_config: dict, cli_info: dict, cwd: str
+) -> Optional[str]:
+    """Verify Claude Code is authenticated inside the sandbox.
+
+    ``<binary> --version`` only proves the executable is reachable. Claude reads
+    OAuth credentials from bind-mounted host files, so a separate ``auth status``
+    probe is needed to confirm the credential binds actually work before burning
+    loop iterations on ``Not logged in`` failures. Returns an error message on
+    failure, None when authenticated.
+    """
+    probe_cmd = build_bwrap_args(
+        sandbox_config,
+        [binary, "auth", "status"],
+        extra_env=_sandbox_passthrough_env(cli_info),
+    )
+    try:
+        proc = subprocess.run(
+            probe_cmd,
+            cwd=cwd,
+            capture_output=True,
+            text=True,
+            timeout=CLAUDE_AUTH_PREFLIGHT_TIMEOUT,
+        )
+    except subprocess.TimeoutExpired:
+        return _sandbox_error_message(
+            sandbox_config,
+            f"Claude auth preflight ('{binary} auth status') timed out after "
+            f"{CLAUDE_AUTH_PREFLIGHT_TIMEOUT}s inside the sandbox",
+        )
+    except OSError as exc:
+        return _sandbox_error_message(
+            sandbox_config, f"Claude auth preflight could not launch: {exc}"
+        )
+
+    combined = (proc.stdout or "") + (proc.stderr or "")
+    logged_in: Optional[bool] = None
+    try:
+        data = json.loads(combined.strip())
+        if isinstance(data, dict):
+            logged_in = bool(data.get("loggedIn"))
+    except (json.JSONDecodeError, ValueError):
+        low = combined.lower()
+        if '"loggedin": true' in low or '"loggedin":true' in low:
+            logged_in = True
+        elif '"loggedin": false' in low or '"loggedin":false' in low:
+            logged_in = False
+
+    if logged_in is True:
+        return None
+    # Ambiguous output but a clean exit: trust the executable/version probe and
+    # the credential binds rather than failing on an unrecognized format.
+    if logged_in is None and proc.returncode == 0:
+        return None
+
+    return _sandbox_error_message(
+        sandbox_config,
+        "Claude Code is not authenticated inside the sandbox. Ensure the host is "
+        "logged in ('claude auth status') and that the credential files exist: "
+        "~/.claude/.credentials.json, ~/.claude.json",
+    )
 
 
 def sandbox_preflight(cli_info: dict, sandbox_config: Optional[dict], cwd: str) -> Optional[str]:
@@ -386,6 +517,11 @@ def sandbox_preflight(cli_info: dict, sandbox_config: Optional[dict], cwd: str) 
         )
     except OSError as exc:
         error = _sandbox_error_message(sandbox_config, f"preflight probe could not launch: {exc}")
+
+    # The version probe only validates the executable. Claude additionally needs
+    # its host credentials bound in, so verify authentication before real runs.
+    if error is None and _is_claude_command(command):
+        error = _claude_auth_preflight(binary, sandbox_config, cli_info, cwd)
 
     _SANDBOX_PREFLIGHT_CACHE[cache_key] = error
     return error
