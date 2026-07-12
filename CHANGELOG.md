@@ -2,6 +2,16 @@
 
 All notable changes to daplug are documented here.
 
+## [0.34.1] - 2026-07-12
+
+### Fixed
+- **Sandboxed `cc-opus`/`cc-sonnet` runs are usable again** (#22). Headless Claude Code failed under the normal worktree + Bubblewrap + loop shape in three sequential ways, plus a stale-state bug:
+  - Bind **every** directory along the CLI's symlink chain, not just the PATH dir and the fully-resolved target. `execvp` follows one hop at a time, so an intermediate symlink (`nvm/bin → /usr/local/bin → ~/.local/bin → ~/.local/share/claude/versions/<v>`) in an unmounted directory dangled inside bwrap.
+  - Read-only bind only Claude's minimum auth files (`~/.claude/.credentials.json`, `~/.claude.json`) for `claude` commands; the rest of `~/.claude` stays out of the sandbox.
+  - Add a Claude-specific `claude auth status` preflight alongside the existing `--version` probe so missing credentials fail fast with an actionable message instead of burning loop iterations.
+  - Escalate `--permission-mode dontAsk` to `bypassPermissions` only when an external Bubblewrap sandbox is the filesystem boundary; without a sandbox, require the explicit `--dangerously-bypass-permissions` opt-in. Inject `IS_SANDBOX=1` so Claude Code allows the bypass under root.
+  - Record the executor PID in loop state and terminalize a stale `running` state as `executor_missing` when the PID no longer exists.
+
 ## [0.34.0] - 2026-07-09
 
 ### Changed
