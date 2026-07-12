@@ -228,6 +228,13 @@ _SHORTHAND: dict[str, _ModelRequest] = {
         force_cli="claude",
         strict_cli=True,
     ),
+    "fable": _ModelRequest(
+        "fable",
+        family="anthropic",
+        model_id="anthropic:fable",
+        force_cli="claude",
+        strict_cli=True,
+    ),
 }
 
 _ALIASES: dict[str, str] = {
