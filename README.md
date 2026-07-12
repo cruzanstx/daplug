@@ -654,6 +654,7 @@ These tables are generated from `scripts/models.json`.
 | `claude` | claude | Complex reasoning in current Claude Code context |
 | `cc-sonnet` | sonnet | Claude Code CLI Sonnet runs |
 | `cc-opus` | opus | Claude Code CLI Opus runs |
+| `fable` | fable | Hardest reasoning tasks via Claude Code CLI (Fable 5, above Opus tier) |
 
 #### OpenAI
 

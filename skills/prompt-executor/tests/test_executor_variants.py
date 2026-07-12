@@ -350,6 +350,7 @@ EXPECTED_MODEL_KEYS = [
     "claude",
     "cc-sonnet",
     "cc-opus",
+    "fable",
     "codex",
     "codex-spark",
     "codex-high",

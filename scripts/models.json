@@ -135,6 +135,54 @@
       }
     },
     {
+      "name": "fable",
+      "display": "fable (Claude Fable 5 via Claude Code)",
+      "model_id": "anthropic:fable",
+      "default_cli": "claude",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": "fable",
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "stdin",
+      "command": [
+        "claude",
+        "--print",
+        "--no-session-persistence",
+        "--output-format",
+        "text",
+        "--input-format",
+        "text",
+        "--permission-mode",
+        "dontAsk",
+        "--model",
+        "fable"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "claude"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Claude",
+        "cli_label": "claude",
+        "actual_model": "fable (Claude Fable 5 alias)",
+        "option_description": "Claude Code CLI Fable 5 alias (most capable)",
+        "reference_cli": "claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model fable",
+        "reference_description": "Claude Code CLI Fable 5 runs",
+        "readme_section": "Claude",
+        "readme_model": "fable",
+        "best_for": "Hardest reasoning tasks via Claude Code CLI (Fable 5, above Opus tier)",
+        "prompt_description": "Claude Code CLI Fable 5 alias (most capable)",
+        "menu_note": "Claude Code CLI Fable 5",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
       "name": "codex",
       "display": "codex (gpt-5.6-terra)",
       "model_id": "openai:gpt-5.6-terra",
