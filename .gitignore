@@ -23,10 +23,13 @@ node_modules/
 .DS_Store
 Thumbs.db
 
-# Claude Code local settings
-.claude/settings.local.json
+# Claude Code local project state
+.claude/
 
 # Local artifacts
 .worktrees/
 fix_run_prompt_opencode.md
 opencode_web_backup.json
+
+# Local agent runtime state
+.sisyphus/
