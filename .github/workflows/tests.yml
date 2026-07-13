@@ -18,23 +18,9 @@ jobs:
       - name: Install test dependencies
         run: pip install pytest pyyaml
 
-      # Suites run in separate pytest processes: each appends its own
-      # scripts/ dir to sys.path and imports modules by bare name
-      # (executor, config, detector, ...), which collide if combined.
+      # All suites + model registry check live in scripts/run-tests.sh so CI
+      # and the /release skill share one source of truth for the suite list.
       - name: Run test suites
-        run: |
-          for suite in \
-            skills/prompt-executor/tests \
-            skills/cli-detector/tests \
-            skills/config-reader/tests \
-            skills/sprint/tests \
-            skills/at-prompt-runner/tests \
-            scripts/tests
-          do
-            echo "::group::$suite"
-            python -m pytest "$suite" -v
-            echo "::endgroup::"
-          done
-
-      - name: Model registry consistency
-        run: python scripts/manage-models.py check
+        env:
+          PYTHON: python
+        run: bash scripts/run-tests.sh
