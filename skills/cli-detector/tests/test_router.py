@@ -49,7 +49,7 @@ def test_synthetic_models_force_opencode_provider(monkeypatch):
         cli, resolved_model_id, cmd = router.resolve_model(shorthand)
         assert cli == "opencode"
         assert resolved_model_id == model_id
-        assert cmd == ["opencode", "run", "--format", "json", "-m", opencode_ref]
+        assert cmd == ["opencode", "run", "--format", "json", "-m", opencode_ref, "--pure", "--agent", "build"]
 
 
 def test_raw_syn_alias_routes_through_synthetic_provider(monkeypatch):
@@ -64,7 +64,7 @@ def test_raw_syn_alias_routes_through_synthetic_provider(monkeypatch):
     cli, model_id, cmd = router.resolve_model("syn:large:text")
     assert cli == "opencode"
     assert model_id == "synthetic:syn:large:text"
-    assert cmd == ["opencode", "run", "--format", "json", "-m", "synthetic/syn:large:text"]
+    assert cmd == ["opencode", "run", "--format", "json", "-m", "synthetic/syn:large:text", "--pure", "--agent", "build"]
 
 def test_resolve_model_returns_installed_cli(monkeypatch):
     fake = _FakeCache(
@@ -261,7 +261,7 @@ def test_backward_compat_when_cache_missing(monkeypatch):
     monkeypatch.setattr(imported_router, "load_cache_file", lambda: None)
 
     info = executor.get_cli_info("opencode", repo_root=repo_root)
-    assert info["command"] == ["opencode", "run", "--format", "json", "-m", "zai/glm-4.7"]
+    assert info["command"] == ["opencode", "run", "--format", "json", "-m", "zai/glm-4.7", "--pure", "--agent", "build"]
 
 
 def test_get_provider_endpoint_priority(monkeypatch):
