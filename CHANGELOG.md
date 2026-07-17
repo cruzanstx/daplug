@@ -2,6 +2,11 @@
 
 All notable changes to daplug are documented here.
 
+## [0.35.1] - 2026-07-17
+
+### Fixed
+- **Cloud OpenCode models now run with `--pure --agent build`.** In headless one-shot runs the oh-my-opencode harness orchestrator delegates work to background subagents that die when the `opencode run` process exits, returning rc=0 with no changes (A/B tested: `--pure` completed a multi-file task in 143s vs 415s and zero output with the harness loaded). Local LMStudio models already used `--pure`; this extends it to all opencode-routed cloud models (`glm5`, `glm52`, `kimi`, `synthetic`, `syn-*`, `opencode`) and the `--cli opencode` override path.
+
 ## [0.35.0] - 2026-07-12
 
 ### Added
