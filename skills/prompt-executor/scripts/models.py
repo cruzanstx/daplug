@@ -374,6 +374,10 @@ def _build_opencode_command(model_id: str, variant: Optional[str]) -> list[str]:
     cmd = ["opencode", "run", "--format", "json", "-m", _opencode_model_spec(model_id)]
     if variant:
         cmd.extend(["--variant", variant])
+    # Headless one-shot runs must not load the oh-my-opencode harness: its
+    # orchestrator delegates to background subagents that die when the
+    # one-shot process exits, yielding rc=0 with no changes.
+    cmd.extend(["--pure", "--agent", "build"])
     return cmd
 
 

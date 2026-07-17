@@ -281,14 +281,14 @@ python3 "$EXECUTOR" --loop-status
 | gemini3pro | gemini -y -m gemini-3-pro-preview | Explicit 3 Pro selection |
 | gemini31pro | gemini -y -m gemini-3.1-pro-preview | Latest Pro model (if available) |
 | zai | codex exec --full-auto --profile zai | General coding fallback |
-| glm5 | opencode run --format json -m zai/glm-5.2 | Latest GLM 5.x tasks via OpenCode |
-| glm52 | opencode run --format json -m zai/glm-5.2 | Explicit GLM-5.2 pin via OpenCode |
-| kimi | opencode run --format json -m opencode/kimi-k2.5 | Kimi K2.5 via OpenCode |
-| synthetic | opencode run --format json -m synthetic/syn:large:text | GLM-5.2 default, 512k context |
-| syn-flash | opencode run --format json -m synthetic/syn:small:text | Fast GLM-4.7-Flash fallback |
-| syn-kimi | opencode run --format json -m synthetic/syn:large:vision | Kimi-K2.6 vision tasks |
-| syn-qwen | opencode run --format json -m synthetic/syn:small:vision | Qwen3.6-27B vision tasks |
-| opencode | opencode run --format json -m zai/glm-4.7 | Recommended OpenCode JSON runner |
+| glm5 | opencode run --format json -m zai/glm-5.2 --pure --agent build | Latest GLM 5.x tasks via OpenCode |
+| glm52 | opencode run --format json -m zai/glm-5.2 --pure --agent build | Explicit GLM-5.2 pin via OpenCode |
+| kimi | opencode run --format json -m opencode/kimi-k2.5 --pure --agent build | Kimi K2.5 via OpenCode |
+| synthetic | opencode run --format json -m synthetic/syn:large:text --pure --agent build | GLM-5.2 default, 512k context |
+| syn-flash | opencode run --format json -m synthetic/syn:small:text --pure --agent build | Fast GLM-4.7-Flash fallback |
+| syn-kimi | opencode run --format json -m synthetic/syn:large:vision --pure --agent build | Kimi-K2.6 vision tasks |
+| syn-qwen | opencode run --format json -m synthetic/syn:small:vision --pure --agent build | Qwen3.6-27B vision tasks |
+| opencode | opencode run --format json -m zai/glm-4.7 --pure --agent build | Recommended OpenCode JSON runner |
 | local | opencode run --format json -m lmstudio/qwen3.6-35b-a3b --pure --agent build | Local qwen-coder model with no quota |
 | qwen | opencode run --format json -m lmstudio/qwen3.6-35b-a3b --pure --agent build | Local qwen-coder model with no quota |
 | devstral | opencode run --format json -m lmstudio/devstral-small-2-2512 --pure --agent build | Local Devstral model with no quota |

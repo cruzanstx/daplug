@@ -82,7 +82,7 @@ def test_synthetic_models_build_opencode_commands(no_router, tmp_path, monkeypat
         info = executor.get_cli_info(shorthand, repo_root=tmp_path)
         assert info["selected_cli"] == "opencode"
         assert info["model_id"] == model_id
-        assert info["command"] == ["opencode", "run", "--format", "json", "-m", opencode_ref]
+        assert info["command"] == ["opencode", "run", "--format", "json", "-m", opencode_ref, "--pure", "--agent", "build"]
         assert info["env"] == {}
 
 

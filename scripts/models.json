@@ -1328,7 +1328,10 @@
         "--format",
         "json",
         "-m",
-        "zai/glm-5.2"
+        "zai/glm-5.2",
+        "--pure",
+        "--agent",
+        "build"
       ],
       "routing": {
         "cli_overrides": [
@@ -1344,7 +1347,7 @@
         "cli_label": "opencode",
         "actual_model": "GLM-5.2 via OpenCode (latest GLM 5.x, 1M context)",
         "option_description": "Z.AI GLM-5.2 via OpenCode (latest GLM 5.x, 1M context)",
-        "reference_cli": "opencode run --format json -m zai/glm-5.2",
+        "reference_cli": "opencode run --format json -m zai/glm-5.2 --pure --agent build",
         "reference_description": "Latest GLM 5.x tasks via OpenCode",
         "readme_section": "Z.AI / OpenCode",
         "readme_model": "glm-5.2",
@@ -1372,7 +1375,10 @@
         "--format",
         "json",
         "-m",
-        "zai/glm-5.2"
+        "zai/glm-5.2",
+        "--pure",
+        "--agent",
+        "build"
       ],
       "routing": {
         "cli_overrides": [
@@ -1387,7 +1393,7 @@
         "cli_label": "opencode",
         "actual_model": "GLM-5.2 via OpenCode (explicit pin, 1M context)",
         "option_description": "Z.AI GLM-5.2 via OpenCode (explicit pin, 1M context)",
-        "reference_cli": "opencode run --format json -m zai/glm-5.2",
+        "reference_cli": "opencode run --format json -m zai/glm-5.2 --pure --agent build",
         "reference_description": "Explicit GLM-5.2 pin via OpenCode",
         "readme_section": "Z.AI / OpenCode",
         "readme_model": "glm-5.2",
@@ -1415,7 +1421,10 @@
         "--format",
         "json",
         "-m",
-        "opencode/kimi-k2.5"
+        "opencode/kimi-k2.5",
+        "--pure",
+        "--agent",
+        "build"
       ],
       "routing": {
         "cli_overrides": [
@@ -1430,7 +1439,7 @@
         "cli_label": "opencode",
         "actual_model": "Kimi K2.5 via OpenCode",
         "option_description": "Kimi K2.5 via OpenCode",
-        "reference_cli": "opencode run --format json -m opencode/kimi-k2.5",
+        "reference_cli": "opencode run --format json -m opencode/kimi-k2.5 --pure --agent build",
         "reference_description": "Kimi K2.5 via OpenCode",
         "readme_section": "Z.AI / OpenCode",
         "readme_model": "kimi-k2.5",
@@ -1458,7 +1467,10 @@
         "--format",
         "json",
         "-m",
-        "synthetic/syn:large:text"
+        "synthetic/syn:large:text",
+        "--pure",
+        "--agent",
+        "build"
       ],
       "routing": {
         "cli_overrides": [
@@ -1473,7 +1485,7 @@
         "cli_label": "opencode",
         "actual_model": "GLM-5.2 via Synthetic (`syn:large:text`, 512k context)",
         "option_description": "GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, 512k context)",
-        "reference_cli": "opencode run --format json -m synthetic/syn:large:text",
+        "reference_cli": "opencode run --format json -m synthetic/syn:large:text --pure --agent build",
         "reference_description": "GLM-5.2 default, 512k context",
         "readme_section": "Synthetic",
         "readme_model": "`syn:large:text`",
@@ -1501,7 +1513,10 @@
         "--format",
         "json",
         "-m",
-        "synthetic/syn:small:text"
+        "synthetic/syn:small:text",
+        "--pure",
+        "--agent",
+        "build"
       ],
       "routing": {
         "cli_overrides": [
@@ -1516,7 +1531,7 @@
         "cli_label": "opencode",
         "actual_model": "GLM-4.7-Flash via Synthetic (`syn:small:text`)",
         "option_description": "GLM-4.7-Flash via Synthetic / OpenCode",
-        "reference_cli": "opencode run --format json -m synthetic/syn:small:text",
+        "reference_cli": "opencode run --format json -m synthetic/syn:small:text --pure --agent build",
         "reference_description": "Fast GLM-4.7-Flash fallback",
         "readme_section": "Synthetic",
         "readme_model": "`syn:small:text`",
@@ -1544,7 +1559,10 @@
         "--format",
         "json",
         "-m",
-        "synthetic/syn:large:vision"
+        "synthetic/syn:large:vision",
+        "--pure",
+        "--agent",
+        "build"
       ],
       "routing": {
         "cli_overrides": [
@@ -1559,7 +1577,7 @@
         "cli_label": "opencode",
         "actual_model": "Kimi-K2.6 via Synthetic (`syn:large:vision`, vision)",
         "option_description": "Kimi-K2.6 via Synthetic / OpenCode (vision)",
-        "reference_cli": "opencode run --format json -m synthetic/syn:large:vision",
+        "reference_cli": "opencode run --format json -m synthetic/syn:large:vision --pure --agent build",
         "reference_description": "Kimi-K2.6 vision tasks",
         "readme_section": "Synthetic",
         "readme_model": "`syn:large:vision`",
@@ -1587,7 +1605,10 @@
         "--format",
         "json",
         "-m",
-        "synthetic/syn:small:vision"
+        "synthetic/syn:small:vision",
+        "--pure",
+        "--agent",
+        "build"
       ],
       "routing": {
         "cli_overrides": [
@@ -1602,7 +1623,7 @@
         "cli_label": "opencode",
         "actual_model": "Qwen3.6-27B via Synthetic (`syn:small:vision`, vision)",
         "option_description": "Qwen3.6-27B via Synthetic / OpenCode (vision)",
-        "reference_cli": "opencode run --format json -m synthetic/syn:small:vision",
+        "reference_cli": "opencode run --format json -m synthetic/syn:small:vision --pure --agent build",
         "reference_description": "Qwen3.6-27B vision tasks",
         "readme_section": "Synthetic",
         "readme_model": "`syn:small:vision`",
@@ -1630,7 +1651,10 @@
         "--format",
         "json",
         "-m",
-        "zai/glm-4.7"
+        "zai/glm-4.7",
+        "--pure",
+        "--agent",
+        "build"
       ],
       "routing": {
         "cli_overrides": [
@@ -1645,7 +1669,7 @@
         "cli_label": "opencode",
         "actual_model": "GLM-4.7 via OpenCode (recommended; JSON output)",
         "option_description": "OpenCode runner with Z.AI GLM-4.7",
-        "reference_cli": "opencode run --format json -m zai/glm-4.7",
+        "reference_cli": "opencode run --format json -m zai/glm-4.7 --pure --agent build",
         "reference_description": "Recommended OpenCode JSON runner",
         "readme_section": "Z.AI / OpenCode",
         "readme_model": "glm-4.7",
