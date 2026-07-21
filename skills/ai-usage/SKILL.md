@@ -32,6 +32,9 @@ npx cclimits --oneline
 # Compact one-liner (7d window)
 npx cclimits --oneline 7d
 
+# One-liner with reset countdowns (alias: --timeremaining)
+npx cclimits --oneline both --resets
+
 # Check specific tools
 npx cclimits --claude
 npx cclimits --codex
@@ -109,6 +112,12 @@ Gemini models are grouped by quota tier (models in same tier share quota):
 
 ```
 Claude: 4.0% (5h) ✅ | Codex: 0% (5h) ✅ | Z.AI: 1% ✅ | Gemini: ( 3-Flash 7% ✅ | Flash 1% ✅ | Pro 10% ✅ )
+```
+
+With `--resets` (or `--timeremaining`), each provider gains a `↻` reset countdown (`5h-reset/7d-reset` for `both`):
+
+```
+Claude: 4.0%/10.0% ✅ ↻2h15m/3d17h | Codex: 0%/2% ✅ ↻1h05m/6d23h | Z.AI: 1% (5h) ✅ ↻3h02m | Antigravity: 3% (20 models) ✅ ↻10m
 ```
 
 ### Detailed Output (default)
