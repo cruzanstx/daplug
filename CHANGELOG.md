@@ -2,6 +2,11 @@
 
 All notable changes to daplug are documented here.
 
+## [0.35.2] - 2026-07-21
+
+### Changed
+- **docs(ai-usage):** document the new cclimits 1.4.0 `--resets` flag (alias `--timeremaining`) — appends `↻` reset countdowns per provider in `--oneline` output, with example.
+
 ## [0.35.1] - 2026-07-17
 
 ### Fixed
