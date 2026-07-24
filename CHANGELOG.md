@@ -2,6 +2,11 @@
 
 All notable changes to daplug are documented here.
 
+## [0.35.3] - 2026-07-24
+
+### Changed
+- **docs(models):** `cc-opus` and `cc-sonnet` docs now reflect that Claude Code's `opus`/`sonnet` aliases resolve to Claude Opus 5 and Claude Sonnet 5 (verified via live `modelUsage`). No executor change needed — daplug passes the alias through. README Model Tiers table now shows the alias resolution.
+
 ## [0.35.2] - 2026-07-21
 
 ### Changed
