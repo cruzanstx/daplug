@@ -652,8 +652,8 @@ These tables are generated from `scripts/models.json`.
 | Shorthand | Model | Best For |
 |-----------|-------|----------|
 | `claude` | claude | Complex reasoning in current Claude Code context |
-| `cc-sonnet` | sonnet | Claude Code CLI Sonnet runs |
-| `cc-opus` | opus | Claude Code CLI Opus runs |
+| `cc-sonnet` | sonnet (Sonnet 5 alias) | Claude Code CLI Sonnet runs |
+| `cc-opus` | opus (Opus 5 alias) | Claude Code CLI Opus runs |
 | `fable` | fable | Hardest reasoning tasks via Claude Code CLI (Fable 5, above Opus tier) |
 
 #### OpenAI

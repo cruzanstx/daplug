@@ -147,8 +147,8 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | Shorthand | CLI | Actual Model |
 |-----------|-----|--------------|
 | `claude` | subagent | Claude Code Task subagent (configured in Claude Code) |
-| `cc-sonnet` | claude | sonnet (Claude Sonnet 4.6 alias) |
-| `cc-opus` | claude | opus (Claude Opus 4.6 alias) |
+| `cc-sonnet` | claude | sonnet (Claude Sonnet 5 alias) |
+| `cc-opus` | claude | opus (Claude Opus 5 alias) |
 | `fable` | claude | fable (Claude Fable 5 alias) |
 | `codex` | codex | gpt-5.6-terra |
 | `codex-spark` | codex | gpt-5.3-codex-spark (low latency) |
