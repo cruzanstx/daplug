@@ -66,6 +66,11 @@ SYNTHETIC_MODELS = {
     "syn-kimi": ("synthetic:syn:large:vision", "synthetic/syn:large:vision"),
     "syn-kimi3": ("synthetic:hf:moonshotai/Kimi-K3", "synthetic/hf:moonshotai/Kimi-K3"),
     "syn-qwen": ("synthetic:syn:small:vision", "synthetic/syn:small:vision"),
+    "syn-minimax": ("synthetic:hf:MiniMaxAI/MiniMax-M3", "synthetic/hf:MiniMaxAI/MiniMax-M3"),
+    "syn-nemotron": (
+        "synthetic:hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4",
+        "synthetic/hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4",
+    ),
 }
 
 
@@ -386,6 +391,8 @@ EXPECTED_MODEL_KEYS = [
     "syn-kimi",
     "syn-kimi3",
     "syn-qwen",
+    "syn-minimax",
+    "syn-nemotron",
     "opencode",
     "local",
     "qwen",

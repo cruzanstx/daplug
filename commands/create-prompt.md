@@ -507,6 +507,8 @@ All available models for /daplug:run-prompt --model:
 - `syn-kimi` - Kimi-K2.7-Code via Synthetic / OpenCode (vision)
 - `syn-kimi3` - Kimi-K3 via Synthetic / OpenCode (vision, 512k context)
 - `syn-qwen` - Qwen3.6-27B via Synthetic / OpenCode (vision)
+- `syn-minimax` - MiniMax-M3 via Synthetic / OpenCode (vision, 256k context)
+- `syn-nemotron` - Nemotron-3-Super-120B via Synthetic / OpenCode (text, 256k context)
 
 **Local Models:** (opencode + LMStudio; no hosted quota)
 - `local` - Local qwen3.6-35b-a3b via opencode + LMStudio
@@ -659,17 +661,19 @@ If user chooses "Run prompt now", run `npx cclimits --json 2>/dev/null`, summari
   37. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.7-Code vision
   38. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
   39. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
+  40. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
+  41. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
 
   **Local:** {usage status}
-  40. local - local qwen3.6-35b-a3b, no quota
-  41. qwen - local qwen3.6-35b-a3b, no quota
-  42. devstral - local Devstral, no quota
-  43. glm-local - local GLM-4.7 Flash, no quota
-  44. qwen-small - local qwen3-4b, no quota
-  45. qwen36 - local qwen3.6-35b-a3b, no quota
-  46. qwen36-27b - local qwen3.6-27b, no quota
+  42. local - local qwen3.6-35b-a3b, no quota
+  43. qwen - local qwen3.6-35b-a3b, no quota
+  44. devstral - local Devstral, no quota
+  45. glm-local - local GLM-4.7 Flash, no quota
+  46. qwen-small - local qwen3-4b, no quota
+  47. qwen36 - local qwen3.6-35b-a3b, no quota
+  48. qwen36-27b - local qwen3.6-27b, no quota
 
-  Choose (1-46), or type model with flags (e.g., 'codex --worktree --loop'): _
+  Choose (1-48), or type model with flags (e.g., 'codex --worktree --loop'): _
 <!-- END GENERATED: create-prompt-selection-menu -->
 
 After selection:
@@ -762,17 +766,19 @@ If running now, run `npx cclimits --json 2>/dev/null`, summarize current quota s
   37. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.7-Code vision
   38. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
   39. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
+  40. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
+  41. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
 
   **Local:** {usage status}
-  40. local - local qwen3.6-35b-a3b, no quota
-  41. qwen - local qwen3.6-35b-a3b, no quota
-  42. devstral - local Devstral, no quota
-  43. glm-local - local GLM-4.7 Flash, no quota
-  44. qwen-small - local qwen3-4b, no quota
-  45. qwen36 - local qwen3.6-35b-a3b, no quota
-  46. qwen36-27b - local qwen3.6-27b, no quota
+  42. local - local qwen3.6-35b-a3b, no quota
+  43. qwen - local qwen3.6-35b-a3b, no quota
+  44. devstral - local Devstral, no quota
+  45. glm-local - local GLM-4.7 Flash, no quota
+  46. qwen-small - local qwen3-4b, no quota
+  47. qwen36 - local qwen3.6-35b-a3b, no quota
+  48. qwen36-27b - local qwen3.6-27b, no quota
 
-  Choose (1-46), or type model with flags (e.g., 'codex --worktree --loop'): _
+  Choose (1-48), or type model with flags (e.g., 'codex --worktree --loop'): _
 <!-- END GENERATED: create-prompt-parallel-selection-menu -->
 
 After selection:
@@ -866,17 +872,19 @@ If running now, run `npx cclimits --json 2>/dev/null`, summarize current quota s
   37. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.7-Code vision
   38. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
   39. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
+  40. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
+  41. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
 
   **Local:** {usage status}
-  40. local - local qwen3.6-35b-a3b, no quota
-  41. qwen - local qwen3.6-35b-a3b, no quota
-  42. devstral - local Devstral, no quota
-  43. glm-local - local GLM-4.7 Flash, no quota
-  44. qwen-small - local qwen3-4b, no quota
-  45. qwen36 - local qwen3.6-35b-a3b, no quota
-  46. qwen36-27b - local qwen3.6-27b, no quota
+  42. local - local qwen3.6-35b-a3b, no quota
+  43. qwen - local qwen3.6-35b-a3b, no quota
+  44. devstral - local Devstral, no quota
+  45. glm-local - local GLM-4.7 Flash, no quota
+  46. qwen-small - local qwen3-4b, no quota
+  47. qwen36 - local qwen3.6-35b-a3b, no quota
+  48. qwen36-27b - local qwen3.6-27b, no quota
 
-  Choose (1-46), or type model with flags (e.g., 'codex --worktree --loop'): _
+  Choose (1-48), or type model with flags (e.g., 'codex --worktree --loop'): _
 <!-- END GENERATED: create-prompt-sequential-selection-menu -->
 
 After selection:

@@ -157,6 +157,20 @@ _SHORTHAND: dict[str, _ModelRequest] = {
         force_cli="opencode",
         strict_cli=True,
     ),
+    "syn-minimax": _ModelRequest(
+        "syn-minimax",
+        family="synthetic",
+        model_id="synthetic:hf:MiniMaxAI/MiniMax-M3",
+        force_cli="opencode",
+        strict_cli=True,
+    ),
+    "syn-nemotron": _ModelRequest(
+        "syn-nemotron",
+        family="synthetic",
+        model_id="synthetic:hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4",
+        force_cli="opencode",
+        strict_cli=True,
+    ),
     "opencode": _ModelRequest(
         "opencode",
         family="zai",

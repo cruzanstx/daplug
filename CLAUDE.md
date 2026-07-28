@@ -184,6 +184,8 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `syn-kimi` | opencode | Kimi-K2.7-Code via Synthetic (`syn:large:vision`, vision) |
 | `syn-kimi3` | opencode | Kimi-K3 via Synthetic (`hf:moonshotai/Kimi-K3`, vision, 512k context) |
 | `syn-qwen` | opencode | Qwen3.6-27B via Synthetic (`syn:small:vision`, vision) |
+| `syn-minimax` | opencode | MiniMax-M3 via Synthetic (`hf:MiniMaxAI/MiniMax-M3`, vision, 256k context) |
+| `syn-nemotron` | opencode | Nemotron-3-Super-120B via Synthetic (`hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4`, 256k context) |
 | `opencode` | opencode | GLM-4.7 via OpenCode (recommended; JSON output) |
 | `local` | opencode | qwen3.6-35b-a3b via LMStudio (opencode default, --cli codex for legacy) |
 | `qwen` | opencode | qwen3.6-35b-a3b via LMStudio (opencode default, --cli codex for legacy) |

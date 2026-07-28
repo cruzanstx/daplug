@@ -712,6 +712,8 @@ Synthetic shorthands route through OpenCode's `synthetic` provider and require `
 | `syn-kimi` | `syn:large:vision` | Kimi-K2.7-Code vision tasks |
 | `syn-kimi3` | `hf:moonshotai/Kimi-K3` | Kimi-K3 flagship, vision, 512k context |
 | `syn-qwen` | `syn:small:vision` | Qwen3.6-27B vision tasks |
+| `syn-minimax` | `hf:MiniMaxAI/MiniMax-M3` | MiniMax-M3 vision, cheap all-rounder |
+| `syn-nemotron` | `hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4` | Nemotron-3-Super-120B, cheapest large text |
 
 #### Local
 

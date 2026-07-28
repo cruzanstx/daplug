@@ -1680,6 +1680,98 @@
       }
     },
     {
+      "name": "syn-minimax",
+      "display": "syn-minimax (MiniMax-M3 via Synthetic, vision)",
+      "model_id": "synthetic:hf:MiniMaxAI/MiniMax-M3",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "synthetic/hf:MiniMaxAI/MiniMax-M3",
+        "--pure",
+        "--agent",
+        "build"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": true
+      },
+      "docs": {
+        "family": "Synthetic",
+        "cli_label": "opencode",
+        "actual_model": "MiniMax-M3 via Synthetic (`hf:MiniMaxAI/MiniMax-M3`, vision, 256k context)",
+        "option_description": "MiniMax-M3 via Synthetic / OpenCode (vision, 256k context)",
+        "reference_cli": "opencode run --format json -m synthetic/hf:MiniMaxAI/MiniMax-M3 --pure --agent build",
+        "reference_description": "MiniMax-M3 vision, cheap all-rounder",
+        "readme_section": "Synthetic",
+        "readme_model": "`hf:MiniMaxAI/MiniMax-M3`",
+        "best_for": "MiniMax-M3 vision, cheap all-rounder",
+        "prompt_description": "MiniMax-M3 via Synthetic / OpenCode (vision, 256k context)",
+        "menu_note": "Synthetic MiniMax-M3 vision",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "syn-nemotron",
+      "display": "syn-nemotron (Nemotron-3-Super-120B via Synthetic)",
+      "model_id": "synthetic:hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "synthetic/hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4",
+        "--pure",
+        "--agent",
+        "build"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": true
+      },
+      "docs": {
+        "family": "Synthetic",
+        "cli_label": "opencode",
+        "actual_model": "Nemotron-3-Super-120B via Synthetic (`hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4`, 256k context)",
+        "option_description": "Nemotron-3-Super-120B via Synthetic / OpenCode (text, 256k context)",
+        "reference_cli": "opencode run --format json -m synthetic/hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 --pure --agent build",
+        "reference_description": "Nemotron-3-Super-120B, cheapest large text",
+        "readme_section": "Synthetic",
+        "readme_model": "`hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4`",
+        "best_for": "Nemotron-3-Super-120B, cheapest large text",
+        "prompt_description": "Nemotron-3-Super-120B via Synthetic / OpenCode (text, 256k context)",
+        "menu_note": "Synthetic Nemotron-3-Super",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
       "name": "opencode",
       "display": "opencode (GLM-4.7 via OpenCode)",
       "model_id": "zai:glm-4.7",

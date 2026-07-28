@@ -70,7 +70,7 @@ python3 "$EXECUTOR" [prompts...] [options]
 
 **Options:**
 <!-- BEGIN GENERATED: skill-model-options -->
-- `--model, -m`: claude, cc-sonnet, cc-opus, fable, codex, codex-spark, codex-high, codex-xhigh, sol, terra, luna, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, glm52, kimi, synthetic, syn-flash, syn-kimi, syn-kimi3, syn-qwen, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b
+- `--model, -m`: claude, cc-sonnet, cc-opus, fable, codex, codex-spark, codex-high, codex-xhigh, sol, terra, luna, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, glm52, kimi, synthetic, syn-flash, syn-kimi, syn-kimi3, syn-qwen, syn-minimax, syn-nemotron, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b
   - `glm52`: GLM-5.2 via Z.AI / OpenCode (1M context)
   - `synthetic`: GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, requires `SYNTHETIC_API_KEY`)
 <!-- END GENERATED: skill-model-options -->
@@ -289,6 +289,8 @@ python3 "$EXECUTOR" --loop-status
 | syn-kimi | opencode run --format json -m synthetic/syn:large:vision --pure --agent build | Kimi-K2.7-Code vision tasks |
 | syn-kimi3 | opencode run --format json -m synthetic/hf:moonshotai/Kimi-K3 --pure --agent build | Kimi-K3 flagship, vision, 512k context |
 | syn-qwen | opencode run --format json -m synthetic/syn:small:vision --pure --agent build | Qwen3.6-27B vision tasks |
+| syn-minimax | opencode run --format json -m synthetic/hf:MiniMaxAI/MiniMax-M3 --pure --agent build | MiniMax-M3 vision, cheap all-rounder |
+| syn-nemotron | opencode run --format json -m synthetic/hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 --pure --agent build | Nemotron-3-Super-120B, cheapest large text |
 | opencode | opencode run --format json -m zai/glm-4.7 --pure --agent build | Recommended OpenCode JSON runner |
 | local | opencode run --format json -m lmstudio/qwen3.6-35b-a3b --pure --agent build | Local qwen-coder model with no quota |
 | qwen | opencode run --format json -m lmstudio/qwen3.6-35b-a3b --pure --agent build | Local qwen-coder model with no quota |

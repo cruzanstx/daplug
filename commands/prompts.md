@@ -91,6 +91,8 @@ Use AskUserQuestion tool with options:
 - `syn-kimi` - Kimi-K2.7-Code via Synthetic / OpenCode (vision)
 - `syn-kimi3` - Kimi-K3 via Synthetic / OpenCode (vision, 512k context)
 - `syn-qwen` - Qwen3.6-27B via Synthetic / OpenCode (vision)
+- `syn-minimax` - MiniMax-M3 via Synthetic / OpenCode (vision, 256k context)
+- `syn-nemotron` - Nemotron-3-Super-120B via Synthetic / OpenCode (text, 256k context)
 - `opencode` - OpenCode runner with Z.AI GLM-4.7
 - `local` - Local qwen3.6-35b-a3b via opencode + LMStudio
 - `qwen` - Qwen via opencode + LMStudio
