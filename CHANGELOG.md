@@ -2,6 +2,12 @@
 
 All notable changes to daplug are documented here.
 
+## [0.37.0] - 2026-07-27
+
+### Added
+- **`syn-minimax` model shorthand** — MiniMax-M3 via Synthetic (`hf:MiniMaxAI/MiniMax-M3`): vision, 256k context, tools + reasoning, cheap all-rounder ($0.60/M in, $1.20/M out).
+- **`syn-nemotron` model shorthand** — Nemotron-3-Super-120B via Synthetic (`hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4`): text-only, 256k context, cheapest large model on the plan ($0.30/M in, $1/M out). Both use direct `hf:` model IDs and route through OpenCode.
+
 ## [0.36.0] - 2026-07-27
 
 ### Added
