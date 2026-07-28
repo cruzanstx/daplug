@@ -2,6 +2,14 @@
 
 All notable changes to daplug are documented here.
 
+## [0.36.0] - 2026-07-27
+
+### Added
+- **`syn-kimi3` model shorthand** — Kimi K3 via Synthetic (`hf:moonshotai/Kimi-K3`): vision, 512k context, tools + reasoning. Pinned to the direct `hf:` model ID since Synthetic exposes K3 outside the `syn:` tier aliases. Routed through OpenCode like the other Synthetic shorthands.
+
+### Changed
+- **`syn-kimi` docs corrected to Kimi-K2.7-Code.** Synthetic silently remapped the `syn:large:vision` tier alias from Kimi-K2.6 (removed from their catalog) to Kimi-K2.7-Code; the shorthand's behavior follows the alias, docs now match.
+
 ## [0.35.3] - 2026-07-24
 
 ### Changed
