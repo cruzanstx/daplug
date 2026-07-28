@@ -88,7 +88,8 @@ Use AskUserQuestion tool with options:
 - `kimi` - Kimi K2.5 via OpenCode
 - `synthetic` - GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, 512k context)
 - `syn-flash` - GLM-4.7-Flash via Synthetic / OpenCode
-- `syn-kimi` - Kimi-K2.6 via Synthetic / OpenCode (vision)
+- `syn-kimi` - Kimi-K2.7-Code via Synthetic / OpenCode (vision)
+- `syn-kimi3` - Kimi-K3 via Synthetic / OpenCode (vision, 512k context)
 - `syn-qwen` - Qwen3.6-27B via Synthetic / OpenCode (vision)
 - `opencode` - OpenCode runner with Z.AI GLM-4.7
 - `local` - Local qwen3.6-35b-a3b via opencode + LMStudio

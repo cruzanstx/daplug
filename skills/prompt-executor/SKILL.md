@@ -70,7 +70,7 @@ python3 "$EXECUTOR" [prompts...] [options]
 
 **Options:**
 <!-- BEGIN GENERATED: skill-model-options -->
-- `--model, -m`: claude, cc-sonnet, cc-opus, fable, codex, codex-spark, codex-high, codex-xhigh, sol, terra, luna, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, glm52, kimi, synthetic, syn-flash, syn-kimi, syn-qwen, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b
+- `--model, -m`: claude, cc-sonnet, cc-opus, fable, codex, codex-spark, codex-high, codex-xhigh, sol, terra, luna, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, glm52, kimi, synthetic, syn-flash, syn-kimi, syn-kimi3, syn-qwen, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b
   - `glm52`: GLM-5.2 via Z.AI / OpenCode (1M context)
   - `synthetic`: GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, requires `SYNTHETIC_API_KEY`)
 <!-- END GENERATED: skill-model-options -->
@@ -286,7 +286,8 @@ python3 "$EXECUTOR" --loop-status
 | kimi | opencode run --format json -m opencode/kimi-k2.5 --pure --agent build | Kimi K2.5 via OpenCode |
 | synthetic | opencode run --format json -m synthetic/syn:large:text --pure --agent build | GLM-5.2 default, 512k context |
 | syn-flash | opencode run --format json -m synthetic/syn:small:text --pure --agent build | Fast GLM-4.7-Flash fallback |
-| syn-kimi | opencode run --format json -m synthetic/syn:large:vision --pure --agent build | Kimi-K2.6 vision tasks |
+| syn-kimi | opencode run --format json -m synthetic/syn:large:vision --pure --agent build | Kimi-K2.7-Code vision tasks |
+| syn-kimi3 | opencode run --format json -m synthetic/hf:moonshotai/Kimi-K3 --pure --agent build | Kimi-K3 flagship, vision, 512k context |
 | syn-qwen | opencode run --format json -m synthetic/syn:small:vision --pure --agent build | Qwen3.6-27B vision tasks |
 | opencode | opencode run --format json -m zai/glm-4.7 --pure --agent build | Recommended OpenCode JSON runner |
 | local | opencode run --format json -m lmstudio/qwen3.6-35b-a3b --pure --agent build | Local qwen-coder model with no quota |

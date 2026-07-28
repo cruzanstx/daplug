@@ -1543,7 +1543,7 @@
     },
     {
       "name": "syn-kimi",
-      "display": "syn-kimi (Kimi-K2.6 via Synthetic, vision)",
+      "display": "syn-kimi (Kimi-K2.7-Code via Synthetic, vision)",
       "model_id": "synthetic:syn:large:vision",
       "default_cli": "opencode",
       "supports_codex_reasoning": false,
@@ -1575,15 +1575,61 @@
       "docs": {
         "family": "Synthetic",
         "cli_label": "opencode",
-        "actual_model": "Kimi-K2.6 via Synthetic (`syn:large:vision`, vision)",
-        "option_description": "Kimi-K2.6 via Synthetic / OpenCode (vision)",
+        "actual_model": "Kimi-K2.7-Code via Synthetic (`syn:large:vision`, vision)",
+        "option_description": "Kimi-K2.7-Code via Synthetic / OpenCode (vision)",
         "reference_cli": "opencode run --format json -m synthetic/syn:large:vision --pure --agent build",
-        "reference_description": "Kimi-K2.6 vision tasks",
+        "reference_description": "Kimi-K2.7-Code vision tasks",
         "readme_section": "Synthetic",
         "readme_model": "`syn:large:vision`",
-        "best_for": "Kimi-K2.6 vision tasks",
-        "prompt_description": "Kimi-K2.6 via Synthetic / OpenCode (vision)",
-        "menu_note": "Synthetic Kimi-K2.6 vision",
+        "best_for": "Kimi-K2.7-Code vision tasks",
+        "prompt_description": "Kimi-K2.7-Code via Synthetic / OpenCode (vision)",
+        "menu_note": "Synthetic Kimi-K2.7-Code vision",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "syn-kimi3",
+      "display": "syn-kimi3 (Kimi-K3 via Synthetic, vision, 512k context)",
+      "model_id": "synthetic:hf:moonshotai/Kimi-K3",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "synthetic/hf:moonshotai/Kimi-K3",
+        "--pure",
+        "--agent",
+        "build"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": true
+      },
+      "docs": {
+        "family": "Synthetic",
+        "cli_label": "opencode",
+        "actual_model": "Kimi-K3 via Synthetic (`hf:moonshotai/Kimi-K3`, vision, 512k context)",
+        "option_description": "Kimi-K3 via Synthetic / OpenCode (vision, 512k context)",
+        "reference_cli": "opencode run --format json -m synthetic/hf:moonshotai/Kimi-K3 --pure --agent build",
+        "reference_description": "Kimi-K3 flagship, vision, 512k context",
+        "readme_section": "Synthetic",
+        "readme_model": "`hf:moonshotai/Kimi-K3`",
+        "best_for": "Kimi-K3 flagship, vision, 512k context",
+        "prompt_description": "Kimi-K3 via Synthetic / OpenCode (vision, 512k context)",
+        "menu_note": "Synthetic Kimi-K3 vision",
         "include_in_prompt_guides": true
       }
     },

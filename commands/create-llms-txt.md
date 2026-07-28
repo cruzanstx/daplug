@@ -505,7 +505,8 @@ All available models for /daplug:run-prompt --model:
 **Synthetic Models:** (check request quota from `/v2/quotas`; requires `SYNTHETIC_API_KEY`)
 - `synthetic` - GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, 512k context)
 - `syn-flash` - GLM-4.7-Flash via Synthetic / OpenCode
-- `syn-kimi` - Kimi-K2.6 via Synthetic / OpenCode (vision)
+- `syn-kimi` - Kimi-K2.7-Code via Synthetic / OpenCode (vision)
+- `syn-kimi3` - Kimi-K3 via Synthetic / OpenCode (vision, 512k context)
 - `syn-qwen` - Qwen3.6-27B via Synthetic / OpenCode (vision)
 
 **Local Models:** (opencode + LMStudio; no hosted quota)
@@ -641,19 +642,20 @@ If user chooses #1:
   **Synthetic:** {usage status}
   35. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
   36. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
-  37. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.6 vision
-  38. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
+  37. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.7-Code vision
+  38. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
+  39. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
 
   **Local:** {usage status}
-  39. local - local qwen3.6-35b-a3b, no quota
-  40. qwen - local qwen3.6-35b-a3b, no quota
-  41. devstral - local Devstral, no quota
-  42. glm-local - local GLM-4.7 Flash, no quota
-  43. qwen-small - local qwen3-4b, no quota
-  44. qwen36 - local qwen3.6-35b-a3b, no quota
-  45. qwen36-27b - local qwen3.6-27b, no quota
+  40. local - local qwen3.6-35b-a3b, no quota
+  41. qwen - local qwen3.6-35b-a3b, no quota
+  42. devstral - local Devstral, no quota
+  43. glm-local - local GLM-4.7 Flash, no quota
+  44. qwen-small - local qwen3-4b, no quota
+  45. qwen36 - local qwen3.6-35b-a3b, no quota
+  46. qwen36-27b - local qwen3.6-27b, no quota
 
-  Choose (1-45), or type model with flags (e.g., 'codex --worktree --loop'): _
+  Choose (1-46), or type model with flags (e.g., 'codex --worktree --loop'): _
 <!-- END GENERATED: create-llms-selection-menu -->
 
   **Execute based on selection:**

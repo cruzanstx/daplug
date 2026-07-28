@@ -709,7 +709,8 @@ Synthetic shorthands route through OpenCode's `synthetic` provider and require `
 |-----------|-------|----------|
 | `synthetic` | `syn:large:text` | GLM-5.2 default, 512k context |
 | `syn-flash` | `syn:small:text` | Fast GLM-4.7-Flash fallback |
-| `syn-kimi` | `syn:large:vision` | Kimi-K2.6 vision tasks |
+| `syn-kimi` | `syn:large:vision` | Kimi-K2.7-Code vision tasks |
+| `syn-kimi3` | `hf:moonshotai/Kimi-K3` | Kimi-K3 flagship, vision, 512k context |
 | `syn-qwen` | `syn:small:vision` | Qwen3.6-27B vision tasks |
 
 #### Local

@@ -181,7 +181,8 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `kimi` | opencode | Kimi K2.5 via OpenCode |
 | `synthetic` | opencode | GLM-5.2 via Synthetic (`syn:large:text`, 512k context) |
 | `syn-flash` | opencode | GLM-4.7-Flash via Synthetic (`syn:small:text`) |
-| `syn-kimi` | opencode | Kimi-K2.6 via Synthetic (`syn:large:vision`, vision) |
+| `syn-kimi` | opencode | Kimi-K2.7-Code via Synthetic (`syn:large:vision`, vision) |
+| `syn-kimi3` | opencode | Kimi-K3 via Synthetic (`hf:moonshotai/Kimi-K3`, vision, 512k context) |
 | `syn-qwen` | opencode | Qwen3.6-27B via Synthetic (`syn:small:vision`, vision) |
 | `opencode` | opencode | GLM-4.7 via OpenCode (recommended; JSON output) |
 | `local` | opencode | qwen3.6-35b-a3b via LMStudio (opencode default, --cli codex for legacy) |
