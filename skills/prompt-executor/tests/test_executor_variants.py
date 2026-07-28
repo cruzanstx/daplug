@@ -64,6 +64,7 @@ SYNTHETIC_MODELS = {
     "synthetic": ("synthetic:syn:large:text", "synthetic/syn:large:text"),
     "syn-flash": ("synthetic:syn:small:text", "synthetic/syn:small:text"),
     "syn-kimi": ("synthetic:syn:large:vision", "synthetic/syn:large:vision"),
+    "syn-kimi3": ("synthetic:hf:moonshotai/Kimi-K3", "synthetic/hf:moonshotai/Kimi-K3"),
     "syn-qwen": ("synthetic:syn:small:vision", "synthetic/syn:small:vision"),
 }
 
@@ -97,11 +98,11 @@ def test_main_argparse_accepts_synthetic_shorthands(prompt_repo, monkeypatch, ca
     monkeypatch.setenv("SYNTHETIC_API_KEY", "test-key")
     repo_root, _logs_dir, _prompt_file = prompt_repo
 
-    for shorthand in SYNTHETIC_MODELS:
+    for shorthand, (_model_id, opencode_ref) in SYNTHETIC_MODELS.items():
         monkeypatch.setattr(sys, "argv", ["executor.py", "001", "--model", shorthand])
         executor.main()
         output = json.loads(capsys.readouterr().out)
-        assert output["prompts"][0]["cli_command"][5].startswith("synthetic/syn:")
+        assert output["prompts"][0]["cli_command"][5] == opencode_ref
 
 def test_variant_parsing_precedence_over_alias_defaults(no_router, tmp_path):
     info_default = executor.get_cli_info("codex-high", repo_root=tmp_path)
@@ -383,6 +384,7 @@ EXPECTED_MODEL_KEYS = [
     "synthetic",
     "syn-flash",
     "syn-kimi",
+    "syn-kimi3",
     "syn-qwen",
     "opencode",
     "local",

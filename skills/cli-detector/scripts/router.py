@@ -143,6 +143,13 @@ _SHORTHAND: dict[str, _ModelRequest] = {
         force_cli="opencode",
         strict_cli=True,
     ),
+    "syn-kimi3": _ModelRequest(
+        "syn-kimi3",
+        family="synthetic",
+        model_id="synthetic:hf:moonshotai/Kimi-K3",
+        force_cli="opencode",
+        strict_cli=True,
+    ),
     "syn-qwen": _ModelRequest(
         "syn-qwen",
         family="synthetic",
