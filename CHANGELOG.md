@@ -2,6 +2,14 @@
 
 All notable changes to daplug are documented here.
 
+## [0.38.0] - 2026-08-14
+
+### Added
+- **`glm53` model shorthand** — GLM-5.3 via Z.AI Coding Plan / OpenCode (`zai/glm-5.3`, 1M context): released 2026-08-14, same base as GLM-5.2 with heavier post-training and ~50% coding improvement. Explicit pin alongside the `glm5` latest alias.
+
+### Changed
+- **`glm5` repointed to GLM-5.3.** The latest-GLM alias now targets `zai:glm-5.3`; `glm52` remains the explicit GLM-5.2 pin. Note: GLM-5.3 is newer than the models.dev catalog, so it must be declared in the `zai` provider block of `~/.config/opencode/opencode.json` (documented in the long-context note).
+
 ## [0.37.0] - 2026-07-27
 
 ### Added
