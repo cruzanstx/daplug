@@ -655,15 +655,18 @@ class TestZAIModels:
         assert "--format" in cmd
         assert "json" in cmd
 
-    @pytest.mark.parametrize("shorthand", ["glm5", "glm52"])
-    def test_glm52_shorthands_route_to_opencode(self, full_cache, shorthand):
-        """glm5 and glm52 both target GLM-5.2 through OpenCode."""
+    @pytest.mark.parametrize(
+        ("shorthand", "raw_model"),
+        [("glm5", "glm-5.3"), ("glm52", "glm-5.2"), ("glm53", "glm-5.3")],
+    )
+    def test_glm5x_shorthands_route_to_opencode(self, full_cache, shorthand, raw_model):
+        """glm5/glm53 target GLM-5.3, glm52 pins GLM-5.2, all through OpenCode."""
         cli, model_id, cmd = router.resolve_model(shorthand)
         assert cli == "opencode"
-        assert model_id == "zai:glm-5.2"
+        assert model_id == f"zai:{raw_model}"
         assert cmd[0:4] == ["opencode", "run", "--format", "json"]
         idx_m = cmd.index("-m")
-        assert cmd[idx_m + 1] == "zai/glm-5.2"
+        assert cmd[idx_m + 1] == f"zai/{raw_model}"
 
 
 class TestLocalModels:

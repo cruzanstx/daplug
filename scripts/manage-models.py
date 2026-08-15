@@ -288,7 +288,7 @@ def comma_list(names: list[str]) -> str:
 def render_skill_model_options(registry: dict) -> str:
     names = comma_list(model_names(registry))
     highlights = [
-        "  - `glm52`: GLM-5.2 via Z.AI / OpenCode (1M context)",
+        "  - `glm53`: GLM-5.3 via Z.AI / OpenCode (1M context)",
         "  - `synthetic`: GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, requires `SYNTHETIC_API_KEY`)",
     ]
     return "\n".join([f"- `--model, -m`: {names}", *highlights])
@@ -429,7 +429,7 @@ def render_claude_model_notes() -> str:
     return "\n".join([
         "Google shorthands prefer Antigravity CLI (`agy`) when it is installed and healthy. The legacy `gemini` CLI remains supported as fallback and for explicit `--cli gemini` runs.",
         "",
-        "**GLM-5.2 long-context note:** Z.AI Coding Plan uses endpoint `https://api.z.ai/api/coding/paas/v4` with raw model ID `glm-5.2` and a 1M context window. OpenCode model refs use `zai/glm-5.2`; Claude Code env vars use `glm-5.2[1m]` for `ANTHROPIC_DEFAULT_SONNET_MODEL` and `ANTHROPIC_DEFAULT_OPUS_MODEL`, plus `CLAUDE_CODE_AUTO_COMPACT_WINDOW=1000000`. daplug does not set context-window flags for OpenCode; the Coding Plan endpoint activates the 1M window.",
+        "**GLM 5.x long-context note:** Z.AI Coding Plan uses endpoint `https://api.z.ai/api/coding/paas/v4` with raw model IDs `glm-5.3` (latest; `glm5`/`glm53`) and `glm-5.2` (`glm52` pin), each with a 1M context window. OpenCode model refs use `zai/glm-5.3` / `zai/glm-5.2` — GLM-5.3 is newer than the models.dev catalog, so it must be declared in the `zai` provider block of `~/.config/opencode/opencode.json`. Claude Code env vars use `glm-5.3[1m]` for `ANTHROPIC_DEFAULT_SONNET_MODEL` and `ANTHROPIC_DEFAULT_OPUS_MODEL`, plus `CLAUDE_CODE_AUTO_COMPACT_WINDOW=1000000`. daplug does not set context-window flags for OpenCode; the Coding Plan endpoint activates the 1M window.",
         "",
         '**Synthetic note:** Synthetic shorthands use OpenCode provider refs such as `synthetic/syn:large:text` and require `SYNTHETIC_API_KEY`. OpenAI-compatible base URL: `https://api.synthetic.new/openai/v1`; Anthropic-compatible base URL: `https://api.synthetic.new/anthropic`; quota endpoint: `GET https://api.synthetic.new/v2/quotas` returns `subscription.requests`, `subscription.limit`, and `subscription.renewsAt` without counting against quota. Minimal `opencode.json` provider example: `{"provider":{"synthetic":{"npm":"@ai-sdk/openai-compatible","options":{"baseURL":"https://api.synthetic.new/openai/v1","apiKey":"{env:SYNTHETIC_API_KEY}"},"models":{"syn:large:text":{"name":"Synthetic GLM-5.2"}}}}}`.',
         "",

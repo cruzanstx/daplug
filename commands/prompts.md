@@ -83,8 +83,9 @@ Use AskUserQuestion tool with options:
 - `gemini3pro` - Gemini 3 Pro Preview (explicit shorthand)
 - `gemini31pro` - Gemini 3.1 Pro Preview (if your account has access)
 - `zai` - Z.AI GLM-4.7 via Codex CLI
-- `glm5` - Z.AI GLM-5.2 via OpenCode (latest GLM 5.x, 1M context)
+- `glm5` - Z.AI GLM-5.3 via OpenCode (latest GLM 5.x, 1M context)
 - `glm52` - Z.AI GLM-5.2 via OpenCode (explicit pin, 1M context)
+- `glm53` - Z.AI GLM-5.3 via OpenCode (explicit pin, 1M context)
 - `kimi` - Kimi K2.5 via OpenCode
 - `synthetic` - GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, 512k context)
 - `syn-flash` - GLM-4.7-Flash via Synthetic / OpenCode

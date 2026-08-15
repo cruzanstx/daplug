@@ -1312,8 +1312,8 @@
     },
     {
       "name": "glm5",
-      "display": "glm5 (GLM-5.2 via OpenCode \u2014 latest GLM 5.x, 1M context)",
-      "model_id": "zai:glm-5.2",
+      "display": "glm5 (GLM-5.3 via OpenCode — latest GLM 5.x, 1M context)",
+      "model_id": "zai:glm-5.3",
       "default_cli": "opencode",
       "supports_codex_reasoning": false,
       "codex_profile": "glm5",
@@ -1328,7 +1328,7 @@
         "--format",
         "json",
         "-m",
-        "zai/glm-5.2",
+        "zai/glm-5.3",
         "--pure",
         "--agent",
         "build"
@@ -1345,21 +1345,21 @@
       "docs": {
         "family": "Z.AI / OpenCode",
         "cli_label": "opencode",
-        "actual_model": "GLM-5.2 via OpenCode (latest GLM 5.x, 1M context)",
-        "option_description": "Z.AI GLM-5.2 via OpenCode (latest GLM 5.x, 1M context)",
-        "reference_cli": "opencode run --format json -m zai/glm-5.2 --pure --agent build",
+        "actual_model": "GLM-5.3 via OpenCode (latest GLM 5.x, 1M context)",
+        "option_description": "Z.AI GLM-5.3 via OpenCode (latest GLM 5.x, 1M context)",
+        "reference_cli": "opencode run --format json -m zai/glm-5.3 --pure --agent build",
         "reference_description": "Latest GLM 5.x tasks via OpenCode",
         "readme_section": "Z.AI / OpenCode",
-        "readme_model": "glm-5.2",
+        "readme_model": "glm-5.3",
         "best_for": "Latest GLM 5.x tasks via OpenCode",
-        "prompt_description": "Z.AI GLM-5.2 via OpenCode (latest GLM 5.x, 1M context)",
-        "menu_note": "Z.AI GLM-5.2 latest alias",
+        "prompt_description": "Z.AI GLM-5.3 via OpenCode (latest GLM 5.x, 1M context)",
+        "menu_note": "Z.AI GLM-5.3 latest alias",
         "include_in_prompt_guides": true
       }
     },
     {
       "name": "glm52",
-      "display": "glm52 (GLM-5.2 via OpenCode \u2014 explicit pin, 1M context)",
+      "display": "glm52 (GLM-5.2 via OpenCode — explicit pin, 1M context)",
       "model_id": "zai:glm-5.2",
       "default_cli": "opencode",
       "supports_codex_reasoning": false,
@@ -1400,6 +1400,52 @@
         "best_for": "Explicit GLM-5.2 pin via OpenCode",
         "prompt_description": "Z.AI GLM-5.2 via OpenCode (explicit pin, 1M context)",
         "menu_note": "Z.AI GLM-5.2 explicit pin",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "glm53",
+      "display": "glm53 (GLM-5.3 via OpenCode — explicit pin, 1M context)",
+      "model_id": "zai:glm-5.3",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "zai/glm-5.3",
+        "--pure",
+        "--agent",
+        "build"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Z.AI / OpenCode",
+        "cli_label": "opencode",
+        "actual_model": "GLM-5.3 via OpenCode (explicit pin, 1M context)",
+        "option_description": "Z.AI GLM-5.3 via OpenCode (explicit pin, 1M context)",
+        "reference_cli": "opencode run --format json -m zai/glm-5.3 --pure --agent build",
+        "reference_description": "Explicit GLM-5.3 pin via OpenCode",
+        "readme_section": "Z.AI / OpenCode",
+        "readme_model": "glm-5.3",
+        "best_for": "Explicit GLM-5.3 pin via OpenCode",
+        "prompt_description": "Z.AI GLM-5.3 via OpenCode (explicit pin, 1M context)",
+        "menu_note": "Z.AI GLM-5.3 explicit pin",
         "include_in_prompt_guides": true
       }
     },

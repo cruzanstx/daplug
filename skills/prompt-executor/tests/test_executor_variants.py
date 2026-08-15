@@ -385,6 +385,7 @@ EXPECTED_MODEL_KEYS = [
     "zai",
     "glm5",
     "glm52",
+    "glm53",
     "kimi",
     "synthetic",
     "syn-flash",
@@ -463,5 +464,7 @@ def test_model_registry_loads_when_cwd_is_not_repo_root(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     _registry, by_name = executor._load_model_registry()
     assert list(by_name) == EXPECTED_MODEL_KEYS
+    assert by_name["glm5"]["model_id"] == "zai:glm-5.3"
     assert by_name["glm52"]["model_id"] == "zai:glm-5.2"
+    assert by_name["glm53"]["model_id"] == "zai:glm-5.3"
 

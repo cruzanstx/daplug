@@ -176,8 +176,9 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `gemini3pro` | agy/gemini | gemini-3-pro-preview |
 | `gemini31pro` | agy/gemini | gemini-3.1-pro-preview (if available) |
 | `zai` | codex | GLM-4.7 via Z.AI (may have issues) |
-| `glm5` | opencode | GLM-5.2 via OpenCode (latest GLM 5.x, 1M context) |
+| `glm5` | opencode | GLM-5.3 via OpenCode (latest GLM 5.x, 1M context) |
 | `glm52` | opencode | GLM-5.2 via OpenCode (explicit pin, 1M context) |
+| `glm53` | opencode | GLM-5.3 via OpenCode (explicit pin, 1M context) |
 | `kimi` | opencode | Kimi K2.5 via OpenCode |
 | `synthetic` | opencode | GLM-5.2 via Synthetic (`syn:large:text`, 512k context) |
 | `syn-flash` | opencode | GLM-4.7-Flash via Synthetic (`syn:small:text`) |
@@ -197,7 +198,7 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 
 Google shorthands prefer Antigravity CLI (`agy`) when it is installed and healthy. The legacy `gemini` CLI remains supported as fallback and for explicit `--cli gemini` runs.
 
-**GLM-5.2 long-context note:** Z.AI Coding Plan uses endpoint `https://api.z.ai/api/coding/paas/v4` with raw model ID `glm-5.2` and a 1M context window. OpenCode model refs use `zai/glm-5.2`; Claude Code env vars use `glm-5.2[1m]` for `ANTHROPIC_DEFAULT_SONNET_MODEL` and `ANTHROPIC_DEFAULT_OPUS_MODEL`, plus `CLAUDE_CODE_AUTO_COMPACT_WINDOW=1000000`. daplug does not set context-window flags for OpenCode; the Coding Plan endpoint activates the 1M window.
+**GLM 5.x long-context note:** Z.AI Coding Plan uses endpoint `https://api.z.ai/api/coding/paas/v4` with raw model IDs `glm-5.3` (latest; `glm5`/`glm53`) and `glm-5.2` (`glm52` pin), each with a 1M context window. OpenCode model refs use `zai/glm-5.3` / `zai/glm-5.2` — GLM-5.3 is newer than the models.dev catalog, so it must be declared in the `zai` provider block of `~/.config/opencode/opencode.json`. Claude Code env vars use `glm-5.3[1m]` for `ANTHROPIC_DEFAULT_SONNET_MODEL` and `ANTHROPIC_DEFAULT_OPUS_MODEL`, plus `CLAUDE_CODE_AUTO_COMPACT_WINDOW=1000000`. daplug does not set context-window flags for OpenCode; the Coding Plan endpoint activates the 1M window.
 
 **Synthetic note:** Synthetic shorthands use OpenCode provider refs such as `synthetic/syn:large:text` and require `SYNTHETIC_API_KEY`. OpenAI-compatible base URL: `https://api.synthetic.new/openai/v1`; Anthropic-compatible base URL: `https://api.synthetic.new/anthropic`; quota endpoint: `GET https://api.synthetic.new/v2/quotas` returns `subscription.requests`, `subscription.limit`, and `subscription.renewsAt` without counting against quota. Minimal `opencode.json` provider example: `{"provider":{"synthetic":{"npm":"@ai-sdk/openai-compatible","options":{"baseURL":"https://api.synthetic.new/openai/v1","apiKey":"{env:SYNTHETIC_API_KEY}"},"models":{"syn:large:text":{"name":"Synthetic GLM-5.2"}}}}}`.
 

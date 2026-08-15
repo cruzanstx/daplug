@@ -70,8 +70,8 @@ python3 "$EXECUTOR" [prompts...] [options]
 
 **Options:**
 <!-- BEGIN GENERATED: skill-model-options -->
-- `--model, -m`: claude, cc-sonnet, cc-opus, fable, codex, codex-spark, codex-high, codex-xhigh, sol, terra, luna, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, glm52, kimi, synthetic, syn-flash, syn-kimi, syn-kimi3, syn-qwen, syn-minimax, syn-nemotron, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b
-  - `glm52`: GLM-5.2 via Z.AI / OpenCode (1M context)
+- `--model, -m`: claude, cc-sonnet, cc-opus, fable, codex, codex-spark, codex-high, codex-xhigh, sol, terra, luna, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, glm52, glm53, kimi, synthetic, syn-flash, syn-kimi, syn-kimi3, syn-qwen, syn-minimax, syn-nemotron, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b
+  - `glm53`: GLM-5.3 via Z.AI / OpenCode (1M context)
   - `synthetic`: GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, requires `SYNTHETIC_API_KEY`)
 <!-- END GENERATED: skill-model-options -->
 - `--moa`: Mixture-of-agents — comma-separated list of 2+ models (e.g. `codex,synthetic,qwen36`). Entries may carry a per-model CLI override as `model:cli` (e.g. `codex:opencode`). Each run gets its own worktree (implies `--worktree`); a manifest for the judge/consolidation phase is written to `~/.claude/loop-state/moa/`. Mutually exclusive with `--model` and the global `--cli`; the bare `claude` Task-subagent shorthand is not allowed (use `cc-sonnet`, `cc-opus`, or `claude:claude`).
@@ -281,8 +281,9 @@ python3 "$EXECUTOR" --loop-status
 | gemini3pro | gemini -y -m gemini-3-pro-preview | Explicit 3 Pro selection |
 | gemini31pro | gemini -y -m gemini-3.1-pro-preview | Latest Pro model (if available) |
 | zai | codex exec --full-auto --profile zai | General coding fallback |
-| glm5 | opencode run --format json -m zai/glm-5.2 --pure --agent build | Latest GLM 5.x tasks via OpenCode |
+| glm5 | opencode run --format json -m zai/glm-5.3 --pure --agent build | Latest GLM 5.x tasks via OpenCode |
 | glm52 | opencode run --format json -m zai/glm-5.2 --pure --agent build | Explicit GLM-5.2 pin via OpenCode |
+| glm53 | opencode run --format json -m zai/glm-5.3 --pure --agent build | Explicit GLM-5.3 pin via OpenCode |
 | kimi | opencode run --format json -m opencode/kimi-k2.5 --pure --agent build | Kimi K2.5 via OpenCode |
 | synthetic | opencode run --format json -m synthetic/syn:large:text --pure --agent build | GLM-5.2 default, 512k context |
 | syn-flash | opencode run --format json -m synthetic/syn:small:text --pure --agent build | Fast GLM-4.7-Flash fallback |

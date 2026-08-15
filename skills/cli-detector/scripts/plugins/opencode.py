@@ -34,6 +34,12 @@ class OpenCodeCLI(SimpleCLIPlugin):
                 display_name="GLM-5.2 (via Z.AI Coding Plan)",
                 provider="zai",
                 capabilities=["code", "chat", "long-context"],
+            ),
+            ModelInfo(
+                id="zai:glm-5.3",
+                display_name="GLM-5.3 (via Z.AI Coding Plan)",
+                provider="zai",
+                capabilities=["code", "chat", "long-context"],
             )
         ]
 
