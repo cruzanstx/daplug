@@ -2,6 +2,12 @@
 
 All notable changes to daplug are documented here.
 
+## [0.39.0] - 2026-08-21
+
+### Added
+- **Gemini 3.7 Flash Antigravity shorthands** — `gemini37`, `gemini37-high`, and `gemini37-low` route to the byte-exact AGY display names for Medium, High, and Low reasoning while preserving `gemini-3.7-flash` for the legacy Gemini CLI.
+- **AGY model fixture and consistency guards** — live `agy models` output from AGY 1.1.17 now anchors offline display-name checks, with an opt-in live verification test and exact three-way map-divergence protection.
+
 ## [0.38.0] - 2026-08-14
 
 ### Added
