@@ -82,6 +82,9 @@ Use AskUserQuestion tool with options:
 - `gemini3flash` - Gemini 3 Flash Preview (explicit shorthand)
 - `gemini3pro` - Gemini 3 Pro Preview (explicit shorthand)
 - `gemini31pro` - Gemini 3.1 Pro Preview (if your account has access)
+- `gemini37` - Gemini 3.7 Flash (Medium reasoning) via Antigravity
+- `gemini37-high` - Gemini 3.7 Flash (High reasoning) via Antigravity
+- `gemini37-low` - Gemini 3.7 Flash (Low reasoning) via Antigravity
 - `zai` - Z.AI GLM-4.7 via Codex CLI
 - `glm5` - Z.AI GLM-5.3 via OpenCode (latest GLM 5.x, 1M context)
 - `glm52` - Z.AI GLM-5.2 via OpenCode (explicit pin, 1M context)

@@ -175,6 +175,9 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `gemini3flash` | agy/gemini | gemini-3-flash-preview |
 | `gemini3pro` | agy/gemini | gemini-3-pro-preview |
 | `gemini31pro` | agy/gemini | gemini-3.1-pro-preview (if available) |
+| `gemini37` | agy/gemini | gemini-3.7-flash (Medium reasoning) |
+| `gemini37-high` | agy/gemini | gemini-3.7-flash (High reasoning) |
+| `gemini37-low` | agy/gemini | gemini-3.7-flash (Low reasoning) |
 | `zai` | codex | GLM-4.7 via Z.AI (may have issues) |
 | `glm5` | opencode | GLM-5.3 via OpenCode (latest GLM 5.x, 1M context) |
 | `glm52` | opencode | GLM-5.2 via OpenCode (explicit pin, 1M context) |

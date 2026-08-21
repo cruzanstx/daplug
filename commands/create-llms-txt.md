@@ -494,6 +494,9 @@ All available models for /daplug:run-prompt --model:
 - `gemini3flash` - Gemini 3 Flash Preview (explicit shorthand)
 - `gemini3pro` - Gemini 3 Pro Preview (explicit shorthand)
 - `gemini31pro` - Gemini 3.1 Pro Preview (if your account has access)
+- `gemini37` - Gemini 3.7 Flash (Medium reasoning) via Antigravity
+- `gemini37-high` - Gemini 3.7 Flash (High reasoning) via Antigravity
+- `gemini37-low` - Gemini 3.7 Flash (Low reasoning) via Antigravity
 
 **Z.AI / OpenCode Models:** (check: `zai.token_quota.percentage` where applicable)
 - `zai` - Z.AI GLM-4.7 via Codex CLI
@@ -534,6 +537,9 @@ Antigravity (`agy`) maps legacy shorthands to the closest current `agy models` d
 | `gemini3flash` | gemini-3-flash-preview | gemini-3-flash-preview |
 | `gemini3pro` | gemini-3-pro-preview | gemini-3-pro-preview |
 | `gemini31pro` | gemini-3.1-pro-preview | gemini-3.1-pro-preview |
+| `gemini37` | gemini-3.7-flash | gemini-3.7-flash |
+| `gemini37-high` | gemini-3.7-flash | gemini-3.7-flash |
+| `gemini37-low` | gemini-3.7-flash | gemini-3.7-flash |
 <!-- END GENERATED: create-llms-available-models -->
 </available_models>
 
@@ -634,34 +640,37 @@ If user chooses #1:
   27. gemini3flash - {X}% used - 3-flash explicit
   28. gemini3pro - {X}% used - 3-pro, most capable
   29. gemini31pro - {X}% used - 3.1 Pro Preview if available
+  30. gemini37 - {X}% used - 3.7-flash Medium, latest balanced Flash
+  31. gemini37-high - {X}% used - 3.7-flash High, latest deep reasoning
+  32. gemini37-low - {X}% used - 3.7-flash Low, latest fast tier
 
   **Z.AI / OpenCode:** {usage status}
-  30. zai - {X}% used - Z.AI GLM-4.7
-  31. glm5 - {X}% used - Z.AI GLM-5.3 latest alias
-  32. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
-  33. glm53 - {X}% used - Z.AI GLM-5.3 explicit pin
-  34. kimi - {X}% used - Kimi K2.5 via OpenCode
-  35. opencode - {X}% used - OpenCode GLM-4.7
+  33. zai - {X}% used - Z.AI GLM-4.7
+  34. glm5 - {X}% used - Z.AI GLM-5.3 latest alias
+  35. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
+  36. glm53 - {X}% used - Z.AI GLM-5.3 explicit pin
+  37. kimi - {X}% used - Kimi K2.5 via OpenCode
+  38. opencode - {X}% used - OpenCode GLM-4.7
 
   **Synthetic:** {usage status}
-  36. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
-  37. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
-  38. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.7-Code vision
-  39. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
-  40. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
-  41. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
-  42. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
+  39. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
+  40. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
+  41. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.7-Code vision
+  42. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
+  43. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
+  44. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
+  45. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
 
   **Local:** {usage status}
-  43. local - local qwen3.6-35b-a3b, no quota
-  44. qwen - local qwen3.6-35b-a3b, no quota
-  45. devstral - local Devstral, no quota
-  46. glm-local - local GLM-4.7 Flash, no quota
-  47. qwen-small - local qwen3-4b, no quota
-  48. qwen36 - local qwen3.6-35b-a3b, no quota
-  49. qwen36-27b - local qwen3.6-27b, no quota
+  46. local - local qwen3.6-35b-a3b, no quota
+  47. qwen - local qwen3.6-35b-a3b, no quota
+  48. devstral - local Devstral, no quota
+  49. glm-local - local GLM-4.7 Flash, no quota
+  50. qwen-small - local qwen3-4b, no quota
+  51. qwen36 - local qwen3.6-35b-a3b, no quota
+  52. qwen36-27b - local qwen3.6-27b, no quota
 
-  Choose (1-49), or type model with flags (e.g., 'codex --worktree --loop'): _
+  Choose (1-52), or type model with flags (e.g., 'codex --worktree --loop'): _
 <!-- END GENERATED: create-llms-selection-menu -->
 
   **Execute based on selection:**

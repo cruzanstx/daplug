@@ -156,6 +156,38 @@ def test_agy_cli_override_for_google_models(no_router, tmp_path):
     assert pro_info["command"] == ["agy", "--model", "Gemini 3.1 Pro (High)", "--print"]
 
 
+def test_agy_cli_override_for_gemini37_models(no_router, tmp_path):
+    """--cli agy on gemini37 shorthands produces byte-exact agy commands."""
+    info = executor.get_cli_info("gemini37", repo_root=tmp_path, cli_override="agy")
+    assert info["selected_cli"] == "agy"
+    assert info["stdin_mode"] == "arg"
+    assert info["command"] == ["agy", "--model", "Gemini 3.7 Flash (Medium)", "--print"]
+
+    info_high = executor.get_cli_info("gemini37-high", repo_root=tmp_path, cli_override="agy")
+    assert info_high["selected_cli"] == "agy"
+    assert info_high["command"] == ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
+
+    info_low = executor.get_cli_info("gemini37-low", repo_root=tmp_path, cli_override="agy")
+    assert info_low["selected_cli"] == "agy"
+    assert info_low["command"] == ["agy", "--model", "Gemini 3.7 Flash (Low)", "--print"]
+
+
+def test_gemini_cli_override_for_gemini37_models(no_router, tmp_path):
+    """--cli gemini on gemini37 shorthands produces legacy gemini commands."""
+    info = executor.get_cli_info("gemini37", repo_root=tmp_path, cli_override="gemini")
+    assert info["selected_cli"] == "gemini"
+    assert info["stdin_mode"] == "arg"
+    assert info["command"] == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
+
+    info_high = executor.get_cli_info("gemini37-high", repo_root=tmp_path, cli_override="gemini")
+    assert info_high["selected_cli"] == "gemini"
+    assert info_high["command"] == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
+
+    info_low = executor.get_cli_info("gemini37-low", repo_root=tmp_path, cli_override="gemini")
+    assert info_low["selected_cli"] == "gemini"
+    assert info_low["command"] == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
+
+
 def test_legacy_gemini_cli_override_still_works(no_router, tmp_path):
     info = executor.get_cli_info("gemini31pro", repo_root=tmp_path, cli_override="gemini")
 
@@ -382,6 +414,9 @@ EXPECTED_MODEL_KEYS = [
     "gemini3flash",
     "gemini3pro",
     "gemini31pro",
+    "gemini37",
+    "gemini37-high",
+    "gemini37-low",
     "zai",
     "glm5",
     "glm52",

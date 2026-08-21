@@ -126,6 +126,84 @@ def test_google_models_prefer_agy_when_healthy(monkeypatch):
     assert cmd == ["agy", "--model", "Gemini 3.1 Pro (High)", "--print"]
 
 
+def test_gemini37_routes_through_agy_when_healthy(monkeypatch):
+    """gemini37/37-high/37-low must route to agy with byte-exact display names."""
+    fake = _FakeCache(
+        {
+            "clis": {
+                "agy": {"installed": True, "issues": []},
+                "gemini": {"installed": True, "issues": []},
+                "opencode": {"installed": True, "issues": []},
+            },
+            "providers": {},
+        }
+    )
+    monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+
+    cli, model_id, cmd = router.resolve_model("gemini37")
+    assert cli == "agy"
+    assert model_id == "google:gemini-3.7-flash"
+    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (Medium)", "--print"]
+
+    cli, model_id, cmd = router.resolve_model("gemini37-high")
+    assert cli == "agy"
+    assert model_id == "google:gemini-3.7-flash"
+    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
+
+    cli, model_id, cmd = router.resolve_model("gemini37-low")
+    assert cli == "agy"
+    assert model_id == "google:gemini-3.7-flash"
+    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (Low)", "--print"]
+
+
+def test_gemini37_falls_back_to_gemini_cli_when_agy_missing(monkeypatch):
+    """When agy is not installed, gemini37 shorthands use the legacy gemini CLI."""
+    fake = _FakeCache(
+        {
+            "clis": {
+                "agy": {"installed": False, "issues": []},
+                "gemini": {"installed": True, "issues": []},
+                "opencode": {"installed": True, "issues": []},
+            },
+            "providers": {},
+        }
+    )
+    monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+
+    cli, model_id, cmd = router.resolve_model("gemini37")
+    assert cli == "gemini"
+    assert model_id == "google:gemini-3.7-flash"
+    assert cmd == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
+
+    cli, model_id, cmd = router.resolve_model("gemini37-high")
+    assert cli == "gemini"
+    assert model_id == "google:gemini-3.7-flash"
+    assert cmd == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
+
+    cli, model_id, cmd = router.resolve_model("gemini37-low")
+    assert cli == "gemini"
+    assert model_id == "google:gemini-3.7-flash"
+    assert cmd == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
+
+
+def test_gemini37_preferred_cli_can_force_legacy_gemini(monkeypatch):
+    """preferred_cli=gemini forces legacy gemini CLI even when agy is healthy."""
+    fake = _FakeCache(
+        {
+            "clis": {
+                "agy": {"installed": True, "issues": []},
+                "gemini": {"installed": True, "issues": []},
+            },
+            "providers": {},
+        }
+    )
+    monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+
+    cli, _model_id, cmd = router.resolve_model("gemini37", preferred_cli="gemini")
+    assert cli == "gemini"
+    assert cmd[0] == "gemini"
+
+
 def test_google_models_fall_back_to_gemini_when_agy_missing(monkeypatch):
     fake = _FakeCache(
         {
@@ -602,6 +680,9 @@ class TestGeminiModels:
             ("gemini3flash", "gemini-3-flash-preview"),
             ("gemini3pro", "gemini-3-pro-preview"),
             ("gemini31pro", "gemini-3.1-pro-preview"),
+            ("gemini37", "gemini-3.7-flash"),
+            ("gemini37-high", "gemini-3.7-flash"),
+            ("gemini37-low", "gemini-3.7-flash"),
         ],
     )
     def test_gemini_models(self, full_cache, shorthand, expected_model):

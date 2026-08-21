@@ -70,7 +70,7 @@ python3 "$EXECUTOR" [prompts...] [options]
 
 **Options:**
 <!-- BEGIN GENERATED: skill-model-options -->
-- `--model, -m`: claude, cc-sonnet, cc-opus, fable, codex, codex-spark, codex-high, codex-xhigh, sol, terra, luna, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, zai, glm5, glm52, glm53, kimi, synthetic, syn-flash, syn-kimi, syn-kimi3, syn-qwen, syn-minimax, syn-nemotron, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b
+- `--model, -m`: claude, cc-sonnet, cc-opus, fable, codex, codex-spark, codex-high, codex-xhigh, sol, terra, luna, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, gemini37, gemini37-high, gemini37-low, zai, glm5, glm52, glm53, kimi, synthetic, syn-flash, syn-kimi, syn-kimi3, syn-qwen, syn-minimax, syn-nemotron, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b
   - `glm53`: GLM-5.3 via Z.AI / OpenCode (1M context)
   - `synthetic`: GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, requires `SYNTHETIC_API_KEY`)
 <!-- END GENERATED: skill-model-options -->
@@ -280,6 +280,9 @@ python3 "$EXECUTOR" --loop-status
 | gemini3flash | gemini -y -m gemini-3-flash-preview | Explicit 3 Flash selection |
 | gemini3pro | gemini -y -m gemini-3-pro-preview | Explicit 3 Pro selection |
 | gemini31pro | gemini -y -m gemini-3.1-pro-preview | Latest Pro model (if available) |
+| gemini37 | agy --model "Gemini 3.7 Flash (Medium)" --print | Latest Flash tier, balanced reasoning |
+| gemini37-high | agy --model "Gemini 3.7 Flash (High)" --print | Latest Flash tier, high reasoning |
+| gemini37-low | agy --model "Gemini 3.7 Flash (Low)" --print | Latest Flash tier, fast low-reasoning |
 | zai | codex exec --full-auto --profile zai | General coding fallback |
 | glm5 | opencode run --format json -m zai/glm-5.3 --pure --agent build | Latest GLM 5.x tasks via OpenCode |
 | glm52 | opencode run --format json -m zai/glm-5.2 --pure --agent build | Explicit GLM-5.2 pin via OpenCode |

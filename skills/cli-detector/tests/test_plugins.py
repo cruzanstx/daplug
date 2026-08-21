@@ -101,6 +101,51 @@ def test_agy_plugin_builds_argv_print_command(tmp_path):
     ]
 
 
+def test_agy_plugin_builds_gemini37_commands(tmp_path):
+    """agy plugin must map gemini37 model IDs to exact display names."""
+    plugin = get_plugin("agy")
+    assert plugin is not None
+
+    prompt_file = tmp_path / "prompt.md"
+    prompt_file.write_text("test", encoding="utf-8")
+
+    assert plugin.build_command("google:gemini-3.7-flash", prompt_file, tmp_path)[:4] == [
+        "agy",
+        "--model",
+        "Gemini 3.7 Flash (Medium)",
+        "--print",
+    ]
+    assert plugin.build_command("gemini37-high", prompt_file, tmp_path)[:4] == [
+        "agy",
+        "--model",
+        "Gemini 3.7 Flash (High)",
+        "--print",
+    ]
+    assert plugin.build_command("gemini37-low", prompt_file, tmp_path)[:4] == [
+        "agy",
+        "--model",
+        "Gemini 3.7 Flash (Low)",
+        "--print",
+    ]
+
+
+def test_agy_plugin_advertises_gemini37_models():
+    """agy plugin's get_available_models must include the 3.7 Flash tiers."""
+    plugin = get_plugin("agy")
+    assert plugin is not None
+
+    models = plugin.get_available_models()
+    display_names = [m.display_name for m in models]
+    assert "Gemini 3.7 Flash (Medium)" in display_names
+    assert "Gemini 3.7 Flash (High)" in display_names
+    assert "Gemini 3.7 Flash (Low)" in display_names
+
+    ids = [m.id for m in models]
+    assert "google:gemini-3.7-flash" in ids
+    assert "gemini37-high" in ids
+    assert "gemini37-low" in ids
+
+
 def test_agy_plugin_version_command():
     plugin = get_plugin("agy")
     assert plugin is not None

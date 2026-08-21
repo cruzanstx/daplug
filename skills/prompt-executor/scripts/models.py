@@ -224,17 +224,23 @@ def _strip_provider_prefix(model_id: str) -> str:
     return model_id.split(":", 1)[1] if ":" in model_id else model_id
 
 
-def _agy_model_arg(model_id: str) -> str:
-    agy_args = {
-        "google:gemini-3-flash-preview": "Gemini 3.5 Flash (Medium)",
-        "google:gemini-3.5-flash": "Gemini 3.5 Flash (Medium)",
-        "google:gemini-2.5-flash": "Gemini 3.5 Flash (Medium)",
-        "google:gemini-2.5-flash-lite": "Gemini 3.5 Flash (Low)",
-        "google:gemini-2.5-pro": "Gemini 3.1 Pro (High)",
-        "google:gemini-3-pro-preview": "Gemini 3.1 Pro (High)",
-        "google:gemini-3.1-pro-preview": "Gemini 3.1 Pro (High)",
-    }
-    return agy_args.get(model_id, model_id)
+_AGY_MODEL_ARGS = {
+    "google:gemini-3-flash-preview": "Gemini 3.5 Flash (Medium)",
+    "google:gemini-3.5-flash": "Gemini 3.5 Flash (Medium)",
+    "google:gemini-2.5-flash": "Gemini 3.5 Flash (Medium)",
+    "google:gemini-2.5-flash-lite": "Gemini 3.5 Flash (Low)",
+    "google:gemini-2.5-pro": "Gemini 3.1 Pro (High)",
+    "google:gemini-3-pro-preview": "Gemini 3.1 Pro (High)",
+    "google:gemini-3.1-pro-preview": "Gemini 3.1 Pro (High)",
+    "google:gemini-3.7-flash": "Gemini 3.7 Flash (Medium)",
+    "gemini37": "Gemini 3.7 Flash (Medium)",
+    "gemini37-high": "Gemini 3.7 Flash (High)",
+    "gemini37-low": "Gemini 3.7 Flash (Low)",
+}
+
+
+def _agy_model_arg(model_id: str, shorthand: str | None = None) -> str:
+    return _AGY_MODEL_ARGS.get(shorthand or "", _AGY_MODEL_ARGS.get(model_id, model_id))
 
 
 def _opencode_model_spec(model_id: str) -> str:
@@ -387,7 +393,7 @@ def _build_agy_command(model: str, model_id: str, variant: Optional[str]) -> lis
             f"--variant {variant} is not supported with --model {model} when using Antigravity."
         )
     # agy --print requires its prompt as an argv value; stdin leaves --print without an argument.
-    return ["agy", "--model", _agy_model_arg(model_id), "--print"]
+    return ["agy", "--model", _agy_model_arg(model_id, model), "--print"]
 
 
 def _build_gemini_command(model: str, model_id: str, variant: Optional[str]) -> list[str]:

@@ -110,6 +110,10 @@ _SHORTHAND: dict[str, _ModelRequest] = {
     "gemini3pro": _ModelRequest("gemini3pro", family="google", model_id="google:gemini-3-pro-preview"),
     # Gemini 3.1 Pro Preview is account-gated; keep it as an explicit opt-in shorthand.
     "gemini31pro": _ModelRequest("gemini31pro", family="google", model_id="google:gemini-3.1-pro-preview"),
+    # Gemini 3.7 Flash — newest Flash tier with reasoning tiers in the agy display name.
+    "gemini37": _ModelRequest("gemini37", family="google", model_id="google:gemini-3.7-flash"),
+    "gemini37-high": _ModelRequest("gemini37-high", family="google", model_id="google:gemini-3.7-flash"),
+    "gemini37-low": _ModelRequest("gemini37-low", family="google", model_id="google:gemini-3.7-flash"),
     # Z.AI
     "zai": _ModelRequest("zai", family="zai", model_id="zai:glm-4.7"),
     "glm5": _ModelRequest("glm5", family="zai", model_id="zai:glm-5.3", codex_profile="glm5"),
@@ -299,6 +303,10 @@ _AGY_MODEL_ARGS: dict[str, str] = {
     "google:gemini-2.5-pro": "Gemini 3.1 Pro (High)",
     "google:gemini-3-pro-preview": "Gemini 3.1 Pro (High)",
     "google:gemini-3.1-pro-preview": "Gemini 3.1 Pro (High)",
+    "google:gemini-3.7-flash": "Gemini 3.7 Flash (Medium)",
+    "gemini37": "Gemini 3.7 Flash (Medium)",
+    "gemini37-high": "Gemini 3.7 Flash (High)",
+    "gemini37-low": "Gemini 3.7 Flash (Low)",
 }
 
 
@@ -319,8 +327,8 @@ def _strip_provider_prefix(model_id: str) -> str:
     return model_id.split(":", 1)[1] if ":" in model_id else model_id
 
 
-def _agy_model_arg(model_id: str) -> str:
-    return _AGY_MODEL_ARGS.get(model_id, model_id)
+def _agy_model_arg(model_id: str, shorthand: str | None = None) -> str:
+    return _AGY_MODEL_ARGS.get(shorthand or "", _AGY_MODEL_ARGS.get(model_id, model_id))
 
 
 def _opencode_model_spec(model_id: str) -> str:
@@ -593,7 +601,7 @@ def _build_command(cli: str, model_id: str, request: _ModelRequest) -> list[str]
 
     if cli == "agy":
         # agy --print requires the prompt as the flag value; the executor appends it in argv mode.
-        cmd = ["agy", "--model", _agy_model_arg(model_id), "--print"]
+        cmd = ["agy", "--model", _agy_model_arg(model_id, request.shorthand), "--print"]
         return cmd
 
     if cli == "gemini":

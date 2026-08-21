@@ -20,6 +20,8 @@ rationale and drift audit.
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 import sys
 from dataclasses import replace
 from pathlib import Path
@@ -314,3 +316,187 @@ class TestRegistryRouterConsistency:
         assert "bogus-model" in relevant[0], (
             f"Expected 'bogus-model' in message: {relevant[0]}"
         )
+
+
+# --- AGY map-divergence guard -----------------------------------------
+
+
+class TestAGYMapConsistency:
+    """Ensure the three copies of the AGY display-name map agree.
+
+    router.py, plugins/agy.py, and prompt-executor/scripts/models.py each
+    maintain their own copy of the AGY model-arg map.  These tests fail
+    if any copy drifts, preventing silent wrong-display-name failures.
+    """
+
+    def test_agy_maps_are_identical(self):
+        """All three _AGY_MODEL_ARGS dicts must contain the same entries."""
+        # router.py
+        router_map = dict(router._AGY_MODEL_ARGS)
+
+        # plugins/agy.py — import through the plugins package (relative imports)
+        from plugins import agy as agy_plugin  # noqa: E402
+        plugin_map = dict(agy_plugin._AGY_MODEL_ARGS)
+
+        # prompt-executor/scripts/models.py
+        models_dir = _REPO_ROOT / "skills" / "prompt-executor" / "scripts"
+        if str(models_dir) not in sys.path:
+            sys.path.insert(0, str(models_dir))
+        import models as models_mod  # noqa: E402
+        executor_map = dict(models_mod._AGY_MODEL_ARGS)
+
+        # All three complete maps must agree, including extra keys.
+        assert router_map == plugin_map, (
+            "router._AGY_MODEL_ARGS and plugins/agy.py._AGY_MODEL_ARGS differ:\n"
+            f"  router only: {set(router_map.items()) - set(plugin_map.items())}\n"
+            f"  plugin only: {set(plugin_map.items()) - set(router_map.items())}"
+        )
+        assert router_map == executor_map, (
+            "router._AGY_MODEL_ARGS and prompt-executor models._AGY_MODEL_ARGS differ:\n"
+            f"  router only: {set(router_map.items()) - set(executor_map.items())}\n"
+            f"  executor only: {set(executor_map.items()) - set(router_map.items())}"
+        )
+
+    def test_gemini37_display_names_in_all_maps(self):
+        """All three AGY maps must contain the gemini37 entries."""
+        expected = {
+            "google:gemini-3.7-flash": "Gemini 3.7 Flash (Medium)",
+            "gemini37": "Gemini 3.7 Flash (Medium)",
+            "gemini37-high": "Gemini 3.7 Flash (High)",
+            "gemini37-low": "Gemini 3.7 Flash (Low)",
+        }
+
+        # router.py
+        for key, val in expected.items():
+            assert key in router._AGY_MODEL_ARGS, f"router._AGY_MODEL_ARGS missing {key}"
+            assert router._AGY_MODEL_ARGS[key] == val, (
+                f"router._AGY_MODEL_ARGS[{key!r}] = {router._AGY_MODEL_ARGS[key]!r}, "
+                f"expected {val!r}"
+            )
+
+        # plugins/agy.py — import through the plugins package (relative imports)
+        from plugins import agy as agy_plugin  # noqa: E402
+        for key, val in expected.items():
+            assert key in agy_plugin._AGY_MODEL_ARGS, f"agy_plugin._AGY_MODEL_ARGS missing {key}"
+            assert agy_plugin._AGY_MODEL_ARGS[key] == val, (
+                f"agy_plugin._AGY_MODEL_ARGS[{key!r}] = {agy_plugin._AGY_MODEL_ARGS[key]!r}, "
+                f"expected {val!r}"
+            )
+
+        # prompt-executor/scripts/models.py
+        models_dir = _REPO_ROOT / "skills" / "prompt-executor" / "scripts"
+        if str(models_dir) not in sys.path:
+            sys.path.insert(0, str(models_dir))
+        import models as models_mod  # noqa: E402
+        for key, val in expected.items():
+            assert models_mod._agy_model_arg(key) == val, (
+                f"models._agy_model_arg({key!r}) = {models_mod._agy_model_arg(key)!r}, "
+                f"expected {val!r}"
+            )
+
+
+# --- Fixture agreement (offline) -------------------------------------
+
+_FIXTURE_PATH = Path(__file__).resolve().parent / "fixtures" / "agy-models.txt"
+
+
+def _parse_fixture_display_names(path: Path) -> set[str]:
+    """Parse display names from raw ``agy models`` output.
+
+    Lines starting with '#' are comments. Blank lines are ignored. Current
+    agy versions emit ``<model-id>\t<display-name>``; display-only fixtures
+    remain supported for backwards compatibility.
+    """
+    if not path.exists():
+        pytest.skip(f"Fixture not found: {path}")
+    names: set[str] = set()
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        names.add(stripped.split("\t", 1)[-1])
+    return names
+
+
+class TestFixtureAgreement:
+    """Verify daplug's agy display strings exist verbatim in the fixture.
+
+    This test is purely offline (no network, no agy CLI).  It guards
+    against typos in the display-name maps by checking every value in
+    the AGY maps against the captured fixture.
+    """
+
+    def test_all_agy_display_names_in_fixture(self):
+        """Every display name in router._AGY_MODEL_ARGS must appear in the fixture."""
+        fixture_names = _parse_fixture_display_names(_FIXTURE_PATH)
+        for key, display_name in router._AGY_MODEL_ARGS.items():
+            assert display_name in fixture_names, (
+                f"Display name {display_name!r} (for model_id {key!r}) "
+                f"is not in the agy-models fixture"
+            )
+
+    def test_gemini37_display_names_in_fixture(self):
+        """The three gemini37 display strings must be in the fixture."""
+        fixture_names = _parse_fixture_display_names(_FIXTURE_PATH)
+        assert "Gemini 3.7 Flash (Medium)" in fixture_names
+        assert "Gemini 3.7 Flash (High)" in fixture_names
+        assert "Gemini 3.7 Flash (Low)" in fixture_names
+
+
+# --- Generated-file consistency --------------------------------------
+
+class TestGeneratedFileConsistency:
+    """Verify manage-models.py check exits 0 (generated docs in sync)."""
+
+    def test_manage_models_check_exits_zero(self):
+        """Run manage-models.py check and assert exit code 0."""
+        repo_root = _REPO_ROOT
+        script = repo_root / "scripts" / "manage-models.py"
+        if not script.exists():
+            pytest.skip("manage-models.py not found")
+        result = subprocess.run(
+            [sys.executable, str(script), "check"],
+            capture_output=True,
+            text=True,
+            cwd=str(repo_root),
+            timeout=30,
+        )
+        assert result.returncode == 0, (
+            f"manage-models.py check exited {result.returncode}:\n"
+            f"stdout: {result.stdout}\nstderr: {result.stderr}"
+        )
+
+
+# --- Optional live check ----------------------------------------------
+
+@pytest.mark.skipif(
+    not os.environ.get("DAPLUG_LIVE_AGY"),
+    reason="Set DAPLUG_LIVE_AGY=1 to run live agy models verification",
+)
+class TestLiveAGYModels:
+    """Optional live verification against real `agy models` output.
+
+    Disabled by default (no network in CI).  Set DAPLUG_LIVE_AGY=1 to
+    run locally after authenticating with agy.
+    """
+
+    def test_live_agy_display_names_match(self):
+        """Every display name daplug sends must appear in live agy models."""
+        result = subprocess.run(
+            ["agy", "models"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if result.returncode != 0:
+            pytest.skip(f"agy models failed (rc={result.returncode}): {result.stderr}")
+        live_names: set[str] = set()
+        for line in result.stdout.splitlines():
+            stripped = line.strip()
+            if stripped:
+                live_names.add(stripped.split("\t", 1)[-1])
+        for key, display_name in router._AGY_MODEL_ARGS.items():
+            assert display_name in live_names, (
+                f"Display name {display_name!r} (for {key!r}) not found in "
+                f"live `agy models` output"
+            )
