@@ -149,7 +149,11 @@ def test_agy_cli_override_for_google_models(no_router, tmp_path):
 
     assert info["selected_cli"] == "agy"
     assert info["stdin_mode"] == "arg"
-    assert info["command"] == ["agy", "--model", "Gemini 3.5 Flash (Medium)", "--print"]
+    assert info["command"] == ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
+
+    flash_info = executor.get_cli_info("gemini3flash", repo_root=tmp_path, cli_override="agy")
+    assert flash_info["selected_cli"] == "agy"
+    assert flash_info["command"] == ["agy", "--model", "Gemini 3.5 Flash (Medium)", "--print"]
 
     pro_info = executor.get_cli_info("gemini31pro", repo_root=tmp_path, cli_override="antigravity")
     assert pro_info["selected_cli"] == "agy"
@@ -219,6 +223,45 @@ def test_router_selected_agy_uses_executor_mapping(tmp_path, monkeypatch):
 def test_explicit_cli_opencode_errors_for_unsupported_model(no_router, tmp_path):
     with pytest.raises(ValueError, match="--cli opencode is not supported with --model gemini"):
         executor.get_cli_info("gemini", repo_root=tmp_path, cli_override="opencode")
+
+
+def test_gemini_and_agy_default_to_antigravity_37_high(no_router, tmp_path):
+    """Bare `gemini` and `agy` run Gemini 3.7 Flash (High) through agy by default."""
+    expected = ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
+    for shorthand in ("gemini", "agy", "gemini37"):
+        info = executor.get_cli_info(shorthand, repo_root=tmp_path)
+        assert info["selected_cli"] == "agy", shorthand
+        assert info["stdin_mode"] == "arg", shorthand
+        assert info["command"] == expected, shorthand
+        assert info["model_id"] == "google:gemini-3.7-flash", shorthand
+
+
+def test_gemini_and_agy_cli_gemini_override_use_37_flash(no_router, tmp_path):
+    """--cli gemini on bare `gemini`/`agy` yields the legacy command with gemini-3.7-flash."""
+    expected = ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
+    for shorthand in ("gemini", "agy"):
+        info = executor.get_cli_info(shorthand, repo_root=tmp_path, cli_override="gemini")
+        assert info["selected_cli"] == "gemini", shorthand
+        assert info["stdin_mode"] == "arg", shorthand
+        assert info["command"] == expected, shorthand
+
+
+def test_agy_shorthand_cli_overrides_match_gemini(no_router, tmp_path):
+    expected = ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
+    for override in ("agy", "antigravity"):
+        info = executor.get_cli_info("agy", repo_root=tmp_path, cli_override=override)
+        assert info["selected_cli"] == "agy", override
+        assert info["command"] == expected, override
+
+    with pytest.raises(ValueError, match="--cli opencode is not supported with --model agy"):
+        executor.get_cli_info("agy", repo_root=tmp_path, cli_override="opencode")
+
+
+def test_gemini3flash_still_targets_3_flash_preview(no_router, tmp_path):
+    """Regression guard: retargeting bare `gemini` must not touch gemini3flash."""
+    info = executor.get_cli_info("gemini3flash", repo_root=tmp_path, cli_override="gemini")
+    assert info["command"] == ["gemini", "-y", "-m", "gemini-3-flash-preview", "-p"]
+    assert info["model_id"] == "google:gemini-3-flash-preview"
 
 
 def test_explicit_cli_override_takes_precedence_over_router_default(tmp_path, monkeypatch):
@@ -426,6 +469,7 @@ EXPECTED_MODEL_KEYS = [
     "gemini37-high",
     "gemini37-medium",
     "gemini37-low",
+    "agy",
     "zai",
     "glm5",
     "glm52",

@@ -16,6 +16,8 @@ _AGY_MODEL_ARGS = {
     "google:gemini-3-pro-preview": "Gemini 3.1 Pro (High)",
     "google:gemini-3.1-pro-preview": "Gemini 3.1 Pro (High)",
     "google:gemini-3.7-flash": "Gemini 3.7 Flash (High)",
+    "gemini": "Gemini 3.7 Flash (High)",
+    "agy": "Gemini 3.7 Flash (High)",
     "gemini37": "Gemini 3.7 Flash (High)",
     "gemini37-high": "Gemini 3.7 Flash (High)",
     "gemini37-medium": "Gemini 3.7 Flash (Medium)",
@@ -23,11 +25,13 @@ _AGY_MODEL_ARGS = {
 }
 
 
+# Display name used when no model is given; mirrors the bare `gemini`/`agy` shorthands.
+_AGY_DEFAULT_MODEL_ARG = "Gemini 3.7 Flash (High)"
+
+
 def _agy_model_arg(model: str) -> str:
     key = (model or "").strip()
-    if not key:
-        return "Gemini 3.5 Flash (Medium)"
-    return _AGY_MODEL_ARGS.get(key, key)
+    return _AGY_MODEL_ARGS.get(key, _AGY_DEFAULT_MODEL_ARG)
 
 
 class AgyCLI(SimpleCLIPlugin):
@@ -62,6 +66,18 @@ class AgyCLI(SimpleCLIPlugin):
             ),
             ModelInfo(
                 id="google:gemini-3.7-flash",
+                display_name="Gemini 3.7 Flash (High)",
+                provider="google",
+                capabilities=["code", "chat", "vision"],
+            ),
+            ModelInfo(
+                id="gemini",
+                display_name="Gemini 3.7 Flash (High)",
+                provider="google",
+                capabilities=["code", "chat", "vision"],
+            ),
+            ModelInfo(
+                id="agy",
                 display_name="Gemini 3.7 Flash (High)",
                 provider="google",
                 capabilities=["code", "chat", "vision"],

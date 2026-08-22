@@ -141,6 +141,26 @@ def test_agy_plugin_builds_gemini37_commands(tmp_path):
     ]
 
 
+def test_agy_plugin_builds_default_shorthand_commands(tmp_path):
+    """Bare `gemini`/`agy` and unmapped keys resolve to Gemini 3.7 Flash (High)."""
+    plugin = get_plugin("agy")
+    assert plugin is not None
+
+    prompt_file = tmp_path / "prompt.md"
+    prompt_file.write_text("test", encoding="utf-8")
+
+    expected = ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
+    assert plugin.build_command("gemini", prompt_file, tmp_path)[:4] == expected
+    assert plugin.build_command("agy", prompt_file, tmp_path)[:4] == expected
+    assert plugin.build_command("", prompt_file, tmp_path)[:4] == expected
+    assert plugin.build_command("   ", prompt_file, tmp_path)[:4] == expected
+
+    # Unknown and empty keys use the configured AGY default.
+    from plugins import agy as agy_plugin
+    assert agy_plugin._agy_model_arg("") == "Gemini 3.7 Flash (High)"
+    assert agy_plugin._agy_model_arg("google:some-unknown-model") == "Gemini 3.7 Flash (High)"
+
+
 def test_agy_plugin_advertises_gemini37_models():
     """agy plugin's get_available_models must include the 3.7 Flash tiers."""
     plugin = get_plugin("agy")
@@ -154,7 +174,12 @@ def test_agy_plugin_advertises_gemini37_models():
 
     ids = [m.id for m in models]
     assert "google:gemini-3.7-flash" in ids
+    assert "gemini" in ids
+    assert "agy" in ids
     assert "gemini37-high" in ids
+    by_id = {m.id: m.display_name for m in models}
+    assert by_id["gemini"] == "Gemini 3.7 Flash (High)"
+    assert by_id["agy"] == "Gemini 3.7 Flash (High)"
     assert "gemini37-medium" in ids
     assert "gemini37-low" in ids
 

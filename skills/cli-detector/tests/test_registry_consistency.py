@@ -361,6 +361,8 @@ class TestAGYMapConsistency:
         """All three AGY maps must contain the gemini37 entries."""
         expected = {
             "google:gemini-3.7-flash": "Gemini 3.7 Flash (High)",
+            "gemini": "Gemini 3.7 Flash (High)",
+            "agy": "Gemini 3.7 Flash (High)",
             "gemini37": "Gemini 3.7 Flash (High)",
             "gemini37-high": "Gemini 3.7 Flash (High)",
             "gemini37-medium": "Gemini 3.7 Flash (Medium)",
@@ -394,6 +396,20 @@ class TestAGYMapConsistency:
                 f"models._agy_model_arg({key!r}) = {models_mod._agy_model_arg(key)!r}, "
                 f"expected {val!r}"
             )
+
+
+    def test_gemini_agy_gemini37_share_registry_runtime(self):
+        """`gemini`, `agy`, and `gemini37` are the same model and default command."""
+        reg_by_name = {m["name"]: m for m in _load_registry()}
+        entries = [reg_by_name[name] for name in ("gemini", "agy", "gemini37")]
+        model_ids = {entry["model_id"] for entry in entries}
+        assert model_ids == {"google:gemini-3.7-flash"}, model_ids
+        default_clis = {entry["default_cli"] for entry in entries}
+        assert default_clis == {"agy"}, default_clis
+        commands = {tuple(entry["command"]) for entry in entries}
+        assert commands == {("agy", "--model", "Gemini 3.7 Flash (High)", "--print")}, commands
+        stdin_modes = {entry["stdin_mode"] for entry in entries}
+        assert stdin_modes == {"arg"}, stdin_modes
 
 
 # --- Fixture agreement (offline) -------------------------------------

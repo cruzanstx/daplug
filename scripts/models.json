@@ -882,9 +882,9 @@
     },
     {
       "name": "gemini",
-      "display": "gemini (Gemini 3 Flash)",
-      "model_id": "google:gemini-3-flash-preview",
-      "default_cli": "gemini",
+      "display": "gemini (Gemini 3.7 Flash, High)",
+      "model_id": "google:gemini-3.7-flash",
+      "default_cli": "agy",
       "supports_codex_reasoning": false,
       "codex_profile": null,
       "claude_model_flag": null,
@@ -893,11 +893,10 @@
       "env": {},
       "stdin_mode": "arg",
       "command": [
-        "gemini",
-        "-y",
-        "-m",
-        "gemini-3-flash-preview",
-        "-p"
+        "agy",
+        "--model",
+        "Gemini 3.7 Flash (High)",
+        "--print"
       ],
       "routing": {
         "cli_overrides": [
@@ -911,15 +910,15 @@
       "docs": {
         "family": "Google Gemini",
         "cli_label": "agy/gemini",
-        "actual_model": "gemini-3-flash-preview",
-        "option_description": "Gemini 3 Flash Preview (default Gemini shorthand)",
-        "reference_cli": "gemini -y -m gemini-3-flash-preview",
-        "reference_description": "Fast daily driver (default)",
+        "actual_model": "gemini-3.7-flash (High reasoning)",
+        "option_description": "Gemini 3.7 Flash (High reasoning) via Antigravity (default Gemini shorthand)",
+        "reference_cli": "agy --model \"Gemini 3.7 Flash (High)\" --print",
+        "reference_description": "Fast daily driver, high reasoning (default)",
         "readme_section": "Google Gemini",
-        "readme_model": "gemini-3-flash-preview",
-        "best_for": "Fast daily driver (default)",
-        "prompt_description": "Gemini 3 Flash Preview (default Gemini shorthand)",
-        "menu_note": "3-flash, best coding performance",
+        "readme_model": "gemini-3.7-flash",
+        "best_for": "Fast daily driver, high reasoning (default)",
+        "prompt_description": "Gemini 3.7 Flash (High reasoning) via Antigravity (default Gemini shorthand)",
+        "menu_note": "3.7-flash High via Antigravity, default Gemini shorthand",
         "include_in_prompt_guides": true
       }
     },
@@ -1271,7 +1270,7 @@
       "name": "gemini37",
       "display": "gemini37 (Gemini 3.7 Flash, High)",
       "model_id": "google:gemini-3.7-flash",
-      "default_cli": "gemini",
+      "default_cli": "agy",
       "supports_codex_reasoning": false,
       "codex_profile": null,
       "claude_model_flag": null,
@@ -1280,11 +1279,10 @@
       "env": {},
       "stdin_mode": "arg",
       "command": [
-        "gemini",
-        "-y",
-        "-m",
-        "gemini-3.7-flash",
-        "-p"
+        "agy",
+        "--model",
+        "Gemini 3.7 Flash (High)",
+        "--print"
       ],
       "routing": {
         "cli_overrides": [
@@ -1436,6 +1434,48 @@
         "best_for": "Latest Flash tier, fast low-reasoning",
         "prompt_description": "Gemini 3.7 Flash (Low reasoning) via Antigravity",
         "menu_note": "3.7-flash Low, latest fast tier",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "agy",
+      "display": "agy (Gemini 3.7 Flash, High)",
+      "model_id": "google:gemini-3.7-flash",
+      "default_cli": "agy",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "agy",
+        "--model",
+        "Gemini 3.7 Flash (High)",
+        "--print"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "agy",
+          "gemini"
+        ],
+        "force_direct_opencode": false,
+        "google": true,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Google Gemini",
+        "cli_label": "agy/gemini",
+        "actual_model": "gemini-3.7-flash (High reasoning)",
+        "option_description": "Gemini 3.7 Flash (High) via Antigravity (default agy shorthand)",
+        "reference_cli": "agy --model \"Gemini 3.7 Flash (High)\" --print",
+        "reference_description": "Antigravity default (same as gemini/gemini37)",
+        "readme_section": "Google Gemini",
+        "readme_model": "gemini-3.7-flash",
+        "best_for": "Antigravity default (same as gemini/gemini37)",
+        "prompt_description": "Gemini 3.7 Flash (High) via Antigravity (default agy shorthand)",
+        "menu_note": "3.7-flash High, default agy shorthand",
         "include_in_prompt_guides": true
       }
     },

@@ -174,7 +174,21 @@ def stdin_mode_for_cli(default_cli: str) -> str | None:
         return "dash"
     if default_cli == "claude":
         return "stdin"
+    # agy/gemini/opencode pass the prompt as an argv value.
     return "arg"
+
+
+AGY_DISPLAY_NAMES = {
+    "google:gemini-3.7-flash": "Gemini 3.7 Flash (High)",
+    "google:gemini-3.5-flash": "Gemini 3.5 Flash (Medium)",
+    "google:gemini-3-flash-preview": "Gemini 3.5 Flash (Medium)",
+    "google:gemini-2.5-flash": "Gemini 3.5 Flash (Medium)",
+    "google:gemini-2.5-flash-lite": "Gemini 3.5 Flash (Low)",
+    "google:gemini-2.5-pro": "Gemini 3.1 Pro (High)",
+    "google:gemini-3-pro-preview": "Gemini 3.1 Pro (High)",
+    "google:gemini-3.1-pro-preview": "Gemini 3.1 Pro (High)",
+}
+AGY_DEFAULT_DISPLAY_NAME = "Gemini 3.7 Flash (High)"
 
 
 def default_command(
@@ -213,6 +227,11 @@ def default_command(
         if default_variant:
             raise RegistryError("Gemini models cannot have a default variant")
         return ["gemini", "-y", "-m", strip_provider(model_id), "-p"]
+    if default_cli == "agy":
+        if default_variant:
+            raise RegistryError("Antigravity models cannot have a default variant")
+        # agy matches on the display name; --print needs the prompt as an argv value.
+        return ["agy", "--model", AGY_DISPLAY_NAMES.get(model_id, AGY_DEFAULT_DISPLAY_NAME), "--print"]
     if default_cli == "claude":
         if default_variant:
             raise RegistryError("Claude CLI models cannot have a default variant")
@@ -642,7 +661,7 @@ def add_model_interactive(repo_root: Path) -> None:
         raise RegistryError(f"Model '{name}' already exists")
 
     model_id = input("Model ID with provider prefix (e.g., openai:gpt-5.6): ").strip()
-    default_cli = input("Default CLI (codex/opencode/gemini/claude/subagent) [codex]: ").strip() or "codex"
+    default_cli = input("Default CLI (codex/opencode/agy/gemini/claude/subagent) [codex]: ").strip() or "codex"
     supports_reasoning = prompt_bool("Supports Codex high/xhigh reasoning", default=default_cli == "codex")
     codex_profile = input("Codex profile (blank for none): ").strip() or None
     claude_model_flag = input("Claude --model flag (blank for none): ").strip() or None
@@ -681,7 +700,7 @@ def add_model_interactive(repo_root: Path) -> None:
         },
         "docs": {
             "family": family,
-            "cli_label": "agy/gemini" if google else default_cli,
+            "cli_label": "agy/gemini" if google or default_cli == "agy" else default_cli,
             "actual_model": strip_provider(model_id),
             "option_description": description,
             "reference_cli": default_cli,

@@ -72,7 +72,7 @@ Use AskUserQuestion tool with options:
 - `gpt52` - OpenAI GPT-5.2 (planning, research, analysis)
 - `gpt52-high` - OpenAI GPT-5.2 with high reasoning effort
 - `gpt52-xhigh` - OpenAI GPT-5.2 with xhigh reasoning (30+ min tasks)
-- `gemini` - Gemini 3 Flash Preview (default Gemini shorthand)
+- `gemini` - Gemini 3.7 Flash (High reasoning) via Antigravity (default Gemini shorthand)
 - `gemini-high` - Gemini 2.5 Pro
 - `gemini-xhigh` - Gemini 3 Pro Preview
 - `gemini25pro` - Gemini 2.5 Pro (explicit shorthand)
@@ -86,6 +86,7 @@ Use AskUserQuestion tool with options:
 - `gemini37-high` - Gemini 3.7 Flash (High reasoning) via Antigravity
 - `gemini37-medium` - Gemini 3.7 Flash (Medium reasoning) via Antigravity
 - `gemini37-low` - Gemini 3.7 Flash (Low reasoning) via Antigravity
+- `agy` - Gemini 3.7 Flash (High) via Antigravity (default agy shorthand)
 - `zai` - Z.AI GLM-4.7 via Codex CLI
 - `glm5` - Z.AI GLM-5.3 via OpenCode (latest GLM 5.x, 1M context)
 - `glm52` - Z.AI GLM-5.2 via OpenCode (explicit pin, 1M context)

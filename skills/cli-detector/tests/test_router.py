@@ -117,6 +117,17 @@ def test_google_models_prefer_agy_when_healthy(monkeypatch):
 
     cli, model_id, cmd = router.resolve_model("gemini")
     assert cli == "agy"
+    assert model_id == "google:gemini-3.7-flash"
+    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
+
+    cli, model_id, cmd = router.resolve_model("agy")
+    assert cli == "agy"
+    assert model_id == "google:gemini-3.7-flash"
+    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
+
+    # Legacy explicit shorthand keeps its 3 Flash preview mapping.
+    cli, model_id, cmd = router.resolve_model("gemini3flash")
+    assert cli == "agy"
     assert model_id == "google:gemini-3-flash-preview"
     assert cmd == ["agy", "--model", "Gemini 3.5 Flash (Medium)", "--print"]
 
@@ -124,6 +135,25 @@ def test_google_models_prefer_agy_when_healthy(monkeypatch):
     assert cli == "agy"
     assert model_id == "google:gemini-2.5-pro"
     assert cmd == ["agy", "--model", "Gemini 3.1 Pro (High)", "--print"]
+
+
+def test_gemini_and_agy_fall_back_to_legacy_gemini_cli_when_agy_missing(monkeypatch):
+    fake = _FakeCache(
+        {
+            "clis": {
+                "gemini": {"installed": True, "issues": []},
+                "opencode": {"installed": True, "issues": []},
+            },
+            "providers": {},
+        }
+    )
+    monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+
+    for shorthand in ("gemini", "agy"):
+        cli, model_id, cmd = router.resolve_model(shorthand)
+        assert cli == "gemini", shorthand
+        assert model_id == "google:gemini-3.7-flash", shorthand
+        assert cmd == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"], shorthand
 
 
 def test_gemini37_routes_through_agy_when_healthy(monkeypatch):
@@ -682,7 +712,8 @@ class TestGeminiModels:
     @pytest.mark.parametrize(
         "shorthand,expected_model",
         [
-            ("gemini", "gemini-3-flash-preview"),
+            ("gemini", "gemini-3.7-flash"),
+            ("agy", "gemini-3.7-flash"),
             ("gemini-high", "gemini-2.5-pro"),
             ("gemini-xhigh", "gemini-3-pro-preview"),
             ("gemini25pro", "gemini-2.5-pro"),

@@ -634,7 +634,7 @@ The executor uses stdin for codex models to avoid shell escaping issues with com
 codex exec --full-auto -  # reads from stdin
 
 # Antigravity: uses --print with the prompt as the flag value
-agy --model "Gemini 3.5 Flash (Medium)" --print "prompt content"
+agy --model "Gemini 3.7 Flash (High)" --print "prompt content"
 
 # Legacy Gemini CLI fallback: uses -p for headless mode
 gemini -y -p "prompt content"
@@ -681,7 +681,7 @@ These tables are generated from `scripts/models.json`.
 
 | Shorthand | Model | Best For |
 |-----------|-------|----------|
-| `gemini` | gemini-3-flash-preview | Fast daily driver (default) |
+| `gemini` | gemini-3.7-flash | Fast daily driver, high reasoning (default) |
 | `gemini-high` | gemini-2.5-pro | Stable, more capable |
 | `gemini-xhigh` | gemini-3-pro-preview | Most capable Gemini fallback |
 | `gemini25pro` | gemini-2.5-pro | Explicit stable Pro selection |
@@ -694,6 +694,7 @@ These tables are generated from `scripts/models.json`.
 | `gemini37-high` | gemini-3.7-flash | Latest Flash tier, high reasoning |
 | `gemini37-medium` | gemini-3.7-flash | Latest Flash tier, balanced reasoning |
 | `gemini37-low` | gemini-3.7-flash | Latest Flash tier, fast low-reasoning |
+| `agy` | gemini-3.7-flash | Antigravity default (same as gemini/gemini37) |
 
 #### Z.AI / OpenCode
 
