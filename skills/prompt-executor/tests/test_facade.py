@@ -61,8 +61,13 @@ FACADE_NAMES = [
     "maybe_wrap_command_with_sandbox",
     "raise_on_execution_error",
     "SANDBOX_ENV_PASSTHROUGH",
+    "SANDBOX_PREFLIGHT_TIMEOUT",
+    "AGY_AUTH_PREFLIGHT_TIMEOUT",
     "_SANDBOX_PREFLIGHT_CACHE",
     "_sandbox_passthrough_env",
+    "_is_agy_command",
+    "_is_claude_command",
+    "_agy_auth_bind_file",
     "BWRAP_PROFILES",
     "BWRAP_MISSING_ERROR",
     # loop.py

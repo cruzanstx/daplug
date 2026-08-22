@@ -87,6 +87,16 @@ python3 "$EXECUTOR" [prompts...] [options]
 - `--sandbox-profile`: Isolation profile (`strict|balanced|dev`, default `balanced`)
 - `--sandbox-workspace`: Override sandbox workspace path (default: execution cwd)
 - `--sandbox-net`: Network override (`on|off`; default comes from profile)
+
+### Sandbox Authentication & CLI-Scoped Binds
+
+Bubblewrap sandboxes bind only the minimum host files each CLI needs to authenticate:
+
+- **Claude Code** (`claude`): read-only bind of `~/.claude/.credentials.json` and `~/.claude.json`; the rest of `~/.claude` stays outside the sandbox. A `claude auth status` preflight verifies the binds before real runs.
+- **Antigravity** (`agy`/`antigravity`): read-only bind of `~/.gemini/antigravity-cli/antigravity-oauth-token` on top of a tmpfs for the parent directory, so only the token file is visible — conversations, databases, cache, and logs stay outside the sandbox. An `agy models` preflight verifies the token works before real runs.
+- **Other CLIs** (`codex`, `gemini`, `opencode`): authenticate via environment variables or API keys passed through `--setenv`; no host credential files are bound.
+
+Writable tool-state binds are CLI-scoped (least privilege): `opencode_state`/`opencode_cache`/`opencode_config` are only bound for `opencode` children. `workspace` and `tool_caches` remain shared across all CLIs.
 - `--base-branch, -b`: Base branch for worktree (default: main)
 - `--on-conflict`: How to handle existing worktree (error|remove|reuse|increment)
 - `--loop, -l`: Enable iterative verification loop until completion

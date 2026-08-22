@@ -26,6 +26,8 @@ Execute prompts from `./prompts/` (including subfolders) using various AI models
 | `--sandbox-profile <preset>` | Isolation preset: `strict`, `balanced`, `dev` (default: `balanced`) |
 | `--sandbox-workspace <path>` | Override sandbox workspace path (default: repo/worktree cwd) |
 | `--sandbox-net <mode>` | Network override: `on` or `off` (default from profile) |
+
+**Sandbox auth:** Claude binds `~/.claude/.credentials.json` + `~/.claude.json` read-only; Antigravity (agy) binds `~/.gemini/antigravity-cli/antigravity-oauth-token` read-only (on a tmpfs so conversations/databases stay outside). Writable OpenCode state binds are CLI-scoped (only `opencode` children receive them). Preflight probes (`claude auth status`, `agy models`) fail fast with an actionable message when auth is missing.
 | `--tmux, -t` | Run in tmux session (can monitor/attach later) |
 | `--parallel, -p` | Run multiple prompts in parallel |
 | `--loop, -l` | Enable iterative verification loop until completion |

@@ -5,6 +5,7 @@ import argparse
 import json
 import os
 import shutil
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -26,6 +27,19 @@ BWRAP_PROFILES = {
         "writable": ["workspace", "opencode_state", "opencode_cache", "opencode_config", "tool_caches"],
         "minimal_env": False,
     },
+}
+
+# Which CLIs each named writable bind applies to.  None means all CLIs.
+#
+# Least privilege: an agent running as one CLI should not be able to read
+# another CLI's sessions or credentials.  opencode_state/cache/config are only
+# bound for opencode children; workspace and tool_caches apply to all.
+_BIND_CLI_OWNERS: dict[str, Optional[frozenset[str]]] = {
+    "workspace": None,
+    "opencode_state": frozenset({"opencode"}),
+    "opencode_cache": frozenset({"opencode"}),
+    "opencode_config": frozenset({"opencode"}),
+    "tool_caches": None,
 }
 
 # Credential env vars that must survive bwrap --clearenv. These providers
@@ -267,6 +281,11 @@ def _is_claude_command(child_command: Optional[list[str]]) -> bool:
     return bool(child_command) and Path(child_command[0]).name == "claude"
 
 
+def _is_agy_command(child_command: Optional[list[str]]) -> bool:
+    """True when the sandboxed command launches the Antigravity CLI (agy)."""
+    return bool(child_command) and Path(child_command[0]).name in ("agy", "antigravity")
+
+
 def _claude_auth_bind_files(home: Path) -> list[str]:
     """Minimal host files Claude Code needs to authenticate inside the sandbox.
 
@@ -282,6 +301,22 @@ def _claude_auth_bind_files(home: Path) -> list[str]:
     return [str(p) for p in candidates if p.exists()]
 
 
+def _agy_auth_bind_file(home: Path) -> Optional[str]:
+    """Return the host OAuth token path for Antigravity, or None if absent.
+
+    Only the single token file is exposed.  The rest of
+    ~/.gemini/antigravity-cli/ (conversations, databases, cache, logs, brain)
+    is kept out of the sandbox by mounting a tmpfs over the directory and
+    then binding only the token on top.
+    """
+    token = home / ".gemini" / "antigravity-cli" / "antigravity-oauth-token"
+    try:
+        mode = token.lstat().st_mode
+    except OSError:
+        return None
+    return str(token) if stat.S_ISREG(mode) else None
+
+
 def _sandbox_passthrough_env(cli_info: dict) -> dict[str, str]:
     """Env-keyed credentials to re-inject after bwrap --clearenv."""
     extra = {k: v for k, v in cli_info.get("env", {}).items() if v}
@@ -290,6 +325,22 @@ def _sandbox_passthrough_env(cli_info: dict) -> dict[str, str]:
         if value and key not in extra:
             extra[key] = value
     return extra
+
+
+def _bind_applies_to_cli(key: str, child_command: Optional[list[str]]) -> bool:
+    """Check if a named writable bind applies to the given CLI.
+
+    Least privilege: an agent running as one CLI should not be able to read
+    another CLI's sessions or credentials.  ``opencode_state``/``cache``/
+    ``config`` are only bound for opencode children; ``workspace`` and
+    ``tool_caches`` apply to all.
+    """
+    owners = _BIND_CLI_OWNERS.get(key)
+    if owners is None:
+        return True
+    if not child_command:
+        return False
+    return Path(child_command[0]).name in owners
 
 
 def build_bwrap_args(
@@ -372,6 +423,8 @@ def build_bwrap_args(
     }
 
     for key in profile_cfg["writable"]:
+        if not _bind_applies_to_cli(key, child_command):
+            continue
         for path in writable_paths.get(key, []):
             p = Path(path)
             if key == "workspace":
@@ -390,12 +443,25 @@ def build_bwrap_args(
         for path in _claude_auth_bind_files(Path(home)):
             cmd.extend(["--ro-bind", path, path])
 
+    # Antigravity (agy) authenticates from a single OAuth token on the host.
+    # Mount a writable tmpfs over ~/.gemini/antigravity-cli/ so the CLI has a
+    # scratch space for runtime cache/logs, then bind only the token file
+    # read-only on top.  Conversations, databases, and other sensitive entries
+    # in the real directory are never visible inside the sandbox.
+    if _is_agy_command(child_command):
+        token = _agy_auth_bind_file(Path(home))
+        if token:
+            parent = str(Path(token).parent)
+            cmd.extend(["--tmpfs", parent])
+            cmd.extend(["--ro-bind", token, token])
+
     cmd.extend(["--", *child_command])
     return cmd
 
 
 SANDBOX_PREFLIGHT_TIMEOUT = 60
 CLAUDE_AUTH_PREFLIGHT_TIMEOUT = 60
+AGY_AUTH_PREFLIGHT_TIMEOUT = 60
 
 # Keyed by (binary, profile, workspace); a loop re-probes only when the
 # sandbox shape changes, not on every iteration.
@@ -465,6 +531,66 @@ def _claude_auth_preflight(
     )
 
 
+def _agy_auth_preflight(
+    binary: str, sandbox_config: dict, cli_info: dict, cwd: str
+) -> Optional[str]:
+    """Verify Antigravity CLI is authenticated inside the sandbox.
+
+    ``<binary> --version`` only proves the executable is reachable.  agy reads
+    its OAuth token from a bind-mounted host file, so a separate ``agy models``
+    probe is needed to confirm the token bind actually works before burning
+    loop iterations on interactive-login timeouts.  Returns an error message
+    on failure, None when authenticated.
+    """
+    token = _agy_auth_bind_file(Path.home())
+    if not token:
+        return _sandbox_error_message(
+            sandbox_config,
+            "Antigravity CLI is not authenticated inside the sandbox: "
+            "token file not found at "
+            "~/.gemini/antigravity-cli/antigravity-oauth-token. "
+            "Run 'agy' interactively on the host to complete OAuth login.",
+        )
+
+    probe_cmd = build_bwrap_args(
+        sandbox_config,
+        [binary, "models"],
+        extra_env=_sandbox_passthrough_env(cli_info),
+    )
+    try:
+        proc = subprocess.run(
+            probe_cmd,
+            cwd=cwd,
+            capture_output=True,
+            text=True,
+            timeout=AGY_AUTH_PREFLIGHT_TIMEOUT,
+        )
+    except subprocess.TimeoutExpired:
+        return _sandbox_error_message(
+            sandbox_config,
+            f"AGY auth preflight ('{binary} models') timed out after "
+            f"{AGY_AUTH_PREFLIGHT_TIMEOUT}s inside the sandbox. "
+            "The host token at ~/.gemini/antigravity-cli/antigravity-oauth-token "
+            "may be expired; run 'agy' interactively to re-authenticate.",
+        )
+    except OSError as exc:
+        return _sandbox_error_message(
+            sandbox_config, f"AGY auth preflight could not launch: {exc}"
+        )
+
+    if proc.returncode != 0:
+        return _sandbox_error_message(
+            sandbox_config,
+            f"AGY auth preflight ('{binary} models') failed inside the sandbox "
+            f"(exit {proc.returncode}). "
+            "Ensure the host is logged in by running 'agy' interactively to "
+            "complete OAuth. Token path: "
+            "~/.gemini/antigravity-cli/antigravity-oauth-token",
+        )
+
+    return None
+
+
 def sandbox_preflight(cli_info: dict, sandbox_config: Optional[dict], cwd: str) -> Optional[str]:
     """Probe the CLI inside the sandbox before real execution.
 
@@ -483,14 +609,21 @@ def sandbox_preflight(cli_info: dict, sandbox_config: Optional[dict], cwd: str) 
         return None
 
     binary = command[0]
-    cache_key = (binary, sandbox_config.get("profile"), sandbox_config.get("workspace"))
+    passthrough_env = _sandbox_passthrough_env(cli_info)
+    cache_key = (
+        binary,
+        sandbox_config.get("profile"),
+        sandbox_config.get("workspace"),
+        bool(sandbox_config.get("network")),
+        tuple(sorted(passthrough_env)),
+    )
     if cache_key in _SANDBOX_PREFLIGHT_CACHE:
         return _SANDBOX_PREFLIGHT_CACHE[cache_key]
 
     probe_cmd = build_bwrap_args(
         sandbox_config,
         [binary, "--version"],
-        extra_env=_sandbox_passthrough_env(cli_info),
+        extra_env=passthrough_env,
     )
     error: Optional[str] = None
     try:
@@ -522,6 +655,9 @@ def sandbox_preflight(cli_info: dict, sandbox_config: Optional[dict], cwd: str) 
     # its host credentials bound in, so verify authentication before real runs.
     if error is None and _is_claude_command(command):
         error = _claude_auth_preflight(binary, sandbox_config, cli_info, cwd)
+
+    if error is None and _is_agy_command(command):
+        error = _agy_auth_preflight(binary, sandbox_config, cli_info, cwd)
 
     _SANDBOX_PREFLIGHT_CACHE[cache_key] = error
     return error

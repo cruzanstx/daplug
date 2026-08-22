@@ -2,6 +2,14 @@
 
 All notable changes to daplug are documented here.
 
+## [Unreleased]
+
+### Fixed
+- **Sandboxed Antigravity CLI (agy) authenticates with the host OAuth token** instead of prompting for interactive login and timing out. The sandbox now binds `~/.gemini/antigravity-cli/antigravity-oauth-token` read-only into the sandbox (on top of a tmpfs for the parent directory, so conversations, databases, and other sensitive entries stay outside). An `agy models` preflight probes authentication under the same bwrap shape as the real run, failing fast with an actionable message when the token is missing or expired.
+
+### Changed
+- **CLI-scoped writable binds**: `opencode_state`/`opencode_cache`/`opencode_config` writable binds are now only applied for `opencode` children. AGY, Codex, and Claude children no longer receive OpenCode state they never use. OpenCode children are byte-for-byte unchanged. `workspace` and `tool_caches` remain shared across all CLIs.
+
 ## [0.39.0] - 2026-08-21
 
 ### Added

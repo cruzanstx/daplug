@@ -642,6 +642,16 @@ gemini -y -p "prompt content"
 
 This prevents issues with prompts containing newlines, quotes, backticks, and XML tags.
 
+### Sandbox Authentication
+
+When `--sandbox` is enabled (Linux/bubblewrap), each CLI receives only the minimum host credentials it needs:
+
+- **Claude Code**: `~/.claude/.credentials.json` + `~/.claude.json` (read-only bind)
+- **Antigravity (agy)**: `~/.gemini/antigravity-cli/antigravity-oauth-token` (read-only bind on a tmpfs; conversations and databases stay outside)
+- **OpenCode/Codex**: env-keyed credentials via `--setenv`; no host credential files bound
+
+Writable tool-state binds are CLI-scoped: `opencode_state`/`opencode_cache`/`opencode_config` are only bound for `opencode` children. Preflight probes (`claude auth status`, `agy models`) verify authentication before real runs and fail fast with an actionable message.
+
 <!-- BEGIN GENERATED: readme-model-tiers -->
 ### Model Tiers
 

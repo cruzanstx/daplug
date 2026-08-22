@@ -133,6 +133,15 @@ When `--loop` is used, prompts are wrapped with completion markers:
 
 Loop state persisted in `~/.claude/loop-state/{prompt-number}.json`
 
+### Sandbox Auth & CLI-Scoped Binds
+
+`build_bwrap_args` in `sandbox.py` binds only the minimum host credentials each CLI needs:
+- Claude: `~/.claude/.credentials.json` + `~/.claude.json` (read-only); rest of `~/.claude` excluded
+- Antigravity (agy): `~/.gemini/antigravity-cli/antigravity-oauth-token` (read-only on a tmpfs so conversations/databases stay outside); `agy models` preflight verifies the token
+- Other CLIs: env-keyed credentials via `--setenv`; no host credential files
+
+Writable tool-state binds are CLI-scoped via `_BIND_CLI_OWNERS` in `sandbox.py`: `opencode_state`/`opencode_cache`/`opencode_config` are only bound for `opencode` children. `workspace` and `tool_caches` apply to all CLIs.
+
 ### Prompt File Naming
 
 Pattern: `NNN-descriptive-name.md` (e.g., `042-add-user-auth.md`)
