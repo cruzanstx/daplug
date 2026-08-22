@@ -112,13 +112,25 @@ def test_agy_plugin_builds_gemini37_commands(tmp_path):
     assert plugin.build_command("google:gemini-3.7-flash", prompt_file, tmp_path)[:4] == [
         "agy",
         "--model",
-        "Gemini 3.7 Flash (Medium)",
+        "Gemini 3.7 Flash (High)",
+        "--print",
+    ]
+    assert plugin.build_command("gemini37", prompt_file, tmp_path)[:4] == [
+        "agy",
+        "--model",
+        "Gemini 3.7 Flash (High)",
         "--print",
     ]
     assert plugin.build_command("gemini37-high", prompt_file, tmp_path)[:4] == [
         "agy",
         "--model",
         "Gemini 3.7 Flash (High)",
+        "--print",
+    ]
+    assert plugin.build_command("gemini37-medium", prompt_file, tmp_path)[:4] == [
+        "agy",
+        "--model",
+        "Gemini 3.7 Flash (Medium)",
         "--print",
     ]
     assert plugin.build_command("gemini37-low", prompt_file, tmp_path)[:4] == [
@@ -143,6 +155,7 @@ def test_agy_plugin_advertises_gemini37_models():
     ids = [m.id for m in models]
     assert "google:gemini-3.7-flash" in ids
     assert "gemini37-high" in ids
+    assert "gemini37-medium" in ids
     assert "gemini37-low" in ids
 
 

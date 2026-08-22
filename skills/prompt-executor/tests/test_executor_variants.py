@@ -161,11 +161,15 @@ def test_agy_cli_override_for_gemini37_models(no_router, tmp_path):
     info = executor.get_cli_info("gemini37", repo_root=tmp_path, cli_override="agy")
     assert info["selected_cli"] == "agy"
     assert info["stdin_mode"] == "arg"
-    assert info["command"] == ["agy", "--model", "Gemini 3.7 Flash (Medium)", "--print"]
+    assert info["command"] == ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
 
     info_high = executor.get_cli_info("gemini37-high", repo_root=tmp_path, cli_override="agy")
     assert info_high["selected_cli"] == "agy"
     assert info_high["command"] == ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
+
+    info_medium = executor.get_cli_info("gemini37-medium", repo_root=tmp_path, cli_override="agy")
+    assert info_medium["selected_cli"] == "agy"
+    assert info_medium["command"] == ["agy", "--model", "Gemini 3.7 Flash (Medium)", "--print"]
 
     info_low = executor.get_cli_info("gemini37-low", repo_root=tmp_path, cli_override="agy")
     assert info_low["selected_cli"] == "agy"
@@ -182,6 +186,10 @@ def test_gemini_cli_override_for_gemini37_models(no_router, tmp_path):
     info_high = executor.get_cli_info("gemini37-high", repo_root=tmp_path, cli_override="gemini")
     assert info_high["selected_cli"] == "gemini"
     assert info_high["command"] == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
+
+    info_medium = executor.get_cli_info("gemini37-medium", repo_root=tmp_path, cli_override="gemini")
+    assert info_medium["selected_cli"] == "gemini"
+    assert info_medium["command"] == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
 
     info_low = executor.get_cli_info("gemini37-low", repo_root=tmp_path, cli_override="gemini")
     assert info_low["selected_cli"] == "gemini"
@@ -416,6 +424,7 @@ EXPECTED_MODEL_KEYS = [
     "gemini31pro",
     "gemini37",
     "gemini37-high",
+    "gemini37-medium",
     "gemini37-low",
     "zai",
     "glm5",

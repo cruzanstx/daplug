@@ -232,9 +232,10 @@ _AGY_MODEL_ARGS = {
     "google:gemini-2.5-pro": "Gemini 3.1 Pro (High)",
     "google:gemini-3-pro-preview": "Gemini 3.1 Pro (High)",
     "google:gemini-3.1-pro-preview": "Gemini 3.1 Pro (High)",
-    "google:gemini-3.7-flash": "Gemini 3.7 Flash (Medium)",
-    "gemini37": "Gemini 3.7 Flash (Medium)",
+    "google:gemini-3.7-flash": "Gemini 3.7 Flash (High)",
+    "gemini37": "Gemini 3.7 Flash (High)",
     "gemini37-high": "Gemini 3.7 Flash (High)",
+    "gemini37-medium": "Gemini 3.7 Flash (Medium)",
     "gemini37-low": "Gemini 3.7 Flash (Low)",
 }
 

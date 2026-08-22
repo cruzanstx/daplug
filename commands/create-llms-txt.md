@@ -494,8 +494,9 @@ All available models for /daplug:run-prompt --model:
 - `gemini3flash` - Gemini 3 Flash Preview (explicit shorthand)
 - `gemini3pro` - Gemini 3 Pro Preview (explicit shorthand)
 - `gemini31pro` - Gemini 3.1 Pro Preview (if your account has access)
-- `gemini37` - Gemini 3.7 Flash (Medium reasoning) via Antigravity
+- `gemini37` - Gemini 3.7 Flash (High reasoning, default 3.7 Flash alias) via Antigravity
 - `gemini37-high` - Gemini 3.7 Flash (High reasoning) via Antigravity
+- `gemini37-medium` - Gemini 3.7 Flash (Medium reasoning) via Antigravity
 - `gemini37-low` - Gemini 3.7 Flash (Low reasoning) via Antigravity
 
 **Z.AI / OpenCode Models:** (check: `zai.token_quota.percentage` where applicable)
@@ -539,6 +540,7 @@ Antigravity (`agy`) maps legacy shorthands to the closest current `agy models` d
 | `gemini31pro` | gemini-3.1-pro-preview | gemini-3.1-pro-preview |
 | `gemini37` | gemini-3.7-flash | gemini-3.7-flash |
 | `gemini37-high` | gemini-3.7-flash | gemini-3.7-flash |
+| `gemini37-medium` | gemini-3.7-flash | gemini-3.7-flash |
 | `gemini37-low` | gemini-3.7-flash | gemini-3.7-flash |
 <!-- END GENERATED: create-llms-available-models -->
 </available_models>
@@ -640,37 +642,38 @@ If user chooses #1:
   27. gemini3flash - {X}% used - 3-flash explicit
   28. gemini3pro - {X}% used - 3-pro, most capable
   29. gemini31pro - {X}% used - 3.1 Pro Preview if available
-  30. gemini37 - {X}% used - 3.7-flash Medium, latest balanced Flash
+  30. gemini37 - {X}% used - 3.7-flash High, default 3.7 Flash alias
   31. gemini37-high - {X}% used - 3.7-flash High, latest deep reasoning
-  32. gemini37-low - {X}% used - 3.7-flash Low, latest fast tier
+  32. gemini37-medium - {X}% used - 3.7-flash Medium, latest balanced Flash
+  33. gemini37-low - {X}% used - 3.7-flash Low, latest fast tier
 
   **Z.AI / OpenCode:** {usage status}
-  33. zai - {X}% used - Z.AI GLM-4.7
-  34. glm5 - {X}% used - Z.AI GLM-5.3 latest alias
-  35. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
-  36. glm53 - {X}% used - Z.AI GLM-5.3 explicit pin
-  37. kimi - {X}% used - Kimi K2.5 via OpenCode
-  38. opencode - {X}% used - OpenCode GLM-4.7
+  34. zai - {X}% used - Z.AI GLM-4.7
+  35. glm5 - {X}% used - Z.AI GLM-5.3 latest alias
+  36. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
+  37. glm53 - {X}% used - Z.AI GLM-5.3 explicit pin
+  38. kimi - {X}% used - Kimi K2.5 via OpenCode
+  39. opencode - {X}% used - OpenCode GLM-4.7
 
   **Synthetic:** {usage status}
-  39. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
-  40. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
-  41. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.7-Code vision
-  42. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
-  43. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
-  44. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
-  45. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
+  40. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
+  41. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
+  42. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.7-Code vision
+  43. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
+  44. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
+  45. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
+  46. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
 
   **Local:** {usage status}
-  46. local - local qwen3.6-35b-a3b, no quota
-  47. qwen - local qwen3.6-35b-a3b, no quota
-  48. devstral - local Devstral, no quota
-  49. glm-local - local GLM-4.7 Flash, no quota
-  50. qwen-small - local qwen3-4b, no quota
-  51. qwen36 - local qwen3.6-35b-a3b, no quota
-  52. qwen36-27b - local qwen3.6-27b, no quota
+  47. local - local qwen3.6-35b-a3b, no quota
+  48. qwen - local qwen3.6-35b-a3b, no quota
+  49. devstral - local Devstral, no quota
+  50. glm-local - local GLM-4.7 Flash, no quota
+  51. qwen-small - local qwen3-4b, no quota
+  52. qwen36 - local qwen3.6-35b-a3b, no quota
+  53. qwen36-27b - local qwen3.6-27b, no quota
 
-  Choose (1-52), or type model with flags (e.g., 'codex --worktree --loop'): _
+  Choose (1-53), or type model with flags (e.g., 'codex --worktree --loop'): _
 <!-- END GENERATED: create-llms-selection-menu -->
 
   **Execute based on selection:**

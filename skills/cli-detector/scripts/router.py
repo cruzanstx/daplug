@@ -113,6 +113,7 @@ _SHORTHAND: dict[str, _ModelRequest] = {
     # Gemini 3.7 Flash — newest Flash tier with reasoning tiers in the agy display name.
     "gemini37": _ModelRequest("gemini37", family="google", model_id="google:gemini-3.7-flash"),
     "gemini37-high": _ModelRequest("gemini37-high", family="google", model_id="google:gemini-3.7-flash"),
+    "gemini37-medium": _ModelRequest("gemini37-medium", family="google", model_id="google:gemini-3.7-flash"),
     "gemini37-low": _ModelRequest("gemini37-low", family="google", model_id="google:gemini-3.7-flash"),
     # Z.AI
     "zai": _ModelRequest("zai", family="zai", model_id="zai:glm-4.7"),
@@ -303,9 +304,10 @@ _AGY_MODEL_ARGS: dict[str, str] = {
     "google:gemini-2.5-pro": "Gemini 3.1 Pro (High)",
     "google:gemini-3-pro-preview": "Gemini 3.1 Pro (High)",
     "google:gemini-3.1-pro-preview": "Gemini 3.1 Pro (High)",
-    "google:gemini-3.7-flash": "Gemini 3.7 Flash (Medium)",
-    "gemini37": "Gemini 3.7 Flash (Medium)",
+    "google:gemini-3.7-flash": "Gemini 3.7 Flash (High)",
+    "gemini37": "Gemini 3.7 Flash (High)",
     "gemini37-high": "Gemini 3.7 Flash (High)",
+    "gemini37-medium": "Gemini 3.7 Flash (Medium)",
     "gemini37-low": "Gemini 3.7 Flash (Low)",
 }
 

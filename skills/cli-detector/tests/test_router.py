@@ -127,7 +127,7 @@ def test_google_models_prefer_agy_when_healthy(monkeypatch):
 
 
 def test_gemini37_routes_through_agy_when_healthy(monkeypatch):
-    """gemini37/37-high/37-low must route to agy with byte-exact display names."""
+    """gemini37/37-high/37-medium/37-low must route to agy with byte-exact display names."""
     fake = _FakeCache(
         {
             "clis": {
@@ -143,12 +143,17 @@ def test_gemini37_routes_through_agy_when_healthy(monkeypatch):
     cli, model_id, cmd = router.resolve_model("gemini37")
     assert cli == "agy"
     assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (Medium)", "--print"]
+    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
 
     cli, model_id, cmd = router.resolve_model("gemini37-high")
     assert cli == "agy"
     assert model_id == "google:gemini-3.7-flash"
     assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
+
+    cli, model_id, cmd = router.resolve_model("gemini37-medium")
+    assert cli == "agy"
+    assert model_id == "google:gemini-3.7-flash"
+    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (Medium)", "--print"]
 
     cli, model_id, cmd = router.resolve_model("gemini37-low")
     assert cli == "agy"
@@ -180,6 +185,11 @@ def test_gemini37_falls_back_to_gemini_cli_when_agy_missing(monkeypatch):
     assert model_id == "google:gemini-3.7-flash"
     assert cmd == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
 
+    cli, model_id, cmd = router.resolve_model("gemini37-medium")
+    assert cli == "gemini"
+    assert model_id == "google:gemini-3.7-flash"
+    assert cmd == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
+
     cli, model_id, cmd = router.resolve_model("gemini37-low")
     assert cli == "gemini"
     assert model_id == "google:gemini-3.7-flash"
@@ -199,9 +209,10 @@ def test_gemini37_preferred_cli_can_force_legacy_gemini(monkeypatch):
     )
     monkeypatch.setattr(router, "load_cache_file", lambda: fake)
 
-    cli, _model_id, cmd = router.resolve_model("gemini37", preferred_cli="gemini")
-    assert cli == "gemini"
-    assert cmd[0] == "gemini"
+    for shorthand in ("gemini37", "gemini37-high", "gemini37-medium", "gemini37-low"):
+        cli, _model_id, cmd = router.resolve_model(shorthand, preferred_cli="gemini")
+        assert cli == "gemini", shorthand
+        assert cmd == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"], shorthand
 
 
 def test_google_models_fall_back_to_gemini_when_agy_missing(monkeypatch):
@@ -682,6 +693,7 @@ class TestGeminiModels:
             ("gemini31pro", "gemini-3.1-pro-preview"),
             ("gemini37", "gemini-3.7-flash"),
             ("gemini37-high", "gemini-3.7-flash"),
+            ("gemini37-medium", "gemini-3.7-flash"),
             ("gemini37-low", "gemini-3.7-flash"),
         ],
     )

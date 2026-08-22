@@ -360,9 +360,10 @@ class TestAGYMapConsistency:
     def test_gemini37_display_names_in_all_maps(self):
         """All three AGY maps must contain the gemini37 entries."""
         expected = {
-            "google:gemini-3.7-flash": "Gemini 3.7 Flash (Medium)",
-            "gemini37": "Gemini 3.7 Flash (Medium)",
+            "google:gemini-3.7-flash": "Gemini 3.7 Flash (High)",
+            "gemini37": "Gemini 3.7 Flash (High)",
             "gemini37-high": "Gemini 3.7 Flash (High)",
+            "gemini37-medium": "Gemini 3.7 Flash (Medium)",
             "gemini37-low": "Gemini 3.7 Flash (Low)",
         }
 

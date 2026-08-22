@@ -690,8 +690,9 @@ These tables are generated from `scripts/models.json`.
 | `gemini3flash` | gemini-3-flash-preview | Explicit 3 Flash selection |
 | `gemini3pro` | gemini-3-pro-preview | Explicit 3 Pro selection |
 | `gemini31pro` | gemini-3.1-pro-preview | Latest Pro model (if available) |
-| `gemini37` | gemini-3.7-flash | Latest Flash tier, balanced reasoning |
+| `gemini37` | gemini-3.7-flash | Latest Flash tier, high reasoning (default 3.7 Flash alias) |
 | `gemini37-high` | gemini-3.7-flash | Latest Flash tier, high reasoning |
+| `gemini37-medium` | gemini-3.7-flash | Latest Flash tier, balanced reasoning |
 | `gemini37-low` | gemini-3.7-flash | Latest Flash tier, fast low-reasoning |
 
 #### Z.AI / OpenCode
