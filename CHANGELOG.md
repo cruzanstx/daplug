@@ -4,6 +4,13 @@ All notable changes to daplug are documented here.
 
 ## [Unreleased]
 
+## [0.40.2] - 2026-08-23
+
+### Fixed
+- **Headless Antigravity runs can execute tools without interactive approval.** All daplug-generated `agy`/`antigravity` commands now include `--dangerously-skip-permissions` immediately before `--print`. Legacy explicit `--cli gemini` commands remain unchanged, and bubblewrap continues to provide the filesystem isolation boundary.
+
+## [0.40.1] - 2026-08-23
+
 ### Fixed
 - **Sandboxed Antigravity CLI (agy) authenticates with the host OAuth token** instead of prompting for interactive login and timing out. The sandbox now binds `~/.gemini/antigravity-cli/antigravity-oauth-token` read-only into the sandbox (on top of a tmpfs for the parent directory, so conversations, databases, and other sensitive entries stay outside). An `agy models` preflight probes authentication under the same bwrap shape as the real run, failing fast with an actionable message when the token is missing or expired.
 
