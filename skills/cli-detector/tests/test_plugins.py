@@ -90,13 +90,15 @@ def test_agy_plugin_builds_argv_print_command(tmp_path):
         "agy",
         "--model",
         "Gemini 3.1 Pro (High)",
+        "--dangerously-skip-permissions",
         "--print",
         "Say only: ok",
     ]
-    assert plugin.build_command("google:gemini-3-flash-preview", prompt_file, tmp_path)[:4] == [
+    assert plugin.build_command("google:gemini-3-flash-preview", prompt_file, tmp_path)[:5] == [
         "agy",
         "--model",
         "Gemini 3.5 Flash (Medium)",
+        "--dangerously-skip-permissions",
         "--print",
     ]
 
@@ -109,34 +111,39 @@ def test_agy_plugin_builds_gemini37_commands(tmp_path):
     prompt_file = tmp_path / "prompt.md"
     prompt_file.write_text("test", encoding="utf-8")
 
-    assert plugin.build_command("google:gemini-3.7-flash", prompt_file, tmp_path)[:4] == [
+    assert plugin.build_command("google:gemini-3.7-flash", prompt_file, tmp_path)[:5] == [
         "agy",
         "--model",
         "Gemini 3.7 Flash (High)",
+        "--dangerously-skip-permissions",
         "--print",
     ]
-    assert plugin.build_command("gemini37", prompt_file, tmp_path)[:4] == [
+    assert plugin.build_command("gemini37", prompt_file, tmp_path)[:5] == [
         "agy",
         "--model",
         "Gemini 3.7 Flash (High)",
+        "--dangerously-skip-permissions",
         "--print",
     ]
-    assert plugin.build_command("gemini37-high", prompt_file, tmp_path)[:4] == [
+    assert plugin.build_command("gemini37-high", prompt_file, tmp_path)[:5] == [
         "agy",
         "--model",
         "Gemini 3.7 Flash (High)",
+        "--dangerously-skip-permissions",
         "--print",
     ]
-    assert plugin.build_command("gemini37-medium", prompt_file, tmp_path)[:4] == [
+    assert plugin.build_command("gemini37-medium", prompt_file, tmp_path)[:5] == [
         "agy",
         "--model",
         "Gemini 3.7 Flash (Medium)",
+        "--dangerously-skip-permissions",
         "--print",
     ]
-    assert plugin.build_command("gemini37-low", prompt_file, tmp_path)[:4] == [
+    assert plugin.build_command("gemini37-low", prompt_file, tmp_path)[:5] == [
         "agy",
         "--model",
         "Gemini 3.7 Flash (Low)",
+        "--dangerously-skip-permissions",
         "--print",
     ]
 
@@ -149,11 +156,11 @@ def test_agy_plugin_builds_default_shorthand_commands(tmp_path):
     prompt_file = tmp_path / "prompt.md"
     prompt_file.write_text("test", encoding="utf-8")
 
-    expected = ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
-    assert plugin.build_command("gemini", prompt_file, tmp_path)[:4] == expected
-    assert plugin.build_command("agy", prompt_file, tmp_path)[:4] == expected
-    assert plugin.build_command("", prompt_file, tmp_path)[:4] == expected
-    assert plugin.build_command("   ", prompt_file, tmp_path)[:4] == expected
+    expected = ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"]
+    assert plugin.build_command("gemini", prompt_file, tmp_path)[:5] == expected
+    assert plugin.build_command("agy", prompt_file, tmp_path)[:5] == expected
+    assert plugin.build_command("", prompt_file, tmp_path)[:5] == expected
+    assert plugin.build_command("   ", prompt_file, tmp_path)[:5] == expected
 
     # Unknown and empty keys use the configured AGY default.
     from plugins import agy as agy_plugin

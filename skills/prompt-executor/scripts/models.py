@@ -396,7 +396,13 @@ def _build_agy_command(model: str, model_id: str, variant: Optional[str]) -> lis
             f"--variant {variant} is not supported with --model {model} when using Antigravity."
         )
     # agy --print requires its prompt as an argv value; stdin leaves --print without an argument.
-    return ["agy", "--model", _agy_model_arg(model_id, model), "--print"]
+    return [
+        "agy",
+        "--model",
+        _agy_model_arg(model_id, model),
+        "--dangerously-skip-permissions",
+        "--print",
+    ]
 
 
 def _build_gemini_command(model: str, model_id: str, variant: Optional[str]) -> list[str]:

@@ -106,7 +106,14 @@ class AgyCLI(SimpleCLIPlugin):
         _ = cwd
         prompt = prompt_file.read_text(encoding="utf-8", errors="replace")
         # agy --print requires the prompt as the flag value; stdin leaves --print without an argument.
-        return ["agy", "--model", _agy_model_arg(model), "--print", prompt]
+        return [
+            "agy",
+            "--model",
+            _agy_model_arg(model),
+            "--dangerously-skip-permissions",
+            "--print",
+            prompt,
+        ]
 
     def _resolve_active_config(self) -> tuple[Path | None, dict[str, object] | None, str | None]:
         for candidate in self.get_config_paths():

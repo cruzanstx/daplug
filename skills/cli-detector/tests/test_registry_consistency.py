@@ -407,7 +407,15 @@ class TestAGYMapConsistency:
         default_clis = {entry["default_cli"] for entry in entries}
         assert default_clis == {"agy"}, default_clis
         commands = {tuple(entry["command"]) for entry in entries}
-        assert commands == {("agy", "--model", "Gemini 3.7 Flash (High)", "--print")}, commands
+        assert commands == {
+            (
+                "agy",
+                "--model",
+                "Gemini 3.7 Flash (High)",
+                "--dangerously-skip-permissions",
+                "--print",
+            )
+        }, commands
         stdin_modes = {entry["stdin_mode"] for entry in entries}
         assert stdin_modes == {"arg"}, stdin_modes
 

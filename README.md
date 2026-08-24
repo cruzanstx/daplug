@@ -634,7 +634,7 @@ The executor uses stdin for codex models to avoid shell escaping issues with com
 codex exec --full-auto -  # reads from stdin
 
 # Antigravity: uses --print with the prompt as the flag value
-agy --model "Gemini 3.7 Flash (High)" --print "prompt content"
+agy --model "Gemini 3.7 Flash (High)" --dangerously-skip-permissions --print "prompt content"
 
 # Legacy Gemini CLI fallback: uses -p for headless mode
 gemini -y -p "prompt content"

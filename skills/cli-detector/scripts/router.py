@@ -608,7 +608,13 @@ def _build_command(cli: str, model_id: str, request: _ModelRequest) -> list[str]
 
     if cli == "agy":
         # agy --print requires the prompt as the flag value; the executor appends it in argv mode.
-        cmd = ["agy", "--model", _agy_model_arg(model_id, request.shorthand), "--print"]
+        cmd = [
+            "agy",
+            "--model",
+            _agy_model_arg(model_id, request.shorthand),
+            "--dangerously-skip-permissions",
+            "--print",
+        ]
         return cmd
 
     if cli == "gemini":

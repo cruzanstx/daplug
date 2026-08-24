@@ -118,23 +118,42 @@ def test_google_models_prefer_agy_when_healthy(monkeypatch):
     cli, model_id, cmd = router.resolve_model("gemini")
     assert cli == "agy"
     assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
+    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"]
 
     cli, model_id, cmd = router.resolve_model("agy")
     assert cli == "agy"
     assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
+    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"]
 
     # Legacy explicit shorthand keeps its 3 Flash preview mapping.
     cli, model_id, cmd = router.resolve_model("gemini3flash")
     assert cli == "agy"
     assert model_id == "google:gemini-3-flash-preview"
-    assert cmd == ["agy", "--model", "Gemini 3.5 Flash (Medium)", "--print"]
+    assert cmd == ["agy", "--model", "Gemini 3.5 Flash (Medium)", "--dangerously-skip-permissions", "--print"]
 
     cli, model_id, cmd = router.resolve_model("gemini-high")
     assert cli == "agy"
     assert model_id == "google:gemini-2.5-pro"
-    assert cmd == ["agy", "--model", "Gemini 3.1 Pro (High)", "--print"]
+    assert cmd == ["agy", "--model", "Gemini 3.1 Pro (High)", "--dangerously-skip-permissions", "--print"]
+
+
+def test_agy_permission_flag_is_exclusive_to_antigravity_commands(monkeypatch):
+    fake = _FakeCache(
+        {
+            "clis": {
+                "agy": {"installed": True, "issues": []},
+                "gemini": {"installed": True, "issues": []},
+            },
+            "providers": {},
+        }
+    )
+    monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+
+    _cli, _model_id, agy_command = router.resolve_model("gemini")
+    _cli, _model_id, gemini_command = router.resolve_model("gemini", preferred_cli="gemini")
+
+    assert agy_command[agy_command.index("--print") - 1] == "--dangerously-skip-permissions"
+    assert "--dangerously-skip-permissions" not in gemini_command
 
 
 def test_gemini_and_agy_fall_back_to_legacy_gemini_cli_when_agy_missing(monkeypatch):
@@ -173,22 +192,22 @@ def test_gemini37_routes_through_agy_when_healthy(monkeypatch):
     cli, model_id, cmd = router.resolve_model("gemini37")
     assert cli == "agy"
     assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
+    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"]
 
     cli, model_id, cmd = router.resolve_model("gemini37-high")
     assert cli == "agy"
     assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
+    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"]
 
     cli, model_id, cmd = router.resolve_model("gemini37-medium")
     assert cli == "agy"
     assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (Medium)", "--print"]
+    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (Medium)", "--dangerously-skip-permissions", "--print"]
 
     cli, model_id, cmd = router.resolve_model("gemini37-low")
     assert cli == "agy"
     assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (Low)", "--print"]
+    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (Low)", "--dangerously-skip-permissions", "--print"]
 
 
 def test_gemini37_falls_back_to_gemini_cli_when_agy_missing(monkeypatch):

@@ -281,7 +281,7 @@ python3 "$EXECUTOR" --loop-status
 | gpt52 | codex exec --full-auto -m gpt-5.2 | Planning, research, analysis |
 | gpt52-high | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="high" | Deep reasoning |
 | gpt52-xhigh | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="xhigh" | Maximum reasoning (30+ min) |
-| gemini | agy --model "Gemini 3.7 Flash (High)" --print | Fast daily driver, high reasoning (default) |
+| gemini | agy --model "Gemini 3.7 Flash (High)" --dangerously-skip-permissions --print | Fast daily driver, high reasoning (default) |
 | gemini-high | gemini -y -m gemini-2.5-pro | Stable, more capable |
 | gemini-xhigh | gemini -y -m gemini-3-pro-preview | Most capable Gemini fallback |
 | gemini25pro | gemini -y -m gemini-2.5-pro | Explicit stable Pro selection |
@@ -290,11 +290,11 @@ python3 "$EXECUTOR" --loop-status
 | gemini3flash | gemini -y -m gemini-3-flash-preview | Explicit 3 Flash selection |
 | gemini3pro | gemini -y -m gemini-3-pro-preview | Explicit 3 Pro selection |
 | gemini31pro | gemini -y -m gemini-3.1-pro-preview | Latest Pro model (if available) |
-| gemini37 | agy --model "Gemini 3.7 Flash (High)" --print | Latest Flash tier, high reasoning (default 3.7 Flash alias) |
-| gemini37-high | agy --model "Gemini 3.7 Flash (High)" --print | Latest Flash tier, high reasoning |
-| gemini37-medium | agy --model "Gemini 3.7 Flash (Medium)" --print | Latest Flash tier, balanced reasoning |
-| gemini37-low | agy --model "Gemini 3.7 Flash (Low)" --print | Latest Flash tier, fast low-reasoning |
-| agy | agy --model "Gemini 3.7 Flash (High)" --print | Antigravity default (same as gemini/gemini37) |
+| gemini37 | agy --model "Gemini 3.7 Flash (High)" --dangerously-skip-permissions --print | Latest Flash tier, high reasoning (default 3.7 Flash alias) |
+| gemini37-high | agy --model "Gemini 3.7 Flash (High)" --dangerously-skip-permissions --print | Latest Flash tier, high reasoning |
+| gemini37-medium | agy --model "Gemini 3.7 Flash (Medium)" --dangerously-skip-permissions --print | Latest Flash tier, balanced reasoning |
+| gemini37-low | agy --model "Gemini 3.7 Flash (Low)" --dangerously-skip-permissions --print | Latest Flash tier, fast low-reasoning |
+| agy | agy --model "Gemini 3.7 Flash (High)" --dangerously-skip-permissions --print | Antigravity default (same as gemini/gemini37) |
 | zai | codex exec --full-auto --profile zai | General coding fallback |
 | glm5 | opencode run --format json -m zai/glm-5.3 --pure --agent build | Latest GLM 5.x tasks via OpenCode |
 | glm52 | opencode run --format json -m zai/glm-5.2 --pure --agent build | Explicit GLM-5.2 pin via OpenCode |

@@ -149,15 +149,15 @@ def test_agy_cli_override_for_google_models(no_router, tmp_path):
 
     assert info["selected_cli"] == "agy"
     assert info["stdin_mode"] == "arg"
-    assert info["command"] == ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
+    assert info["command"] == ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"]
 
     flash_info = executor.get_cli_info("gemini3flash", repo_root=tmp_path, cli_override="agy")
     assert flash_info["selected_cli"] == "agy"
-    assert flash_info["command"] == ["agy", "--model", "Gemini 3.5 Flash (Medium)", "--print"]
+    assert flash_info["command"] == ["agy", "--model", "Gemini 3.5 Flash (Medium)", "--dangerously-skip-permissions", "--print"]
 
     pro_info = executor.get_cli_info("gemini31pro", repo_root=tmp_path, cli_override="antigravity")
     assert pro_info["selected_cli"] == "agy"
-    assert pro_info["command"] == ["agy", "--model", "Gemini 3.1 Pro (High)", "--print"]
+    assert pro_info["command"] == ["agy", "--model", "Gemini 3.1 Pro (High)", "--dangerously-skip-permissions", "--print"]
 
 
 def test_agy_cli_override_for_gemini37_models(no_router, tmp_path):
@@ -165,19 +165,19 @@ def test_agy_cli_override_for_gemini37_models(no_router, tmp_path):
     info = executor.get_cli_info("gemini37", repo_root=tmp_path, cli_override="agy")
     assert info["selected_cli"] == "agy"
     assert info["stdin_mode"] == "arg"
-    assert info["command"] == ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
+    assert info["command"] == ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"]
 
     info_high = executor.get_cli_info("gemini37-high", repo_root=tmp_path, cli_override="agy")
     assert info_high["selected_cli"] == "agy"
-    assert info_high["command"] == ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
+    assert info_high["command"] == ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"]
 
     info_medium = executor.get_cli_info("gemini37-medium", repo_root=tmp_path, cli_override="agy")
     assert info_medium["selected_cli"] == "agy"
-    assert info_medium["command"] == ["agy", "--model", "Gemini 3.7 Flash (Medium)", "--print"]
+    assert info_medium["command"] == ["agy", "--model", "Gemini 3.7 Flash (Medium)", "--dangerously-skip-permissions", "--print"]
 
     info_low = executor.get_cli_info("gemini37-low", repo_root=tmp_path, cli_override="agy")
     assert info_low["selected_cli"] == "agy"
-    assert info_low["command"] == ["agy", "--model", "Gemini 3.7 Flash (Low)", "--print"]
+    assert info_low["command"] == ["agy", "--model", "Gemini 3.7 Flash (Low)", "--dangerously-skip-permissions", "--print"]
 
 
 def test_gemini_cli_override_for_gemini37_models(no_router, tmp_path):
@@ -212,13 +212,13 @@ def test_router_selected_agy_uses_executor_mapping(tmp_path, monkeypatch):
     monkeypatch.setattr(
         models,
         "_resolve_router_command",
-        lambda *_args, **_kwargs: ("agy", "google:gemini-2.5-pro", ["agy", "--model", "Gemini 3.1 Pro (High)", "--print"]),
+        lambda *_args, **_kwargs: ("agy", "google:gemini-2.5-pro", ["agy", "--model", "Gemini 3.1 Pro (High)", "--dangerously-skip-permissions", "--print"]),
     )
 
     info = executor.get_cli_info("gemini-high", repo_root=tmp_path)
     assert info["selected_cli"] == "agy"
     assert info["stdin_mode"] == "arg"
-    assert info["command"] == ["agy", "--model", "Gemini 3.1 Pro (High)", "--print"]
+    assert info["command"] == ["agy", "--model", "Gemini 3.1 Pro (High)", "--dangerously-skip-permissions", "--print"]
 
 def test_explicit_cli_opencode_errors_for_unsupported_model(no_router, tmp_path):
     with pytest.raises(ValueError, match="--cli opencode is not supported with --model gemini"):
@@ -227,7 +227,7 @@ def test_explicit_cli_opencode_errors_for_unsupported_model(no_router, tmp_path)
 
 def test_gemini_and_agy_default_to_antigravity_37_high(no_router, tmp_path):
     """Bare `gemini` and `agy` run Gemini 3.7 Flash (High) through agy by default."""
-    expected = ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
+    expected = ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"]
     for shorthand in ("gemini", "agy", "gemini37"):
         info = executor.get_cli_info(shorthand, repo_root=tmp_path)
         assert info["selected_cli"] == "agy", shorthand
@@ -247,7 +247,7 @@ def test_gemini_and_agy_cli_gemini_override_use_37_flash(no_router, tmp_path):
 
 
 def test_agy_shorthand_cli_overrides_match_gemini(no_router, tmp_path):
-    expected = ["agy", "--model", "Gemini 3.7 Flash (High)", "--print"]
+    expected = ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"]
     for override in ("agy", "antigravity"):
         info = executor.get_cli_info("agy", repo_root=tmp_path, cli_override=override)
         assert info["selected_cli"] == "agy", override
@@ -555,4 +555,3 @@ def test_model_registry_loads_when_cwd_is_not_repo_root(tmp_path, monkeypatch):
     assert by_name["glm5"]["model_id"] == "zai:glm-5.3"
     assert by_name["glm52"]["model_id"] == "zai:glm-5.2"
     assert by_name["glm53"]["model_id"] == "zai:glm-5.3"
-

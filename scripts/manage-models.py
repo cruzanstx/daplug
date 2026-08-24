@@ -231,7 +231,13 @@ def default_command(
         if default_variant:
             raise RegistryError("Antigravity models cannot have a default variant")
         # agy matches on the display name; --print needs the prompt as an argv value.
-        return ["agy", "--model", AGY_DISPLAY_NAMES.get(model_id, AGY_DEFAULT_DISPLAY_NAME), "--print"]
+        return [
+            "agy",
+            "--model",
+            AGY_DISPLAY_NAMES.get(model_id, AGY_DEFAULT_DISPLAY_NAME),
+            "--dangerously-skip-permissions",
+            "--print",
+        ]
     if default_cli == "claude":
         if default_variant:
             raise RegistryError("Claude CLI models cannot have a default variant")

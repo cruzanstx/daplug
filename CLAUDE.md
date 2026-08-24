@@ -118,7 +118,7 @@ process = subprocess.Popen(["codex", "exec", "--full-auto", "-"], stdin=subproce
 process.stdin.write(content)
 
 # Antigravity/Gemini-style: pass as argument
-subprocess.Popen(["agy", "--model", "Gemini 3.7 Flash (High)", "--print", content], ...)
+subprocess.Popen(["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print", content], ...)
 subprocess.Popen(["gemini", "-y", "-p", content], ...)  # legacy fallback
 ```
 

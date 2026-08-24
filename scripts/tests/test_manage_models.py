@@ -60,6 +60,23 @@ def test_default_command_builder_matches_registry_commands():
         assert manage_models.stdin_mode_for_cli(model["default_cli"]) == model["stdin_mode"], model["name"]
 
 
+def test_agy_commands_are_unattended_but_legacy_gemini_commands_are_not():
+    registry = manage_models.load_registry(REPO_ROOT)
+
+    for model in registry["models"]:
+        command = manage_models.default_command(
+            model["default_cli"],
+            model["model_id"],
+            model["codex_profile"],
+            model["claude_model_flag"],
+            model["default_variant"],
+        )
+        if model["default_cli"] == "agy":
+            assert command[command.index("--print") - 1] == "--dangerously-skip-permissions"
+        elif model["default_cli"] == "gemini":
+            assert "--dangerously-skip-permissions" not in command
+
+
 def test_generate_is_idempotent_on_temp_copy(tmp_path: Path):
     root = copy_model_targets(tmp_path)
     manage_models.generate_models(root, write=True)

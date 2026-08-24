@@ -896,6 +896,7 @@
         "agy",
         "--model",
         "Gemini 3.7 Flash (High)",
+        "--dangerously-skip-permissions",
         "--print"
       ],
       "routing": {
@@ -912,7 +913,7 @@
         "cli_label": "agy/gemini",
         "actual_model": "gemini-3.7-flash (High reasoning)",
         "option_description": "Gemini 3.7 Flash (High reasoning) via Antigravity (default Gemini shorthand)",
-        "reference_cli": "agy --model \"Gemini 3.7 Flash (High)\" --print",
+        "reference_cli": "agy --model \"Gemini 3.7 Flash (High)\" --dangerously-skip-permissions --print",
         "reference_description": "Fast daily driver, high reasoning (default)",
         "readme_section": "Google Gemini",
         "readme_model": "gemini-3.7-flash",
@@ -1282,6 +1283,7 @@
         "agy",
         "--model",
         "Gemini 3.7 Flash (High)",
+        "--dangerously-skip-permissions",
         "--print"
       ],
       "routing": {
@@ -1298,7 +1300,7 @@
         "cli_label": "agy/gemini",
         "actual_model": "gemini-3.7-flash (High reasoning)",
         "option_description": "Gemini 3.7 Flash (High reasoning, default 3.7 Flash alias) via Antigravity",
-        "reference_cli": "agy --model \"Gemini 3.7 Flash (High)\" --print",
+        "reference_cli": "agy --model \"Gemini 3.7 Flash (High)\" --dangerously-skip-permissions --print",
         "reference_description": "Latest Flash tier, high reasoning (default 3.7 Flash alias)",
         "readme_section": "Google Gemini",
         "readme_model": "gemini-3.7-flash",
@@ -1341,7 +1343,7 @@
         "cli_label": "agy/gemini",
         "actual_model": "gemini-3.7-flash (High reasoning)",
         "option_description": "Gemini 3.7 Flash (High reasoning) via Antigravity",
-        "reference_cli": "agy --model \"Gemini 3.7 Flash (High)\" --print",
+        "reference_cli": "agy --model \"Gemini 3.7 Flash (High)\" --dangerously-skip-permissions --print",
         "reference_description": "Latest Flash tier, high reasoning",
         "readme_section": "Google Gemini",
         "readme_model": "gemini-3.7-flash",
@@ -1384,7 +1386,7 @@
         "cli_label": "agy/gemini",
         "actual_model": "gemini-3.7-flash (Medium reasoning)",
         "option_description": "Gemini 3.7 Flash (Medium reasoning) via Antigravity",
-        "reference_cli": "agy --model \"Gemini 3.7 Flash (Medium)\" --print",
+        "reference_cli": "agy --model \"Gemini 3.7 Flash (Medium)\" --dangerously-skip-permissions --print",
         "reference_description": "Latest Flash tier, balanced reasoning",
         "readme_section": "Google Gemini",
         "readme_model": "gemini-3.7-flash",
@@ -1427,7 +1429,7 @@
         "cli_label": "agy/gemini",
         "actual_model": "gemini-3.7-flash (Low reasoning)",
         "option_description": "Gemini 3.7 Flash (Low reasoning) via Antigravity",
-        "reference_cli": "agy --model \"Gemini 3.7 Flash (Low)\" --print",
+        "reference_cli": "agy --model \"Gemini 3.7 Flash (Low)\" --dangerously-skip-permissions --print",
         "reference_description": "Latest Flash tier, fast low-reasoning",
         "readme_section": "Google Gemini",
         "readme_model": "gemini-3.7-flash",
@@ -1453,6 +1455,7 @@
         "agy",
         "--model",
         "Gemini 3.7 Flash (High)",
+        "--dangerously-skip-permissions",
         "--print"
       ],
       "routing": {
@@ -1469,7 +1472,7 @@
         "cli_label": "agy/gemini",
         "actual_model": "gemini-3.7-flash (High reasoning)",
         "option_description": "Gemini 3.7 Flash (High) via Antigravity (default agy shorthand)",
-        "reference_cli": "agy --model \"Gemini 3.7 Flash (High)\" --print",
+        "reference_cli": "agy --model \"Gemini 3.7 Flash (High)\" --dangerously-skip-permissions --print",
         "reference_description": "Antigravity default (same as gemini/gemini37)",
         "readme_section": "Google Gemini",
         "readme_model": "gemini-3.7-flash",
