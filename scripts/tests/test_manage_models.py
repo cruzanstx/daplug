@@ -72,7 +72,8 @@ def test_agy_commands_are_unattended_but_legacy_gemini_commands_are_not():
             model["default_variant"],
         )
         if model["default_cli"] == "agy":
-            assert command[command.index("--print") - 1] == "--dangerously-skip-permissions"
+            assert "--dangerously-skip-permissions" in command
+            assert command.index("--dangerously-skip-permissions") < command.index("--print")
         elif model["default_cli"] == "gemini":
             assert "--dangerously-skip-permissions" not in command
 

@@ -4,6 +4,11 @@ All notable changes to daplug are documented here.
 
 ## [Unreleased]
 
+## [0.40.4] - 2026-08-25
+
+### Fixed
+- **CI registry regression coverage now accepts the required AGY streaming flags.** The unattended-execution assertion verifies `--dangerously-skip-permissions` remains present before `--print` without incorrectly requiring it to be adjacent after `--print-timeout` and `--output-format` were added.
+
 ## [0.40.3] - 2026-08-25
 
 ### Fixed
