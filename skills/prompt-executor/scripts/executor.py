@@ -413,6 +413,8 @@ def _moa_cli_info(
     repo_root: Path,
     variant: Optional[str],
     cli_override: Optional[str] = None,
+    agy_print_timeout: Optional[str] = None,
+    agy_inactivity_timeout: Optional[str] = None,
 ) -> tuple[dict, Optional[str], bool]:
     """Resolve cli_info for a MoA model, dropping --variant where unsupported.
 
@@ -421,16 +423,17 @@ def _moa_cli_info(
     unrelated to the variant (unknown model, unsupported CLI combo) still
     raise from the fallback attempt.
     """
+    kwargs = dict(agy_print_timeout=agy_print_timeout, agy_inactivity_timeout=agy_inactivity_timeout)
     if variant is not None:
         try:
             return (
-                get_cli_info(model, repo_root=repo_root, cli_override=cli_override, variant=variant),
+                get_cli_info(model, repo_root=repo_root, cli_override=cli_override, variant=variant, **kwargs),
                 variant,
                 False,
             )
         except ValueError:
             pass
-    info = get_cli_info(model, repo_root=repo_root, cli_override=cli_override, variant=None)
+    info = get_cli_info(model, repo_root=repo_root, cli_override=cli_override, variant=None, **kwargs)
     return info, None, variant is not None
 
 
@@ -668,6 +671,19 @@ def main():
         default=None,
         help=argparse.SUPPRESS,
     )
+    parser.add_argument(
+        "--agy-print-timeout",
+        type=str,
+        default=None,
+        help="Override agy --print-timeout (default: 60m or agy_print_timeout config)",
+    )
+    parser.add_argument(
+        "--agy-inactivity-timeout",
+        type=str,
+        default=None,
+        help="If no agy stream-json event arrives for this duration, warn then terminate "
+             "(e.g. 30s, 5m; default: disabled or agy_inactivity_timeout config)",
+    )
 
     args = parser.parse_args()
 
@@ -738,7 +754,9 @@ def main():
             # fail fast before any worktrees are created.
             for entry in moa_models:
                 info, effective_variant, variant_dropped = _moa_cli_info(
-                    entry["model"], repo_root, args.variant, cli_override=entry["cli"]
+                    entry["model"], repo_root, args.variant, cli_override=entry["cli"],
+                    agy_print_timeout=args.agy_print_timeout,
+                    agy_inactivity_timeout=args.agy_inactivity_timeout,
                 )
                 if args.dangerously_bypass_permissions:
                     info["allow_bypass_without_sandbox"] = True
@@ -755,6 +773,8 @@ def main():
                 repo_root=repo_root,
                 cli_override=args.cli,
                 variant=args.variant,
+                agy_print_timeout=args.agy_print_timeout,
+                agy_inactivity_timeout=args.agy_inactivity_timeout,
             )
             if args.dangerously_bypass_permissions:
                 cli_info["allow_bypass_without_sandbox"] = True

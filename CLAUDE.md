@@ -46,6 +46,8 @@ worktree_dir: .worktrees/
 llms_txt_dir: /path/to/llms_txt
 ai_usage_awareness: enabled
 cli_logs_dir: ~/.claude/cli-logs/
+agy_print_timeout: 60m
+agy_inactivity_timeout:
 </daplug_config>
 ```
 

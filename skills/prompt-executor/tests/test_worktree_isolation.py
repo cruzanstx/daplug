@@ -279,7 +279,7 @@ def _make_fake_cli(*, write_marker: bool, side_effect_file: Path | None,
         if side_effect_file is not None:
             side_effect_file.parent.mkdir(parents=True, exist_ok=True)
             side_effect_file.write_text("leaked\n")
-        return {"status": "ok", "exit_code": 0}
+        return {"status": "completed", "exit_code": 0}
     return fake_run
 
 

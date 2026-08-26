@@ -231,11 +231,17 @@ def default_command(
         if default_variant:
             raise RegistryError("Antigravity models cannot have a default variant")
         # agy matches on the display name; --print needs the prompt as an argv value.
+        # --print-timeout and --output-format must precede --print so agy doesn't
+        # swallow them as the prompt value.
         return [
             "agy",
             "--model",
             AGY_DISPLAY_NAMES.get(model_id, AGY_DEFAULT_DISPLAY_NAME),
             "--dangerously-skip-permissions",
+            "--print-timeout",
+            "60m",
+            "--output-format",
+            "stream-json",
             "--print",
         ]
     if default_cli == "claude":

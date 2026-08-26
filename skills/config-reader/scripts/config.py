@@ -29,6 +29,8 @@ KNOWN_KEYS = [
     "ai_usage_awareness",
     "cli_logs_dir",
     "local_providers",
+    "agy_print_timeout",
+    "agy_inactivity_timeout",
 ]
 
 LEGACY_KEY_SET = set(KNOWN_KEYS)

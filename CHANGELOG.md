@@ -4,6 +4,15 @@ All notable changes to daplug are documented here.
 
 ## [Unreleased]
 
+## [0.40.3] - 2026-08-25
+
+### Fixed
+- **Long-running Antigravity prompts no longer die at AGY's five-minute print timeout.** Daplug now supplies a configurable 60-minute `--print-timeout`, consumes AGY stream-JSON progress, preserves assistant text for completion-marker detection, and distinguishes successful completion from AGY errors, print timeouts, and inactivity termination.
+- **Verification loops cannot report false success after AGY failure.** Completion now requires exit code 0 plus a successful terminal AGY result, and timeout/error logs cannot complete a loop merely because they contain a completion marker.
+
+### Added
+- **Configurable AGY execution controls:** `agy_print_timeout` defaults to `60m`; optional `agy_inactivity_timeout` warns and then terminates a genuinely stalled AGY process group. Configuration, routing, sandbox, parser, real-pipe watchdog, and regression coverage are included.
+
 ## [0.40.2] - 2026-08-23
 
 ### Fixed

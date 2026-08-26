@@ -118,23 +118,23 @@ def test_google_models_prefer_agy_when_healthy(monkeypatch):
     cli, model_id, cmd = router.resolve_model("gemini")
     assert cli == "agy"
     assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"]
+    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
 
     cli, model_id, cmd = router.resolve_model("agy")
     assert cli == "agy"
     assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"]
+    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
 
     # Legacy explicit shorthand keeps its 3 Flash preview mapping.
     cli, model_id, cmd = router.resolve_model("gemini3flash")
     assert cli == "agy"
     assert model_id == "google:gemini-3-flash-preview"
-    assert cmd == ["agy", "--model", "Gemini 3.5 Flash (Medium)", "--dangerously-skip-permissions", "--print"]
+    assert cmd == ["agy", "--model", "Gemini 3.5 Flash (Medium)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
 
     cli, model_id, cmd = router.resolve_model("gemini-high")
     assert cli == "agy"
     assert model_id == "google:gemini-2.5-pro"
-    assert cmd == ["agy", "--model", "Gemini 3.1 Pro (High)", "--dangerously-skip-permissions", "--print"]
+    assert cmd == ["agy", "--model", "Gemini 3.1 Pro (High)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
 
 
 def test_agy_permission_flag_is_exclusive_to_antigravity_commands(monkeypatch):
@@ -152,7 +152,7 @@ def test_agy_permission_flag_is_exclusive_to_antigravity_commands(monkeypatch):
     _cli, _model_id, agy_command = router.resolve_model("gemini")
     _cli, _model_id, gemini_command = router.resolve_model("gemini", preferred_cli="gemini")
 
-    assert agy_command[agy_command.index("--print") - 1] == "--dangerously-skip-permissions"
+    assert agy_command[agy_command.index("--print") - 1] == "stream-json"
     assert "--dangerously-skip-permissions" not in gemini_command
 
 
@@ -192,22 +192,22 @@ def test_gemini37_routes_through_agy_when_healthy(monkeypatch):
     cli, model_id, cmd = router.resolve_model("gemini37")
     assert cli == "agy"
     assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"]
+    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
 
     cli, model_id, cmd = router.resolve_model("gemini37-high")
     assert cli == "agy"
     assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"]
+    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
 
     cli, model_id, cmd = router.resolve_model("gemini37-medium")
     assert cli == "agy"
     assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (Medium)", "--dangerously-skip-permissions", "--print"]
+    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (Medium)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
 
     cli, model_id, cmd = router.resolve_model("gemini37-low")
     assert cli == "agy"
     assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (Low)", "--dangerously-skip-permissions", "--print"]
+    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (Low)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
 
 
 def test_gemini37_falls_back_to_gemini_cli_when_agy_missing(monkeypatch):

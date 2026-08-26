@@ -4,14 +4,18 @@
 import json
 import os
 import re
+import selectors
+import signal
 import subprocess
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
 from models import apply_claude_sandbox_permissions
 from paths import get_cli_logs_dir, get_repo_root
+import agy_stream
 from repostate import (
     _detect_impossible_gate,
     _detect_stalled,
@@ -193,17 +197,27 @@ def update_loop_iteration(
     exit_code: int,
     marker_found: bool,
     log_file: str,
-    retry_reason: Optional[str] = None
+    retry_reason: Optional[str] = None,
+    conversation_id: Optional[str] = None,
+    terminal_status: Optional[str] = None,
+    exec_status: Optional[str] = None,
 ) -> dict:
     """Update loop state after an iteration completes."""
-    state["history"].append({
+    record: dict = {
         "iteration": state["iteration"],
         "ended_at": datetime.now().isoformat(),
         "exit_code": exit_code,
         "marker_found": marker_found,
         "retry_reason": retry_reason,
         "log_file": log_file
-    })
+    }
+    if conversation_id is not None:
+        record["conversation_id"] = conversation_id
+    if terminal_status is not None:
+        record["terminal_status"] = terminal_status
+    if exec_status is not None:
+        record["exec_status"] = exec_status
+    state["history"].append(record)
 
     if marker_found:
         state["status"] = "completed"
@@ -678,6 +692,159 @@ def run_cli(
     }
 
 
+def _is_agy_cli(cli_info: dict) -> bool:
+    """True when cli_info represents an Antigravity (agy) command."""
+    cmd = cli_info.get("command") or []
+    return bool(cmd) and Path(cmd[0]).name in ("agy", "antigravity")
+
+
+def _parse_duration(value: Optional[str]) -> Optional[float]:
+    """Parse a duration string like ``30s``, ``5m``, ``1h`` into seconds.
+
+    Returns None when *value* is empty/None.  Raises ValueError on unparseable input.
+    """
+    if not value or not value.strip():
+        return None
+    v = value.strip().lower()
+    units = {"s": 1, "m": 60, "h": 3600}
+    if v[-1] in units:
+        num = float(v[:-1])
+        return num * units[v[-1]]
+    return float(v)
+
+
+def _classify_agy_result(
+    exit_code: int,
+    terminal_event: Optional[agy_stream.AgyEvent],
+    inactivity_killed: bool,
+) -> str:
+    """Classify an agy execution outcome into a status string.
+
+    Returns one of: ``completed``, ``agy_error``, ``agy_print_timeout``,
+    ``agy_inactivity_timeout``.
+
+    ``completed`` requires BOTH exit code 0 AND a terminal result event for
+    which :func:`agy_stream.is_success` is true.  Missing terminal events,
+    unknown/non-success statuses (including CANCELLED), and nonzero exits
+    classify as ``agy_error`` unless already classified as
+    print/inactivity timeout.
+    """
+    if inactivity_killed:
+        return "agy_inactivity_timeout"
+    if terminal_event is not None and agy_stream.is_print_timeout(terminal_event):
+        return "agy_print_timeout"
+    if terminal_event is not None and agy_stream.is_error(terminal_event):
+        return "agy_error"
+    if exit_code == 0 and terminal_event is not None and agy_stream.is_success(terminal_event):
+        return "completed"
+    return "agy_error"
+
+
+def _run_agy_reader_loop(
+    process: subprocess.Popen,
+    log_handle,
+    inactivity_timeout: Optional[float],
+) -> dict:
+    """Read agy stream-json stdout line-by-line, write raw + assistant text to log.
+
+    Returns a dict with: ``exit_code``, ``conversation_id``, ``terminal_status``,
+    ``terminal_error``, ``assistant_text``, ``inactivity_killed``, ``terminal_event``.
+    """
+    conversation_id: Optional[str] = None
+    terminal_event: Optional[agy_stream.AgyEvent] = None
+    assistant_text_parts: list[str] = []
+
+    sel = selectors.DefaultSelector()
+    sel.register(process.stdout, selectors.EVENT_READ)
+    last_event_time = time.monotonic()
+    inactivity_warned = False
+
+    try:
+        while True:
+            ready = sel.select(timeout=1.0)
+            if ready:
+                line = process.stdout.readline()
+                if not line:
+                    break
+                last_event_time = time.monotonic()
+                inactivity_warned = False
+
+                log_handle.write(line)
+                log_handle.flush()
+
+                event = agy_stream.parse_line(line)
+                if event.conversation_id:
+                    conversation_id = event.conversation_id
+
+                if event.event_type == agy_stream.EVENT_ASSISTANT_TEXT and event.text:
+                    assistant_text_parts.append(event.text)
+                    log_handle.write(event.text)
+                    log_handle.flush()
+
+                if event.event_type == agy_stream.EVENT_RESULT:
+                    terminal_event = event
+                    if event.text:
+                        log_handle.write(event.text)
+                        log_handle.flush()
+            else:
+                if process.poll() is not None:
+                    break
+                if inactivity_timeout:
+                    elapsed = time.monotonic() - last_event_time
+                    if not inactivity_warned and elapsed >= inactivity_timeout:
+                        log_handle.write(
+                            f"[agy] inactivity warning: no output for "
+                            f"{int(inactivity_timeout)}s\n"
+                        )
+                        log_handle.flush()
+                        inactivity_warned = True
+                    elif inactivity_warned and elapsed >= inactivity_timeout * 2:
+                        log_handle.write(
+                            f"[agy] inactivity timeout: no output for "
+                            f"{int(elapsed)}s, terminating\n"
+                        )
+                        log_handle.flush()
+                        try:
+                            os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+                        except (ProcessLookupError, PermissionError):
+                            pass
+                        time.sleep(2)
+                        try:
+                            os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+                        except (ProcessLookupError, PermissionError):
+                            pass
+                        exit_code = process.wait()
+                        return {
+                            "exit_code": exit_code,
+                            "conversation_id": conversation_id,
+                            "terminal_status": terminal_event.status if terminal_event else None,
+                            "terminal_error": terminal_event.error if terminal_event else None,
+                            "assistant_text": "\n".join(assistant_text_parts),
+                            "inactivity_killed": True,
+                            "terminal_event": terminal_event,
+                        }
+    finally:
+        sel.close()
+
+    exit_code = process.wait()
+    return {
+        "exit_code": exit_code,
+        "conversation_id": conversation_id,
+        "terminal_status": terminal_event.status if terminal_event else None,
+        "terminal_error": terminal_event.error if terminal_event else None,
+        "assistant_text": "\n".join(assistant_text_parts),
+        "inactivity_killed": False,
+        "terminal_event": terminal_event,
+    }
+
+
+AGY_FAILURE_EXPLANATIONS = {
+    "agy_error": "AGY finished with an error",
+    "agy_print_timeout": "AGY timed out (print-timeout fired)",
+    "agy_inactivity_timeout": "AGY inactivity timeout (no output from process)",
+}
+
+
 def run_cli_foreground(
     cli_info: dict,
     content: str,
@@ -799,6 +966,39 @@ def run_cli_foreground(
                 full_cmd = ["script", "-q", "-c", cmd_str, "/dev/null"]
 
             full_cmd = maybe_wrap_command_with_sandbox(full_cmd, sandbox_config, extra_env=sandbox_env)
+
+            if _is_agy_cli(cli_info):
+                inactivity_raw = cli_info.get("agy_inactivity_timeout")
+                try:
+                    inactivity_secs = _parse_duration(inactivity_raw)
+                except ValueError:
+                    inactivity_secs = None
+                process = subprocess.Popen(
+                    full_cmd,
+                    cwd=cwd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    env=env,
+                    text=True,
+                    start_new_session=True,
+                )
+                reader = _run_agy_reader_loop(process, log_handle, inactivity_secs)
+                log_handle.close()
+                status = _classify_agy_result(
+                    reader["exit_code"],
+                    reader.get("terminal_event"),
+                    reader["inactivity_killed"],
+                )
+                result = {
+                    "status": status,
+                    "exit_code": reader["exit_code"],
+                    "log": str(log_file),
+                    "conversation_id": reader.get("conversation_id"),
+                    "terminal_status": reader.get("terminal_status"),
+                }
+                if reader.get("terminal_error"):
+                    result["terminal_error"] = reader["terminal_error"]
+                return result
 
             process = subprocess.Popen(
                 full_cmd,
@@ -1021,6 +1221,15 @@ def run_verification_loop(
             result["error"] = error_msg
             break
 
+        # Log agy-specific failure classifications (non-error statuses that still
+        # indicate the CLI did not complete successfully).
+        exec_status = exec_result.get("status")
+        if exec_status in AGY_FAILURE_EXPLANATIONS:
+            explanation = AGY_FAILURE_EXPLANATIONS[exec_status]
+            with open(loop_log, "a") as f:
+                f.write(f"[Loop] {explanation}\n")
+            print(f"[Loop] {explanation}", file=sys.stderr)
+
         # The sandbox is the security boundary. Original checkout changes observed here
         # are logged for operator awareness, but they do not invalidate the iteration.
         if guard_repo_root:
@@ -1048,8 +1257,16 @@ def run_verification_loop(
                     )
                 save_loop_state(state)
 
-        # Check for completion marker
-        marker_found, retry_reason = check_completion_marker(log_file, completion_marker)
+        # Check for completion marker — only when the CLI execution itself
+        # completed successfully.  A marker present in a timeout/error log
+        # must never complete the loop; the execution failure is persisted
+        # and the loop retries/fails normally.
+        exec_status = exec_result.get("status")
+        if exec_status == "completed":
+            marker_found, retry_reason = check_completion_marker(log_file, completion_marker)
+        else:
+            marker_found = False
+            retry_reason = None
 
         # --require-diff: verify the execution cwd actually changed before accepting
         # the completion marker.  If not, reject and convert to a synthetic retry so
@@ -1086,12 +1303,16 @@ def run_verification_loop(
 
         # Update state
         exit_code = exec_result.get("exit_code", -1)
+        exec_status = exec_result.get("status")
         state = update_loop_iteration(
             state,
             exit_code,
             marker_found,
             str(log_file),
-            retry_reason=retry_reason
+            retry_reason=retry_reason,
+            conversation_id=exec_result.get("conversation_id"),
+            terminal_status=exec_result.get("terminal_status"),
+            exec_status=exec_status,
         )
 
         iteration_result = {
@@ -1101,6 +1322,12 @@ def run_verification_loop(
             "marker_found": marker_found,
             "retry_reason": retry_reason
         }
+        if exec_result.get("conversation_id"):
+            iteration_result["conversation_id"] = exec_result["conversation_id"]
+        if exec_result.get("terminal_status"):
+            iteration_result["terminal_status"] = exec_result["terminal_status"]
+        if exec_status:
+            iteration_result["exec_status"] = exec_status
         result["iterations"].append(iteration_result)
 
         if marker_found:
@@ -1325,6 +1552,12 @@ def run_verification_loop_background(
         cmd.append("--require-diff")
     if allow_bypass_without_sandbox:
         cmd.append("--dangerously-bypass-permissions")
+    if cli_info.get("agy_inactivity_timeout"):
+        cmd.extend(["--agy-inactivity-timeout", str(cli_info["agy_inactivity_timeout"])])
+    # Forward agy_print_timeout if present in cli_info (from --agy-print-timeout flag)
+    agy_pt = cli_info.get("agy_print_timeout")
+    if agy_pt:
+        cmd.extend(["--agy-print-timeout", str(agy_pt)])
 
     if worktree_path:
         # When in worktree, use --prompt-file to read TASK.md directly

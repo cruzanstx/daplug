@@ -413,6 +413,10 @@ class TestAGYMapConsistency:
                 "--model",
                 "Gemini 3.7 Flash (High)",
                 "--dangerously-skip-permissions",
+                "--print-timeout",
+                "60m",
+                "--output-format",
+                "stream-json",
                 "--print",
             )
         }, commands

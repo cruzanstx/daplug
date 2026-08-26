@@ -98,7 +98,7 @@ def _make_cli(
         if git_commit:
             _run(["git", "add", "-A"], cwd=cwd)
             _run(["git", "commit", "-m", "agent work"], cwd=cwd)
-        return {"status": "ok", "exit_code": 0}
+        return {"status": "completed", "exit_code": 0}
     return fake_run
 
 
@@ -128,7 +128,7 @@ def _make_seq_cli(*, calls: list[dict]):
         if call.get("git_commit"):
             _run(["git", "add", "-A"], cwd=cwd)
             _run(["git", "commit", "-m", "agent work"], cwd=cwd)
-        return {"status": "ok", "exit_code": 0}
+        return {"status": "completed", "exit_code": 0}
     return fake_run
 
 

@@ -476,6 +476,8 @@ worktree_dir: .worktrees/
 llms_txt_dir: /storage/projects/docker/llms_txt
 ai_usage_awareness: enabled
 cli_logs_dir: ~/.claude/cli-logs/
+agy_print_timeout: 60m
+agy_inactivity_timeout:
 </daplug_config>
 ```
 
@@ -486,6 +488,8 @@ cli_logs_dir: ~/.claude/cli-logs/
 | `llms_txt_dir` | Running `/daplug:create-llms-txt` | `../llms_txt` |
 | `ai_usage_awareness` | Running `/daplug:create-prompt` (when choosing executor) | Asks user (enabled/disabled) |
 | `cli_logs_dir` | Not prompted (advanced) | `~/.claude/cli-logs/` |
+| `agy_print_timeout` | Not prompted (advanced) | `60m` |
+| `agy_inactivity_timeout` | Not prompted (advanced) | (disabled) |
 | `auto_pipeline_monitor` | Not prompted (advanced) | `enabled` |
 
 Settings are checked in order: project `./CLAUDE.md` → user `~/.claude/CLAUDE.md`

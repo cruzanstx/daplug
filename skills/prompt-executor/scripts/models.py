@@ -390,19 +390,52 @@ def _build_opencode_command(model_id: str, variant: Optional[str]) -> list[str]:
     return cmd
 
 
-def _build_agy_command(model: str, model_id: str, variant: Optional[str]) -> list[str]:
+DEFAULT_AGY_PRINT_TIMEOUT = "60m"
+
+
+def _build_agy_base(display_name: str, print_timeout: Optional[str] = None) -> list[str]:
+    """Build the agy argv up to (but not including) the prompt.
+
+    The prompt is appended as the value of ``--print`` by the executor's
+    arg-mode handler, so ``--print`` must be the final element.  Flags
+    that take values (``--print-timeout``, ``--output-format``) must
+    precede ``--print`` to avoid being swallowed as the prompt.
+
+    An explicitly empty ``print_timeout`` (e.g. ``agy_print_timeout:`` in
+    config with no value) raises ``ValueError``.  Omitting the argument
+    entirely (None) falls back to the default.
+    """
+    if print_timeout is not None:
+        if not print_timeout.strip():
+            raise ValueError("agy_print_timeout must be non-empty")
+        timeout = print_timeout
+    else:
+        timeout = DEFAULT_AGY_PRINT_TIMEOUT
+    return [
+        "agy",
+        "--model",
+        display_name,
+        "--dangerously-skip-permissions",
+        "--print-timeout",
+        timeout,
+        "--output-format",
+        "stream-json",
+        "--print",
+    ]
+
+
+def _build_agy_command(
+    model: str,
+    model_id: str,
+    variant: Optional[str],
+    print_timeout: Optional[str] = None,
+) -> list[str]:
     if variant:
         raise ValueError(
             f"--variant {variant} is not supported with --model {model} when using Antigravity."
         )
     # agy --print requires its prompt as an argv value; stdin leaves --print without an argument.
-    return [
-        "agy",
-        "--model",
-        _agy_model_arg(model_id, model),
-        "--dangerously-skip-permissions",
-        "--print",
-    ]
+    return _build_agy_base(_agy_model_arg(model_id, model), print_timeout)
 
 
 def _build_gemini_command(model: str, model_id: str, variant: Optional[str]) -> list[str]:
@@ -508,6 +541,8 @@ def get_cli_info(
     repo_root: Optional[Path] = None,
     cli_override: Optional[str] = None,
     variant: Optional[str] = None,
+    agy_print_timeout: Optional[str] = None,
+    agy_inactivity_timeout: Optional[str] = None,
 ) -> dict:
     """Get CLI command and info for a model.
 
@@ -575,11 +610,14 @@ def get_cli_info(
 
     _require_synthetic_api_key(model, model_id)
 
+    cli_info_extras: dict = {}
+
     use_registry_runtime = (
         router_resolution is None
         and cli_override is None
         and not explicit_variant
         and selected_cli == requested_model_spec["default_cli"]
+        and selected_cli != "agy"
     )
 
     if use_registry_runtime:
@@ -593,9 +631,16 @@ def get_cli_info(
         env = _env_for_command(selected_cli, command)
         stdin_mode = "arg"
     elif selected_cli == "agy":
-        command = _build_agy_command(model, model_id, effective_variant)
+        agy_pt = agy_print_timeout if agy_print_timeout is not None else _read_config_value(repo_root, "agy_print_timeout")
+        command = _build_agy_command(model, model_id, effective_variant, print_timeout=agy_pt)
         env = _env_for_command(selected_cli, command)
         stdin_mode = "arg"
+        agy_it = agy_inactivity_timeout if agy_inactivity_timeout is not None else _read_config_value(repo_root, "agy_inactivity_timeout")
+        cli_info_extras = {}
+        if agy_pt:
+            cli_info_extras["agy_print_timeout"] = agy_pt
+        if agy_it:
+            cli_info_extras["agy_inactivity_timeout"] = agy_it
     elif selected_cli == "gemini":
         command = _build_gemini_command(model, model_id, effective_variant)
         env = _env_for_command(selected_cli, command)
@@ -645,7 +690,7 @@ def get_cli_info(
         display=display,
     )
 
-    return {
+    result = {
         "command": config.command,
         "display": config.display,
         "env": config.env,
@@ -655,3 +700,5 @@ def get_cli_info(
         "model_id": config.model_id,
         "variant": config.variant,
     }
+    result.update(cli_info_extras)
+    return result

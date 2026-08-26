@@ -608,11 +608,17 @@ def _build_command(cli: str, model_id: str, request: _ModelRequest) -> list[str]
 
     if cli == "agy":
         # agy --print requires the prompt as the flag value; the executor appends it in argv mode.
+        # --print-timeout and --output-format must precede --print so agy doesn't swallow them
+        # as the prompt value.
         cmd = [
             "agy",
             "--model",
             _agy_model_arg(model_id, request.shorthand),
             "--dangerously-skip-permissions",
+            "--print-timeout",
+            "60m",
+            "--output-format",
+            "stream-json",
             "--print",
         ]
         return cmd
