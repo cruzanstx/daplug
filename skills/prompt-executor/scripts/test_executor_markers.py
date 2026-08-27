@@ -170,7 +170,20 @@ class TestGetCliInfo(unittest.TestCase):
     def test_opencode_model_exists(self):
         """Verify opencode model is configured."""
         info = executor.get_cli_info("opencode")
-        self.assertEqual(info["command"], ["opencode", "run", "--format", "json", "-m", "zai/glm-4.7"])
+        self.assertEqual(
+            info["command"],
+            [
+                "opencode",
+                "run",
+                "--format",
+                "json",
+                "-m",
+                "zai/glm-4.7",
+                "--pure",
+                "--agent",
+                "build",
+            ],
+        )
         self.assertEqual(info["stdin_mode"], "arg")
         self.assertFalse(info.get("needs_pty", False))
 
@@ -181,16 +194,29 @@ class TestGetCliInfo(unittest.TestCase):
 
     def test_local_models_default_to_opencode(self):
         """Verify local models default to opencode CLI."""
-        expected = {
-            "local": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-coder-next"],
-            "qwen": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-coder-next"],
-            "devstral": ["opencode", "run", "--format", "json", "-m", "lmstudio/devstral-small-2-2512"],
-            "glm-local": ["opencode", "run", "--format", "json", "-m", "lmstudio/glm-4.7-flash"],
-            "qwen-small": ["opencode", "run", "--format", "json", "-m", "lmstudio/qwen3-4b-2507"],
+        expected_models = {
+            "local": "lmstudio/qwen3.6-35b-a3b",
+            "qwen": "lmstudio/qwen3.6-35b-a3b",
+            "devstral": "lmstudio/devstral-small-2-2512",
+            "glm-local": "lmstudio/glm-4.7-flash",
+            "qwen-small": "lmstudio/qwen3-4b-2507",
         }
-        for model, cmd in expected.items():
+        for model, model_id in expected_models.items():
             info = executor.get_cli_info(model)
-            self.assertEqual(info["command"], cmd)
+            self.assertEqual(
+                info["command"],
+                [
+                    "opencode",
+                    "run",
+                    "--format",
+                    "json",
+                    "-m",
+                    model_id,
+                    "--pure",
+                    "--agent",
+                    "build",
+                ],
+            )
             self.assertEqual(info["stdin_mode"], "arg")
 
     def test_local_models_cli_override_codex(self):

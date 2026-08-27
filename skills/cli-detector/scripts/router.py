@@ -123,6 +123,23 @@ _SHORTHAND: dict[str, _ModelRequest] = {
     "glm5": _ModelRequest("glm5", family="zai", model_id="zai:glm-5.3", codex_profile="glm5"),
     "glm52": _ModelRequest("glm52", family="zai", model_id="zai:glm-5.2"),
     "glm53": _ModelRequest("glm53", family="zai", model_id="zai:glm-5.3"),
+    # GLM-5.3-Flash: cheap, fast, natively multimodal sibling of GLM-5.3 on
+    # the Z.AI Coding Plan (3x quota, 1M context). `glm53-flash` is the
+    # versioned alias of `flash`.
+    "flash": _ModelRequest(
+        "flash",
+        family="zai",
+        model_id="zai:glm-5.3-flash",
+        force_cli="opencode",
+        strict_cli=True,
+    ),
+    "glm53-flash": _ModelRequest(
+        "glm53-flash",
+        family="zai",
+        model_id="zai:glm-5.3-flash",
+        force_cli="opencode",
+        strict_cli=True,
+    ),
     "kimi": _ModelRequest(
         "kimi",
         family="zai",

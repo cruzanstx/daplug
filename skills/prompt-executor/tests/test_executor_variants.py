@@ -485,6 +485,8 @@ EXPECTED_MODEL_KEYS = [
     "glm5",
     "glm52",
     "glm53",
+    "flash",
+    "glm53-flash",
     "kimi",
     "synthetic",
     "syn-flash",
@@ -566,3 +568,26 @@ def test_model_registry_loads_when_cwd_is_not_repo_root(tmp_path, monkeypatch):
     assert by_name["glm5"]["model_id"] == "zai:glm-5.3"
     assert by_name["glm52"]["model_id"] == "zai:glm-5.2"
     assert by_name["glm53"]["model_id"] == "zai:glm-5.3"
+    assert by_name["flash"]["model_id"] == "zai:glm-5.3-flash"
+    assert by_name["glm53-flash"]["model_id"] == "zai:glm-5.3-flash"
+
+
+def test_flash_shorthands_generate_opencode_glm53_flash_command(no_router, tmp_path):
+    """flash and glm53-flash both run GLM-5.3-Flash via OpenCode with the lean build agent."""
+    expected_command = [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "zai/glm-5.3-flash",
+        "--pure",
+        "--agent",
+        "build",
+    ]
+    for shorthand in ("flash", "glm53-flash"):
+        info = executor.get_cli_info(shorthand, repo_root=tmp_path)
+        assert info["selected_cli"] == "opencode", shorthand
+        assert info["model_id"] == "zai:glm-5.3-flash", shorthand
+        assert info["command"] == expected_command, shorthand
+        assert info["stdin_mode"] == "arg", shorthand

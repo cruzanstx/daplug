@@ -70,7 +70,7 @@ python3 "$EXECUTOR" [prompts...] [options]
 
 **Options:**
 <!-- BEGIN GENERATED: skill-model-options -->
-- `--model, -m`: claude, cc-sonnet, cc-opus, fable, codex, codex-spark, codex-high, codex-xhigh, sol, terra, luna, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, gemini37, gemini37-high, gemini37-medium, gemini37-low, agy, zai, glm5, glm52, glm53, kimi, synthetic, syn-flash, syn-kimi, syn-kimi3, syn-qwen, syn-minimax, syn-nemotron, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b
+- `--model, -m`: claude, cc-sonnet, cc-opus, fable, codex, codex-spark, codex-high, codex-xhigh, sol, terra, luna, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, gemini37, gemini37-high, gemini37-medium, gemini37-low, agy, zai, glm5, glm52, glm53, flash, glm53-flash, kimi, synthetic, syn-flash, syn-kimi, syn-kimi3, syn-qwen, syn-minimax, syn-nemotron, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b
   - `glm53`: GLM-5.3 via Z.AI / OpenCode (1M context)
   - `synthetic`: GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, requires `SYNTHETIC_API_KEY`)
 <!-- END GENERATED: skill-model-options -->
@@ -299,6 +299,8 @@ python3 "$EXECUTOR" --loop-status
 | glm5 | opencode run --format json -m zai/glm-5.3 --pure --agent build | Latest GLM 5.x tasks via OpenCode |
 | glm52 | opencode run --format json -m zai/glm-5.2 --pure --agent build | Explicit GLM-5.2 pin via OpenCode |
 | glm53 | opencode run --format json -m zai/glm-5.3 --pure --agent build | Explicit GLM-5.3 pin via OpenCode |
+| flash | opencode run --format json -m zai/glm-5.3-flash --pure --agent build | Fast multimodal GLM-5.3-Flash via OpenCode (3x quota, reasoning effort max recommended) |
+| glm53-flash | opencode run --format json -m zai/glm-5.3-flash --pure --agent build | Explicit GLM-5.3-Flash pin via OpenCode (3x quota, reasoning effort max recommended) |
 | kimi | opencode run --format json -m opencode/kimi-k2.5 --pure --agent build | Kimi K2.5 via OpenCode |
 | synthetic | opencode run --format json -m synthetic/syn:large:text --pure --agent build | GLM-5.2 default, 512k context |
 | syn-flash | opencode run --format json -m synthetic/syn:small:text --pure --agent build | Fast GLM-4.7-Flash fallback |

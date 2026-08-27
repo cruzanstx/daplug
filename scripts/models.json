@@ -1677,6 +1677,98 @@
       }
     },
     {
+      "name": "flash",
+      "display": "flash (GLM-5.3-Flash via OpenCode — multimodal, 1M context, 3x quota)",
+      "model_id": "zai:glm-5.3-flash",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "zai/glm-5.3-flash",
+        "--pure",
+        "--agent",
+        "build"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Z.AI / OpenCode",
+        "cli_label": "opencode",
+        "actual_model": "GLM-5.3-Flash via OpenCode (multimodal vision, 1M context, 3x Coding Plan quota vs GLM-5.3)",
+        "option_description": "Z.AI GLM-5.3-Flash via OpenCode (multimodal, 1M context, 3x quota)",
+        "reference_cli": "opencode run --format json -m zai/glm-5.3-flash --pure --agent build",
+        "reference_description": "Fast multimodal GLM-5.3-Flash via OpenCode (3x quota, reasoning effort max recommended)",
+        "readme_section": "Z.AI / OpenCode",
+        "readme_model": "glm-5.3-flash",
+        "best_for": "Fast multimodal GLM-5.3-Flash tasks via OpenCode (1M context, 3x quota, reasoning effort max recommended)",
+        "prompt_description": "Z.AI GLM-5.3-Flash via OpenCode (multimodal vision, 1M context, 3x Coding Plan quota)",
+        "menu_note": "Z.AI GLM-5.3-Flash multimodal, 3x quota, reasoning max",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "glm53-flash",
+      "display": "glm53-flash (GLM-5.3-Flash via OpenCode — versioned alias, 1M context)",
+      "model_id": "zai:glm-5.3-flash",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": "flash",
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "zai/glm-5.3-flash",
+        "--pure",
+        "--agent",
+        "build"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Z.AI / OpenCode",
+        "cli_label": "opencode",
+        "actual_model": "GLM-5.3-Flash via OpenCode (versioned alias of flash; multimodal vision, 1M context, 3x quota vs GLM-5.3)",
+        "option_description": "Z.AI GLM-5.3-Flash via OpenCode (versioned alias of flash; multimodal, 1M context, 3x quota)",
+        "reference_cli": "opencode run --format json -m zai/glm-5.3-flash --pure --agent build",
+        "reference_description": "Explicit GLM-5.3-Flash pin via OpenCode (3x quota, reasoning effort max recommended)",
+        "readme_section": "Z.AI / OpenCode",
+        "readme_model": "glm-5.3-flash",
+        "best_for": "Explicit GLM-5.3-Flash pin via OpenCode (multimodal, 1M context, 3x quota, reasoning effort max recommended)",
+        "prompt_description": "Z.AI GLM-5.3-Flash via OpenCode (versioned alias of flash; multimodal vision, 1M context, 3x Coding Plan quota)",
+        "menu_note": "Z.AI GLM-5.3-Flash versioned alias of flash",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
       "name": "kimi",
       "display": "kimi (Kimi K2.5 via OpenCode)",
       "model_id": "opencode:kimi-k2.5",

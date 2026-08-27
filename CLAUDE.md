@@ -195,6 +195,8 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `glm5` | opencode | GLM-5.3 via OpenCode (latest GLM 5.x, 1M context) |
 | `glm52` | opencode | GLM-5.2 via OpenCode (explicit pin, 1M context) |
 | `glm53` | opencode | GLM-5.3 via OpenCode (explicit pin, 1M context) |
+| `flash` | opencode | GLM-5.3-Flash via OpenCode (multimodal vision, 1M context, 3x Coding Plan quota vs GLM-5.3) |
+| `glm53-flash` | opencode | GLM-5.3-Flash via OpenCode (versioned alias of flash; multimodal vision, 1M context, 3x quota vs GLM-5.3) |
 | `kimi` | opencode | Kimi K2.5 via OpenCode |
 | `synthetic` | opencode | GLM-5.2 via Synthetic (`syn:large:text`, 512k context) |
 | `syn-flash` | opencode | GLM-4.7-Flash via Synthetic (`syn:small:text`) |

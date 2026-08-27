@@ -52,6 +52,36 @@ def test_synthetic_models_force_opencode_provider(monkeypatch):
         assert cmd == ["opencode", "run", "--format", "json", "-m", opencode_ref, "--pure", "--agent", "build"]
 
 
+def test_glm53_flash_models_force_opencode_provider(monkeypatch):
+    fake = _FakeCache(
+        {
+            "clis": {
+                "codex": {"installed": True, "issues": []},
+                "opencode": {"installed": True, "issues": []},
+            },
+            "providers": {},
+            "user_preferences": {"default_cli": "codex", "model_overrides": {}},
+        }
+    )
+    monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+
+    for shorthand in ("flash", "glm53-flash"):
+        cli, model_id, cmd = router.resolve_model(shorthand)
+        assert cli == "opencode"
+        assert model_id == "zai:glm-5.3-flash"
+        assert cmd == [
+            "opencode",
+            "run",
+            "--format",
+            "json",
+            "-m",
+            "zai/glm-5.3-flash",
+            "--pure",
+            "--agent",
+            "build",
+        ]
+
+
 def test_raw_syn_alias_routes_through_synthetic_provider(monkeypatch):
     fake = _FakeCache(
         {
@@ -800,16 +830,24 @@ class TestZAIModels:
 
     @pytest.mark.parametrize(
         ("shorthand", "raw_model"),
-        [("glm5", "glm-5.3"), ("glm52", "glm-5.2"), ("glm53", "glm-5.3")],
+        [
+            ("glm5", "glm-5.3"),
+            ("glm52", "glm-5.2"),
+            ("glm53", "glm-5.3"),
+            ("flash", "glm-5.3-flash"),
+            ("glm53-flash", "glm-5.3-flash"),
+        ],
     )
     def test_glm5x_shorthands_route_to_opencode(self, full_cache, shorthand, raw_model):
-        """glm5/glm53 target GLM-5.3, glm52 pins GLM-5.2, all through OpenCode."""
+        """glm5/glm53 target GLM-5.3, glm52 pins GLM-5.2, flash/glm53-flash pin GLM-5.3-Flash, all through OpenCode."""
         cli, model_id, cmd = router.resolve_model(shorthand)
         assert cli == "opencode"
         assert model_id == f"zai:{raw_model}"
         assert cmd[0:4] == ["opencode", "run", "--format", "json"]
         idx_m = cmd.index("-m")
         assert cmd[idx_m + 1] == f"zai/{raw_model}"
+        assert "--pure" in cmd
+        assert cmd[cmd.index("--agent") + 1] == "build"
 
 
 class TestLocalModels:

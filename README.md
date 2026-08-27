@@ -718,6 +718,8 @@ These tables are generated from `scripts/models.json`.
 | `glm5` | glm-5.3 | Latest GLM 5.x tasks via OpenCode |
 | `glm52` | glm-5.2 | Explicit GLM-5.2 pin via OpenCode |
 | `glm53` | glm-5.3 | Explicit GLM-5.3 pin via OpenCode |
+| `flash` | glm-5.3-flash | Fast multimodal GLM-5.3-Flash tasks via OpenCode (1M context, 3x quota, reasoning effort max recommended) |
+| `glm53-flash` | glm-5.3-flash | Explicit GLM-5.3-Flash pin via OpenCode (multimodal, 1M context, 3x quota, reasoning effort max recommended) |
 | `kimi` | kimi-k2.5 | Kimi K2.5 via OpenCode |
 | `opencode` | glm-4.7 | Recommended OpenCode JSON runner |
 

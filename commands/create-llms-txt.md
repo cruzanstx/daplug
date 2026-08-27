@@ -505,6 +505,8 @@ All available models for /daplug:run-prompt --model:
 - `glm5` - Z.AI GLM-5.3 via OpenCode (latest GLM 5.x, 1M context)
 - `glm52` - Z.AI GLM-5.2 via OpenCode (explicit pin, 1M context)
 - `glm53` - Z.AI GLM-5.3 via OpenCode (explicit pin, 1M context)
+- `flash` - Z.AI GLM-5.3-Flash via OpenCode (multimodal vision, 1M context, 3x Coding Plan quota)
+- `glm53-flash` - Z.AI GLM-5.3-Flash via OpenCode (versioned alias of flash; multimodal vision, 1M context, 3x Coding Plan quota)
 - `kimi` - Kimi K2.5 via OpenCode
 - `opencode` - OpenCode runner with Z.AI GLM-4.7
 
@@ -655,28 +657,30 @@ If user chooses #1:
   36. glm5 - {X}% used - Z.AI GLM-5.3 latest alias
   37. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
   38. glm53 - {X}% used - Z.AI GLM-5.3 explicit pin
-  39. kimi - {X}% used - Kimi K2.5 via OpenCode
-  40. opencode - {X}% used - OpenCode GLM-4.7
+  39. flash - {X}% used - Z.AI GLM-5.3-Flash multimodal, 3x quota, reasoning max
+  40. glm53-flash - {X}% used - Z.AI GLM-5.3-Flash versioned alias of flash
+  41. kimi - {X}% used - Kimi K2.5 via OpenCode
+  42. opencode - {X}% used - OpenCode GLM-4.7
 
   **Synthetic:** {usage status}
-  41. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
-  42. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
-  43. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.7-Code vision
-  44. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
-  45. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
-  46. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
-  47. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
+  43. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
+  44. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
+  45. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.7-Code vision
+  46. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
+  47. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
+  48. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
+  49. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
 
   **Local:** {usage status}
-  48. local - local qwen3.6-35b-a3b, no quota
-  49. qwen - local qwen3.6-35b-a3b, no quota
-  50. devstral - local Devstral, no quota
-  51. glm-local - local GLM-4.7 Flash, no quota
-  52. qwen-small - local qwen3-4b, no quota
-  53. qwen36 - local qwen3.6-35b-a3b, no quota
-  54. qwen36-27b - local qwen3.6-27b, no quota
+  50. local - local qwen3.6-35b-a3b, no quota
+  51. qwen - local qwen3.6-35b-a3b, no quota
+  52. devstral - local Devstral, no quota
+  53. glm-local - local GLM-4.7 Flash, no quota
+  54. qwen-small - local qwen3-4b, no quota
+  55. qwen36 - local qwen3.6-35b-a3b, no quota
+  56. qwen36-27b - local qwen3.6-27b, no quota
 
-  Choose (1-54), or type model with flags (e.g., 'codex --worktree --loop'): _
+  Choose (1-56), or type model with flags (e.g., 'codex --worktree --loop'): _
 <!-- END GENERATED: create-llms-selection-menu -->
 
   **Execute based on selection:**

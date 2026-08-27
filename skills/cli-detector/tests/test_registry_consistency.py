@@ -249,6 +249,57 @@ class TestRegistryRouterConsistency:
             + "\n".join(drifts)
         )
 
+    def test_flash_and_glm53_flash_are_identical_routes(self):
+        """flash and glm53-flash must resolve identically to zai:glm-5.3-flash via opencode."""
+        reg_by_name = {m["name"]: m for m in _load_registry()}
+
+        for name in ("flash", "glm53-flash"):
+            assert name in reg_by_name, f"{name} missing from models.json"
+            entry = reg_by_name[name]
+            assert entry["model_id"] == "zai:glm-5.3-flash", name
+            assert entry["default_cli"] == "opencode", name
+            assert entry["command"] == [
+                "opencode",
+                "run",
+                "--format",
+                "json",
+                "-m",
+                "zai/glm-5.3-flash",
+                "--pure",
+                "--agent",
+                "build",
+            ], name
+            assert entry["routing"] == {
+                "cli_overrides": ["opencode"],
+                "force_direct_opencode": True,
+                "google": False,
+                "synthetic": False,
+            }, name
+
+        assert reg_by_name["glm53-flash"]["alias_of"] == "flash"
+        assert reg_by_name["flash"]["model_id"] == reg_by_name["glm53-flash"]["model_id"]
+        assert reg_by_name["flash"]["command"] == reg_by_name["glm53-flash"]["command"]
+        assert reg_by_name["flash"]["routing"] == reg_by_name["glm53-flash"]["routing"]
+
+        # Router entries agree and resolve identically.
+        for name in ("flash", "glm53-flash"):
+            req = router._SHORTHAND[name]
+            assert req.family == "zai", name
+            assert req.model_id == "zai:glm-5.3-flash", name
+        assert router._SHORTHAND["flash"].model_id == router._SHORTHAND["glm53-flash"].model_id
+
+    def test_glm53_still_targets_glm_5_3(self):
+        """Adding GLM-5.3-Flash must not retarget glm5/glm53."""
+        reg_by_name = {m["name"]: m for m in _load_registry()}
+        for name in ("glm5", "glm53"):
+            assert reg_by_name[name]["model_id"] == "zai:glm-5.3", name
+            assert router._SHORTHAND[name].model_id == "zai:glm-5.3", name
+        assert reg_by_name["glm52"]["model_id"] == "zai:glm-5.2"
+        assert reg_by_name["zai"]["model_id"] == "zai:glm-4.7"
+        assert reg_by_name["opencode"]["model_id"] == "zai:glm-4.7"
+        assert reg_by_name["synthetic"]["model_id"] == "synthetic:syn:large:text"
+        assert reg_by_name["syn-flash"]["model_id"] == "synthetic:syn:small:text"
+
     def test_drift_missing_router_key_produces_actionable_message(self):
         """A model missing from router must produce a message naming it."""
         registry_models = _load_registry()

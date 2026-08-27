@@ -101,6 +101,49 @@ def test_check_detects_and_repairs_generated_drift(tmp_path: Path):
     assert manage_models.check_models(root) is True
 
 
+def test_flash_and_glm53_flash_registry_entries(tmp_path: Path):
+    """flash and its versioned alias glm53-flash are registered with identical GLM-5.3-Flash routing."""
+    registry = manage_models.load_registry(REPO_ROOT)
+    by_name = {model["name"]: model for model in registry["models"]}
+
+    expected_command = [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "zai/glm-5.3-flash",
+        "--pure",
+        "--agent",
+        "build",
+    ]
+    expected_routing = {
+        "cli_overrides": ["opencode"],
+        "force_direct_opencode": True,
+        "google": False,
+        "synthetic": False,
+    }
+    for name in ("flash", "glm53-flash"):
+        assert name in by_name, name
+        entry = by_name[name]
+        assert entry["model_id"] == "zai:glm-5.3-flash", name
+        assert entry["default_cli"] == "opencode", name
+        assert entry["supports_codex_reasoning"] is False, name
+        assert entry["command"] == expected_command, name
+        assert entry["routing"] == expected_routing, name
+        assert entry["docs"]["family"] == "Z.AI / OpenCode", name
+        assert manage_models.default_command(
+            entry["default_cli"],
+            entry["model_id"],
+            entry["codex_profile"],
+            entry["claude_model_flag"],
+            entry["default_variant"],
+        ) == expected_command, name
+
+    assert by_name["glm53-flash"]["alias_of"] == "flash"
+    assert by_name["glm53"]["model_id"] == "zai:glm-5.3"
+
+
 def test_load_registry_rejects_missing_model_fields(tmp_path: Path):
     root = copy_model_targets(tmp_path)
     registry_path = root / "scripts" / "models.json"

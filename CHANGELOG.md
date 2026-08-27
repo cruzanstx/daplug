@@ -4,6 +4,9 @@ All notable changes to daplug are documented here.
 
 ## [Unreleased]
 
+### Added
+- **GLM-5.3-Flash model shorthands** — `flash` (plus versioned alias `glm53-flash`) routes to `zai/glm-5.3-flash` via OpenCode (`opencode run --format json -m zai/glm-5.3-flash --pure --agent build`), the cheap, fast, natively multimodal (vision) sibling of GLM-5.3 on the Z.AI Coding Plan with the official 1M context window and 3x the Coding Plan quota of full GLM-5.3. Reasoning effort `max` is recommended where guidance appears in the generated docs. `glm5`/`glm53` remain pinned to `zai/glm-5.3`; registry, router, and all generated doc tables updated from the single-source registry.
+
 ## [0.40.4] - 2026-08-25
 
 ### Fixed
