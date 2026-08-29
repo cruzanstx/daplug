@@ -144,6 +144,56 @@ def test_flash_and_glm53_flash_registry_entries(tmp_path: Path):
     assert by_name["glm53"]["model_id"] == "zai:glm-5.3"
 
 
+def test_syn_glm53_flash_registry_entry(tmp_path: Path):
+    """syn-glm53-flash routes to Synthetic's hf:zai-org/GLM-5.3-Flash via direct OpenCode."""
+    registry = manage_models.load_registry(REPO_ROOT)
+    by_name = {model["name"]: model for model in registry["models"]}
+
+    expected_command = [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "synthetic/hf:zai-org/GLM-5.3-Flash",
+        "--pure",
+        "--agent",
+        "build",
+    ]
+    expected_routing = {
+        "cli_overrides": ["opencode"],
+        "force_direct_opencode": True,
+        "google": False,
+        "synthetic": True,
+    }
+
+    assert "syn-glm53-flash" in by_name
+    entry = by_name["syn-glm53-flash"]
+    assert entry["model_id"] == "synthetic:hf:zai-org/GLM-5.3-Flash"
+    assert entry["default_cli"] == "opencode"
+    assert entry["supports_codex_reasoning"] is False
+    assert entry["alias_of"] is None
+    assert entry["command"] == expected_command
+    assert entry["routing"] == expected_routing
+    assert entry["docs"]["family"] == "Synthetic"
+    assert manage_models.default_command(
+        entry["default_cli"],
+        entry["model_id"],
+        entry["codex_profile"],
+        entry["claude_model_flag"],
+        entry["default_variant"],
+    ) == expected_command
+
+    # Z.AI GLM-5.3-Flash shorthands stay on the Coding Plan route.
+    for name in ("flash", "glm53-flash"):
+        assert by_name[name]["model_id"] == "zai:glm-5.3-flash", name
+        assert by_name[name]["routing"]["synthetic"] is False, name
+
+    # Generic Synthetic defaults remain GLM-5.2 / GLM-4.7-Flash.
+    assert by_name["synthetic"]["model_id"] == "synthetic:syn:large:text"
+    assert by_name["syn-flash"]["model_id"] == "synthetic:syn:small:text"
+
+
 def test_load_registry_rejects_missing_model_fields(tmp_path: Path):
     root = copy_model_targets(tmp_path)
     registry_path = root / "scripts" / "models.json"

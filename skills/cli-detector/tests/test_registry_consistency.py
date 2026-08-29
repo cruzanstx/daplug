@@ -58,6 +58,16 @@ _FAMILY_MAP: dict[str, str] = {
 # --- Helpers ----------------------------------------------------------
 
 
+class _FakeCache:
+    """Minimal stand-in for the CLI detection cache used by router.resolve_model."""
+
+    def __init__(self, data: dict):
+        self._data = data
+
+    def to_dict(self) -> dict:
+        return dict(self._data)
+
+
 def _load_registry() -> list[dict]:
     """Load and return the models list from scripts/models.json."""
     if not _REGISTRY_PATH.exists():
@@ -299,6 +309,77 @@ class TestRegistryRouterConsistency:
         assert reg_by_name["opencode"]["model_id"] == "zai:glm-4.7"
         assert reg_by_name["synthetic"]["model_id"] == "synthetic:syn:large:text"
         assert reg_by_name["syn-flash"]["model_id"] == "synthetic:syn:small:text"
+
+    def test_syn_glm53_flash_routes_to_synthetic_provider(self):
+        """syn-glm53-flash must route to Synthetic's hf:zai-org/GLM-5.3-Flash via opencode."""
+        reg_by_name = {m["name"]: m for m in _load_registry()}
+        assert "syn-glm53-flash" in reg_by_name
+        entry = reg_by_name["syn-glm53-flash"]
+        assert entry["model_id"] == "synthetic:hf:zai-org/GLM-5.3-Flash"
+        assert entry["default_cli"] == "opencode"
+        assert entry["supports_codex_reasoning"] is False
+        assert entry["command"] == [
+            "opencode",
+            "run",
+            "--format",
+            "json",
+            "-m",
+            "synthetic/hf:zai-org/GLM-5.3-Flash",
+            "--pure",
+            "--agent",
+            "build",
+        ]
+        assert entry["routing"] == {
+            "cli_overrides": ["opencode"],
+            "force_direct_opencode": True,
+            "google": False,
+            "synthetic": True,
+        }
+        assert entry["docs"]["family"] == "Synthetic"
+
+        req = router._SHORTHAND["syn-glm53-flash"]
+        assert req.family == "synthetic"
+        assert req.model_id == "synthetic:hf:zai-org/GLM-5.3-Flash"
+        assert req.force_cli == "opencode"
+        assert req.strict_cli is True
+
+        # Distinct from the Z.AI Coding Plan GLM-5.3-Flash shorthands.
+        assert reg_by_name["flash"]["model_id"] == "zai:glm-5.3-flash"
+        assert reg_by_name["glm53-flash"]["model_id"] == "zai:glm-5.3-flash"
+        assert router._SHORTHAND["flash"].model_id == "zai:glm-5.3-flash"
+        assert router._SHORTHAND["glm53-flash"].model_id == "zai:glm-5.3-flash"
+
+        # Generic Synthetic defaults remain GLM-5.2 / GLM-4.7-Flash.
+        assert reg_by_name["synthetic"]["model_id"] == "synthetic:syn:large:text"
+        assert reg_by_name["syn-flash"]["model_id"] == "synthetic:syn:small:text"
+
+    def test_syn_glm53_flash_resolves_strictly_to_opencode(self, monkeypatch):
+        """Router resolution for syn-glm53-flash is strict-direct OpenCode."""
+        fake = _FakeCache(
+            {
+                "clis": {
+                    "codex": {"installed": True, "issues": []},
+                    "opencode": {"installed": True, "issues": []},
+                },
+                "providers": {},
+            }
+        )
+        monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+
+        cli, model_id, cmd = router.resolve_model("syn-glm53-flash")
+        assert cli == "opencode"
+        assert model_id == "synthetic:hf:zai-org/GLM-5.3-Flash"
+        assert cmd == [
+            "opencode",
+            "run",
+            "--format",
+            "json",
+            "-m",
+            "synthetic/hf:zai-org/GLM-5.3-Flash",
+            "--pure",
+            "--agent",
+            "build",
+        ]
 
     def test_drift_missing_router_key_produces_actionable_message(self):
         """A model missing from router must produce a message naming it."""

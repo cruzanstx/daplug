@@ -2137,6 +2137,52 @@
       }
     },
     {
+      "name": "syn-glm53-flash",
+      "display": "syn-glm53-flash (GLM-5.3-Flash via Synthetic — beta, vision, low-cost)",
+      "model_id": "synthetic:hf:zai-org/GLM-5.3-Flash",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "synthetic/hf:zai-org/GLM-5.3-Flash",
+        "--pure",
+        "--agent",
+        "build"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": true
+      },
+      "docs": {
+        "family": "Synthetic",
+        "cli_label": "opencode",
+        "actual_model": "GLM-5.3-Flash via Synthetic (`hf:zai-org/GLM-5.3-Flash`, beta, vision, low-cost)",
+        "option_description": "GLM-5.3-Flash via Synthetic / OpenCode (beta, vision, low-cost)",
+        "reference_cli": "opencode run --format json -m synthetic/hf:zai-org/GLM-5.3-Flash --pure --agent build",
+        "reference_description": "Beta vision GLM-5.3-Flash, low-cost ($0.15/MTok in, $0.04/MTok cached, $0.50/MTok out)",
+        "readme_section": "Synthetic",
+        "readme_model": "`hf:zai-org/GLM-5.3-Flash`",
+        "best_for": "Beta vision GLM-5.3-Flash, low-cost ($0.15/MTok in, $0.04/MTok cached, $0.50/MTok out)",
+        "prompt_description": "GLM-5.3-Flash via Synthetic / OpenCode (beta, vision, low-cost)",
+        "menu_note": "Synthetic GLM-5.3-Flash beta vision",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
       "name": "opencode",
       "display": "opencode (GLM-4.7 via OpenCode)",
       "model_id": "zai:glm-4.7",

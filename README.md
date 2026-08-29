@@ -736,6 +736,7 @@ Synthetic shorthands route through OpenCode's `synthetic` provider and require `
 | `syn-qwen` | `syn:small:vision` | Qwen3.6-27B vision tasks |
 | `syn-minimax` | `hf:MiniMaxAI/MiniMax-M3` | MiniMax-M3 vision, cheap all-rounder |
 | `syn-nemotron` | `hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4` | Nemotron-3-Super-120B, cheapest large text |
+| `syn-glm53-flash` | `hf:zai-org/GLM-5.3-Flash` | Beta vision GLM-5.3-Flash, low-cost ($0.15/MTok in, $0.04/MTok cached, $0.50/MTok out) |
 
 #### Local
 

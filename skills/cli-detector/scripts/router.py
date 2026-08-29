@@ -197,6 +197,15 @@ _SHORTHAND: dict[str, _ModelRequest] = {
         force_cli="opencode",
         strict_cli=True,
     ),
+    # Synthetic-hosted GLM-5.3-Flash (beta, vision). Distinct from the Z.AI
+    # Coding Plan shorthands `flash`/`glm53-flash`, which route to zai/glm-5.3-flash.
+    "syn-glm53-flash": _ModelRequest(
+        "syn-glm53-flash",
+        family="synthetic",
+        model_id="synthetic:hf:zai-org/GLM-5.3-Flash",
+        force_cli="opencode",
+        strict_cli=True,
+    ),
     "opencode": _ModelRequest(
         "opencode",
         family="zai",

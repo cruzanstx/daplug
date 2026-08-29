@@ -205,6 +205,7 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `syn-qwen` | opencode | Qwen3.6-27B via Synthetic (`syn:small:vision`, vision) |
 | `syn-minimax` | opencode | MiniMax-M3 via Synthetic (`hf:MiniMaxAI/MiniMax-M3`, vision, 256k context) |
 | `syn-nemotron` | opencode | Nemotron-3-Super-120B via Synthetic (`hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4`, 256k context) |
+| `syn-glm53-flash` | opencode | GLM-5.3-Flash via Synthetic (`hf:zai-org/GLM-5.3-Flash`, beta, vision, low-cost) |
 | `opencode` | opencode | GLM-4.7 via OpenCode (recommended; JSON output) |
 | `local` | opencode | qwen3.6-35b-a3b via LMStudio (opencode default, --cli codex for legacy) |
 | `qwen` | opencode | qwen3.6-35b-a3b via LMStudio (opencode default, --cli codex for legacy) |

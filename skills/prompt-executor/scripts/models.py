@@ -462,7 +462,7 @@ def _require_synthetic_api_key(model: str, model_id: str) -> None:
     raise RuntimeError(
         "SYNTHETIC_API_KEY is required for Synthetic models. "
         "Create a key at https://synthetic.new/dashboard and export it before using "
-        "--model synthetic, syn-flash, syn-kimi, or syn-qwen."
+        "--model synthetic, syn-flash, syn-kimi, syn-qwen, or syn-glm53-flash."
     )
 
 

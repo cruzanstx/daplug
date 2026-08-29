@@ -5,6 +5,7 @@ All notable changes to daplug are documented here.
 ## [Unreleased]
 
 ### Added
+- **`syn-glm53-flash` model shorthand** — GLM-5.3-Flash via Synthetic routes to `synthetic/hf:zai-org/GLM-5.3-Flash` through OpenCode (`opencode run --format json -m synthetic/hf:zai-org/GLM-5.3-Flash --pure --agent build`) and requires `SYNTHETIC_API_KEY`. Beta release; first vision model in the GLM-5 family; published prices are $0.15/MTok input, $0.04/MTok cached input, $0.50/MTok output. Synthetic reports it broadly outperforming GLM-5.2 and typically matching Opus 4.8. Distinct from the Z.AI Coding Plan shorthands `flash`/`glm53-flash` (`zai/glm-5.3-flash`), which are unchanged; the generic `synthetic` (GLM-5.2, `syn:large:text`) and `syn-flash` (GLM-4.7-Flash, `syn:small:text`) defaults also remain unchanged while GLM-5.3-Flash is beta.
 - **GLM-5.3-Flash model shorthands** — `flash` (plus versioned alias `glm53-flash`) routes to `zai/glm-5.3-flash` via OpenCode (`opencode run --format json -m zai/glm-5.3-flash --pure --agent build`), the cheap, fast, natively multimodal (vision) sibling of GLM-5.3 on the Z.AI Coding Plan with the official 1M context window and 3x the Coding Plan quota of full GLM-5.3. Reasoning effort `max` is recommended where guidance appears in the generated docs. `glm5`/`glm53` remain pinned to `zai/glm-5.3`; registry, router, and all generated doc tables updated from the single-source registry.
 
 ## [0.40.4] - 2026-08-25

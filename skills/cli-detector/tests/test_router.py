@@ -30,6 +30,10 @@ SYNTHETIC_ROUTER_MODELS = {
     "syn-flash": ("synthetic:syn:small:text", "synthetic/syn:small:text"),
     "syn-kimi": ("synthetic:syn:large:vision", "synthetic/syn:large:vision"),
     "syn-qwen": ("synthetic:syn:small:vision", "synthetic/syn:small:vision"),
+    "syn-glm53-flash": (
+        "synthetic:hf:zai-org/GLM-5.3-Flash",
+        "synthetic/hf:zai-org/GLM-5.3-Flash",
+    ),
 }
 
 

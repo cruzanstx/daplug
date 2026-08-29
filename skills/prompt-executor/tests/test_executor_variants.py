@@ -71,6 +71,10 @@ SYNTHETIC_MODELS = {
         "synthetic:hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4",
         "synthetic/hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4",
     ),
+    "syn-glm53-flash": (
+        "synthetic:hf:zai-org/GLM-5.3-Flash",
+        "synthetic/hf:zai-org/GLM-5.3-Flash",
+    ),
 }
 
 
@@ -495,6 +499,7 @@ EXPECTED_MODEL_KEYS = [
     "syn-qwen",
     "syn-minimax",
     "syn-nemotron",
+    "syn-glm53-flash",
     "opencode",
     "local",
     "qwen",

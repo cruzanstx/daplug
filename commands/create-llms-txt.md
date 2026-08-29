@@ -518,6 +518,7 @@ All available models for /daplug:run-prompt --model:
 - `syn-qwen` - Qwen3.6-27B via Synthetic / OpenCode (vision)
 - `syn-minimax` - MiniMax-M3 via Synthetic / OpenCode (vision, 256k context)
 - `syn-nemotron` - Nemotron-3-Super-120B via Synthetic / OpenCode (text, 256k context)
+- `syn-glm53-flash` - GLM-5.3-Flash via Synthetic / OpenCode (beta, vision, low-cost)
 
 **Local Models:** (opencode + LMStudio; no hosted quota)
 - `local` - Local qwen3.6-35b-a3b via opencode + LMStudio
@@ -670,17 +671,18 @@ If user chooses #1:
   47. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
   48. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
   49. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
+  50. syn-glm53-flash - {requests}/{limit} requests - Synthetic GLM-5.3-Flash beta vision
 
   **Local:** {usage status}
-  50. local - local qwen3.6-35b-a3b, no quota
-  51. qwen - local qwen3.6-35b-a3b, no quota
-  52. devstral - local Devstral, no quota
-  53. glm-local - local GLM-4.7 Flash, no quota
-  54. qwen-small - local qwen3-4b, no quota
-  55. qwen36 - local qwen3.6-35b-a3b, no quota
-  56. qwen36-27b - local qwen3.6-27b, no quota
+  51. local - local qwen3.6-35b-a3b, no quota
+  52. qwen - local qwen3.6-35b-a3b, no quota
+  53. devstral - local Devstral, no quota
+  54. glm-local - local GLM-4.7 Flash, no quota
+  55. qwen-small - local qwen3-4b, no quota
+  56. qwen36 - local qwen3.6-35b-a3b, no quota
+  57. qwen36-27b - local qwen3.6-27b, no quota
 
-  Choose (1-56), or type model with flags (e.g., 'codex --worktree --loop'): _
+  Choose (1-57), or type model with flags (e.g., 'codex --worktree --loop'): _
 <!-- END GENERATED: create-llms-selection-menu -->
 
   **Execute based on selection:**
