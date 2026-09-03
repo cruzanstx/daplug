@@ -107,8 +107,21 @@ cat prompt.md | python3 "$PROMPT_MANAGER" create "backup-server"
 # With specific number
 python3 "$PROMPT_MANAGER" create "backup-server" --number 010 --content "..."
 
+# With automatic session transcript reference
+python3 "$PROMPT_MANAGER" create "backup-server" --content "..." --include-session-ref
+
 # JSON output
 python3 "$PROMPT_MANAGER" create "backup-server" --content "..." --json
+```
+
+### Session Transcript
+
+```bash
+# Get path to current session transcript
+python3 "$PROMPT_MANAGER" session-transcript
+
+# As JSON
+python3 "$PROMPT_MANAGER" session-transcript --json
 ```
 
 ### Complete Prompt (Move to completed/)
@@ -156,8 +169,8 @@ PROMPT_MANAGER="$PLUGIN_ROOT/skills/prompt-manager/scripts/manager.py"
 NEXT_NUM=$(python3 "$PROMPT_MANAGER" next-number)
 echo "Next prompt will be: $NEXT_NUM"
 
-# Create the prompt
-python3 "$PROMPT_MANAGER" create "my-task-name" --content "$PROMPT_CONTENT" --json
+# Create the prompt with the latest matching Claude Code session reference
+python3 "$PROMPT_MANAGER" create "my-task-name" --content "$PROMPT_CONTENT" --include-session-ref --json
 ```
 
 ### From /run-prompt

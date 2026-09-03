@@ -15,7 +15,8 @@ Usage:
     python3 manager.py list --completed         # List completed prompts only
     python3 manager.py find <query>             # Find prompt by number, name, or folder/number
     python3 manager.py read <query>             # Read prompt content
-    python3 manager.py create <name> [--folder FOLDER] [--number N] [--content-file FILE]
+    python3 manager.py create <name> [--folder FOLDER] [--number N] [--content-file FILE] [--include-session-ref]
+    python3 manager.py session-transcript [--json] # Get current session transcript file path
     python3 manager.py complete <query>         # Move prompt to completed/
     python3 manager.py delete <query>           # Delete prompt
     python3 manager.py info                     # Show prompts directory info
@@ -120,6 +121,66 @@ def validate_create_folder(folder: str) -> None:
     """Validate a create destination folder (completed/ is reserved)."""
     if folder == "completed" or folder.startswith("completed/"):
         raise ValueError("Folder 'completed' is reserved (archive destination)")
+
+
+def get_project_slug(path: Optional[Path] = None) -> str:
+    """Get the Claude Code project slug for a directory."""
+    if path is None:
+        path = Path.cwd()
+    return re.sub(r"[^a-zA-Z0-9]", "-", str(path.resolve()))
+
+
+def get_session_file(
+    cwd: Optional[Path] = None,
+    repo_root: Optional[Path] = None,
+    claude_home: Optional[Path] = None,
+) -> Optional[Path]:
+    """
+    Find the most recent Claude Code session transcript (.jsonl) for the current project.
+
+    Checks:
+    1. ~/.claude/projects/{slug-of-cwd}
+    2. ~/.claude/projects/{slug-of-repo-root} (if cwd differs from repo_root)
+
+    Returns Path to the .jsonl file, or None if not found.
+    """
+    if claude_home is None:
+        claude_projects_dir = Path.home() / ".claude" / "projects"
+    else:
+        claude_projects_dir = claude_home / "projects"
+
+    if not claude_projects_dir.is_dir():
+        return None
+
+    if cwd is None:
+        cwd = Path.cwd()
+
+    candidate_slugs: list[str] = [get_project_slug(cwd)]
+    if repo_root is None:
+        try:
+            repo_root = get_repo_root()
+        except Exception:
+            repo_root = None
+
+    if repo_root is not None:
+        repo_slug = get_project_slug(repo_root)
+        if repo_slug not in candidate_slugs:
+            candidate_slugs.append(repo_slug)
+
+    for slug in candidate_slugs:
+        project_dir = claude_projects_dir / slug
+        if project_dir.is_dir():
+            jsonl_files = list(project_dir.glob("*.jsonl"))
+            if jsonl_files:
+                jsonl_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+                return jsonl_files[0]
+
+    return None
+
+
+def format_session_reference(session_file: Path) -> str:
+    """Format standard session context reference block."""
+    return f"\n\n---\n**Session Context**: For full conversation context, see: `{session_file}`"
 
 
 def parse_prompt_filename(filename: str) -> Optional[tuple[str, str]]:
@@ -391,6 +452,7 @@ def create_prompt(
     number: Optional[str] = None,
     folder: str = "",
     repo_root: Optional[Path] = None,
+    include_session_ref: bool = False,
 ) -> PromptInfo:
     """
     Create a new prompt file.
@@ -399,7 +461,9 @@ def create_prompt(
         name: Descriptive name (will be kebab-cased)
         content: Prompt content
         number: Optional specific number (auto-generated if None)
+        folder: Destination folder under prompts/ (excluding completed/)
         repo_root: Repository root path
+        include_session_ref: Whether to append session context reference if detected
 
     Returns:
         PromptInfo for the created prompt
@@ -446,6 +510,12 @@ def create_prompt(
         raise ValueError(f"Prompt filename already exists in completed/: {completed_path}")
 
     path = target_dir / filename
+
+    # Append session reference if requested and not already present
+    if include_session_ref and "**Session Context**" not in content:
+        session_file = get_session_file(repo_root=repo_root)
+        if session_file is not None:
+            content = content.rstrip() + format_session_reference(session_file)
 
     # Write content
     path.write_text(content)
@@ -535,6 +605,7 @@ def get_info(repo_root: Optional[Path] = None) -> dict:
     prompts = list_prompts(repo_root)
     active = [p for p in prompts if p.status == "active"]
     completed = [p for p in prompts if p.status == "completed"]
+    session_file = get_session_file(repo_root=repo_root)
 
     return {
         "repo_root": str(repo_root),
@@ -544,6 +615,7 @@ def get_info(repo_root: Optional[Path] = None) -> dict:
         "active_count": len(active),
         "completed_count": len(completed),
         "total_count": len(prompts),
+        "session_file": str(session_file) if session_file else None,
     }
 
 
@@ -645,7 +717,12 @@ def main():
     create_parser.add_argument("--folder", "-f", default="", help="Destination folder under prompts/ (excluding completed/)")
     create_parser.add_argument("--content-file", "-F", help="Read content from file")
     create_parser.add_argument("--content", "-c", help="Prompt content (or use stdin)")
+    create_parser.add_argument("--include-session-ref", action="store_true", help="Append session transcript reference if detected")
     create_parser.add_argument("--json", action="store_true", help="Output as JSON")
+
+    # session-transcript command
+    session_parser = subparsers.add_parser("session-transcript", help="Get current session transcript file path")
+    session_parser.add_argument("--json", action="store_true", help="Output as JSON")
 
     # complete command
     complete_parser = subparsers.add_parser("complete", help="Move prompt to completed")
@@ -731,11 +808,29 @@ def main():
                 content=content,
                 number=args.number,
                 folder=args.folder,
+                include_session_ref=args.include_session_ref,
             )
             if args.json:
                 print(json.dumps(prompt.to_dict(), indent=2))
             else:
                 print(f"Created: {prompt.path}")
+
+        elif args.command == "session-transcript":
+            session_file = get_session_file()
+            if session_file is None:
+                if args.json:
+                    print(json.dumps({"session_file": None, "project_slug": get_project_slug()}, indent=2))
+                else:
+                    print("No session transcript found", file=sys.stderr)
+                    sys.exit(1)
+            else:
+                if args.json:
+                    print(json.dumps({
+                        "session_file": str(session_file),
+                        "project_slug": get_project_slug(),
+                    }, indent=2))
+                else:
+                    print(str(session_file))
 
         elif args.command == "complete":
             prompt = complete_prompt(args.query)
