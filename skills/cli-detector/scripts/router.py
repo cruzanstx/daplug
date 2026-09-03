@@ -100,8 +100,8 @@ _SHORTHAND: dict[str, _ModelRequest] = {
     ),
     # Google (Antigravity CLI preferred; Gemini CLI retained as legacy fallback)
     # Keep preview shorthands for backwards compatibility; availability depends on user auth/plan.
-    # Bare `gemini` defaults to Gemini 3.7 Flash (High) through Antigravity.
-    "gemini": _ModelRequest("gemini", family="google", model_id="google:gemini-3.7-flash"),
+    # Bare `gemini` defaults to Gemini 3.8 Flash (High) through Antigravity.
+    "gemini": _ModelRequest("gemini", family="google", model_id="google:gemini-3.8-flash"),
     "gemini-high": _ModelRequest("gemini-high", family="google", model_id="google:gemini-2.5-pro"),
     "gemini-xhigh": _ModelRequest("gemini-xhigh", family="google", model_id="google:gemini-3-pro-preview"),
     "gemini25pro": _ModelRequest("gemini25pro", family="google", model_id="google:gemini-2.5-pro"),
@@ -111,13 +111,13 @@ _SHORTHAND: dict[str, _ModelRequest] = {
     "gemini3pro": _ModelRequest("gemini3pro", family="google", model_id="google:gemini-3-pro-preview"),
     # Gemini 3.1 Pro Preview is account-gated; keep it as an explicit opt-in shorthand.
     "gemini31pro": _ModelRequest("gemini31pro", family="google", model_id="google:gemini-3.1-pro-preview"),
-    # Gemini 3.7 Flash — newest Flash tier with reasoning tiers in the agy display name.
-    "gemini37": _ModelRequest("gemini37", family="google", model_id="google:gemini-3.7-flash"),
-    "gemini37-high": _ModelRequest("gemini37-high", family="google", model_id="google:gemini-3.7-flash"),
-    "gemini37-medium": _ModelRequest("gemini37-medium", family="google", model_id="google:gemini-3.7-flash"),
-    "gemini37-low": _ModelRequest("gemini37-low", family="google", model_id="google:gemini-3.7-flash"),
+    # Gemini 3.8 Flash — newest Flash tier with reasoning tiers in the agy display name.
+    "gemini37": _ModelRequest("gemini37", family="google", model_id="google:gemini-3.8-flash"),
+    "gemini37-high": _ModelRequest("gemini37-high", family="google", model_id="google:gemini-3.8-flash"),
+    "gemini37-medium": _ModelRequest("gemini37-medium", family="google", model_id="google:gemini-3.8-flash"),
+    "gemini37-low": _ModelRequest("gemini37-low", family="google", model_id="google:gemini-3.8-flash"),
     # Bare `agy` shorthand: identical to `gemini`/`gemini37` (Antigravity default).
-    "agy": _ModelRequest("agy", family="google", model_id="google:gemini-3.7-flash"),
+    "agy": _ModelRequest("agy", family="google", model_id="google:gemini-3.8-flash"),
     # Z.AI
     "zai": _ModelRequest("zai", family="zai", model_id="zai:glm-4.7"),
     "glm5": _ModelRequest("glm5", family="zai", model_id="zai:glm-5.3", codex_profile="glm5"),
@@ -343,13 +343,13 @@ _AGY_MODEL_ARGS: dict[str, str] = {
     "google:gemini-2.5-pro": "Gemini 3.1 Pro (High)",
     "google:gemini-3-pro-preview": "Gemini 3.1 Pro (High)",
     "google:gemini-3.1-pro-preview": "Gemini 3.1 Pro (High)",
-    "google:gemini-3.7-flash": "Gemini 3.7 Flash (High)",
-    "gemini": "Gemini 3.7 Flash (High)",
-    "agy": "Gemini 3.7 Flash (High)",
-    "gemini37": "Gemini 3.7 Flash (High)",
-    "gemini37-high": "Gemini 3.7 Flash (High)",
-    "gemini37-medium": "Gemini 3.7 Flash (Medium)",
-    "gemini37-low": "Gemini 3.7 Flash (Low)",
+    "google:gemini-3.8-flash": "Gemini 3.8 Flash (High)",
+    "gemini": "Gemini 3.8 Flash (High)",
+    "agy": "Gemini 3.8 Flash (High)",
+    "gemini37": "Gemini 3.8 Flash (High)",
+    "gemini37-high": "Gemini 3.8 Flash (High)",
+    "gemini37-medium": "Gemini 3.8 Flash (Medium)",
+    "gemini37-low": "Gemini 3.8 Flash (Low)",
 }
 
 

@@ -531,13 +531,13 @@ class TestAGYMapConsistency:
     def test_gemini37_display_names_in_all_maps(self):
         """All three AGY maps must contain the gemini37 entries."""
         expected = {
-            "google:gemini-3.7-flash": "Gemini 3.7 Flash (High)",
-            "gemini": "Gemini 3.7 Flash (High)",
-            "agy": "Gemini 3.7 Flash (High)",
-            "gemini37": "Gemini 3.7 Flash (High)",
-            "gemini37-high": "Gemini 3.7 Flash (High)",
-            "gemini37-medium": "Gemini 3.7 Flash (Medium)",
-            "gemini37-low": "Gemini 3.7 Flash (Low)",
+            "google:gemini-3.8-flash": "Gemini 3.8 Flash (High)",
+            "gemini": "Gemini 3.8 Flash (High)",
+            "agy": "Gemini 3.8 Flash (High)",
+            "gemini37": "Gemini 3.8 Flash (High)",
+            "gemini37-high": "Gemini 3.8 Flash (High)",
+            "gemini37-medium": "Gemini 3.8 Flash (Medium)",
+            "gemini37-low": "Gemini 3.8 Flash (Low)",
         }
 
         # router.py
@@ -574,7 +574,7 @@ class TestAGYMapConsistency:
         reg_by_name = {m["name"]: m for m in _load_registry()}
         entries = [reg_by_name[name] for name in ("gemini", "agy", "gemini37")]
         model_ids = {entry["model_id"] for entry in entries}
-        assert model_ids == {"google:gemini-3.7-flash"}, model_ids
+        assert model_ids == {"google:gemini-3.8-flash"}, model_ids
         default_clis = {entry["default_cli"] for entry in entries}
         assert default_clis == {"agy"}, default_clis
         commands = {tuple(entry["command"]) for entry in entries}
@@ -582,7 +582,7 @@ class TestAGYMapConsistency:
             (
                 "agy",
                 "--model",
-                "Gemini 3.7 Flash (High)",
+                "Gemini 3.8 Flash (High)",
                 "--dangerously-skip-permissions",
                 "--print-timeout",
                 "60m",
@@ -638,9 +638,9 @@ class TestFixtureAgreement:
     def test_gemini37_display_names_in_fixture(self):
         """The three gemini37 display strings must be in the fixture."""
         fixture_names = _parse_fixture_display_names(_FIXTURE_PATH)
-        assert "Gemini 3.7 Flash (Medium)" in fixture_names
-        assert "Gemini 3.7 Flash (High)" in fixture_names
-        assert "Gemini 3.7 Flash (Low)" in fixture_names
+        assert "Gemini 3.8 Flash (Medium)" in fixture_names
+        assert "Gemini 3.8 Flash (High)" in fixture_names
+        assert "Gemini 3.8 Flash (Low)" in fixture_names
 
 
 # --- Generated-file consistency --------------------------------------

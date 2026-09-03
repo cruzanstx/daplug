@@ -1,8 +1,11 @@
 # agy models output fixture
-# Captured live: 2026-08-21
-# agy --version: 1.1.17
+# Captured live: 2026-09-03
+# agy --version: 1.1.25
 # Raw tab-separated output from `agy models`; the CLI progress line is excluded.
 # --- BEGIN agy models ---
+gemini-3.8-flash-high	Gemini 3.8 Flash (High)
+gemini-3.8-flash-medium	Gemini 3.8 Flash (Medium)
+gemini-3.8-flash-low	Gemini 3.8 Flash (Low)
 gemini-3.7-flash-high	Gemini 3.7 Flash (High)
 gemini-3.7-flash-medium	Gemini 3.7 Flash (Medium)
 gemini-3.7-flash-low	Gemini 3.7 Flash (Low)

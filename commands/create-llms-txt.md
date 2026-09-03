@@ -486,7 +486,7 @@ All available models for /daplug:run-prompt --model:
 - `gpt52-xhigh` - OpenAI GPT-5.2 with xhigh reasoning (30+ min tasks)
 
 **Google Gemini Family:** (check: `gemini.models.<model>.used` for each; `agy` is preferred when healthy, legacy `gemini` is fallback)
-- `gemini` - Gemini 3.7 Flash (High reasoning) via Antigravity (default Gemini shorthand)
+- `gemini` - Gemini 3.8 Flash (High reasoning) via Antigravity (default Gemini shorthand)
 - `gemini-high` - Gemini 2.5 Pro
 - `gemini-xhigh` - Gemini 3 Pro Preview
 - `gemini25pro` - Gemini 2.5 Pro (explicit shorthand)
@@ -495,11 +495,11 @@ All available models for /daplug:run-prompt --model:
 - `gemini3flash` - Gemini 3 Flash Preview (explicit shorthand)
 - `gemini3pro` - Gemini 3 Pro Preview (explicit shorthand)
 - `gemini31pro` - Gemini 3.1 Pro Preview (if your account has access)
-- `gemini37` - Gemini 3.7 Flash (High reasoning, default 3.7 Flash alias) via Antigravity
-- `gemini37-high` - Gemini 3.7 Flash (High reasoning) via Antigravity
-- `gemini37-medium` - Gemini 3.7 Flash (Medium reasoning) via Antigravity
-- `gemini37-low` - Gemini 3.7 Flash (Low reasoning) via Antigravity
-- `agy` - Gemini 3.7 Flash (High) via Antigravity (default agy shorthand)
+- `gemini37` - Gemini 3.8 Flash (High reasoning, default 3.7 Flash alias) via Antigravity
+- `gemini37-high` - Gemini 3.8 Flash (High reasoning) via Antigravity
+- `gemini37-medium` - Gemini 3.8 Flash (Medium reasoning) via Antigravity
+- `gemini37-low` - Gemini 3.8 Flash (Low reasoning) via Antigravity
+- `agy` - Gemini 3.8 Flash (High) via Antigravity (default agy shorthand)
 
 **Z.AI / OpenCode Models:** (check: `zai.token_quota.percentage` where applicable)
 - `zai` - Z.AI GLM-4.7 via Codex CLI
@@ -534,7 +534,7 @@ All available models for /daplug:run-prompt --model:
 Antigravity (`agy`) maps legacy shorthands to the closest current `agy models` display names; legacy `gemini` keeps these API model IDs.
 | Shorthand | API Model | Quota Bucket |
 |-----------|-----------|--------------|
-| `gemini` | gemini-3.7-flash | gemini-3.7-flash |
+| `gemini` | gemini-3.8-flash | gemini-3.8-flash |
 | `gemini-high` | gemini-2.5-pro | gemini-2.5-pro |
 | `gemini-xhigh` | gemini-3-pro-preview | gemini-3-pro-preview |
 | `gemini25pro` | gemini-2.5-pro | gemini-2.5-pro |
@@ -543,11 +543,11 @@ Antigravity (`agy`) maps legacy shorthands to the closest current `agy models` d
 | `gemini3flash` | gemini-3-flash-preview | gemini-3-flash-preview |
 | `gemini3pro` | gemini-3-pro-preview | gemini-3-pro-preview |
 | `gemini31pro` | gemini-3.1-pro-preview | gemini-3.1-pro-preview |
-| `gemini37` | gemini-3.7-flash | gemini-3.7-flash |
-| `gemini37-high` | gemini-3.7-flash | gemini-3.7-flash |
-| `gemini37-medium` | gemini-3.7-flash | gemini-3.7-flash |
-| `gemini37-low` | gemini-3.7-flash | gemini-3.7-flash |
-| `agy` | gemini-3.7-flash | gemini-3.7-flash |
+| `gemini37` | gemini-3.8-flash | gemini-3.8-flash |
+| `gemini37-high` | gemini-3.8-flash | gemini-3.8-flash |
+| `gemini37-medium` | gemini-3.8-flash | gemini-3.8-flash |
+| `gemini37-low` | gemini-3.8-flash | gemini-3.8-flash |
+| `agy` | gemini-3.8-flash | gemini-3.8-flash |
 <!-- END GENERATED: create-llms-available-models -->
 </available_models>
 
@@ -640,7 +640,7 @@ If user chooses #1:
   21. gpt52-xhigh - {X}% used - maximum reasoning (30+ min tasks)
 
   **Gemini (Google):** {show each model's usage}
-  22. gemini - {X}% used - 3.7-flash High via Antigravity, default Gemini shorthand
+  22. gemini - {X}% used - 3.8-flash High via Antigravity, default Gemini shorthand
   23. gemini-high - {X}% used - 2.5-pro
   24. gemini-xhigh - {X}% used - 3-pro preview
   25. gemini25pro - {X}% used - 2.5-pro, stable/capable
@@ -649,11 +649,11 @@ If user chooses #1:
   28. gemini3flash - {X}% used - 3-flash explicit
   29. gemini3pro - {X}% used - 3-pro, most capable
   30. gemini31pro - {X}% used - 3.1 Pro Preview if available
-  31. gemini37 - {X}% used - 3.7-flash High, default 3.7 Flash alias
-  32. gemini37-high - {X}% used - 3.7-flash High, latest deep reasoning
-  33. gemini37-medium - {X}% used - 3.7-flash Medium, latest balanced Flash
-  34. gemini37-low - {X}% used - 3.7-flash Low, latest fast tier
-  35. agy - {X}% used - 3.7-flash High, default agy shorthand
+  31. gemini37 - {X}% used - 3.8-flash High, default 3.7 Flash alias
+  32. gemini37-high - {X}% used - 3.8-flash High, latest deep reasoning
+  33. gemini37-medium - {X}% used - 3.8-flash Medium, latest balanced Flash
+  34. gemini37-low - {X}% used - 3.8-flash Low, latest fast tier
+  35. agy - {X}% used - 3.8-flash High, default agy shorthand
 
   **Z.AI / OpenCode:** {usage status}
   36. zai - {X}% used - Z.AI GLM-4.7

@@ -151,13 +151,13 @@ def test_google_models_prefer_agy_when_healthy(monkeypatch):
 
     cli, model_id, cmd = router.resolve_model("gemini")
     assert cli == "agy"
-    assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
+    assert model_id == "google:gemini-3.8-flash"
+    assert cmd == ["agy", "--model", "Gemini 3.8 Flash (High)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
 
     cli, model_id, cmd = router.resolve_model("agy")
     assert cli == "agy"
-    assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
+    assert model_id == "google:gemini-3.8-flash"
+    assert cmd == ["agy", "--model", "Gemini 3.8 Flash (High)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
 
     # Legacy explicit shorthand keeps its 3 Flash preview mapping.
     cli, model_id, cmd = router.resolve_model("gemini3flash")
@@ -205,8 +205,8 @@ def test_gemini_and_agy_fall_back_to_legacy_gemini_cli_when_agy_missing(monkeypa
     for shorthand in ("gemini", "agy"):
         cli, model_id, cmd = router.resolve_model(shorthand)
         assert cli == "gemini", shorthand
-        assert model_id == "google:gemini-3.7-flash", shorthand
-        assert cmd == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"], shorthand
+        assert model_id == "google:gemini-3.8-flash", shorthand
+        assert cmd == ["gemini", "-y", "-m", "gemini-3.8-flash", "-p"], shorthand
 
 
 def test_gemini37_routes_through_agy_when_healthy(monkeypatch):
@@ -225,23 +225,23 @@ def test_gemini37_routes_through_agy_when_healthy(monkeypatch):
 
     cli, model_id, cmd = router.resolve_model("gemini37")
     assert cli == "agy"
-    assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
+    assert model_id == "google:gemini-3.8-flash"
+    assert cmd == ["agy", "--model", "Gemini 3.8 Flash (High)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
 
     cli, model_id, cmd = router.resolve_model("gemini37-high")
     assert cli == "agy"
-    assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
+    assert model_id == "google:gemini-3.8-flash"
+    assert cmd == ["agy", "--model", "Gemini 3.8 Flash (High)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
 
     cli, model_id, cmd = router.resolve_model("gemini37-medium")
     assert cli == "agy"
-    assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (Medium)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
+    assert model_id == "google:gemini-3.8-flash"
+    assert cmd == ["agy", "--model", "Gemini 3.8 Flash (Medium)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
 
     cli, model_id, cmd = router.resolve_model("gemini37-low")
     assert cli == "agy"
-    assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["agy", "--model", "Gemini 3.7 Flash (Low)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
+    assert model_id == "google:gemini-3.8-flash"
+    assert cmd == ["agy", "--model", "Gemini 3.8 Flash (Low)", "--dangerously-skip-permissions", "--print-timeout", "60m", "--output-format", "stream-json", "--print"]
 
 
 def test_gemini37_falls_back_to_gemini_cli_when_agy_missing(monkeypatch):
@@ -260,23 +260,23 @@ def test_gemini37_falls_back_to_gemini_cli_when_agy_missing(monkeypatch):
 
     cli, model_id, cmd = router.resolve_model("gemini37")
     assert cli == "gemini"
-    assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
+    assert model_id == "google:gemini-3.8-flash"
+    assert cmd == ["gemini", "-y", "-m", "gemini-3.8-flash", "-p"]
 
     cli, model_id, cmd = router.resolve_model("gemini37-high")
     assert cli == "gemini"
-    assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
+    assert model_id == "google:gemini-3.8-flash"
+    assert cmd == ["gemini", "-y", "-m", "gemini-3.8-flash", "-p"]
 
     cli, model_id, cmd = router.resolve_model("gemini37-medium")
     assert cli == "gemini"
-    assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
+    assert model_id == "google:gemini-3.8-flash"
+    assert cmd == ["gemini", "-y", "-m", "gemini-3.8-flash", "-p"]
 
     cli, model_id, cmd = router.resolve_model("gemini37-low")
     assert cli == "gemini"
-    assert model_id == "google:gemini-3.7-flash"
-    assert cmd == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
+    assert model_id == "google:gemini-3.8-flash"
+    assert cmd == ["gemini", "-y", "-m", "gemini-3.8-flash", "-p"]
 
 
 def test_gemini37_preferred_cli_can_force_legacy_gemini(monkeypatch):
@@ -295,7 +295,7 @@ def test_gemini37_preferred_cli_can_force_legacy_gemini(monkeypatch):
     for shorthand in ("gemini37", "gemini37-high", "gemini37-medium", "gemini37-low"):
         cli, _model_id, cmd = router.resolve_model(shorthand, preferred_cli="gemini")
         assert cli == "gemini", shorthand
-        assert cmd == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"], shorthand
+        assert cmd == ["gemini", "-y", "-m", "gemini-3.8-flash", "-p"], shorthand
 
 
 def test_google_models_fall_back_to_gemini_when_agy_missing(monkeypatch):
@@ -765,8 +765,8 @@ class TestGeminiModels:
     @pytest.mark.parametrize(
         "shorthand,expected_model",
         [
-            ("gemini", "gemini-3.7-flash"),
-            ("agy", "gemini-3.7-flash"),
+            ("gemini", "gemini-3.8-flash"),
+            ("agy", "gemini-3.8-flash"),
             ("gemini-high", "gemini-2.5-pro"),
             ("gemini-xhigh", "gemini-3-pro-preview"),
             ("gemini25pro", "gemini-2.5-pro"),
@@ -775,10 +775,10 @@ class TestGeminiModels:
             ("gemini3flash", "gemini-3-flash-preview"),
             ("gemini3pro", "gemini-3-pro-preview"),
             ("gemini31pro", "gemini-3.1-pro-preview"),
-            ("gemini37", "gemini-3.7-flash"),
-            ("gemini37-high", "gemini-3.7-flash"),
-            ("gemini37-medium", "gemini-3.7-flash"),
-            ("gemini37-low", "gemini-3.7-flash"),
+            ("gemini37", "gemini-3.8-flash"),
+            ("gemini37-high", "gemini-3.8-flash"),
+            ("gemini37-medium", "gemini-3.8-flash"),
+            ("gemini37-low", "gemini-3.8-flash"),
         ],
     )
     def test_gemini_models(self, full_cache, shorthand, expected_model):

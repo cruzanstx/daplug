@@ -38,7 +38,7 @@ Extract from $ARGUMENTS:
 
 | Shorthand | Gemini CLI Flag | Description |
 |-----------|-----------------|-------------|
-| `gemini` | `-m gemini-3.7-flash` | Gemini 3.7 Flash (default; same model as the `agy` shorthand) |
+| `gemini` | `-m gemini-3.8-flash` | Gemini 3.8 Flash (default; same model as the `agy` shorthand) |
 | `gemini-high` | `-m gemini-2.5-pro` | Gemini 2.5 Pro (stable, capable) |
 | `gemini-xhigh` | `-m gemini-3-pro-preview` | Gemini 3 Pro (most capable) |
 | `gemini25pro` | `-m gemini-2.5-pro` | Gemini 2.5 Pro (explicit) |
@@ -70,7 +70,7 @@ case "$MODEL" in
   gemini3flash)  MODEL_FLAG="-m gemini-3-flash-preview" ;;
   gemini3pro)    MODEL_FLAG="-m gemini-3-pro-preview" ;;
   gemini31pro)   MODEL_FLAG="-m gemini-3.1-pro-preview" ;;
-  *)             MODEL_FLAG="-m gemini-3.7-flash" ;;  # gemini default (3.7 Flash)
+  *)             MODEL_FLAG="-m gemini-3.8-flash" ;;  # gemini default (3.8 Flash)
 esac
 ```
 

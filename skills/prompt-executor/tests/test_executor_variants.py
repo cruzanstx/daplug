@@ -164,7 +164,7 @@ def test_agy_cli_override_for_google_models(no_router, tmp_path):
 
     assert info["selected_cli"] == "agy"
     assert info["stdin_mode"] == "arg"
-    assert info["command"] == _agy_expected("Gemini 3.7 Flash (High)")
+    assert info["command"] == _agy_expected("Gemini 3.8 Flash (High)")
 
     flash_info = executor.get_cli_info("gemini3flash", repo_root=tmp_path, cli_override="agy")
     assert flash_info["selected_cli"] == "agy"
@@ -180,19 +180,19 @@ def test_agy_cli_override_for_gemini37_models(no_router, tmp_path):
     info = executor.get_cli_info("gemini37", repo_root=tmp_path, cli_override="agy")
     assert info["selected_cli"] == "agy"
     assert info["stdin_mode"] == "arg"
-    assert info["command"] == _agy_expected("Gemini 3.7 Flash (High)")
+    assert info["command"] == _agy_expected("Gemini 3.8 Flash (High)")
 
     info_high = executor.get_cli_info("gemini37-high", repo_root=tmp_path, cli_override="agy")
     assert info_high["selected_cli"] == "agy"
-    assert info_high["command"] == _agy_expected("Gemini 3.7 Flash (High)")
+    assert info_high["command"] == _agy_expected("Gemini 3.8 Flash (High)")
 
     info_medium = executor.get_cli_info("gemini37-medium", repo_root=tmp_path, cli_override="agy")
     assert info_medium["selected_cli"] == "agy"
-    assert info_medium["command"] == _agy_expected("Gemini 3.7 Flash (Medium)")
+    assert info_medium["command"] == _agy_expected("Gemini 3.8 Flash (Medium)")
 
     info_low = executor.get_cli_info("gemini37-low", repo_root=tmp_path, cli_override="agy")
     assert info_low["selected_cli"] == "agy"
-    assert info_low["command"] == _agy_expected("Gemini 3.7 Flash (Low)")
+    assert info_low["command"] == _agy_expected("Gemini 3.8 Flash (Low)")
 
 
 def test_gemini_cli_override_for_gemini37_models(no_router, tmp_path):
@@ -200,19 +200,19 @@ def test_gemini_cli_override_for_gemini37_models(no_router, tmp_path):
     info = executor.get_cli_info("gemini37", repo_root=tmp_path, cli_override="gemini")
     assert info["selected_cli"] == "gemini"
     assert info["stdin_mode"] == "arg"
-    assert info["command"] == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
+    assert info["command"] == ["gemini", "-y", "-m", "gemini-3.8-flash", "-p"]
 
     info_high = executor.get_cli_info("gemini37-high", repo_root=tmp_path, cli_override="gemini")
     assert info_high["selected_cli"] == "gemini"
-    assert info_high["command"] == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
+    assert info_high["command"] == ["gemini", "-y", "-m", "gemini-3.8-flash", "-p"]
 
     info_medium = executor.get_cli_info("gemini37-medium", repo_root=tmp_path, cli_override="gemini")
     assert info_medium["selected_cli"] == "gemini"
-    assert info_medium["command"] == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
+    assert info_medium["command"] == ["gemini", "-y", "-m", "gemini-3.8-flash", "-p"]
 
     info_low = executor.get_cli_info("gemini37-low", repo_root=tmp_path, cli_override="gemini")
     assert info_low["selected_cli"] == "gemini"
-    assert info_low["command"] == ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
+    assert info_low["command"] == ["gemini", "-y", "-m", "gemini-3.8-flash", "-p"]
 
 
 def test_legacy_gemini_cli_override_still_works(no_router, tmp_path):
@@ -240,20 +240,20 @@ def test_explicit_cli_opencode_errors_for_unsupported_model(no_router, tmp_path)
         executor.get_cli_info("gemini", repo_root=tmp_path, cli_override="opencode")
 
 
-def test_gemini_and_agy_default_to_antigravity_37_high(no_router, tmp_path):
-    """Bare `gemini` and `agy` run Gemini 3.7 Flash (High) through agy by default."""
-    expected = _agy_expected("Gemini 3.7 Flash (High)")
+def test_gemini_and_agy_default_to_antigravity_38_high(no_router, tmp_path):
+    """Bare `gemini` and `agy` run Gemini 3.8 Flash (High) through agy by default."""
+    expected = _agy_expected("Gemini 3.8 Flash (High)")
     for shorthand in ("gemini", "agy", "gemini37"):
         info = executor.get_cli_info(shorthand, repo_root=tmp_path)
         assert info["selected_cli"] == "agy", shorthand
         assert info["stdin_mode"] == "arg", shorthand
         assert info["command"] == expected, shorthand
-        assert info["model_id"] == "google:gemini-3.7-flash", shorthand
+        assert info["model_id"] == "google:gemini-3.8-flash", shorthand
 
 
-def test_gemini_and_agy_cli_gemini_override_use_37_flash(no_router, tmp_path):
-    """--cli gemini on bare `gemini`/`agy` yields the legacy command with gemini-3.7-flash."""
-    expected = ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]
+def test_gemini_and_agy_cli_gemini_override_use_38_flash(no_router, tmp_path):
+    """--cli gemini on bare `gemini`/`agy` yields the legacy command with gemini-3.8-flash."""
+    expected = ["gemini", "-y", "-m", "gemini-3.8-flash", "-p"]
     for shorthand in ("gemini", "agy"):
         info = executor.get_cli_info(shorthand, repo_root=tmp_path, cli_override="gemini")
         assert info["selected_cli"] == "gemini", shorthand
@@ -262,7 +262,7 @@ def test_gemini_and_agy_cli_gemini_override_use_37_flash(no_router, tmp_path):
 
 
 def test_agy_shorthand_cli_overrides_match_gemini(no_router, tmp_path):
-    expected = _agy_expected("Gemini 3.7 Flash (High)")
+    expected = _agy_expected("Gemini 3.8 Flash (High)")
     for override in ("agy", "antigravity"):
         info = executor.get_cli_info("agy", repo_root=tmp_path, cli_override=override)
         assert info["selected_cli"] == "agy", override

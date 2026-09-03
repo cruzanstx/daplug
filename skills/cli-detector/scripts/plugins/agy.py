@@ -15,18 +15,18 @@ _AGY_MODEL_ARGS = {
     "google:gemini-2.5-pro": "Gemini 3.1 Pro (High)",
     "google:gemini-3-pro-preview": "Gemini 3.1 Pro (High)",
     "google:gemini-3.1-pro-preview": "Gemini 3.1 Pro (High)",
-    "google:gemini-3.7-flash": "Gemini 3.7 Flash (High)",
-    "gemini": "Gemini 3.7 Flash (High)",
-    "agy": "Gemini 3.7 Flash (High)",
-    "gemini37": "Gemini 3.7 Flash (High)",
-    "gemini37-high": "Gemini 3.7 Flash (High)",
-    "gemini37-medium": "Gemini 3.7 Flash (Medium)",
-    "gemini37-low": "Gemini 3.7 Flash (Low)",
+    "google:gemini-3.8-flash": "Gemini 3.8 Flash (High)",
+    "gemini": "Gemini 3.8 Flash (High)",
+    "agy": "Gemini 3.8 Flash (High)",
+    "gemini37": "Gemini 3.8 Flash (High)",
+    "gemini37-high": "Gemini 3.8 Flash (High)",
+    "gemini37-medium": "Gemini 3.8 Flash (Medium)",
+    "gemini37-low": "Gemini 3.8 Flash (Low)",
 }
 
 
 # Display name used when no model is given; mirrors the bare `gemini`/`agy` shorthands.
-_AGY_DEFAULT_MODEL_ARG = "Gemini 3.7 Flash (High)"
+_AGY_DEFAULT_MODEL_ARG = "Gemini 3.8 Flash (High)"
 
 
 def _agy_model_arg(model: str) -> str:
@@ -65,38 +65,38 @@ class AgyCLI(SimpleCLIPlugin):
                 capabilities=["code", "chat", "vision"],
             ),
             ModelInfo(
-                id="google:gemini-3.7-flash",
-                display_name="Gemini 3.7 Flash (High)",
+                id="google:gemini-3.8-flash",
+                display_name="Gemini 3.8 Flash (High)",
                 provider="google",
                 capabilities=["code", "chat", "vision"],
             ),
             ModelInfo(
                 id="gemini",
-                display_name="Gemini 3.7 Flash (High)",
+                display_name="Gemini 3.8 Flash (High)",
                 provider="google",
                 capabilities=["code", "chat", "vision"],
             ),
             ModelInfo(
                 id="agy",
-                display_name="Gemini 3.7 Flash (High)",
+                display_name="Gemini 3.8 Flash (High)",
                 provider="google",
                 capabilities=["code", "chat", "vision"],
             ),
             ModelInfo(
                 id="gemini37-high",
-                display_name="Gemini 3.7 Flash (High)",
+                display_name="Gemini 3.8 Flash (High)",
                 provider="google",
                 capabilities=["code", "chat", "vision"],
             ),
             ModelInfo(
                 id="gemini37-medium",
-                display_name="Gemini 3.7 Flash (Medium)",
+                display_name="Gemini 3.8 Flash (Medium)",
                 provider="google",
                 capabilities=["code", "chat", "vision"],
             ),
             ModelInfo(
                 id="gemini37-low",
-                display_name="Gemini 3.7 Flash (Low)",
+                display_name="Gemini 3.8 Flash (Low)",
                 provider="google",
                 capabilities=["code", "chat", "vision"],
             ),

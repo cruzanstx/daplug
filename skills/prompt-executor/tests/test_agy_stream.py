@@ -22,7 +22,7 @@ import agy_stream
 
 _INIT_LINE = (
     '{"event":"init","conversation_id":"c78dfbed-6231-4782-abc6-d3334c19ea5d",'
-    '"init":{"model":"Gemini 3.7 Flash (High)","cwd":"/tmp","tools":["run_command"],'
+    '"init":{"model":"Gemini 3.8 Flash (High)","cwd":"/tmp","tools":["run_command"],'
     '"permission_mode":"always-proceed"}}'
 )
 

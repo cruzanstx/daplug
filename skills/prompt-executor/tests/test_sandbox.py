@@ -114,7 +114,7 @@ def test_build_bwrap_args_non_opencode_no_opencode_binds(profile, tmp_path, monk
     }
     for child in (
         ["codex", "exec", "--full-auto", "-"],
-        ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"],
+        ["agy", "--model", "Gemini 3.8 Flash (High)", "--dangerously-skip-permissions", "--print"],
         ["claude", "--print"],
     ):
         cmd = executor.build_bwrap_args(config, child)
@@ -229,7 +229,7 @@ def test_agy_gets_token_ro_bind_all_profiles(profile, tmp_path, monkeypatch):
         "network": profile != "strict",
     }
     cmd = executor.build_bwrap_args(
-        config, ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"]
+        config, ["agy", "--model", "Gemini 3.8 Flash (High)", "--dangerously-skip-permissions", "--print"]
     )
     triples = [cmd[i : i + 3] for i in range(len(cmd) - 2)]
     assert ["--ro-bind", token_path, token_path] in triples
@@ -249,7 +249,7 @@ def test_antigravity_basename_gets_token_ro_bind(tmp_path, monkeypatch):
         "network": True,
     }
     cmd = executor.build_bwrap_args(
-        config, ["antigravity", "--model", "Gemini 3.7 Flash (High)", "--print"]
+        config, ["antigravity", "--model", "Gemini 3.8 Flash (High)", "--print"]
     )
     triples = [cmd[i : i + 3] for i in range(len(cmd) - 2)]
     assert ["--ro-bind", token_path, token_path] in triples
@@ -285,7 +285,7 @@ def test_non_agy_children_no_token_bind(child, tmp_path, monkeypatch):
 @pytest.mark.parametrize(
     "child",
     [
-        ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"],
+        ["agy", "--model", "Gemini 3.8 Flash (High)", "--dangerously-skip-permissions", "--print"],
         ["opencode", "run"],
         ["codex", "exec", "--full-auto", "-"],
         ["claude", "--print"],
@@ -329,7 +329,7 @@ def test_agy_token_mode_and_bytes_unchanged_after_build(tmp_path, monkeypatch):
         "network": True,
     }
     executor.build_bwrap_args(
-        config, ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"]
+        config, ["agy", "--model", "Gemini 3.8 Flash (High)", "--dangerously-skip-permissions", "--print"]
     )
 
     assert token.stat().st_mode & 0o777 == 0o600
@@ -348,7 +348,7 @@ def test_agy_missing_token_build_does_not_raise(tmp_path, monkeypatch):
         "network": True,
     }
     cmd = executor.build_bwrap_args(
-        config, ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"]
+        config, ["agy", "--model", "Gemini 3.8 Flash (High)", "--dangerously-skip-permissions", "--print"]
     )
     token_path = str(tmp_path / ".gemini" / "antigravity-cli" / "antigravity-oauth-token")
     assert token_path not in " ".join(cmd)
@@ -390,7 +390,7 @@ def test_agy_child_no_opencode_writable_binds(tmp_path, monkeypatch):
         "network": True,
     }
     cmd = executor.build_bwrap_args(
-        config, ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"]
+        config, ["agy", "--model", "Gemini 3.8 Flash (High)", "--dangerously-skip-permissions", "--print"]
     )
     joined = " ".join(cmd)
     assert ".local/share/opencode" not in joined
@@ -413,7 +413,7 @@ def test_agy_tmpfs_before_ro_bind_ordering(tmp_path, monkeypatch):
         "network": True,
     }
     cmd = executor.build_bwrap_args(
-        config, ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"]
+        config, ["agy", "--model", "Gemini 3.8 Flash (High)", "--dangerously-skip-permissions", "--print"]
     )
     tmpfs_idx = cmd.index("--tmpfs")
     tmpfs_path_idx = cmd.index(parent, tmpfs_idx)
@@ -597,7 +597,7 @@ def agy_preflight_env(tmp_path, monkeypatch):
     _make_fake_token(tmp_path)
     yield {
         "cli_info": {
-            "command": ["agy", "--model", "Gemini 3.7 Flash (High)", "--dangerously-skip-permissions", "--print"],
+            "command": ["agy", "--model", "Gemini 3.8 Flash (High)", "--dangerously-skip-permissions", "--print"],
             "env": {},
         },
         "sandbox_config": {
@@ -620,7 +620,7 @@ def test_agy_preflight_success(agy_preflight_env, monkeypatch):
         calls.append(cmd)
         # First call: --version probe (exit 0).
         # Second call: agy models (exit 0).
-        return _ProbeResult(0, stdout="gemini-3.7-flash")
+        return _ProbeResult(0, stdout="gemini-3.8-flash")
 
     monkeypatch.setattr(executor.subprocess, "run", fake_run)
     assert executor.sandbox_preflight(**agy_preflight_env) is None

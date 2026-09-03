@@ -43,7 +43,7 @@ def no_router(monkeypatch):
 # --- helpers -----------------------------------------------------------
 
 
-def _agy_cli_info(display="Gemini 3.7 Flash (High)", timeout="60m", inactivity=None):
+def _agy_cli_info(display="Gemini 3.8 Flash (High)", timeout="60m", inactivity=None):
     """Build a cli_info dict matching what get_cli_info returns for agy."""
     info = {
         "command": [
@@ -58,7 +58,7 @@ def _agy_cli_info(display="Gemini 3.7 Flash (High)", timeout="60m", inactivity=N
         "stdin_mode": "arg",
         "selected_cli": "agy",
         "base_model": "gemini",
-        "model_id": "google:gemini-3.7-flash",
+        "model_id": "google:gemini-3.8-flash",
         "variant": None,
     }
     if inactivity:
@@ -100,7 +100,7 @@ class TestAgyArgvOrder:
     def test_get_cli_info_gemini37_low_exact_argv(self, no_router, tmp_path):
         info = models.get_cli_info("gemini37-low", repo_root=tmp_path, cli_override="agy")
         cmd = info["command"]
-        assert cmd[2] == "Gemini 3.7 Flash (Low)"
+        assert cmd[2] == "Gemini 3.8 Flash (Low)"
         assert cmd[4] == "--print-timeout"
         assert cmd[6] == "--output-format"
         assert cmd[8] == "--print"
@@ -186,7 +186,7 @@ class TestRouterAgyArgv:
 
         _cli, _mid, cmd = router_mod.resolve_model("gemini")
         assert cmd == [
-            "agy", "--model", "Gemini 3.7 Flash (High)",
+            "agy", "--model", "Gemini 3.8 Flash (High)",
             "--dangerously-skip-permissions",
             "--print-timeout", "60m",
             "--output-format", "stream-json",
@@ -482,9 +482,9 @@ class TestNonAgyCommandsUnchanged:
         ("gemini3flash", ["gemini", "-y", "-m", "gemini-3-flash-preview", "-p"]),
         ("gemini3pro", ["gemini", "-y", "-m", "gemini-3-pro-preview", "-p"]),
         ("gemini31pro", ["gemini", "-y", "-m", "gemini-3.1-pro-preview", "-p"]),
-        ("gemini37-high", ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]),
-        ("gemini37-medium", ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]),
-        ("gemini37-low", ["gemini", "-y", "-m", "gemini-3.7-flash", "-p"]),
+        ("gemini37-high", ["gemini", "-y", "-m", "gemini-3.8-flash", "-p"]),
+        ("gemini37-medium", ["gemini", "-y", "-m", "gemini-3.8-flash", "-p"]),
+        ("gemini37-low", ["gemini", "-y", "-m", "gemini-3.8-flash", "-p"]),
     ])
     def test_legacy_gemini_cli_argv_unchanged(self, tmp_path, shorthand, expected):
         info = models.get_cli_info(shorthand, repo_root=tmp_path, cli_override="gemini")
@@ -560,7 +560,7 @@ class TestReaderLoopInactivity:
 
         lines = [
             '{"event":"init","conversation_id":"conv-xyz",'
-            '"init":{"model":"Gemini 3.7 Flash (High)"}}',
+            '"init":{"model":"Gemini 3.8 Flash (High)"}}',
             '{"event":"step_update","step_update":{"conversation_id":"conv-xyz",'
             '"step_index":0,"state":"ACTIVE","step_type":"agent_response",'
             '"text_delta":"<verification>VERIFICATION_COMPLETE</verification>"}}',

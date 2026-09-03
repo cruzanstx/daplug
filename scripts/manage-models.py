@@ -179,7 +179,7 @@ def stdin_mode_for_cli(default_cli: str) -> str | None:
 
 
 AGY_DISPLAY_NAMES = {
-    "google:gemini-3.7-flash": "Gemini 3.7 Flash (High)",
+    "google:gemini-3.8-flash": "Gemini 3.8 Flash (High)",
     "google:gemini-3.5-flash": "Gemini 3.5 Flash (Medium)",
     "google:gemini-3-flash-preview": "Gemini 3.5 Flash (Medium)",
     "google:gemini-2.5-flash": "Gemini 3.5 Flash (Medium)",
@@ -188,7 +188,7 @@ AGY_DISPLAY_NAMES = {
     "google:gemini-3-pro-preview": "Gemini 3.1 Pro (High)",
     "google:gemini-3.1-pro-preview": "Gemini 3.1 Pro (High)",
 }
-AGY_DEFAULT_DISPLAY_NAME = "Gemini 3.7 Flash (High)"
+AGY_DEFAULT_DISPLAY_NAME = "Gemini 3.8 Flash (High)"
 
 
 def default_command(
