@@ -70,7 +70,7 @@ python3 "$EXECUTOR" [prompts...] [options]
 
 **Options:**
 <!-- BEGIN GENERATED: skill-model-options -->
-- `--model, -m`: claude, cc-sonnet, cc-opus, fable, codex, codex-spark, codex-high, codex-xhigh, sol, terra, luna, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, gemini37, gemini37-high, gemini37-medium, gemini37-low, agy, zai, glm5, glm52, glm53, flash, glm53-flash, kimi, synthetic, syn-flash, syn-kimi, syn-kimi3, syn-qwen, syn-minimax, syn-nemotron, syn-glm53-flash, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b
+- `--model, -m`: claude, cc-sonnet, cc-opus, fable, fable51, codex, codex-spark, codex-high, codex-xhigh, sol, terra, luna, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, gemini37, gemini37-high, gemini37-medium, gemini37-low, agy, zai, glm5, glm52, glm53, flash, glm53-flash, kimi, synthetic, syn-flash, syn-kimi, syn-kimi3, syn-qwen, syn-minimax, syn-nemotron, syn-glm53-flash, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b
   - `glm53`: GLM-5.3 via Z.AI / OpenCode (1M context)
   - `synthetic`: GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, requires `SYNTHETIC_API_KEY`)
 <!-- END GENERATED: skill-model-options -->
@@ -264,7 +264,8 @@ python3 "$EXECUTOR" --loop-status
 | claude | (Task subagent) | Complex reasoning in current Claude Code context |
 | cc-sonnet | claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model sonnet | Claude Code CLI Sonnet runs |
 | cc-opus | claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model opus | Claude Code CLI Opus runs |
-| fable | claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model fable | Claude Code CLI Fable 5 runs |
+| fable | claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model fable | Floating Claude Code Fable alias (currently Fable 5.1) |
+| fable51 | claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model claude-fable-5-1 | Explicit Fable 5.1 pin via Claude Code CLI |
 | codex | codex exec --full-auto -m gpt-5.6-terra | Fast coding execution (default Codex shorthand) |
 | codex-spark | codex exec --full-auto -m gpt-5.3-codex-spark | Lowest-latency quick edits |
 | codex-high | codex exec --full-auto -m gpt-5.6-terra -c model_reasoning_effort="high" | Complex coding |

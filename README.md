@@ -668,7 +668,8 @@ These tables are generated from `scripts/models.json`.
 | `claude` | claude | Complex reasoning in current Claude Code context |
 | `cc-sonnet` | sonnet (Sonnet 5 alias) | Claude Code CLI Sonnet runs |
 | `cc-opus` | opus (Opus 5 alias) | Claude Code CLI Opus runs |
-| `fable` | fable | Hardest reasoning tasks via Claude Code CLI (Fable 5, above Opus tier) |
+| `fable` | fable (currently Fable 5.1; floating alias) | Hardest reasoning tasks via Claude Code CLI; currently Fable 5.1 with 1M context and 128K max output |
+| `fable51` | claude-fable-5-1 (Fable 5.1 pin) | Hardest reasoning tasks pinned to Fable 5.1 (1M context, 128K max output, adaptive thinking, efforts low/medium/high/xhigh/max, $10/MTok in, $50/MTok out) |
 
 #### OpenAI
 

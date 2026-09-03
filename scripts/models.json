@@ -136,7 +136,7 @@
     },
     {
       "name": "fable",
-      "display": "fable (Claude Fable 5 via Claude Code)",
+      "display": "fable (Claude Fable 5.1 via Claude Code — floating alias)",
       "model_id": "anthropic:fable",
       "default_cli": "claude",
       "supports_codex_reasoning": false,
@@ -170,15 +170,63 @@
       "docs": {
         "family": "Claude",
         "cli_label": "claude",
-        "actual_model": "fable (Claude Fable 5 alias)",
-        "option_description": "Claude Code CLI Fable 5 alias (most capable)",
+        "actual_model": "fable (currently Claude Fable 5.1; floating Claude Code alias)",
+        "option_description": "Claude Code CLI Fable alias (currently Fable 5.1, 1M context)",
         "reference_cli": "claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model fable",
-        "reference_description": "Claude Code CLI Fable 5 runs",
+        "reference_description": "Floating Claude Code Fable alias (currently Fable 5.1)",
         "readme_section": "Claude",
-        "readme_model": "fable",
-        "best_for": "Hardest reasoning tasks via Claude Code CLI (Fable 5, above Opus tier)",
-        "prompt_description": "Claude Code CLI Fable 5 alias (most capable)",
-        "menu_note": "Claude Code CLI Fable 5",
+        "readme_model": "fable (currently Fable 5.1; floating alias)",
+        "best_for": "Hardest reasoning tasks via Claude Code CLI; currently Fable 5.1 with 1M context and 128K max output",
+        "prompt_description": "Claude Code CLI Fable alias (currently Fable 5.1; floats with Claude Code)",
+        "menu_note": "floating Fable alias, currently Fable 5.1",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "fable51",
+      "display": "fable51 (Claude Fable 5.1 via Claude Code — explicit pin, 1M context)",
+      "model_id": "anthropic:claude-fable-5-1",
+      "default_cli": "claude",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": "claude-fable-5-1",
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "stdin",
+      "command": [
+        "claude",
+        "--print",
+        "--no-session-persistence",
+        "--output-format",
+        "text",
+        "--input-format",
+        "text",
+        "--permission-mode",
+        "dontAsk",
+        "--model",
+        "claude-fable-5-1"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "claude"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "Claude",
+        "cli_label": "claude",
+        "actual_model": "claude-fable-5-1 (Fable 5.1 explicit pin, 1M context, 128K max output)",
+        "option_description": "Claude Code CLI Fable 5.1 explicit pin (claude-fable-5-1, adaptive thinking)",
+        "reference_cli": "claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model claude-fable-5-1",
+        "reference_description": "Explicit Fable 5.1 pin via Claude Code CLI",
+        "readme_section": "Claude",
+        "readme_model": "claude-fable-5-1 (Fable 5.1 pin)",
+        "best_for": "Hardest reasoning tasks pinned to Fable 5.1 (1M context, 128K max output, adaptive thinking, efforts low/medium/high/xhigh/max, $10/MTok in, $50/MTok out)",
+        "prompt_description": "Claude Code CLI Fable 5.1 explicit pin (claude-fable-5-1, 1M context)",
+        "menu_note": "Fable 5.1 explicit pin, 1M context",
         "include_in_prompt_guides": true
       }
     },

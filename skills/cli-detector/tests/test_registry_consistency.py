@@ -381,6 +381,45 @@ class TestRegistryRouterConsistency:
             "build",
         ]
 
+    def test_fable51_pin_and_fable_alias_are_distinct(self):
+        """fable51 pins claude-fable-5-1 via Claude; the floating fable alias is untouched."""
+        reg_by_name = {m["name"]: m for m in _load_registry()}
+
+        assert reg_by_name["fable51"]["model_id"] == "anthropic:claude-fable-5-1"
+        assert reg_by_name["fable51"]["claude_model_flag"] == "claude-fable-5-1"
+        assert reg_by_name["fable51"]["default_cli"] == "claude"
+        assert reg_by_name["fable51"]["alias_of"] is None
+
+        req = router._SHORTHAND["fable51"]
+        assert req.family == "anthropic"
+        assert req.model_id == "anthropic:claude-fable-5-1"
+        assert req.force_cli == "claude"
+        assert req.strict_cli is True
+        # Router Claude commands pass the stripped model_id as the --model flag.
+        assert router._strip_provider_prefix(req.model_id) == "claude-fable-5-1"
+
+        # Regression guard: the floating `fable` alias keeps its alias routing.
+        assert reg_by_name["fable"]["model_id"] == "anthropic:fable"
+        assert reg_by_name["fable"]["claude_model_flag"] == "fable"
+        assert router._SHORTHAND["fable"].model_id == "anthropic:fable"
+
+    def test_fable51_resolves_strictly_to_claude(self, monkeypatch):
+        """Router resolution for fable51 pins claude-fable-5-1 via the Claude CLI."""
+        fake = _FakeCache(
+            {
+                "clis": {
+                    "claude": {"installed": True, "issues": []},
+                },
+                "providers": {},
+            }
+        )
+        monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+
+        cli, model_id, cmd = router.resolve_model("fable51")
+        assert cli == "claude"
+        assert model_id == "anthropic:claude-fable-5-1"
+        assert cmd[-2:] == ["--model", "claude-fable-5-1"]
+
     def test_drift_missing_router_key_produces_actionable_message(self):
         """A model missing from router must produce a message naming it."""
         registry_models = _load_registry()

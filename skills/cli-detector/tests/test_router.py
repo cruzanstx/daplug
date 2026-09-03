@@ -954,6 +954,23 @@ class TestClaudeModel:
         idx = cmd.index("--model")
         assert cmd[idx + 1] == expected_model
 
+    @pytest.mark.parametrize(
+        "shorthand,expected_model",
+        [
+            ("fable", "fable"),
+            ("fable51", "claude-fable-5-1"),
+        ],
+    )
+    def test_fable_models_force_model_selection(self, full_cache, shorthand, expected_model):
+        """fable floats via the Claude alias; fable51 pins the canonical claude-fable-5-1 ID."""
+        cli, model_id, cmd = router.resolve_model(shorthand)
+        assert cli == "claude"
+        assert model_id.endswith(f":{expected_model}")
+        assert cmd[0] == "claude"
+        assert "--model" in cmd
+        idx = cmd.index("--model")
+        assert cmd[idx + 1] == expected_model
+
 
 class TestAllModelsHaveValidCommands:
     """Ensure all defined shorthands produce valid output."""

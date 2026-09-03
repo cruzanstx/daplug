@@ -194,6 +194,62 @@ def test_syn_glm53_flash_registry_entry(tmp_path: Path):
     assert by_name["syn-flash"]["model_id"] == "synthetic:syn:small:text"
 
 
+def test_fable51_registry_entry(tmp_path: Path):
+    """fable51 pins Fable 5.1 (claude-fable-5-1) via Claude; the floating fable alias is untouched."""
+    registry = manage_models.load_registry(REPO_ROOT)
+    by_name = {model["name"]: model for model in registry["models"]}
+
+    expected_command = [
+        "claude",
+        "--print",
+        "--no-session-persistence",
+        "--output-format",
+        "text",
+        "--input-format",
+        "text",
+        "--permission-mode",
+        "dontAsk",
+        "--model",
+        "claude-fable-5-1",
+    ]
+    expected_routing = {
+        "cli_overrides": ["claude"],
+        "force_direct_opencode": False,
+        "google": False,
+        "synthetic": False,
+    }
+
+    assert "fable51" in by_name
+    entry = by_name["fable51"]
+    assert entry["model_id"] == "anthropic:claude-fable-5-1"
+    assert entry["claude_model_flag"] == "claude-fable-5-1"
+    assert entry["default_cli"] == "claude"
+    assert entry["alias_of"] is None
+    assert entry["supports_codex_reasoning"] is False
+    assert entry["command"] == expected_command
+    assert entry["command"][-2:] == ["--model", "claude-fable-5-1"]
+    assert entry["routing"] == expected_routing
+    assert entry["docs"]["family"] == "Claude"
+    assert manage_models.default_command(
+        entry["default_cli"],
+        entry["model_id"],
+        entry["codex_profile"],
+        entry["claude_model_flag"],
+        entry["default_variant"],
+    ) == expected_command
+
+    # Regression guard: the floating `fable` shorthand keeps its routing while its
+    # user-facing metadata identifies the model Claude Code currently resolves.
+    assert by_name["fable"]["model_id"] == "anthropic:fable"
+    assert by_name["fable"]["claude_model_flag"] == "fable"
+    assert by_name["fable"]["command"] == expected_command[:-2] + ["--model", "fable"]
+    assert "currently Claude Fable 5.1" in by_name["fable"]["docs"]["actual_model"]
+    assert "floating" in by_name["fable"]["docs"]["actual_model"]
+
+    # Only one pin spelling exists (no `fable5-1`).
+    assert "fable5-1" not in by_name
+
+
 def test_load_registry_rejects_missing_model_fields(tmp_path: Path):
     root = copy_model_targets(tmp_path)
     registry_path = root / "scripts" / "models.json"
