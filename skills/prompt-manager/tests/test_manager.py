@@ -1,12 +1,75 @@
 import os
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
+import pytest
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.append(str(SCRIPT_DIR))
 
 import manager  # noqa: E402
+
+
+def _prompt(root: Path, number: int, name: str = "test") -> Path:
+    path = root / "prompts" / f"{number:03d}-{name}.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("test")
+    return path
+
+
+def test_next_number_scans_sibling_worktrees(tmp_path, monkeypatch):
+    primary = tmp_path / "primary"
+    sibling = tmp_path / "sibling"
+    _prompt(primary, 17, "primary")
+    _prompt(sibling, 23, "sibling")
+    monkeypatch.setattr(manager, "_get_worktree_roots", lambda _root: [primary, sibling])
+    monkeypatch.setattr(manager, "_get_git_common_dir", lambda _root: tmp_path / "common")
+
+    assert manager.get_next_number(primary) == "024"
+
+
+def test_deleted_prompt_number_is_not_reused(tmp_path, monkeypatch):
+    repo = tmp_path / "repo"
+    monkeypatch.setattr(manager, "_get_worktree_roots", lambda _root: [repo])
+    monkeypatch.setattr(manager, "_get_git_common_dir", lambda _root: tmp_path / "common")
+    prompt = manager.create_prompt("first", "content", repo_root=repo)
+    prompt.path.unlink()
+
+    assert manager.get_next_number(repo) == "002"
+
+
+def test_deleted_explicit_prompt_number_is_not_reused(tmp_path, monkeypatch):
+    repo = tmp_path / "repo"
+    monkeypatch.setattr(manager, "_get_worktree_roots", lambda _root: [repo])
+    monkeypatch.setattr(manager, "_get_git_common_dir", lambda _root: tmp_path / "common")
+    prompt = manager.create_prompt("manual", "content", number="005", repo_root=repo)
+    prompt.path.unlink()
+
+    assert manager.get_next_number(repo) == "006"
+
+
+def test_live_allocation_lock_is_not_stolen(tmp_path, monkeypatch):
+    repo = tmp_path / "repo"
+    monkeypatch.setattr(manager, "_get_git_common_dir", lambda _root: tmp_path / "common")
+
+    with manager._prompt_number_lock(repo):
+        with pytest.raises(TimeoutError):
+            with manager._prompt_number_lock(repo, timeout=0.05):
+                pass
+
+
+def test_parallel_creates_allocate_unique_numbers(tmp_path, monkeypatch):
+    repo = tmp_path / "repo"
+    monkeypatch.setattr(manager, "_get_worktree_roots", lambda _root: [repo])
+    monkeypatch.setattr(manager, "_get_git_common_dir", lambda _root: tmp_path / "common")
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        prompts = list(pool.map(lambda index: manager.create_prompt(f"task-{index}", "content", repo_root=repo), range(8)))
+
+    assert sorted(prompt.number for prompt in prompts) == [f"{number:03d}" for number in range(1, 9)]
+    assert len({prompt.path for prompt in prompts}) == 8
 
 
 def test_get_project_slug():

@@ -23,12 +23,15 @@ Usage:
 """
 
 import argparse
+import errno
 import json
 import os
 import re
 import shutil
 import subprocess
 import sys
+import time
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
@@ -80,6 +83,106 @@ def get_prompts_dir(repo_root: Optional[Path] = None) -> Path:
 def get_completed_dir(repo_root: Optional[Path] = None) -> Path:
     """Get the completed prompts directory path."""
     return get_prompts_dir(repo_root) / "completed"
+
+
+def _get_worktree_roots(repo_root: Path) -> list[Path]:
+    """Return every linked worktree for the repository."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(repo_root), "worktree", "list", "--porcelain"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return [repo_root]
+
+    roots = [Path(line.removeprefix("worktree ")) for line in result.stdout.splitlines() if line.startswith("worktree ")]
+    return roots or [repo_root]
+
+
+def _get_git_common_dir(repo_root: Path) -> Path:
+    """Return the shared git directory used by all linked worktrees."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(repo_root), "rev-parse", "--path-format=absolute", "--git-common-dir"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return Path(result.stdout.strip())
+    except (OSError, subprocess.CalledProcessError):
+        return repo_root / ".git"
+
+
+def _number_state_paths(repo_root: Path) -> tuple[Path, Path]:
+    common_dir = _get_git_common_dir(repo_root)
+    return common_dir / "daplug-prompt-number.json", common_dir / "daplug-prompt-number.lock"
+
+
+def _read_reserved_number(repo_root: Path) -> int:
+    state_path, _ = _number_state_paths(repo_root)
+    try:
+        data = json.loads(state_path.read_text())
+        value = data.get("highest_allocated", 0)
+        return value if isinstance(value, int) and value >= 0 else 0
+    except (OSError, json.JSONDecodeError, AttributeError):
+        return 0
+
+
+def _write_reserved_number(repo_root: Path, number: int) -> None:
+    state_path, _ = _number_state_paths(repo_root)
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = state_path.with_suffix(".tmp")
+    temporary.write_text(json.dumps({"highest_allocated": number}) + "\n")
+    os.replace(temporary, state_path)
+
+
+@contextmanager
+def _prompt_number_lock(repo_root: Path, timeout: float = 10.0):
+    """Serialize prompt allocation across processes and linked worktrees."""
+    _, lock_path = _number_state_paths(repo_root)
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor = os.open(lock_path, os.O_CREAT | os.O_RDWR, 0o600)
+    lock_file = os.fdopen(descriptor, "r+")
+    deadline = time.monotonic() + timeout
+    acquired = False
+
+    try:
+        if os.name == "nt":
+            import msvcrt
+
+            if lock_path.stat().st_size == 0:
+                lock_file.write("\0")
+                lock_file.flush()
+
+        while True:
+            try:
+                if os.name == "nt":
+                    lock_file.seek(0)
+                    msvcrt.locking(descriptor, msvcrt.LK_NBLCK, 1)
+                else:
+                    import fcntl
+
+                    fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                acquired = True
+                break
+            except OSError as exc:
+                if exc.errno not in (errno.EACCES, errno.EAGAIN):
+                    raise
+                if time.monotonic() >= deadline:
+                    raise TimeoutError("Timed out waiting for prompt-number allocation lock") from exc
+                time.sleep(0.05)
+
+        yield
+    finally:
+        if acquired:
+            if os.name == "nt":
+                lock_file.seek(0)
+                msvcrt.locking(descriptor, msvcrt.LK_UNLCK, 1)
+            else:
+                fcntl.flock(descriptor, fcntl.LOCK_UN)
+        lock_file.close()
 
 
 def ensure_prompts_dir(repo_root: Optional[Path] = None) -> Path:
@@ -304,10 +407,8 @@ def get_next_number(repo_root: Optional[Path] = None, folder: Optional[str] = No
 
     # Global numbering (default): avoid duplicates across all prompts and completed/
     if folder is None:
-        prompts = list_prompts(repo_root)
-        if not prompts:
-            return "001"
-        highest = max(int(p.number) for p in prompts)
+        prompts = [prompt for root in _get_worktree_roots(repo_root) for prompt in list_prompts(root)]
+        highest = max([int(p.number) for p in prompts] + [_read_reserved_number(repo_root)])
         return f"{highest + 1:03d}"
 
     # Folder-scoped numbering: scan only within that folder (does not consider completed/)
@@ -477,12 +578,25 @@ def create_prompt(
     folder = normalize_folder(folder)
     validate_create_folder(folder)
 
-    # Generate number if not provided
-    if number is None:
-        number = get_next_number(repo_root)
-    else:
-        # Normalize (duplicates are checked within target folder)
-        number = f"{int(number):03d}"
+    with _prompt_number_lock(repo_root):
+        if number is None:
+            number = get_next_number(repo_root)
+        else:
+            number = f"{int(number):03d}"
+        prompt = _create_prompt_file(name, content, number, folder, repo_root, include_session_ref)
+        _write_reserved_number(repo_root, max(_read_reserved_number(repo_root), int(number)))
+        return prompt
+
+
+def _create_prompt_file(
+    name: str,
+    content: str,
+    number: str,
+    folder: str,
+    repo_root: Path,
+    include_session_ref: bool,
+) -> PromptInfo:
+    """Write one prompt after its number has been selected."""
 
     # Normalize name to kebab-case
     name = name.lower().strip()
