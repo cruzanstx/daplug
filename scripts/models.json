@@ -2231,6 +2231,98 @@
       }
     },
     {
+      "name": "syn-ds41-flash",
+      "display": "syn-ds41-flash (DeepSeek V4.1 Flash via Synthetic — vision, 512k context)",
+      "model_id": "synthetic:hf:deepseek-ai/DeepSeek-V4.1-Flash",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "synthetic/hf:deepseek-ai/DeepSeek-V4.1-Flash",
+        "--pure",
+        "--agent",
+        "build"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": true
+      },
+      "docs": {
+        "family": "Synthetic",
+        "cli_label": "opencode",
+        "actual_model": "DeepSeek V4.1 Flash via Synthetic (`hf:deepseek-ai/DeepSeek-V4.1-Flash`, vision, 512k context, 64k max output)",
+        "option_description": "DeepSeek V4.1 Flash via Synthetic / OpenCode (vision, 512k context, 64k max output)",
+        "reference_cli": "opencode run --format json -m synthetic/hf:deepseek-ai/DeepSeek-V4.1-Flash --pure --agent build",
+        "reference_description": "DeepSeek V4.1 Flash, vision, tools/structured outputs, reasoning efforts none/low/high/xhigh/max",
+        "readme_section": "Synthetic",
+        "readme_model": "`hf:deepseek-ai/DeepSeek-V4.1-Flash`",
+        "best_for": "DeepSeek V4.1 Flash, vision, 512k context, tools/structured outputs, reasoning efforts none/low/high/xhigh/max",
+        "prompt_description": "DeepSeek V4.1 Flash via Synthetic / OpenCode (vision, 512k context, 64k max output)",
+        "menu_note": "Synthetic DeepSeek V4.1 Flash vision",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "deepseek",
+      "display": "deepseek (DeepSeek V4.1 Flash via Synthetic — everyday alias of syn-ds41-flash)",
+      "model_id": "synthetic:hf:deepseek-ai/DeepSeek-V4.1-Flash",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": "syn-ds41-flash",
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "synthetic/hf:deepseek-ai/DeepSeek-V4.1-Flash",
+        "--pure",
+        "--agent",
+        "build"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": true
+      },
+      "docs": {
+        "family": "Synthetic",
+        "cli_label": "opencode",
+        "actual_model": "DeepSeek V4.1 Flash via Synthetic (everyday alias of syn-ds41-flash; `hf:deepseek-ai/DeepSeek-V4.1-Flash`, vision, 512k context, 64k max output)",
+        "option_description": "DeepSeek V4.1 Flash via Synthetic / OpenCode (everyday alias of syn-ds41-flash)",
+        "reference_cli": "opencode run --format json -m synthetic/hf:deepseek-ai/DeepSeek-V4.1-Flash --pure --agent build",
+        "reference_description": "Everyday DeepSeek V4.1 Flash alias, identical route to syn-ds41-flash",
+        "readme_section": "Synthetic",
+        "readme_model": "`hf:deepseek-ai/DeepSeek-V4.1-Flash`",
+        "best_for": "Everyday DeepSeek V4.1 Flash alias (vision, 512k context, identical route to syn-ds41-flash)",
+        "prompt_description": "DeepSeek V4.1 Flash via Synthetic / OpenCode (everyday alias of syn-ds41-flash, vision, 512k context)",
+        "menu_note": "Synthetic DeepSeek V4.1 Flash (alias of syn-ds41-flash)",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
       "name": "opencode",
       "display": "opencode (GLM-4.7 via OpenCode)",
       "model_id": "zai:glm-4.7",
