@@ -520,6 +520,8 @@ All available models for /daplug:run-prompt --model:
 - `syn-minimax` - MiniMax-M3 via Synthetic / OpenCode (vision, 256k context)
 - `syn-nemotron` - Nemotron-3-Super-120B via Synthetic / OpenCode (text, 256k context)
 - `syn-glm53-flash` - GLM-5.3-Flash via Synthetic / OpenCode (beta, vision, low-cost)
+- `syn-ds41-flash` - DeepSeek V4.1 Flash via Synthetic / OpenCode (vision, 512k context, 64k max output)
+- `deepseek` - DeepSeek V4.1 Flash via Synthetic / OpenCode (everyday alias of syn-ds41-flash, vision, 512k context)
 
 **Local Models:** (opencode + LMStudio; no hosted quota)
 - `local` - Local qwen3.6-35b-a3b via opencode + LMStudio
@@ -674,17 +676,19 @@ If user chooses #1:
   49. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
   50. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
   51. syn-glm53-flash - {requests}/{limit} requests - Synthetic GLM-5.3-Flash beta vision
+  52. syn-ds41-flash - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash vision
+  53. deepseek - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash (alias of syn-ds41-flash)
 
   **Local:** {usage status}
-  52. local - local qwen3.6-35b-a3b, no quota
-  53. qwen - local qwen3.6-35b-a3b, no quota
-  54. devstral - local Devstral, no quota
-  55. glm-local - local GLM-4.7 Flash, no quota
-  56. qwen-small - local qwen3-4b, no quota
-  57. qwen36 - local qwen3.6-35b-a3b, no quota
-  58. qwen36-27b - local qwen3.6-27b, no quota
+  54. local - local qwen3.6-35b-a3b, no quota
+  55. qwen - local qwen3.6-35b-a3b, no quota
+  56. devstral - local Devstral, no quota
+  57. glm-local - local GLM-4.7 Flash, no quota
+  58. qwen-small - local qwen3-4b, no quota
+  59. qwen36 - local qwen3.6-35b-a3b, no quota
+  60. qwen36-27b - local qwen3.6-27b, no quota
 
-  Choose (1-58), or type model with flags (e.g., 'codex --worktree --loop'): _
+  Choose (1-60), or type model with flags (e.g., 'codex --worktree --loop'): _
 <!-- END GENERATED: create-llms-selection-menu -->
 
   **Execute based on selection:**

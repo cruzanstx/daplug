@@ -206,6 +206,22 @@ _SHORTHAND: dict[str, _ModelRequest] = {
         force_cli="opencode",
         strict_cli=True,
     ),
+    # Synthetic-hosted DeepSeek V4.1 Flash (vision, 512k context, 64k max output).
+    # `deepseek` is the everyday alias of `syn-ds41-flash` (identical route).
+    "syn-ds41-flash": _ModelRequest(
+        "syn-ds41-flash",
+        family="synthetic",
+        model_id="synthetic:hf:deepseek-ai/DeepSeek-V4.1-Flash",
+        force_cli="opencode",
+        strict_cli=True,
+    ),
+    "deepseek": _ModelRequest(
+        "deepseek",
+        family="synthetic",
+        model_id="synthetic:hf:deepseek-ai/DeepSeek-V4.1-Flash",
+        force_cli="opencode",
+        strict_cli=True,
+    ),
     "opencode": _ModelRequest(
         "opencode",
         family="zai",

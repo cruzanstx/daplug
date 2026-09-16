@@ -4,6 +4,9 @@ All notable changes to daplug are documented here.
 
 ## [Unreleased]
 
+### Added
+- **`syn-ds41-flash` / `deepseek` model shorthands** — DeepSeek V4.1 Flash via Synthetic routes to `synthetic/hf:deepseek-ai/DeepSeek-V4.1-Flash` through OpenCode (`opencode run --format json -m synthetic/hf:deepseek-ai/DeepSeek-V4.1-Flash --pure --agent build`) and requires `SYNTHETIC_API_KEY` (https://api.synthetic.new/openai/v1). Context window 512k, max output 64k; input accepts text + image (vision) with text output; supports tools, JSON mode, and structured outputs; reasoning efforts accepted by the model are none/low/high/xhigh/max. `syn-ds41-flash` follows the existing `syn-*` Synthetic naming and `deepseek` is the short everyday alias — both spellings resolve to byte-identical commands (registry alias plus dedicated router entry). The generic `synthetic` (GLM-5.2, `syn:large:text`), `syn-flash` (GLM-4.7-Flash, `syn:small:text`), and `syn-glm53-flash` (GLM-5.3-Flash) defaults remain unchanged.
+
 ## [0.40.9] - 2026-09-15
 
 ### Fixed

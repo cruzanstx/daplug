@@ -75,14 +75,25 @@ SYNTHETIC_MODELS = {
         "synthetic:hf:zai-org/GLM-5.3-Flash",
         "synthetic/hf:zai-org/GLM-5.3-Flash",
     ),
+    "syn-ds41-flash": (
+        "synthetic:hf:deepseek-ai/DeepSeek-V4.1-Flash",
+        "synthetic/hf:deepseek-ai/DeepSeek-V4.1-Flash",
+    ),
+    "deepseek": (
+        "synthetic:hf:deepseek-ai/DeepSeek-V4.1-Flash",
+        "synthetic/hf:deepseek-ai/DeepSeek-V4.1-Flash",
+    ),
 }
 
 
 def test_synthetic_model_specs_are_opencode_provider_refs():
     for shorthand, (model_id, _opencode_ref) in SYNTHETIC_MODELS.items():
-        assert executor.MODEL_SPECS[shorthand]["model_id"] == model_id
-        assert executor.MODEL_SPECS[shorthand]["default_cli"] == "opencode"
-        assert executor.MODEL_SPECS[shorthand]["supports_codex_reasoning"] is False
+        # MODEL_SPECS only holds canonical entries; aliases (deepseek) resolve
+        # to their base spec exactly as get_cli_info does at runtime.
+        base = executor._canonical_model(shorthand)
+        assert executor.MODEL_SPECS[base]["model_id"] == model_id
+        assert executor.MODEL_SPECS[base]["default_cli"] == "opencode"
+        assert executor.MODEL_SPECS[base]["supports_codex_reasoning"] is False
 
 
 def test_synthetic_models_build_opencode_commands(no_router, tmp_path, monkeypatch):
@@ -101,6 +112,50 @@ def test_synthetic_models_require_api_key(no_router, tmp_path, monkeypatch):
 
     with pytest.raises(RuntimeError, match="SYNTHETIC_API_KEY is required"):
         executor.get_cli_info("synthetic", repo_root=tmp_path)
+
+
+def test_deepseek_shorthands_build_opencode_commands(no_router, tmp_path, monkeypatch):
+    """syn-ds41-flash and deepseek both build byte-identical DeepSeek V4.1 Flash commands."""
+    monkeypatch.setenv("SYNTHETIC_API_KEY", "test-key")
+    expected_command = [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "synthetic/hf:deepseek-ai/DeepSeek-V4.1-Flash",
+        "--pure",
+        "--agent",
+        "build",
+    ]
+    for shorthand in ("syn-ds41-flash", "deepseek"):
+        info = executor.get_cli_info(shorthand, repo_root=tmp_path)
+        assert info["selected_cli"] == "opencode", shorthand
+        assert info["model_id"] == "synthetic:hf:deepseek-ai/DeepSeek-V4.1-Flash", shorthand
+        assert info["command"] == expected_command, shorthand
+        assert info["stdin_mode"] == "arg", shorthand
+
+
+def test_deepseek_shorthands_insert_variant_before_pure(no_router, tmp_path, monkeypatch):
+    """--variant low/high/xhigh is inserted before --pure for both DeepSeek shorthands."""
+    monkeypatch.setenv("SYNTHETIC_API_KEY", "test-key")
+    for shorthand in ("syn-ds41-flash", "deepseek"):
+        for variant in ("low", "high", "xhigh"):
+            info = executor.get_cli_info(shorthand, repo_root=tmp_path, variant=variant)
+            assert info["command"] == [
+                "opencode",
+                "run",
+                "--format",
+                "json",
+                "-m",
+                "synthetic/hf:deepseek-ai/DeepSeek-V4.1-Flash",
+                "--variant",
+                variant,
+                "--pure",
+                "--agent",
+                "build",
+            ], (shorthand, variant)
+            assert info["variant"] == variant, (shorthand, variant)
 
 
 def test_main_argparse_accepts_synthetic_shorthands(prompt_repo, monkeypatch, capsys):
@@ -501,6 +556,8 @@ EXPECTED_MODEL_KEYS = [
     "syn-minimax",
     "syn-nemotron",
     "syn-glm53-flash",
+    "syn-ds41-flash",
+    "deepseek",
     "opencode",
     "local",
     "qwen",

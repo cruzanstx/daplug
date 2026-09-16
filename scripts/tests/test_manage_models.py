@@ -194,6 +194,65 @@ def test_syn_glm53_flash_registry_entry(tmp_path: Path):
     assert by_name["syn-flash"]["model_id"] == "synthetic:syn:small:text"
 
 
+def test_syn_ds41_flash_and_deepseek_registry_entries(tmp_path: Path):
+    """syn-ds41-flash and its everyday alias deepseek register DeepSeek V4.1 Flash on Synthetic."""
+    registry = manage_models.load_registry(REPO_ROOT)
+    by_name = {model["name"]: model for model in registry["models"]}
+
+    expected_command = [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "synthetic/hf:deepseek-ai/DeepSeek-V4.1-Flash",
+        "--pure",
+        "--agent",
+        "build",
+    ]
+    expected_routing = {
+        "cli_overrides": ["opencode"],
+        "force_direct_opencode": True,
+        "google": False,
+        "synthetic": True,
+    }
+
+    for name in ("syn-ds41-flash", "deepseek"):
+        assert name in by_name, name
+        entry = by_name[name]
+        assert entry["model_id"] == "synthetic:hf:deepseek-ai/DeepSeek-V4.1-Flash", name
+        assert entry["default_cli"] == "opencode", name
+        assert entry["supports_codex_reasoning"] is False, name
+        assert entry["command"] == expected_command, name
+        assert entry["routing"] == expected_routing, name
+        assert entry["docs"]["family"] == "Synthetic", name
+        assert entry["docs"]["cli_label"] == "opencode", name
+        assert manage_models.default_command(
+            entry["default_cli"],
+            entry["model_id"],
+            entry["codex_profile"],
+            entry["claude_model_flag"],
+            entry["default_variant"],
+        ) == expected_command, name
+
+    # Alias relationship: deepseek aliases syn-ds41-flash with identical runtime fields.
+    assert by_name["deepseek"]["alias_of"] == "syn-ds41-flash"
+    assert by_name["syn-ds41-flash"]["alias_of"] is None
+    for field in ("model_id", "default_cli", "command", "routing", "env", "stdin_mode"):
+        assert by_name["deepseek"][field] == by_name["syn-ds41-flash"][field], field
+
+    # Placement: both entries sit immediately after syn-glm53-flash so the
+    # Synthetic family stays contiguous.
+    names = [model["name"] for model in registry["models"]]
+    glm53_index = names.index("syn-glm53-flash")
+    assert names[glm53_index + 1 : glm53_index + 3] == ["syn-ds41-flash", "deepseek"]
+
+    # Existing Synthetic defaults are unchanged.
+    assert by_name["synthetic"]["model_id"] == "synthetic:syn:large:text"
+    assert by_name["syn-flash"]["model_id"] == "synthetic:syn:small:text"
+    assert by_name["syn-glm53-flash"]["model_id"] == "synthetic:hf:zai-org/GLM-5.3-Flash"
+
+
 def test_fable51_registry_entry(tmp_path: Path):
     """fable51 pins Fable 5.1 (claude-fable-5-1) via Claude; the floating fable alias is untouched."""
     registry = manage_models.load_registry(REPO_ROOT)

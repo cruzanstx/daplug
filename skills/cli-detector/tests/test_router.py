@@ -34,6 +34,14 @@ SYNTHETIC_ROUTER_MODELS = {
         "synthetic:hf:zai-org/GLM-5.3-Flash",
         "synthetic/hf:zai-org/GLM-5.3-Flash",
     ),
+    "syn-ds41-flash": (
+        "synthetic:hf:deepseek-ai/DeepSeek-V4.1-Flash",
+        "synthetic/hf:deepseek-ai/DeepSeek-V4.1-Flash",
+    ),
+    "deepseek": (
+        "synthetic:hf:deepseek-ai/DeepSeek-V4.1-Flash",
+        "synthetic/hf:deepseek-ai/DeepSeek-V4.1-Flash",
+    ),
 }
 
 

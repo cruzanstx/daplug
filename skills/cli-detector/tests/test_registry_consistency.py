@@ -381,6 +381,88 @@ class TestRegistryRouterConsistency:
             "build",
         ]
 
+    def test_syn_ds41_flash_and_deepseek_route_to_synthetic_provider(self):
+        """Both DeepSeek shorthands must route to Synthetic's hf:deepseek-ai/DeepSeek-V4.1-Flash via opencode."""
+        reg_by_name = {m["name"]: m for m in _load_registry()}
+        for name in ("syn-ds41-flash", "deepseek"):
+            assert name in reg_by_name, name
+            entry = reg_by_name[name]
+            assert entry["model_id"] == "synthetic:hf:deepseek-ai/DeepSeek-V4.1-Flash", name
+            assert entry["default_cli"] == "opencode", name
+            assert entry["supports_codex_reasoning"] is False, name
+            assert entry["command"] == [
+                "opencode",
+                "run",
+                "--format",
+                "json",
+                "-m",
+                "synthetic/hf:deepseek-ai/DeepSeek-V4.1-Flash",
+                "--pure",
+                "--agent",
+                "build",
+            ], name
+            assert entry["routing"] == {
+                "cli_overrides": ["opencode"],
+                "force_direct_opencode": True,
+                "google": False,
+                "synthetic": True,
+            }, name
+            assert entry["docs"]["family"] == "Synthetic", name
+
+            req = router._SHORTHAND[name]
+            assert req.family == "synthetic", name
+            assert req.model_id == "synthetic:hf:deepseek-ai/DeepSeek-V4.1-Flash", name
+            assert req.force_cli == "opencode", name
+            assert req.strict_cli is True, name
+
+        # Alias relationship with byte-identical command.
+        assert reg_by_name["deepseek"]["alias_of"] == "syn-ds41-flash"
+        assert reg_by_name["syn-ds41-flash"]["alias_of"] is None
+        assert reg_by_name["syn-ds41-flash"]["command"] == reg_by_name["deepseek"]["command"]
+
+        # Generic Synthetic defaults remain GLM-5.2 / GLM-4.7-Flash.
+        assert reg_by_name["synthetic"]["model_id"] == "synthetic:syn:large:text"
+        assert reg_by_name["syn-flash"]["model_id"] == "synthetic:syn:small:text"
+
+    def test_syn_ds41_flash_and_deepseek_resolve_strictly_to_opencode(self, monkeypatch):
+        """Router resolution for both DeepSeek shorthands is strict-direct OpenCode."""
+        fake = _FakeCache(
+            {
+                "clis": {
+                    "codex": {"installed": True, "issues": []},
+                    "opencode": {"installed": True, "issues": []},
+                },
+                "providers": {},
+                "user_preferences": {"default_cli": "codex", "model_overrides": {}},
+            }
+        )
+        monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+
+        expected_cmd = [
+            "opencode",
+            "run",
+            "--format",
+            "json",
+            "-m",
+            "synthetic/hf:deepseek-ai/DeepSeek-V4.1-Flash",
+            "--pure",
+            "--agent",
+            "build",
+        ]
+        for shorthand in ("syn-ds41-flash", "deepseek"):
+            cli, model_id, cmd = router.resolve_model(shorthand)
+            assert cli == "opencode", shorthand
+            assert model_id == "synthetic:hf:deepseek-ai/DeepSeek-V4.1-Flash", shorthand
+            assert cmd == expected_cmd, shorthand
+
+            # An explicit Codex preference must not override strict routing.
+            cli_pref, model_id_pref, cmd_pref = router.resolve_model(
+                shorthand, preferred_cli="codex"
+            )
+            assert cli_pref == "opencode", shorthand
+            assert model_id_pref == model_id, shorthand
+            assert cmd_pref == expected_cmd, shorthand
+
     def test_fable51_pin_and_fable_alias_are_distinct(self):
         """fable51 pins claude-fable-5-1 via Claude; the floating fable alias is untouched."""
         reg_by_name = {m["name"]: m for m in _load_registry()}
