@@ -4,7 +4,11 @@ All notable changes to daplug are documented here.
 
 ## [Unreleased]
 
+## [0.40.10] - 2026-09-23
+
 ### Added
+- **GPT-6 model shorthands** — `astra` selects GPT-6 Astra where available; `sol` and `luna` now select GPT-6 Sol and GPT-6 Luna through Codex. The registry, CLI router, generated model lists, and routing tests agree. `terra` and the `codex` default remain on GPT-5.6 Terra.
+- **Current Claude Opus alias** — `cc-opus` continues to use Claude Code's floating `opus` alias, currently Opus 5.5; model descriptions now reflect the version without pinning future releases.
 - **`syn-ds41-flash` / `deepseek` model shorthands** — DeepSeek V4.1 Flash via Synthetic routes to `synthetic/hf:deepseek-ai/DeepSeek-V4.1-Flash` through OpenCode (`opencode run --format json -m synthetic/hf:deepseek-ai/DeepSeek-V4.1-Flash --pure --agent build`) and requires `SYNTHETIC_API_KEY` (https://api.synthetic.new/openai/v1). Context window 512k, max output 64k; input accepts text + image (vision) with text output; supports tools, JSON mode, and structured outputs; reasoning efforts accepted by the model are none/low/high/xhigh/max. `syn-ds41-flash` follows the existing `syn-*` Synthetic naming and `deepseek` is the short everyday alias — both spellings resolve to byte-identical commands (registry alias plus dedicated router entry). The generic `synthetic` (GLM-5.2, `syn:large:text`), `syn-flash` (GLM-4.7-Flash, `syn:small:text`), and `syn-glm53-flash` (GLM-5.3-Flash) defaults remain unchanged.
 
 ## [0.40.9] - 2026-09-15

@@ -88,7 +88,7 @@
     },
     {
       "name": "cc-opus",
-      "display": "cc-opus (Claude Opus 5 via Claude Code)",
+      "display": "cc-opus (Claude Opus 5.5 via Claude Code — floating alias)",
       "model_id": "anthropic:opus",
       "default_cli": "claude",
       "supports_codex_reasoning": false,
@@ -122,15 +122,15 @@
       "docs": {
         "family": "Claude",
         "cli_label": "claude",
-        "actual_model": "opus (Claude Opus 5 alias)",
-        "option_description": "Claude Code CLI Opus alias",
+        "actual_model": "opus (currently Claude Opus 5.5; floating Claude Code alias)",
+        "option_description": "Claude Code CLI Opus alias (currently Opus 5.5)",
         "reference_cli": "claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model opus",
         "reference_description": "Claude Code CLI Opus runs",
         "readme_section": "Claude",
-        "readme_model": "opus (Opus 5 alias)",
+        "readme_model": "opus (currently Opus 5.5; floating alias)",
         "best_for": "Claude Code CLI Opus runs",
-        "prompt_description": "Claude Code CLI Opus alias",
-        "menu_note": "Claude Code CLI Opus",
+        "prompt_description": "Claude Code CLI Opus alias (currently Opus 5.5; floats with Claude Code)",
+        "menu_note": "floating Opus alias, currently Opus 5.5",
         "include_in_prompt_guides": true
       }
     },
@@ -408,8 +408,8 @@
     },
     {
       "name": "sol",
-      "display": "sol (gpt-5.6-sol)",
-      "model_id": "openai:gpt-5.6-sol",
+      "display": "sol (gpt-6-sol)",
+      "model_id": "openai:gpt-6-sol",
       "default_cli": "codex",
       "supports_codex_reasoning": true,
       "codex_profile": null,
@@ -423,7 +423,7 @@
         "exec",
         "--full-auto",
         "-m",
-        "gpt-5.6-sol"
+        "gpt-6-sol"
       ],
       "routing": {
         "cli_overrides": [
@@ -437,15 +437,15 @@
       "docs": {
         "family": "OpenAI Codex",
         "cli_label": "codex",
-        "actual_model": "gpt-5.6-sol",
-        "option_description": "OpenAI GPT-5.6 Sol (latest frontier agentic coding model)",
-        "reference_cli": "codex exec --full-auto -m gpt-5.6-sol",
+        "actual_model": "gpt-6-sol",
+        "option_description": "OpenAI GPT-6 Sol (latest frontier agentic coding model)",
+        "reference_cli": "codex exec --full-auto -m gpt-6-sol",
         "reference_description": "Hardest agentic coding tasks",
         "readme_section": "OpenAI",
-        "readme_model": "gpt-5.6-sol",
+        "readme_model": "gpt-6-sol",
         "best_for": "Hardest agentic coding tasks",
-        "prompt_description": "OpenAI GPT-5.6 Sol (latest frontier agentic coding model)",
-        "menu_note": "gpt-5.6-sol frontier tier",
+        "prompt_description": "OpenAI GPT-6 Sol (latest frontier agentic coding model)",
+        "menu_note": "gpt-6-sol frontier tier",
         "include_in_prompt_guides": true
       }
     },
@@ -494,8 +494,8 @@
     },
     {
       "name": "luna",
-      "display": "luna (gpt-5.6-luna)",
-      "model_id": "openai:gpt-5.6-luna",
+      "display": "luna (gpt-6-luna)",
+      "model_id": "openai:gpt-6-luna",
       "default_cli": "codex",
       "supports_codex_reasoning": true,
       "codex_profile": null,
@@ -509,7 +509,7 @@
         "exec",
         "--full-auto",
         "-m",
-        "gpt-5.6-luna"
+        "gpt-6-luna"
       ],
       "routing": {
         "cli_overrides": [
@@ -523,15 +523,57 @@
       "docs": {
         "family": "OpenAI Codex",
         "cli_label": "codex",
-        "actual_model": "gpt-5.6-luna",
-        "option_description": "OpenAI GPT-5.6 Luna (fast and affordable agentic coding)",
-        "reference_cli": "codex exec --full-auto -m gpt-5.6-luna",
+        "actual_model": "gpt-6-luna",
+        "option_description": "OpenAI GPT-6 Luna (fast and affordable agentic coding)",
+        "reference_cli": "codex exec --full-auto -m gpt-6-luna",
         "reference_description": "Fast, cost-efficient coding",
         "readme_section": "OpenAI",
-        "readme_model": "gpt-5.6-luna",
+        "readme_model": "gpt-6-luna",
         "best_for": "Fast, cost-efficient coding",
-        "prompt_description": "OpenAI GPT-5.6 Luna (fast and affordable agentic coding)",
-        "menu_note": "gpt-5.6-luna fast/affordable tier",
+        "prompt_description": "OpenAI GPT-6 Luna (fast and affordable agentic coding)",
+        "menu_note": "gpt-6-luna fast/affordable tier",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
+      "name": "astra",
+      "display": "astra (GPT-6 Astra, direct shorthand)",
+      "model_id": "openai:gpt-6-astra",
+      "default_cli": "codex",
+      "supports_codex_reasoning": true,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "dash",
+      "command": [
+        "codex",
+        "exec",
+        "--full-auto",
+        "-m",
+        "gpt-6-astra"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "codex"
+        ],
+        "force_direct_opencode": false,
+        "google": false,
+        "synthetic": false
+      },
+      "docs": {
+        "family": "OpenAI Codex",
+        "cli_label": "codex",
+        "actual_model": "gpt-6-astra",
+        "option_description": "OpenAI GPT-6 Astra (account-gated, direct shorthand)",
+        "reference_cli": "codex exec --full-auto -m gpt-6-astra",
+        "reference_description": "GPT-6 Astra coding",
+        "readme_section": "OpenAI",
+        "readme_model": "gpt-6-astra",
+        "best_for": "GPT-6 Astra coding",
+        "prompt_description": "OpenAI GPT-6 Astra (account-gated, direct shorthand)",
+        "menu_note": "gpt-6-astra explicit shorthand",
         "include_in_prompt_guides": true
       }
     },

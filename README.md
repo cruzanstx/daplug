@@ -667,7 +667,7 @@ These tables are generated from `scripts/models.json`.
 |-----------|-------|----------|
 | `claude` | claude | Complex reasoning in current Claude Code context |
 | `cc-sonnet` | sonnet (Sonnet 5 alias) | Claude Code CLI Sonnet runs |
-| `cc-opus` | opus (Opus 5 alias) | Claude Code CLI Opus runs |
+| `cc-opus` | opus (currently Opus 5.5; floating alias) | Claude Code CLI Opus runs |
 | `fable` | fable (currently Fable 5.1; floating alias) | Hardest reasoning tasks via Claude Code CLI; currently Fable 5.1 with 1M context and 128K max output |
 | `fable51` | claude-fable-5-1 (Fable 5.1 pin) | Hardest reasoning tasks pinned to Fable 5.1 (1M context, 128K max output, adaptive thinking, efforts low/medium/high/xhigh/max, $10/MTok in, $50/MTok out) |
 
@@ -679,9 +679,10 @@ These tables are generated from `scripts/models.json`.
 | `codex-spark` | gpt-5.3-codex-spark | Lowest-latency quick edits |
 | `codex-high` | gpt-5.6-terra | Complex coding |
 | `codex-xhigh` | gpt-5.6-terra | Large refactors |
-| `sol` | gpt-5.6-sol | Hardest agentic coding tasks |
+| `sol` | gpt-6-sol | Hardest agentic coding tasks |
 | `terra` | gpt-5.6-terra | Balanced everyday coding (codex default) |
-| `luna` | gpt-5.6-luna | Fast, cost-efficient coding |
+| `luna` | gpt-6-luna | Fast, cost-efficient coding |
+| `astra` | gpt-6-astra | GPT-6 Astra coding |
 | `gpt54` | gpt-5.4 | Explicit GPT-5.4 shorthand |
 | `gpt54-high` | gpt-5.4 | Deep reasoning with GPT-5.4 |
 | `gpt54-xhigh` | gpt-5.4 | Maximum reasoning with GPT-5.4 |

@@ -186,6 +186,23 @@ def test_codex_variant_mapping_high_and_xhigh(no_router, tmp_path):
     assert _reasoning_value(high_info["command"]) == "high"
     assert _reasoning_value(xhigh_info["command"]) == "xhigh"
 
+@pytest.mark.parametrize("alias,slug", [
+    ("sol", "gpt-6-sol"),
+    ("luna", "gpt-6-luna"),
+    ("astra", "gpt-6-astra"),
+])
+def test_gpt6_registry_routes(no_router, tmp_path, alias, slug):
+    info = executor.get_cli_info(alias, repo_root=tmp_path)
+    assert info["selected_cli"] == "codex"
+    assert info["model_id"] == f"openai:{slug}"
+    assert info["command"][-2:] == ["-m", slug]
+
+
+def test_opus_alias_uses_claude_codes_current_model(no_router, tmp_path):
+    info = executor.get_cli_info("cc-opus", repo_root=tmp_path)
+    assert info["model_id"] == "anthropic:opus"
+    assert info["command"][-2:] == ["--model", "opus"]
+
 
 def test_opencode_command_includes_variant_when_requested(no_router, tmp_path):
     info = executor.get_cli_info("codex", repo_root=tmp_path, cli_override="opencode", variant="high")
@@ -518,6 +535,7 @@ EXPECTED_MODEL_KEYS = [
     "sol",
     "terra",
     "luna",
+    "astra",
     "gpt54",
     "gpt54-high",
     "gpt54-xhigh",

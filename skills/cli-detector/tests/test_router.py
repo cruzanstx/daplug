@@ -728,9 +728,10 @@ class TestOpenAIModels:
             ("codex", "gpt-5.6-terra", None),
             ("codex-high", "gpt-5.6-terra", "high"),
             ("codex-xhigh", "gpt-5.6-terra", "xhigh"),
-            ("sol", "gpt-5.6-sol", None),
+            ("sol", "gpt-6-sol", None),
             ("terra", "gpt-5.6-terra", None),
-            ("luna", "gpt-5.6-luna", None),
+            ("luna", "gpt-6-luna", None),
+            ("astra", "gpt-6-astra", None),
             ("gpt54", "gpt-5.4", None),
             ("gpt54-high", "gpt-5.4", "high"),
             ("gpt54-xhigh", "gpt-5.4", "xhigh"),
@@ -751,6 +752,17 @@ class TestOpenAIModels:
         assert "--full-auto" in cmd
         if expected_reasoning:
             assert any(expected_reasoning in str(c) for c in cmd)
+
+    @pytest.mark.parametrize("alias,model_id", [
+        ("gpt-6-sol", "openai:gpt-6-sol"),
+        ("gpt-6-luna", "openai:gpt-6-luna"),
+        ("gpt-6-astra", "openai:gpt-6-astra"),
+    ])
+    def test_gpt6_slugs_route_to_matching_model(self, full_cache, alias, model_id):
+        cli, resolved, command = router.resolve_model(alias)
+        assert cli == "codex"
+        assert resolved == model_id
+        assert command[-2:] == ["-m", model_id.removeprefix("openai:")]
 
     @pytest.mark.parametrize(
         "alias,expected_shorthand",

@@ -159,16 +159,17 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 |-----------|-----|--------------|
 | `claude` | subagent | Claude Code Task subagent (configured in Claude Code) |
 | `cc-sonnet` | claude | sonnet (Claude Sonnet 5 alias) |
-| `cc-opus` | claude | opus (Claude Opus 5 alias) |
+| `cc-opus` | claude | opus (currently Claude Opus 5.5; floating Claude Code alias) |
 | `fable` | claude | fable (currently Claude Fable 5.1; floating Claude Code alias) |
 | `fable51` | claude | claude-fable-5-1 (Fable 5.1 explicit pin, 1M context, 128K max output) |
 | `codex` | codex | gpt-5.6-terra |
 | `codex-spark` | codex | gpt-5.3-codex-spark (low latency) |
 | `codex-high` | codex | gpt-5.6-terra (high reasoning) |
 | `codex-xhigh` | codex | gpt-5.6-terra (xhigh reasoning) |
-| `sol` | codex | gpt-5.6-sol |
+| `sol` | codex | gpt-6-sol |
 | `terra` | codex | gpt-5.6-terra |
-| `luna` | codex | gpt-5.6-luna |
+| `luna` | codex | gpt-6-luna |
+| `astra` | codex | gpt-6-astra |
 | `gpt54` | codex | gpt-5.4 |
 | `gpt54-high` | codex | gpt-5.4 (high reasoning) |
 | `gpt54-xhigh` | codex | gpt-5.4 (xhigh reasoning) |

@@ -493,9 +493,10 @@ class TestNonAgyCommandsUnchanged:
     @pytest.mark.parametrize("shorthand,expected", [
         ("codex", ["codex", "exec", "--full-auto", "-m", "gpt-5.6-terra"]),
         ("codex-spark", ["codex", "exec", "--full-auto", "-m", "gpt-5.3-codex-spark"]),
-        ("sol", ["codex", "exec", "--full-auto", "-m", "gpt-5.6-sol"]),
+        ("sol", ["codex", "exec", "--full-auto", "-m", "gpt-6-sol"]),
         ("terra", ["codex", "exec", "--full-auto", "-m", "gpt-5.6-terra"]),
-        ("luna", ["codex", "exec", "--full-auto", "-m", "gpt-5.6-luna"]),
+        ("luna", ["codex", "exec", "--full-auto", "-m", "gpt-6-luna"]),
+        ("astra", ["codex", "exec", "--full-auto", "-m", "gpt-6-astra"]),
         ("zai", ["codex", "exec", "--full-auto", "--profile", "zai"]),
     ])
     def test_codex_argv_unchanged(self, tmp_path, shorthand, expected):

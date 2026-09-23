@@ -70,7 +70,7 @@ python3 "$EXECUTOR" [prompts...] [options]
 
 **Options:**
 <!-- BEGIN GENERATED: skill-model-options -->
-- `--model, -m`: claude, cc-sonnet, cc-opus, fable, fable51, codex, codex-spark, codex-high, codex-xhigh, sol, terra, luna, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, gemini37, gemini37-high, gemini37-medium, gemini37-low, agy, zai, glm5, glm52, glm53, flash, glm53-flash, kimi, synthetic, syn-flash, syn-kimi, syn-kimi3, syn-qwen, syn-minimax, syn-nemotron, syn-glm53-flash, syn-ds41-flash, deepseek, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b
+- `--model, -m`: claude, cc-sonnet, cc-opus, fable, fable51, codex, codex-spark, codex-high, codex-xhigh, sol, terra, luna, astra, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, gemini37, gemini37-high, gemini37-medium, gemini37-low, agy, zai, glm5, glm52, glm53, flash, glm53-flash, kimi, synthetic, syn-flash, syn-kimi, syn-kimi3, syn-qwen, syn-minimax, syn-nemotron, syn-glm53-flash, syn-ds41-flash, deepseek, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b
   - `glm53`: GLM-5.3 via Z.AI / OpenCode (1M context)
   - `synthetic`: GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, requires `SYNTHETIC_API_KEY`)
 <!-- END GENERATED: skill-model-options -->
@@ -270,9 +270,10 @@ python3 "$EXECUTOR" --loop-status
 | codex-spark | codex exec --full-auto -m gpt-5.3-codex-spark | Lowest-latency quick edits |
 | codex-high | codex exec --full-auto -m gpt-5.6-terra -c model_reasoning_effort="high" | Complex coding |
 | codex-xhigh | codex exec --full-auto -m gpt-5.6-terra -c model_reasoning_effort="xhigh" | Large refactors |
-| sol | codex exec --full-auto -m gpt-5.6-sol | Hardest agentic coding tasks |
+| sol | codex exec --full-auto -m gpt-6-sol | Hardest agentic coding tasks |
 | terra | codex exec --full-auto -m gpt-5.6-terra | Balanced everyday coding (codex default) |
-| luna | codex exec --full-auto -m gpt-5.6-luna | Fast, cost-efficient coding |
+| luna | codex exec --full-auto -m gpt-6-luna | Fast, cost-efficient coding |
+| astra | codex exec --full-auto -m gpt-6-astra | GPT-6 Astra coding |
 | gpt54 | codex exec --full-auto -m gpt-5.4 | Explicit GPT-5.4 shorthand |
 | gpt54-high | codex exec --full-auto -m gpt-5.4 -c model_reasoning_effort="high" | Deep reasoning with GPT-5.4 |
 | gpt54-xhigh | codex exec --full-auto -m gpt-5.4 -c model_reasoning_effort="xhigh" | Maximum reasoning with GPT-5.4 |
