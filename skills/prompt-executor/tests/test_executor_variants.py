@@ -198,7 +198,8 @@ def test_gpt6_registry_routes(no_router, tmp_path, alias, slug):
     assert info["command"][-2:] == ["-m", slug]
 
 
-def test_opus_alias_uses_claude_codes_current_model(no_router, tmp_path):
+def test_opus_alias_uses_claude_codes_current_model(no_router, tmp_path, monkeypatch):
+    monkeypatch.setattr(models, "_require_claude_cli", lambda: None)
     info = executor.get_cli_info("cc-opus", repo_root=tmp_path)
     assert info["model_id"] == "anthropic:opus"
     assert info["command"][-2:] == ["--model", "opus"]

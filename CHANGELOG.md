@@ -4,6 +4,11 @@ All notable changes to daplug are documented here.
 
 ## [Unreleased]
 
+## [0.40.11] - 2026-09-23
+
+### Fixed
+- Make the `cc-opus` routing test independent of whether Claude Code is installed on the CI runner. Runtime routing is unchanged from 0.40.10.
+
 ## [0.40.10] - 2026-09-23
 
 ### Added
