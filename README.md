@@ -731,11 +731,11 @@ Synthetic shorthands route through OpenCode's `synthetic` provider and require `
 
 | Shorthand | Model | Best For |
 |-----------|-------|----------|
-| `synthetic` | `syn:large:text` | GLM-5.2 default, 512k context |
-| `syn-flash` | `syn:small:text` | Fast GLM-4.7-Flash fallback |
-| `syn-kimi` | `syn:large:vision` | Kimi-K2.7-Code vision tasks |
+| `synthetic` | `syn:large:text` | Synthetic floating alias — currently DeepSeek V4.1 Flash |
+| `syn-flash` | `syn:small:text` | Synthetic floating alias — currently GLM-4.7-Flash |
+| `syn-kimi` | `syn:large:vision` | Synthetic floating alias — currently Kimi-K3 (prefer syn-kimi3) |
 | `syn-kimi3` | `hf:moonshotai/Kimi-K3` | Kimi-K3 flagship, vision, 512k context |
-| `syn-qwen` | `syn:small:vision` | Qwen3.6-27B vision tasks |
+| `syn-qwen` | `syn:small:vision` | Synthetic floating alias — currently Qwen3.8-27B |
 | `syn-minimax` | `hf:MiniMaxAI/MiniMax-M3` | MiniMax-M3 vision, cheap all-rounder |
 | `syn-nemotron` | `hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4` | Nemotron-3-Super-120B, cheapest large text |
 | `syn-glm53-flash` | `hf:zai-org/GLM-5.3-Flash` | Beta vision GLM-5.3-Flash, low-cost ($0.15/MTok in, $0.04/MTok cached, $0.50/MTok out) |

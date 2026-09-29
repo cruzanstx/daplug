@@ -2,6 +2,11 @@
 
 All notable changes to daplug are documented here.
 
+## [0.40.13] - 2026-09-29
+
+### Fixed
+- **Corrected stale `syn:*` model labels and marked Synthetic aliases as floating** (#26) — Synthetic re-points its `syn:*` aliases at newer upstream models without renaming them, so the registry had drifted: `synthetic` (`syn:large:text`) was labeled GLM-5.2 but serves DeepSeek V4.1 Flash, `syn-kimi` (`syn:large:vision`) was labeled Kimi-K2.7-Code but serves Kimi-K3 (now duplicating `syn-kimi3`), and `syn-qwen` (`syn:small:vision`) was labeled Qwen3.6-27B but serves Qwen3.8-27B. All four `syn:*` entries (including the still-correct `syn-flash`) now declare themselves as floating aliases with the currently-verified binding, direct users to the `hf:...`-pinned shorthands (`syn-ds41-flash`, `syn-kimi3`, `syn-glm53-flash`) where model identity matters, and the Synthetic note documents the probe (chat-completion response `model` field) as the re-verification path. Verified against the live API on 2026-09-29.
+
 ## [0.40.12] - 2026-09-29
 
 ### Changed

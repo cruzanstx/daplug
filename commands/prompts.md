@@ -96,11 +96,11 @@ Use AskUserQuestion tool with options:
 - `flash` - Z.AI GLM-5.3-Flash via OpenCode (multimodal, 1M context, 3x quota)
 - `glm53-flash` - Z.AI GLM-5.3-Flash via OpenCode (versioned alias of flash; multimodal, 1M context, 3x quota)
 - `kimi` - Kimi K2.5 via OpenCode
-- `synthetic` - GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, 512k context)
-- `syn-flash` - GLM-4.7-Flash via Synthetic / OpenCode
-- `syn-kimi` - Kimi-K2.7-Code via Synthetic / OpenCode (vision)
+- `synthetic` - DeepSeek V4.1 Flash (currently) via Synthetic floating alias `syn:large:text` / OpenCode
+- `syn-flash` - GLM-4.7-Flash (currently) via Synthetic floating alias `syn:small:text` / OpenCode
+- `syn-kimi` - Kimi-K3 (currently) via Synthetic floating alias `syn:large:vision` / OpenCode — prefer `syn-kimi3` (hf: pin) for stable identity
 - `syn-kimi3` - Kimi-K3 via Synthetic / OpenCode (vision, 512k context)
-- `syn-qwen` - Qwen3.6-27B via Synthetic / OpenCode (vision)
+- `syn-qwen` - Qwen3.8-27B (currently) via Synthetic floating alias `syn:small:vision` / OpenCode
 - `syn-minimax` - MiniMax-M3 via Synthetic / OpenCode (vision, 256k context)
 - `syn-nemotron` - Nemotron-3-Super-120B via Synthetic / OpenCode (text, 256k context)
 - `syn-glm53-flash` - GLM-5.3-Flash via Synthetic / OpenCode (beta, vision, low-cost)
