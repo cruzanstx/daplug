@@ -2,7 +2,10 @@
 
 All notable changes to daplug are documented here.
 
-## [Unreleased]
+## [0.40.12] - 2026-09-29
+
+### Changed
+- **`cc-sonnet` now selects Claude Sonnet 5.5** — the shorthand pins the published model ID `claude-sonnet-5-5` instead of the floating `sonnet` alias, because the installed Claude Code catalog (`claude models`, v2.1.283) still resolves `sonnet` to Claude Sonnet 5. Registry, router, generated model descriptions, and routing tests all reflect the new target; the bare `claude` shorthand and `cc-opus`/`fable` floating aliases are unchanged. Anthropic reference: https://platform.claude.com/docs/en/models/sonnet-5-5/overview.
 
 ## [0.40.11] - 2026-09-23
 

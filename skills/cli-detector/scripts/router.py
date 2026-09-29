@@ -289,8 +289,8 @@ _SHORTHAND: dict[str, _ModelRequest] = {
     "cc-sonnet": _ModelRequest(
         "cc-sonnet",
         family="anthropic",
-        # Claude Code accepts aliases like "sonnet" or full model names (see `claude --help`).
-        model_id="anthropic:sonnet",
+        # Pin the published ID so this shorthand does not depend on the CLI's floating alias.
+        model_id="anthropic:claude-sonnet-5-5",
         force_cli="claude",
         strict_cli=True,
     ),

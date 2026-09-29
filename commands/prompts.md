@@ -53,7 +53,7 @@ echo "${PREFERRED_AGENT:-not_set}"
 Use AskUserQuestion tool with options:
 <!-- BEGIN GENERATED: preferred-agent-options -->
 - `claude` - Claude Code Task subagent (default, current context)
-- `cc-sonnet` - Claude Code CLI Sonnet alias
+- `cc-sonnet` - Claude Code CLI Sonnet 5.5
 - `cc-opus` - Claude Code CLI Opus alias (currently Opus 5.5)
 - `fable` - Claude Code CLI Fable alias (currently Fable 5.1, 1M context)
 - `fable51` - Claude Code CLI Fable 5.1 explicit pin (claude-fable-5-1, adaptive thinking)

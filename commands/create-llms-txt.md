@@ -462,7 +462,7 @@ All available models for /daplug:run-prompt --model:
 
 **Claude Family:** (check: `claude.five_hour.used`, `claude.seven_day.used`)
 - `claude` - Claude Code Task subagent (default, current context)
-- `cc-sonnet` - Claude Code CLI Sonnet alias
+- `cc-sonnet` - Claude Code CLI Sonnet 5.5
 - `cc-opus` - Claude Code CLI Opus alias (currently Opus 5.5; floats with Claude Code)
 - `fable` - Claude Code CLI Fable alias (currently Fable 5.1; floats with Claude Code)
 - `fable51` - Claude Code CLI Fable 5.1 explicit pin (claude-fable-5-1, 1M context)
@@ -619,7 +619,7 @@ If user chooses #1:
 <!-- BEGIN GENERATED: create-llms-selection-menu -->
   **Claude:** {usage status}
   1. claude - sub-agent in current context
-  2. cc-sonnet - Claude Code CLI Sonnet
+  2. cc-sonnet - Claude Code CLI Sonnet 5.5
   3. cc-opus - floating Opus alias, currently Opus 5.5
   4. fable - floating Fable alias, currently Fable 5.1
   5. fable51 - Fable 5.1 explicit pin, 1M context

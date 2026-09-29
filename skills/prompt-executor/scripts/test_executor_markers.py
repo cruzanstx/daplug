@@ -159,7 +159,7 @@ class TestGetCliInfo(unittest.TestCase):
 
         self.assertEqual(sonnet["command"][0], "claude")
         self.assertIn("--model", sonnet["command"])
-        self.assertEqual(sonnet["command"][sonnet["command"].index("--model") + 1], "sonnet")
+        self.assertEqual(sonnet["command"][sonnet["command"].index("--model") + 1], "claude-sonnet-5-5")
         self.assertEqual(sonnet["stdin_mode"], "stdin")
 
         self.assertEqual(opus["command"][0], "claude")

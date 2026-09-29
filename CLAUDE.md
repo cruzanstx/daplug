@@ -158,7 +158,7 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | Shorthand | CLI | Actual Model |
 |-----------|-----|--------------|
 | `claude` | subagent | Claude Code Task subagent (configured in Claude Code) |
-| `cc-sonnet` | claude | sonnet (Claude Sonnet 5 alias) |
+| `cc-sonnet` | claude | claude-sonnet-5-5 (Claude Sonnet 5.5) |
 | `cc-opus` | claude | opus (currently Claude Opus 5.5; floating Claude Code alias) |
 | `fable` | claude | fable (currently Claude Fable 5.1; floating Claude Code alias) |
 | `fable51` | claude | claude-fable-5-1 (Fable 5.1 explicit pin, 1M context, 128K max output) |

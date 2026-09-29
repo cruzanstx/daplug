@@ -262,7 +262,7 @@ python3 "$EXECUTOR" --loop-status
 | Model | CLI | Description |
 |-------|-----|-------------|
 | claude | (Task subagent) | Complex reasoning in current Claude Code context |
-| cc-sonnet | claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model sonnet | Claude Code CLI Sonnet runs |
+| cc-sonnet | claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model claude-sonnet-5-5 | Claude Code CLI Sonnet 5.5 runs |
 | cc-opus | claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model opus | Claude Code CLI Opus runs |
 | fable | claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model fable | Floating Claude Code Fable alias (currently Fable 5.1) |
 | fable51 | claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model claude-fable-5-1 | Explicit Fable 5.1 pin via Claude Code CLI |

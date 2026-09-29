@@ -666,7 +666,7 @@ These tables are generated from `scripts/models.json`.
 | Shorthand | Model | Best For |
 |-----------|-------|----------|
 | `claude` | claude | Complex reasoning in current Claude Code context |
-| `cc-sonnet` | sonnet (Sonnet 5 alias) | Claude Code CLI Sonnet runs |
+| `cc-sonnet` | claude-sonnet-5-5 (Sonnet 5.5) | Claude Code CLI Sonnet 5.5 runs |
 | `cc-opus` | opus (currently Opus 5.5; floating alias) | Claude Code CLI Opus runs |
 | `fable` | fable (currently Fable 5.1; floating alias) | Hardest reasoning tasks via Claude Code CLI; currently Fable 5.1 with 1M context and 128K max output |
 | `fable51` | claude-fable-5-1 (Fable 5.1 pin) | Hardest reasoning tasks pinned to Fable 5.1 (1M context, 128K max output, adaptive thinking, efforts low/medium/high/xhigh/max, $10/MTok in, $50/MTok out) |

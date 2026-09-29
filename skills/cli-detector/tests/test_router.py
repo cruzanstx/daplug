@@ -961,7 +961,7 @@ class TestClaudeModel:
     @pytest.mark.parametrize(
         "shorthand,expected_model",
         [
-            ("cc-sonnet", "sonnet"),
+            ("cc-sonnet", "claude-sonnet-5-5"),
             ("cc-opus", "opus"),
         ],
     )
