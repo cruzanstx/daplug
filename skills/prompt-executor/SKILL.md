@@ -304,11 +304,11 @@ python3 "$EXECUTOR" --loop-status
 | flash | opencode run --format json -m zai/glm-5.3-flash --pure --agent build | Fast multimodal GLM-5.3-Flash via OpenCode (3x quota, reasoning effort max recommended) |
 | glm53-flash | opencode run --format json -m zai/glm-5.3-flash --pure --agent build | Explicit GLM-5.3-Flash pin via OpenCode (3x quota, reasoning effort max recommended) |
 | kimi | opencode run --format json -m opencode/kimi-k2.5 --pure --agent build | Kimi K2.5 via OpenCode |
-| synthetic | opencode run --format json -m synthetic/syn:large:text --pure --agent build | GLM-5.2 default, 512k context |
-| syn-flash | opencode run --format json -m synthetic/syn:small:text --pure --agent build | Fast GLM-4.7-Flash fallback |
-| syn-kimi | opencode run --format json -m synthetic/syn:large:vision --pure --agent build | Kimi-K2.7-Code vision tasks |
+| synthetic | opencode run --format json -m synthetic/syn:large:text --pure --agent build | Synthetic floating alias — currently DeepSeek V4.1 Flash |
+| syn-flash | opencode run --format json -m synthetic/syn:small:text --pure --agent build | Synthetic floating alias — currently GLM-4.7-Flash |
+| syn-kimi | opencode run --format json -m synthetic/syn:large:vision --pure --agent build | Synthetic floating alias — currently Kimi-K3 (prefer syn-kimi3) |
 | syn-kimi3 | opencode run --format json -m synthetic/hf:moonshotai/Kimi-K3 --pure --agent build | Kimi-K3 flagship, vision, 512k context |
-| syn-qwen | opencode run --format json -m synthetic/syn:small:vision --pure --agent build | Qwen3.6-27B vision tasks |
+| syn-qwen | opencode run --format json -m synthetic/syn:small:vision --pure --agent build | Synthetic floating alias — currently Qwen3.8-27B |
 | syn-minimax | opencode run --format json -m synthetic/hf:MiniMaxAI/MiniMax-M3 --pure --agent build | MiniMax-M3 vision, cheap all-rounder |
 | syn-nemotron | opencode run --format json -m synthetic/hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 --pure --agent build | Nemotron-3-Super-120B, cheapest large text |
 | syn-glm53-flash | opencode run --format json -m synthetic/hf:zai-org/GLM-5.3-Flash --pure --agent build | Beta vision GLM-5.3-Flash, low-cost ($0.15/MTok in, $0.04/MTok cached, $0.50/MTok out) |

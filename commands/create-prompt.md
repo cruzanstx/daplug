@@ -514,11 +514,11 @@ All available models for /daplug:run-prompt --model:
 - `opencode` - OpenCode runner with Z.AI GLM-4.7
 
 **Synthetic Models:** (check request quota from `/v2/quotas`; requires `SYNTHETIC_API_KEY`)
-- `synthetic` - GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, 512k context)
-- `syn-flash` - GLM-4.7-Flash via Synthetic / OpenCode
-- `syn-kimi` - Kimi-K2.7-Code via Synthetic / OpenCode (vision)
+- `synthetic` - DeepSeek V4.1 Flash (currently) via Synthetic floating alias `syn:large:text` / OpenCode
+- `syn-flash` - GLM-4.7-Flash (currently) via Synthetic floating alias `syn:small:text` / OpenCode
+- `syn-kimi` - Kimi-K3 (currently) via Synthetic floating alias `syn:large:vision` / OpenCode — prefer `syn-kimi3` (hf: pin)
 - `syn-kimi3` - Kimi-K3 via Synthetic / OpenCode (vision, 512k context)
-- `syn-qwen` - Qwen3.6-27B via Synthetic / OpenCode (vision)
+- `syn-qwen` - Qwen3.8-27B (currently) via Synthetic floating alias `syn:small:vision` / OpenCode
 - `syn-minimax` - MiniMax-M3 via Synthetic / OpenCode (vision, 256k context)
 - `syn-nemotron` - Nemotron-3-Super-120B via Synthetic / OpenCode (text, 256k context)
 - `syn-glm53-flash` - GLM-5.3-Flash via Synthetic / OpenCode (beta, vision, low-cost)
@@ -686,11 +686,11 @@ If user chooses "Run prompt now", run `npx cclimits --json 2>/dev/null`, summari
   44. opencode - {X}% used - OpenCode GLM-4.7
 
   **Synthetic:** {usage status}
-  45. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
-  46. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
-  47. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.7-Code vision
+  45. synthetic - {requests}/{limit} requests - Synthetic floating (currently DS V4.1 Flash)
+  46. syn-flash - {requests}/{limit} requests - Synthetic floating (currently GLM-4.7-Flash)
+  47. syn-kimi - {requests}/{limit} requests - Synthetic floating (currently Kimi-K3) vision
   48. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
-  49. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
+  49. syn-qwen - {requests}/{limit} requests - Synthetic floating (currently Qwen3.8-27B) vision
   50. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
   51. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
   52. syn-glm53-flash - {requests}/{limit} requests - Synthetic GLM-5.3-Flash beta vision
@@ -804,11 +804,11 @@ If running now, run `npx cclimits --json 2>/dev/null`, summarize current quota s
   44. opencode - {X}% used - OpenCode GLM-4.7
 
   **Synthetic:** {usage status}
-  45. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
-  46. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
-  47. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.7-Code vision
+  45. synthetic - {requests}/{limit} requests - Synthetic floating (currently DS V4.1 Flash)
+  46. syn-flash - {requests}/{limit} requests - Synthetic floating (currently GLM-4.7-Flash)
+  47. syn-kimi - {requests}/{limit} requests - Synthetic floating (currently Kimi-K3) vision
   48. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
-  49. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
+  49. syn-qwen - {requests}/{limit} requests - Synthetic floating (currently Qwen3.8-27B) vision
   50. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
   51. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
   52. syn-glm53-flash - {requests}/{limit} requests - Synthetic GLM-5.3-Flash beta vision
@@ -923,11 +923,11 @@ If running now, run `npx cclimits --json 2>/dev/null`, summarize current quota s
   44. opencode - {X}% used - OpenCode GLM-4.7
 
   **Synthetic:** {usage status}
-  45. synthetic - {requests}/{limit} requests - Synthetic GLM-5.2
-  46. syn-flash - {requests}/{limit} requests - Synthetic GLM-4.7-Flash
-  47. syn-kimi - {requests}/{limit} requests - Synthetic Kimi-K2.7-Code vision
+  45. synthetic - {requests}/{limit} requests - Synthetic floating (currently DS V4.1 Flash)
+  46. syn-flash - {requests}/{limit} requests - Synthetic floating (currently GLM-4.7-Flash)
+  47. syn-kimi - {requests}/{limit} requests - Synthetic floating (currently Kimi-K3) vision
   48. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
-  49. syn-qwen - {requests}/{limit} requests - Synthetic Qwen3.6-27B vision
+  49. syn-qwen - {requests}/{limit} requests - Synthetic floating (currently Qwen3.8-27B) vision
   50. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
   51. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
   52. syn-glm53-flash - {requests}/{limit} requests - Synthetic GLM-5.3-Flash beta vision
