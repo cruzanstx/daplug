@@ -738,6 +738,7 @@ Synthetic shorthands route through OpenCode's `synthetic` provider and require `
 | `syn-qwen` | `syn:small:vision` | Synthetic floating alias — currently Qwen3.8-27B |
 | `syn-minimax` | `hf:MiniMaxAI/MiniMax-M3` | MiniMax-M3 vision, cheap all-rounder |
 | `syn-nemotron` | `hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4` | Nemotron-3-Super-120B, cheapest large text |
+| `syn-glm53` | `hf:zai-org/GLM-5.3` | Beta text-only GLM-5.3, 512k context, 64k max output ($1.40/MTok in, $0.26/MTok cached, $4.40/MTok out) |
 | `syn-glm53-flash` | `hf:zai-org/GLM-5.3-Flash` | Beta vision GLM-5.3-Flash, low-cost ($0.15/MTok in, $0.04/MTok cached, $0.50/MTok out) |
 | `syn-ds41-flash` | `hf:deepseek-ai/DeepSeek-V4.1-Flash` | DeepSeek V4.1 Flash, vision, 512k context, tools/structured outputs, reasoning efforts none/low/high/xhigh/max |
 | `deepseek` | `hf:deepseek-ai/DeepSeek-V4.1-Flash` | Everyday DeepSeek V4.1 Flash alias (vision, 512k context, identical route to syn-ds41-flash) |

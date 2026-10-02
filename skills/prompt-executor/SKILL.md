@@ -70,7 +70,7 @@ python3 "$EXECUTOR" [prompts...] [options]
 
 **Options:**
 <!-- BEGIN GENERATED: skill-model-options -->
-- `--model, -m`: claude, cc-sonnet, cc-opus, fable, fable51, codex, codex-spark, codex-high, codex-xhigh, sol, terra, luna, astra, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, gemini37, gemini37-high, gemini37-medium, gemini37-low, agy, zai, glm5, glm52, glm53, flash, glm53-flash, kimi, synthetic, syn-flash, syn-kimi, syn-kimi3, syn-qwen, syn-minimax, syn-nemotron, syn-glm53-flash, syn-ds41-flash, deepseek, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b
+- `--model, -m`: claude, cc-sonnet, cc-opus, fable, fable51, codex, codex-spark, codex-high, codex-xhigh, sol, terra, luna, astra, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, gemini37, gemini37-high, gemini37-medium, gemini37-low, agy, zai, glm5, glm52, glm53, flash, glm53-flash, kimi, synthetic, syn-flash, syn-kimi, syn-kimi3, syn-qwen, syn-minimax, syn-nemotron, syn-glm53, syn-glm53-flash, syn-ds41-flash, deepseek, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b
   - `glm53`: GLM-5.3 via Z.AI / OpenCode (1M context)
   - `synthetic`: GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, requires `SYNTHETIC_API_KEY`)
 <!-- END GENERATED: skill-model-options -->
@@ -311,6 +311,7 @@ python3 "$EXECUTOR" --loop-status
 | syn-qwen | opencode run --format json -m synthetic/syn:small:vision --pure --agent build | Synthetic floating alias — currently Qwen3.8-27B |
 | syn-minimax | opencode run --format json -m synthetic/hf:MiniMaxAI/MiniMax-M3 --pure --agent build | MiniMax-M3 vision, cheap all-rounder |
 | syn-nemotron | opencode run --format json -m synthetic/hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 --pure --agent build | Nemotron-3-Super-120B, cheapest large text |
+| syn-glm53 | opencode run --format json -m synthetic/hf:zai-org/GLM-5.3 --pure --agent build | Beta text-only GLM-5.3, 512k context, 64k max output; provider-default reasoning only (no --variant overrides) ($1.40/MTok in, $0.26/MTok cached, $4.40/MTok out) |
 | syn-glm53-flash | opencode run --format json -m synthetic/hf:zai-org/GLM-5.3-Flash --pure --agent build | Beta vision GLM-5.3-Flash, low-cost ($0.15/MTok in, $0.04/MTok cached, $0.50/MTok out) |
 | syn-ds41-flash | opencode run --format json -m synthetic/hf:deepseek-ai/DeepSeek-V4.1-Flash --pure --agent build | DeepSeek V4.1 Flash, vision, tools/structured outputs, reasoning efforts none/low/high/xhigh/max |
 | deepseek | opencode run --format json -m synthetic/hf:deepseek-ai/DeepSeek-V4.1-Flash --pure --agent build | Everyday DeepSeek V4.1 Flash alias, identical route to syn-ds41-flash |

@@ -103,6 +103,7 @@ Use AskUserQuestion tool with options:
 - `syn-qwen` - Qwen3.8-27B (currently) via Synthetic floating alias `syn:small:vision` / OpenCode
 - `syn-minimax` - MiniMax-M3 via Synthetic / OpenCode (vision, 256k context)
 - `syn-nemotron` - Nemotron-3-Super-120B via Synthetic / OpenCode (text, 256k context)
+- `syn-glm53` - GLM-5.3 via Synthetic / OpenCode (beta, text-only, 512k context)
 - `syn-glm53-flash` - GLM-5.3-Flash via Synthetic / OpenCode (beta, vision, low-cost)
 - `syn-ds41-flash` - DeepSeek V4.1 Flash via Synthetic / OpenCode (vision, 512k context, 64k max output)
 - `deepseek` - DeepSeek V4.1 Flash via Synthetic / OpenCode (everyday alias of syn-ds41-flash)

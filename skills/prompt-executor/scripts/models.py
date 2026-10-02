@@ -462,7 +462,7 @@ def _require_synthetic_api_key(model: str, model_id: str) -> None:
     raise RuntimeError(
         "SYNTHETIC_API_KEY is required for Synthetic models. "
         "Create a key at https://synthetic.new/dashboard and export it before using "
-        "--model synthetic, syn-flash, syn-kimi, syn-qwen, or syn-glm53-flash."
+        "--model " + ", ".join(sorted(SYNTHETIC_MODEL_SHORTHANDS)) + "."
     )
 
 
@@ -560,6 +560,12 @@ def get_cli_info(
         if explicit_variant
         else MODEL_ALIAS_DEFAULT_VARIANT.get(model)
     )
+
+    if model == "syn-glm53" and effective_variant:
+        raise ValueError(
+            f"--variant {effective_variant} is not supported with --model syn-glm53 yet. "
+            "Omit --variant to use the provider default; OpenCode reasoning overrides are unverified."
+        )
 
     _validate_cli_override(model, cli_override)
 

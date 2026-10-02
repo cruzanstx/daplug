@@ -207,6 +207,7 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `syn-qwen` | opencode | Synthetic floating alias `syn:small:vision` — currently Qwen3.8-27B (was Qwen3.6-27B when labeled). Synthetic floating alias — binding is server-side and can change without a daplug release. Re-verify with the probe in scripts/models.json docs (chat-completion response `model` field).  |
 | `syn-minimax` | opencode | MiniMax-M3 via Synthetic (`hf:MiniMaxAI/MiniMax-M3`, vision, 256k context) |
 | `syn-nemotron` | opencode | Nemotron-3-Super-120B via Synthetic (`hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4`, 256k context) |
+| `syn-glm53` | opencode | GLM-5.3 via Synthetic (`hf:zai-org/GLM-5.3`, beta, text-only, 512k context, 64k max output) |
 | `syn-glm53-flash` | opencode | GLM-5.3-Flash via Synthetic (`hf:zai-org/GLM-5.3-Flash`, beta, vision, low-cost) |
 | `syn-ds41-flash` | opencode | DeepSeek V4.1 Flash via Synthetic (`hf:deepseek-ai/DeepSeek-V4.1-Flash`, vision, 512k context, 64k max output) |
 | `deepseek` | opencode | DeepSeek V4.1 Flash via Synthetic (everyday alias of syn-ds41-flash; `hf:deepseek-ai/DeepSeek-V4.1-Flash`, vision, 512k context, 64k max output) |

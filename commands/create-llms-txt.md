@@ -520,6 +520,7 @@ All available models for /daplug:run-prompt --model:
 - `syn-qwen` - Qwen3.8-27B (currently) via Synthetic floating alias `syn:small:vision` / OpenCode
 - `syn-minimax` - MiniMax-M3 via Synthetic / OpenCode (vision, 256k context)
 - `syn-nemotron` - Nemotron-3-Super-120B via Synthetic / OpenCode (text, 256k context)
+- `syn-glm53` - GLM-5.3 via Synthetic / OpenCode (beta, text-only, 512k context)
 - `syn-glm53-flash` - GLM-5.3-Flash via Synthetic / OpenCode (beta, vision, low-cost)
 - `syn-ds41-flash` - DeepSeek V4.1 Flash via Synthetic / OpenCode (vision, 512k context, 64k max output)
 - `deepseek` - DeepSeek V4.1 Flash via Synthetic / OpenCode (everyday alias of syn-ds41-flash, vision, 512k context)
@@ -677,20 +678,21 @@ If user chooses #1:
   49. syn-qwen - {requests}/{limit} requests - Synthetic floating (currently Qwen3.8-27B) vision
   50. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
   51. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
-  52. syn-glm53-flash - {requests}/{limit} requests - Synthetic GLM-5.3-Flash beta vision
-  53. syn-ds41-flash - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash vision
-  54. deepseek - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash (alias of syn-ds41-flash)
+  52. syn-glm53 - {requests}/{limit} requests - Synthetic GLM-5.3 beta text-only
+  53. syn-glm53-flash - {requests}/{limit} requests - Synthetic GLM-5.3-Flash beta vision
+  54. syn-ds41-flash - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash vision
+  55. deepseek - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash (alias of syn-ds41-flash)
 
   **Local:** {usage status}
-  55. local - local qwen3.6-35b-a3b, no quota
-  56. qwen - local qwen3.6-35b-a3b, no quota
-  57. devstral - local Devstral, no quota
-  58. glm-local - local GLM-4.7 Flash, no quota
-  59. qwen-small - local qwen3-4b, no quota
-  60. qwen36 - local qwen3.6-35b-a3b, no quota
-  61. qwen36-27b - local qwen3.6-27b, no quota
+  56. local - local qwen3.6-35b-a3b, no quota
+  57. qwen - local qwen3.6-35b-a3b, no quota
+  58. devstral - local Devstral, no quota
+  59. glm-local - local GLM-4.7 Flash, no quota
+  60. qwen-small - local qwen3-4b, no quota
+  61. qwen36 - local qwen3.6-35b-a3b, no quota
+  62. qwen36-27b - local qwen3.6-27b, no quota
 
-  Choose (1-61), or type model with flags (e.g., 'codex --worktree --loop'): _
+  Choose (1-62), or type model with flags (e.g., 'codex --worktree --loop'): _
 <!-- END GENERATED: create-llms-selection-menu -->
 
   **Execute based on selection:**

@@ -71,6 +71,10 @@ SYNTHETIC_MODELS = {
         "synthetic:hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4",
         "synthetic/hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4",
     ),
+    "syn-glm53": (
+        "synthetic:hf:zai-org/GLM-5.3",
+        "synthetic/hf:zai-org/GLM-5.3",
+    ),
     "syn-glm53-flash": (
         "synthetic:hf:zai-org/GLM-5.3-Flash",
         "synthetic/hf:zai-org/GLM-5.3-Flash",
@@ -574,6 +578,7 @@ EXPECTED_MODEL_KEYS = [
     "syn-qwen",
     "syn-minimax",
     "syn-nemotron",
+    "syn-glm53",
     "syn-glm53-flash",
     "syn-ds41-flash",
     "deepseek",
@@ -673,3 +678,58 @@ def test_flash_shorthands_generate_opencode_glm53_flash_command(no_router, tmp_p
         assert info["model_id"] == "zai:glm-5.3-flash", shorthand
         assert info["command"] == expected_command, shorthand
         assert info["stdin_mode"] == "arg", shorthand
+
+
+def test_syn_glm53_generates_synthetic_opencode_command(no_router, tmp_path, monkeypatch):
+    """syn-glm53 runs Synthetic GLM-5.3 via OpenCode, by default and with explicit --cli opencode."""
+    monkeypatch.setenv("SYNTHETIC_API_KEY", "test-key")
+    expected_command = [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "synthetic/hf:zai-org/GLM-5.3",
+        "--pure",
+        "--agent",
+        "build",
+    ]
+    for cli_override in (None, "opencode"):
+        info = executor.get_cli_info("syn-glm53", repo_root=tmp_path, cli_override=cli_override)
+        assert info["selected_cli"] == "opencode", cli_override
+        assert info["model_id"] == "synthetic:hf:zai-org/GLM-5.3", cli_override
+        assert info["command"] == expected_command, cli_override
+        assert info["stdin_mode"] == "arg", cli_override
+
+    # Z.AI glm53 and Synthetic Flash stay on their own routes.
+    assert executor.get_cli_info("glm53", repo_root=tmp_path)["model_id"] == "zai:glm-5.3"
+    flash = executor.get_cli_info("syn-glm53-flash", repo_root=tmp_path)
+    assert flash["model_id"] == "synthetic:hf:zai-org/GLM-5.3-Flash"
+
+
+@pytest.mark.parametrize("variant", ["low", "medium", "high", "xhigh", "max"])
+def test_syn_glm53_rejects_unverified_reasoning_overrides(no_router, tmp_path, monkeypatch, variant):
+    monkeypatch.setenv("SYNTHETIC_API_KEY", "test-key")
+    with pytest.raises(ValueError, match="[Uu]nsupported|not supported"):
+        executor.get_cli_info("syn-glm53", repo_root=tmp_path, variant=variant)
+
+
+def test_syn_glm53_none_omits_override_and_preserves_other_models(no_router, tmp_path, monkeypatch):
+    monkeypatch.setenv("SYNTHETIC_API_KEY", "test-key")
+    info = executor.get_cli_info("syn-glm53", repo_root=tmp_path, variant="none")
+    assert info["variant"] is None
+    assert "--variant" not in info["command"]
+    assert "synthetic/hf:zai-org/GLM-5.3" in info["command"]
+    flash = executor.get_cli_info("syn-glm53-flash", repo_root=tmp_path, variant="medium")
+    assert flash["command"][flash["command"].index("--variant") + 1] == "medium"
+
+
+def test_synthetic_missing_key_guidance_includes_all_registered_shorthands(no_router, tmp_path, monkeypatch):
+    monkeypatch.delenv("SYNTHETIC_API_KEY", raising=False)
+    with pytest.raises(RuntimeError) as error:
+        executor.get_cli_info("syn-glm53", repo_root=tmp_path)
+    message = str(error.value)
+    assert "SYNTHETIC_API_KEY" in message
+    shorthands = message.split("--model ", 1)[1].rstrip(".").split(", ")
+    assert "syn-glm53" in shorthands
+    assert set(shorthands) == executor.SYNTHETIC_MODEL_SHORTHANDS

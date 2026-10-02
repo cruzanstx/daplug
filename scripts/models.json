@@ -2227,6 +2227,52 @@
       }
     },
     {
+      "name": "syn-glm53",
+      "display": "syn-glm53 (GLM-5.3 via Synthetic — beta, text-only, 512k context)",
+      "model_id": "synthetic:hf:zai-org/GLM-5.3",
+      "default_cli": "opencode",
+      "supports_codex_reasoning": false,
+      "codex_profile": null,
+      "claude_model_flag": null,
+      "alias_of": null,
+      "default_variant": null,
+      "env": {},
+      "stdin_mode": "arg",
+      "command": [
+        "opencode",
+        "run",
+        "--format",
+        "json",
+        "-m",
+        "synthetic/hf:zai-org/GLM-5.3",
+        "--pure",
+        "--agent",
+        "build"
+      ],
+      "routing": {
+        "cli_overrides": [
+          "opencode"
+        ],
+        "force_direct_opencode": true,
+        "google": false,
+        "synthetic": true
+      },
+      "docs": {
+        "family": "Synthetic",
+        "cli_label": "opencode",
+        "actual_model": "GLM-5.3 via Synthetic (`hf:zai-org/GLM-5.3`, beta, text-only, 512k context, 64k max output)",
+        "option_description": "GLM-5.3 via Synthetic / OpenCode (beta, text-only, 512k context)",
+        "reference_cli": "opencode run --format json -m synthetic/hf:zai-org/GLM-5.3 --pure --agent build",
+        "reference_description": "Beta text-only GLM-5.3, 512k context, 64k max output; provider-default reasoning only (no --variant overrides) ($1.40/MTok in, $0.26/MTok cached, $4.40/MTok out)",
+        "readme_section": "Synthetic",
+        "readme_model": "`hf:zai-org/GLM-5.3`",
+        "best_for": "Beta text-only GLM-5.3, 512k context, 64k max output ($1.40/MTok in, $0.26/MTok cached, $4.40/MTok out)",
+        "prompt_description": "GLM-5.3 via Synthetic / OpenCode (beta, text-only, 512k context)",
+        "menu_note": "Synthetic GLM-5.3 beta text-only",
+        "include_in_prompt_guides": true
+      }
+    },
+    {
       "name": "syn-glm53-flash",
       "display": "syn-glm53-flash (GLM-5.3-Flash via Synthetic — beta, vision, low-cost)",
       "model_id": "synthetic:hf:zai-org/GLM-5.3-Flash",
