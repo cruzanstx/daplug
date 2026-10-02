@@ -2,6 +2,14 @@
 
 All notable changes to daplug are documented here.
 
+## [0.40.14] - 2026-10-02
+
+### Added
+- **`syn-glm53` model shorthand** — selects the text-only beta GLM-5.3 model through Synthetic/OpenCode (`synthetic/hf:zai-org/GLM-5.3`). Documents the provider's 512k context and 64k maximum output. This selectable-only integration uses provider-default reasoning; explicit reasoning variants are rejected until their OpenCode transport is verified. Existing Z.AI `glm53`, Synthetic Flash, floating aliases, and defaults are unchanged.
+
+### Fixed
+- **Synthetic API-key guidance stays in sync with the registry** — missing-key errors list every registered Synthetic shorthand, including `syn-glm53`.
+
 ## [0.40.13] - 2026-09-29
 
 ### Fixed
