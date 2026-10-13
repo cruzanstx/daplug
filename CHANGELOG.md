@@ -2,6 +2,11 @@
 
 All notable changes to daplug are documented here.
 
+## [0.40.15] - 2026-10-13
+
+### Added
+- **Gemini 4 Argon shorthands via Antigravity** — `argon` and `argon-high` select High reasoning; `argon-medium` and `argon-low` select their exact AGY catalog tiers. Argon routes only through AGY, rejects unverified CLI overrides, and appears in model discovery and generated selection menus. Existing Gemini defaults and all previous registry entries are unchanged. Verified against AGY 1.3.3, including a live Argon Low terminal-tool smoke test.
+
 ## [0.40.14] - 2026-10-02
 
 ### Added
