@@ -221,6 +221,35 @@ def test_gemini_and_agy_fall_back_to_legacy_gemini_cli_when_agy_missing(monkeypa
         assert cmd == ["gemini", "-y", "-m", "gemini-3.8-flash", "-p"], shorthand
 
 
+@pytest.mark.parametrize("shorthand,tier", [
+    ("argon", "High"), ("argon-high", "High"),
+    ("argon-medium", "Medium"), ("argon-low", "Low"),
+])
+def test_argon_routes_only_through_agy(monkeypatch, shorthand, tier):
+    fake = _FakeCache({"clis": {
+        "agy": {"installed": True, "issues": []},
+        "gemini": {"installed": True, "issues": []},
+    }, "providers": {}})
+    monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+    cli, model_id, cmd = router.resolve_model(shorthand, preferred_cli="gemini")
+    assert cli == "agy"
+    assert model_id == f"google:gemini-4-argon-{tier.lower()}"
+    assert cmd == ["agy", "--model", f"Gemini 4 Argon ({tier})",
+                   "--dangerously-skip-permissions", "--print-timeout", "60m",
+                   "--output-format", "stream-json", "--print"]
+
+
+@pytest.mark.parametrize("shorthand", ["argon", "argon-high", "argon-medium", "argon-low"])
+def test_argon_does_not_fall_back_when_agy_missing(monkeypatch, shorthand):
+    fake = _FakeCache({"clis": {
+        "gemini": {"installed": True, "issues": []},
+        "opencode": {"installed": True, "issues": []},
+    }, "providers": {}})
+    monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+    with pytest.raises(router.ModelNotAvailable, match="agy.*not installed"):
+        router.resolve_model(shorthand)
+
+
 def test_gemini37_routes_through_agy_when_healthy(monkeypatch):
     """gemini37/37-high/37-medium/37-low must route to agy with byte-exact display names."""
     fake = _FakeCache(
@@ -1001,6 +1030,7 @@ class TestAllModelsHaveValidCommands:
 
     def test_all_shorthands_resolve(self, full_cache):
         """Every shorthand in _SHORTHAND should resolve without error."""
+        full_cache._data["clis"]["agy"] = {"installed": True, "issues": []}
         for shorthand in router._SHORTHAND.keys():
             cli, model_id, cmd = router.resolve_model(shorthand)
             assert cli is not None, f"{shorthand} returned None cli"

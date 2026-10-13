@@ -710,6 +710,10 @@ These tables are generated from `scripts/models.json`.
 | `gemini37-high` | gemini-3.8-flash | Latest Flash tier, high reasoning |
 | `gemini37-medium` | gemini-3.8-flash | Latest Flash tier, balanced reasoning |
 | `gemini37-low` | gemini-3.8-flash | Latest Flash tier, fast low-reasoning |
+| `argon` | gemini-4-argon-high | Argon high reasoning (AGY only) |
+| `argon-high` | gemini-4-argon-high | Argon high reasoning (AGY only) |
+| `argon-medium` | gemini-4-argon-medium | Argon medium reasoning (AGY only) |
+| `argon-low` | gemini-4-argon-low | Argon low reasoning (AGY only) |
 | `agy` | gemini-3.8-flash | Antigravity default (same as gemini/gemini37) |
 
 #### Z.AI / OpenCode

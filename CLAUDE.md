@@ -192,6 +192,10 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `gemini37-high` | agy/gemini | gemini-3.8-flash (High reasoning) |
 | `gemini37-medium` | agy/gemini | gemini-3.8-flash (Medium reasoning) |
 | `gemini37-low` | agy/gemini | gemini-3.8-flash (Low reasoning) |
+| `argon` | agy | gemini-4-argon-high |
+| `argon-high` | agy | gemini-4-argon-high |
+| `argon-medium` | agy | gemini-4-argon-medium |
+| `argon-low` | agy | gemini-4-argon-low |
 | `agy` | agy/gemini | gemini-3.8-flash (High reasoning) |
 | `zai` | codex | GLM-4.7 via Z.AI (may have issues) |
 | `glm5` | opencode | GLM-5.3 via OpenCode (latest GLM 5.x, 1M context) |

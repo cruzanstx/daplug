@@ -119,6 +119,11 @@ _SHORTHAND: dict[str, _ModelRequest] = {
     "gemini37-low": _ModelRequest("gemini37-low", family="google", model_id="google:gemini-3.8-flash"),
     # Bare `agy` shorthand: identical to `gemini`/`gemini37` (Antigravity default).
     "agy": _ModelRequest("agy", family="google", model_id="google:gemini-3.8-flash"),
+    # Argon is verified only on Antigravity; do not invent legacy CLI fallbacks.
+    "argon": _ModelRequest("argon", family="google", model_id="google:gemini-4-argon-high", force_cli="agy", strict_cli=True),
+    "argon-high": _ModelRequest("argon-high", family="google", model_id="google:gemini-4-argon-high", force_cli="agy", strict_cli=True),
+    "argon-medium": _ModelRequest("argon-medium", family="google", model_id="google:gemini-4-argon-medium", force_cli="agy", strict_cli=True),
+    "argon-low": _ModelRequest("argon-low", family="google", model_id="google:gemini-4-argon-low", force_cli="agy", strict_cli=True),
     # Z.AI
     "zai": _ModelRequest("zai", family="zai", model_id="zai:glm-4.7"),
     "glm5": _ModelRequest("glm5", family="zai", model_id="zai:glm-5.3", codex_profile="glm5"),
@@ -378,6 +383,13 @@ _AGY_MODEL_ARGS: dict[str, str] = {
     "gemini37-high": "Gemini 3.8 Flash (High)",
     "gemini37-medium": "Gemini 3.8 Flash (Medium)",
     "gemini37-low": "Gemini 3.8 Flash (Low)",
+    "google:gemini-4-argon-high": "Gemini 4 Argon (High)",
+    "google:gemini-4-argon-medium": "Gemini 4 Argon (Medium)",
+    "google:gemini-4-argon-low": "Gemini 4 Argon (Low)",
+    "argon": "Gemini 4 Argon (High)",
+    "argon-high": "Gemini 4 Argon (High)",
+    "argon-medium": "Gemini 4 Argon (Medium)",
+    "argon-low": "Gemini 4 Argon (Low)",
 }
 
 

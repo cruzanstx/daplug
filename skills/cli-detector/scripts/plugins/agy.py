@@ -22,6 +22,13 @@ _AGY_MODEL_ARGS = {
     "gemini37-high": "Gemini 3.8 Flash (High)",
     "gemini37-medium": "Gemini 3.8 Flash (Medium)",
     "gemini37-low": "Gemini 3.8 Flash (Low)",
+    "google:gemini-4-argon-high": "Gemini 4 Argon (High)",
+    "google:gemini-4-argon-medium": "Gemini 4 Argon (Medium)",
+    "google:gemini-4-argon-low": "Gemini 4 Argon (Low)",
+    "argon": "Gemini 4 Argon (High)",
+    "argon-high": "Gemini 4 Argon (High)",
+    "argon-medium": "Gemini 4 Argon (Medium)",
+    "argon-low": "Gemini 4 Argon (Low)",
 }
 
 
@@ -52,6 +59,19 @@ class AgyCLI(SimpleCLIPlugin):
 
     def get_available_models(self) -> list[ModelInfo]:
         return [
+            ModelInfo(
+                id=model_id,
+                display_name=_AGY_MODEL_ARGS[model_id],
+                provider="google",
+                capabilities=["code", "chat"],
+            )
+            for model_id in (
+                "google:gemini-4-argon-high",
+                "google:gemini-4-argon-medium",
+                "google:gemini-4-argon-low",
+                "argon", "argon-high", "argon-medium", "argon-low",
+            )
+        ] + [
             ModelInfo(
                 id="google:gemini-3.5-flash",
                 display_name="Gemini 3.5 Flash (Medium)",

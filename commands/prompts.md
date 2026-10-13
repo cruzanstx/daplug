@@ -77,7 +77,7 @@ Use AskUserQuestion tool with options:
 - `gemini` - Gemini 3.8 Flash (High reasoning) via Antigravity (default Gemini shorthand)
 - `gemini-high` - Gemini 2.5 Pro
 - `gemini-xhigh` - Gemini 3 Pro Preview
-- Google shorthands prefer Antigravity CLI (`agy`) when healthy and fall back to legacy `gemini`.
+- Google shorthands prefer Antigravity CLI (`agy`) when healthy and fall back to legacy `gemini`; `argon*` is AGY-only.
 - `gemini25pro` - Gemini 2.5 Pro (explicit shorthand)
 - `gemini25flash` - Gemini 2.5 Flash
 - `gemini25lite` - Gemini 2.5 Flash-Lite
@@ -88,6 +88,10 @@ Use AskUserQuestion tool with options:
 - `gemini37-high` - Gemini 3.8 Flash (High reasoning) via Antigravity
 - `gemini37-medium` - Gemini 3.8 Flash (Medium reasoning) via Antigravity
 - `gemini37-low` - Gemini 3.8 Flash (Low reasoning) via Antigravity
+- `argon` - Gemini 4 Argon (High reasoning) via Antigravity
+- `argon-high` - Gemini 4 Argon (High reasoning) via Antigravity
+- `argon-medium` - Gemini 4 Argon (Medium reasoning) via Antigravity
+- `argon-low` - Gemini 4 Argon (Low reasoning) via Antigravity
 - `agy` - Gemini 3.8 Flash (High) via Antigravity (default agy shorthand)
 - `zai` - Z.AI GLM-4.7 via Codex CLI
 - `glm5` - Z.AI GLM-5.3 via OpenCode (latest GLM 5.x, 1M context)

@@ -239,6 +239,13 @@ _AGY_MODEL_ARGS = {
     "gemini37-high": "Gemini 3.8 Flash (High)",
     "gemini37-medium": "Gemini 3.8 Flash (Medium)",
     "gemini37-low": "Gemini 3.8 Flash (Low)",
+    "google:gemini-4-argon-high": "Gemini 4 Argon (High)",
+    "google:gemini-4-argon-medium": "Gemini 4 Argon (Medium)",
+    "google:gemini-4-argon-low": "Gemini 4 Argon (Low)",
+    "argon": "Gemini 4 Argon (High)",
+    "argon-high": "Gemini 4 Argon (High)",
+    "argon-medium": "Gemini 4 Argon (Medium)",
+    "argon-low": "Gemini 4 Argon (Low)",
 }
 
 
