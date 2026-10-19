@@ -2,6 +2,11 @@
 
 All notable changes to daplug are documented here.
 
+## [0.40.16] - 2026-10-19
+
+### Added
+- **Session handoff** — `/daplug:handoff` writes a compact, provider-neutral checkpoint (objective, completed work, decisions, constraints, changed files, verification evidence, blockers, exact next action) with Git state captured factually, secret redaction, a 16 KiB size budget, atomic 0600 writes, and storage outside tracked repository state. `/daplug:resume-handoff [latest|path]` validates schema and repository identity, reports branch/HEAD/worktree/dirty-state drift, and never mutates the repository or loads the transcript. Implemented by Gemini 4 Argon (High); reviewed by Claude.
+
 ## [0.40.15] - 2026-10-13
 
 ### Added
