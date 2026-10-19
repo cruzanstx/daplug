@@ -31,6 +31,7 @@ daplug/
 - `config-reader`: Reads `<daplug_config>` blocks from CLAUDE.md files (`scripts/config.py`)
 - `prompt-manager`: CRUD operations for prompt files (`scripts/manager.py`)
 - `prompt-finder`: Locates prompts by number or keyword
+- `handoff`: Provider-neutral session handoff checkpoints and Git drift validation (`scripts/handoff.py`)
 - `worktree`: Git worktree management for isolated development
 
 **Agents** (`agents/*.md`): Background agent definitions for specific tasks (infra-troubleshooter, k8s-cicd-troubleshooter, build optimizers, log watcher).

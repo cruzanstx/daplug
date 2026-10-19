@@ -56,7 +56,7 @@ Command name mapping:
 
 ## What's Included
 
-### Commands (19)
+### Commands (21)
 
 | Command | Description |
 |---------|-------------|
@@ -70,10 +70,12 @@ Command name mapping:
 | `/daplug:devstral-cli` | Run task with local Devstral model via Codex CLI |
 | `/daplug:detect-clis` | Scan and manage available AI coding CLIs |
 | `/daplug:gemini-cli` | Run task with legacy Google Gemini CLI |
+| `/daplug:handoff` | Create a compact, evidence-backed session handoff checkpoint outside tracked Git state |
 | `/daplug:install-bridges` | Install daplug command bridges for other runtimes (e.g. OpenCode) |
 | `/daplug:migrate-config` | Migrate legacy CLAUDE.md settings to <daplug_config> |
 | `/daplug:prompts` | Analyze prompts folder and recommend next steps |
 | `/daplug:qwen-cli` | Run task with local Qwen model via Codex CLI |
+| `/daplug:resume-handoff` | Validate and load a compact session handoff checkpoint with Git drift detection |
 | `/daplug:run-at-prompt` | Run existing prompts with agent-team orchestration (phase groups + auto-deps) |
 | `/daplug:run-prompt` | Execute prompts with various AI models |
 | `/daplug:sprint` | Automated sprint planning from specs or existing prompts |
@@ -90,12 +92,13 @@ Command name mapping:
 | `k8s-cicd-troubleshooter` | Troubleshoot Kubernetes and CI/CD pipelines |
 | `readonly-log-watcher` | Monitor prompt execution logs without touching files |
 
-### Skills (8)
+### Skills (9)
 
 | Skill | Description |
 |-------|-------------|
 | `ai-usage` | Check AI CLI usage/quota (Claude, Codex, Gemini, Z.AI, Synthetic) |
 | `config-reader` | Read and manage daplug config from CLAUDE.md (<daplug_config>) |
+| `handoff` | Create, validate, and resume compact provider-neutral session handoff checkpoints |
 | `prompt-executor` | Execute prompts with AI models, worktrees, tmux |
 | `prompt-finder` | Find and resolve prompts in ./prompts/ directory |
 | `prompt-manager` | CRUD operations for prompts with subfolder support |

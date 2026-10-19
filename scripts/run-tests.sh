@@ -26,6 +26,7 @@ SUITES=(
   skills/prompt-executor/tests
   skills/cli-detector/tests
   skills/config-reader/tests
+  skills/handoff/tests
   skills/sprint/tests
   skills/at-prompt-runner/tests
   scripts/tests
