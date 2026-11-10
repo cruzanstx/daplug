@@ -1012,6 +1012,7 @@ class TestClaudeModel:
         [
             ("fable", "fable"),
             ("fable51", "claude-fable-5-1"),
+            ("fable52", "claude-fable-5-2"),
         ],
     )
     def test_fable_models_force_model_selection(self, full_cache, shorthand, expected_model):

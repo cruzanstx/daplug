@@ -302,7 +302,7 @@ def test_fable51_registry_entry(tmp_path: Path):
     assert by_name["fable"]["model_id"] == "anthropic:fable"
     assert by_name["fable"]["claude_model_flag"] == "fable"
     assert by_name["fable"]["command"] == expected_command[:-2] + ["--model", "fable"]
-    assert "currently Claude Fable 5.1" in by_name["fable"]["docs"]["actual_model"]
+    assert "currently Claude Fable 5.2" in by_name["fable"]["docs"]["actual_model"]
     assert "floating" in by_name["fable"]["docs"]["actual_model"]
 
     # Only one pin spelling exists (no `fable5-1`).

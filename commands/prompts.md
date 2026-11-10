@@ -55,7 +55,8 @@ Use AskUserQuestion tool with options:
 - `claude` - Claude Code Task subagent (default, current context)
 - `cc-sonnet` - Claude Code CLI Sonnet 5.5
 - `cc-opus` - Claude Code CLI Opus alias (currently Opus 5.5)
-- `fable` - Claude Code CLI Fable alias (currently Fable 5.1, 1M context)
+- `fable` - Claude Code CLI Fable alias (currently Fable 5.2, 1M context)
+- `fable52` - Claude Code CLI Fable 5.2 explicit pin (claude-fable-5-2, always-on adaptive thinking)
 - `fable51` - Claude Code CLI Fable 5.1 explicit pin (claude-fable-5-1, adaptive thinking)
 - `codex` - OpenAI Codex CLI (gpt-5.6-terra, balanced everyday coding)
 - `codex-spark` - OpenAI Codex Spark (lowest-latency tier)
@@ -76,8 +77,8 @@ Use AskUserQuestion tool with options:
 - `gpt52-xhigh` - OpenAI GPT-5.2 with xhigh reasoning (30+ min tasks)
 - `gemini` - Gemini 3.8 Flash (High reasoning) via Antigravity (default Gemini shorthand)
 - `gemini-high` - Gemini 2.5 Pro
-- `gemini-xhigh` - Gemini 3 Pro Preview
 - Google shorthands prefer Antigravity CLI (`agy`) when healthy and fall back to legacy `gemini`; `argon*` is AGY-only.
+- `gemini-xhigh` - Gemini 3 Pro Preview
 - `gemini25pro` - Gemini 2.5 Pro (explicit shorthand)
 - `gemini25flash` - Gemini 2.5 Flash
 - `gemini25lite` - Gemini 2.5 Flash-Lite

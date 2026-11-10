@@ -558,6 +558,7 @@ EXPECTED_MODEL_KEYS = [
     "cc-sonnet",
     "cc-opus",
     "fable",
+    "fable52",
     "fable51",
     "codex",
     "codex-spark",

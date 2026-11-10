@@ -569,6 +569,19 @@ class TestRegistryRouterConsistency:
         assert model_id == "anthropic:claude-fable-5-1"
         assert cmd[-2:] == ["--model", "claude-fable-5-1"]
 
+    def test_fable52_pin_resolves_strictly_to_claude(self, monkeypatch):
+        """fable52 pins claude-fable-5-2 via the Claude CLI, distinct from the floating alias."""
+        reg_by_name = {m["name"]: m for m in _load_registry()}
+        assert reg_by_name["fable52"]["model_id"] == "anthropic:claude-fable-5-2"
+        assert reg_by_name["fable52"]["claude_model_flag"] == "claude-fable-5-2"
+        assert reg_by_name["fable52"]["alias_of"] is None
+        fake = _FakeCache({"clis": {"claude": {"installed": True, "issues": []}}, "providers": {}})
+        monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+        cli, model_id, cmd = router.resolve_model("fable52")
+        assert cli == "claude"
+        assert model_id == "anthropic:claude-fable-5-2"
+        assert cmd[-2:] == ["--model", "claude-fable-5-2"]
+
     def test_drift_missing_router_key_produces_actionable_message(self):
         """A model missing from router must produce a message naming it."""
         registry_models = _load_registry()

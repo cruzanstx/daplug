@@ -332,6 +332,15 @@ _SHORTHAND: dict[str, _ModelRequest] = {
         force_cli="claude",
         strict_cli=True,
     ),
+    # "fable52" is the explicit Fable 5.2 pin (canonical Claude API ID
+    # claude-fable-5-2).
+    "fable52": _ModelRequest(
+        "fable52",
+        family="anthropic",
+        model_id="anthropic:claude-fable-5-2",
+        force_cli="claude",
+        strict_cli=True,
+    ),
 }
 
 _ALIASES: dict[str, str] = {

@@ -161,7 +161,8 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `claude` | subagent | Claude Code Task subagent (configured in Claude Code) |
 | `cc-sonnet` | claude | claude-sonnet-5-5 (Claude Sonnet 5.5) |
 | `cc-opus` | claude | opus (currently Claude Opus 5.5; floating Claude Code alias) |
-| `fable` | claude | fable (currently Claude Fable 5.1; floating Claude Code alias) |
+| `fable` | claude | fable (currently Claude Fable 5.2; floating Claude Code alias) |
+| `fable52` | claude | claude-fable-5-2 (Fable 5.2 explicit pin, 1M context, 128K max output) |
 | `fable51` | claude | claude-fable-5-1 (Fable 5.1 explicit pin, 1M context, 128K max output) |
 | `codex` | codex | gpt-5.6-terra |
 | `codex-spark` | codex | gpt-5.3-codex-spark (low latency) |
