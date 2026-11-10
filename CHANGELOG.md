@@ -2,6 +2,11 @@
 
 All notable changes to daplug are documented here.
 
+## [0.40.17] - 2026-11-10
+
+### Added
+- **Fable 5.2** — `fable52` pins `claude-fable-5-2` via Claude Code (1M context, 128K output, always-on adaptive thinking, $8/$40 per MTok). The floating `fable` alias now resolves to Fable 5.2 (Claude Code ≥ 2.1.322); `fable51` stays as the 5.1 pin.
+
 ## [0.40.16] - 2026-10-19
 
 ### Added
