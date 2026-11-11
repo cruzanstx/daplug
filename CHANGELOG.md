@@ -2,6 +2,11 @@
 
 All notable changes to daplug are documented here.
 
+## [0.40.18] - 2026-11-10
+
+### Added
+- **Gemini 4 Carbon** — `carbon`, `carbon-high`, `carbon-medium`, and `carbon-low` select Gemini 4 Carbon through Antigravity (`agy`) only, mirroring the Argon tiers; `carbon` means High. No legacy Gemini route or quota bucket is verified, and unverified CLI overrides are rejected. Carbon (High) verified live on agy 1.5.5.
+
 ## [0.40.17] - 2026-11-10
 
 ### Added
