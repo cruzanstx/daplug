@@ -124,6 +124,11 @@ _SHORTHAND: dict[str, _ModelRequest] = {
     "argon-high": _ModelRequest("argon-high", family="google", model_id="google:gemini-4-argon-high", force_cli="agy", strict_cli=True),
     "argon-medium": _ModelRequest("argon-medium", family="google", model_id="google:gemini-4-argon-medium", force_cli="agy", strict_cli=True),
     "argon-low": _ModelRequest("argon-low", family="google", model_id="google:gemini-4-argon-low", force_cli="agy", strict_cli=True),
+    # Carbon is verified only on Antigravity; do not invent legacy CLI fallbacks.
+    "carbon": _ModelRequest("carbon", family="google", model_id="google:gemini-4-carbon-high", force_cli="agy", strict_cli=True),
+    "carbon-high": _ModelRequest("carbon-high", family="google", model_id="google:gemini-4-carbon-high", force_cli="agy", strict_cli=True),
+    "carbon-medium": _ModelRequest("carbon-medium", family="google", model_id="google:gemini-4-carbon-medium", force_cli="agy", strict_cli=True),
+    "carbon-low": _ModelRequest("carbon-low", family="google", model_id="google:gemini-4-carbon-low", force_cli="agy", strict_cli=True),
     # Z.AI
     "zai": _ModelRequest("zai", family="zai", model_id="zai:glm-4.7"),
     "glm5": _ModelRequest("glm5", family="zai", model_id="zai:glm-5.3", codex_profile="glm5"),
@@ -399,6 +404,13 @@ _AGY_MODEL_ARGS: dict[str, str] = {
     "argon-high": "Gemini 4 Argon (High)",
     "argon-medium": "Gemini 4 Argon (Medium)",
     "argon-low": "Gemini 4 Argon (Low)",
+    "google:gemini-4-carbon-high": "Gemini 4 Carbon (High)",
+    "google:gemini-4-carbon-medium": "Gemini 4 Carbon (Medium)",
+    "google:gemini-4-carbon-low": "Gemini 4 Carbon (Low)",
+    "carbon": "Gemini 4 Carbon (High)",
+    "carbon-high": "Gemini 4 Carbon (High)",
+    "carbon-medium": "Gemini 4 Carbon (Medium)",
+    "carbon-low": "Gemini 4 Carbon (Low)",
 }
 
 

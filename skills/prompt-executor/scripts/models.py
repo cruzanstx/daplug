@@ -246,6 +246,13 @@ _AGY_MODEL_ARGS = {
     "argon-high": "Gemini 4 Argon (High)",
     "argon-medium": "Gemini 4 Argon (Medium)",
     "argon-low": "Gemini 4 Argon (Low)",
+    "google:gemini-4-carbon-high": "Gemini 4 Carbon (High)",
+    "google:gemini-4-carbon-medium": "Gemini 4 Carbon (Medium)",
+    "google:gemini-4-carbon-low": "Gemini 4 Carbon (Low)",
+    "carbon": "Gemini 4 Carbon (High)",
+    "carbon-high": "Gemini 4 Carbon (High)",
+    "carbon-medium": "Gemini 4 Carbon (Medium)",
+    "carbon-low": "Gemini 4 Carbon (Low)",
 }
 
 

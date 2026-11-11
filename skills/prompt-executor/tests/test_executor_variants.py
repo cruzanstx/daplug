@@ -278,6 +278,32 @@ def test_argon_rejects_unverified_cli_overrides(no_router, tmp_path, shorthand, 
         executor.get_cli_info(shorthand, repo_root=tmp_path, cli_override=cli_override)
 
 
+@pytest.mark.parametrize("shorthand,tier", [
+    ("carbon", "High"), ("carbon-high", "High"),
+    ("carbon-medium", "Medium"), ("carbon-low", "Low"),
+])
+@pytest.mark.parametrize("cli_override", [None, "agy"])
+def test_carbon_exact_argv_without_router(no_router, tmp_path, shorthand, tier, cli_override):
+    info = executor.get_cli_info(shorthand, repo_root=tmp_path, cli_override=cli_override)
+    assert info["selected_cli"] == "agy"
+    assert info["stdin_mode"] == "arg"
+    assert info["model_id"] == f"google:gemini-4-carbon-{tier.lower()}"
+    assert info["command"] == ["agy", "--model", f"Gemini 4 Carbon ({tier})",
+                               "--dangerously-skip-permissions", "--print-timeout", "60m",
+                               "--output-format", "stream-json", "--print"]
+    timed = executor.get_cli_info(shorthand, repo_root=tmp_path, agy_print_timeout="15m")
+    assert timed["command"][5] == "15m"
+    with pytest.raises(ValueError, match="not supported"):
+        executor.get_cli_info(shorthand, repo_root=tmp_path, variant="medium")
+
+
+@pytest.mark.parametrize("shorthand", ["carbon", "carbon-high", "carbon-medium", "carbon-low"])
+@pytest.mark.parametrize("cli_override", ["gemini", "opencode", "codex"])
+def test_carbon_rejects_unverified_cli_overrides(no_router, tmp_path, shorthand, cli_override):
+    with pytest.raises(ValueError, match="not supported"):
+        executor.get_cli_info(shorthand, repo_root=tmp_path, cli_override=cli_override)
+
+
 def test_agy_cli_override_for_gemini37_models(no_router, tmp_path):
     """--cli agy on gemini37 shorthands produces byte-exact agy commands."""
     info = executor.get_cli_info("gemini37", repo_root=tmp_path, cli_override="agy")
@@ -594,6 +620,10 @@ EXPECTED_MODEL_KEYS = [
     "argon-high",
     "argon-medium",
     "argon-low",
+    "carbon",
+    "carbon-high",
+    "carbon-medium",
+    "carbon-low",
     "agy",
     "zai",
     "glm5",

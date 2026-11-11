@@ -29,6 +29,13 @@ _AGY_MODEL_ARGS = {
     "argon-high": "Gemini 4 Argon (High)",
     "argon-medium": "Gemini 4 Argon (Medium)",
     "argon-low": "Gemini 4 Argon (Low)",
+    "google:gemini-4-carbon-high": "Gemini 4 Carbon (High)",
+    "google:gemini-4-carbon-medium": "Gemini 4 Carbon (Medium)",
+    "google:gemini-4-carbon-low": "Gemini 4 Carbon (Low)",
+    "carbon": "Gemini 4 Carbon (High)",
+    "carbon-high": "Gemini 4 Carbon (High)",
+    "carbon-medium": "Gemini 4 Carbon (Medium)",
+    "carbon-low": "Gemini 4 Carbon (Low)",
 }
 
 
@@ -70,6 +77,10 @@ class AgyCLI(SimpleCLIPlugin):
                 "google:gemini-4-argon-medium",
                 "google:gemini-4-argon-low",
                 "argon", "argon-high", "argon-medium", "argon-low",
+                "google:gemini-4-carbon-high",
+                "google:gemini-4-carbon-medium",
+                "google:gemini-4-carbon-low",
+                "carbon", "carbon-high", "carbon-medium", "carbon-low",
             )
         ] + [
             ModelInfo(

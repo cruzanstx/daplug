@@ -487,7 +487,7 @@ All available models for /daplug:run-prompt --model:
 - `gpt52-high` - OpenAI GPT-5.2 with high reasoning effort
 - `gpt52-xhigh` - OpenAI GPT-5.2 with xhigh reasoning (30+ min tasks)
 
-**Google Gemini Family:** (check: `gemini.models.<model>.used` for each; `agy` is preferred when healthy, legacy `gemini` is fallback except for AGY-only `argon*`)
+**Google Gemini Family:** (check: `gemini.models.<model>.used` for each; `agy` is preferred when healthy, legacy `gemini` is fallback except for AGY-only `argon*`/`carbon*`)
 - `gemini` - Gemini 3.8 Flash (High reasoning) via Antigravity (default Gemini shorthand)
 - `gemini-high` - Gemini 2.5 Pro
 - `gemini-xhigh` - Gemini 3 Pro Preview
@@ -505,6 +505,10 @@ All available models for /daplug:run-prompt --model:
 - `argon-high` - Gemini 4 Argon (High reasoning) via Antigravity
 - `argon-medium` - Gemini 4 Argon (Medium reasoning) via Antigravity
 - `argon-low` - Gemini 4 Argon (Low reasoning) via Antigravity
+- `carbon` - Gemini 4 Carbon (High reasoning) via Antigravity
+- `carbon-high` - Gemini 4 Carbon (High reasoning) via Antigravity
+- `carbon-medium` - Gemini 4 Carbon (Medium reasoning) via Antigravity
+- `carbon-low` - Gemini 4 Carbon (Low reasoning) via Antigravity
 - `agy` - Gemini 3.8 Flash (High) via Antigravity (default agy shorthand)
 
 **Z.AI / OpenCode Models:** (check: `zai.token_quota.percentage` where applicable)
@@ -540,7 +544,7 @@ All available models for /daplug:run-prompt --model:
 - `qwen36-27b` - Local Qwen 3.6 27b via opencode + LMStudio
 
 **Gemini Model Mapping:**
-Antigravity (`agy`) maps legacy shorthands to the closest current `agy models` display names; legacy `gemini` keeps these API model IDs. `argon*` uses AGY catalog IDs only; no legacy Gemini route or quota bucket is verified.
+Antigravity (`agy`) maps legacy shorthands to the closest current `agy models` display names; legacy `gemini` keeps these API model IDs. `argon*` and `carbon*` use AGY catalog IDs only; no legacy Gemini route or quota bucket is verified.
 | Shorthand | API Model | Quota Bucket |
 |-----------|-----------|--------------|
 | `gemini` | gemini-3.8-flash | gemini-3.8-flash |
@@ -560,6 +564,10 @@ Antigravity (`agy`) maps legacy shorthands to the closest current `agy models` d
 | `argon-high` | gemini-4-argon-high | Unverified |
 | `argon-medium` | gemini-4-argon-medium | Unverified |
 | `argon-low` | gemini-4-argon-low | Unverified |
+| `carbon` | gemini-4-carbon-high | Unverified |
+| `carbon-high` | gemini-4-carbon-high | Unverified |
+| `carbon-medium` | gemini-4-carbon-medium | Unverified |
+| `carbon-low` | gemini-4-carbon-low | Unverified |
 | `agy` | gemini-3.8-flash | gemini-3.8-flash |
 <!-- END GENERATED: create-llms-available-models -->
 </available_models>
@@ -672,41 +680,45 @@ If user chooses #1:
   38. argon-high - {X}% used - Argon High, AGY only
   39. argon-medium - {X}% used - Argon Medium, AGY only
   40. argon-low - {X}% used - Argon Low, AGY only
-  41. agy - {X}% used - 3.8-flash High, default agy shorthand
+  41. carbon - {X}% used - Carbon High, AGY only
+  42. carbon-high - {X}% used - Carbon High, AGY only
+  43. carbon-medium - {X}% used - Carbon Medium, AGY only
+  44. carbon-low - {X}% used - Carbon Low, AGY only
+  45. agy - {X}% used - 3.8-flash High, default agy shorthand
 
   **Z.AI / OpenCode:** {usage status}
-  42. zai - {X}% used - Z.AI GLM-4.7
-  43. glm5 - {X}% used - Z.AI GLM-5.3 latest alias
-  44. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
-  45. glm53 - {X}% used - Z.AI GLM-5.3 explicit pin
-  46. flash - {X}% used - Z.AI GLM-5.3-Flash multimodal, 3x quota, reasoning max
-  47. glm53-flash - {X}% used - Z.AI GLM-5.3-Flash versioned alias of flash
-  48. kimi - {X}% used - Kimi K2.5 via OpenCode
-  49. opencode - {X}% used - OpenCode GLM-4.7
+  46. zai - {X}% used - Z.AI GLM-4.7
+  47. glm5 - {X}% used - Z.AI GLM-5.3 latest alias
+  48. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
+  49. glm53 - {X}% used - Z.AI GLM-5.3 explicit pin
+  50. flash - {X}% used - Z.AI GLM-5.3-Flash multimodal, 3x quota, reasoning max
+  51. glm53-flash - {X}% used - Z.AI GLM-5.3-Flash versioned alias of flash
+  52. kimi - {X}% used - Kimi K2.5 via OpenCode
+  53. opencode - {X}% used - OpenCode GLM-4.7
 
   **Synthetic:** {usage status}
-  50. synthetic - {requests}/{limit} requests - Synthetic floating (currently DS V4.1 Flash)
-  51. syn-flash - {requests}/{limit} requests - Synthetic floating (currently GLM-4.7-Flash)
-  52. syn-kimi - {requests}/{limit} requests - Synthetic floating (currently Kimi-K3) vision
-  53. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
-  54. syn-qwen - {requests}/{limit} requests - Synthetic floating (currently Qwen3.8-27B) vision
-  55. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
-  56. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
-  57. syn-glm53 - {requests}/{limit} requests - Synthetic GLM-5.3 beta text-only
-  58. syn-glm53-flash - {requests}/{limit} requests - Synthetic GLM-5.3-Flash beta vision
-  59. syn-ds41-flash - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash vision
-  60. deepseek - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash (alias of syn-ds41-flash)
+  54. synthetic - {requests}/{limit} requests - Synthetic floating (currently DS V4.1 Flash)
+  55. syn-flash - {requests}/{limit} requests - Synthetic floating (currently GLM-4.7-Flash)
+  56. syn-kimi - {requests}/{limit} requests - Synthetic floating (currently Kimi-K3) vision
+  57. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
+  58. syn-qwen - {requests}/{limit} requests - Synthetic floating (currently Qwen3.8-27B) vision
+  59. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
+  60. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
+  61. syn-glm53 - {requests}/{limit} requests - Synthetic GLM-5.3 beta text-only
+  62. syn-glm53-flash - {requests}/{limit} requests - Synthetic GLM-5.3-Flash beta vision
+  63. syn-ds41-flash - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash vision
+  64. deepseek - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash (alias of syn-ds41-flash)
 
   **Local:** {usage status}
-  61. local - local qwen3.6-35b-a3b, no quota
-  62. qwen - local qwen3.6-35b-a3b, no quota
-  63. devstral - local Devstral, no quota
-  64. glm-local - local GLM-4.7 Flash, no quota
-  65. qwen-small - local qwen3-4b, no quota
-  66. qwen36 - local qwen3.6-35b-a3b, no quota
-  67. qwen36-27b - local qwen3.6-27b, no quota
+  65. local - local qwen3.6-35b-a3b, no quota
+  66. qwen - local qwen3.6-35b-a3b, no quota
+  67. devstral - local Devstral, no quota
+  68. glm-local - local GLM-4.7 Flash, no quota
+  69. qwen-small - local qwen3-4b, no quota
+  70. qwen36 - local qwen3.6-35b-a3b, no quota
+  71. qwen36-27b - local qwen3.6-27b, no quota
 
-  Choose (1-67), or type model with flags (e.g., 'codex --worktree --loop'): _
+  Choose (1-71), or type model with flags (e.g., 'codex --worktree --loop'): _
 <!-- END GENERATED: create-llms-selection-menu -->
 
   **Execute based on selection:**

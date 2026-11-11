@@ -70,7 +70,7 @@ python3 "$EXECUTOR" [prompts...] [options]
 
 **Options:**
 <!-- BEGIN GENERATED: skill-model-options -->
-- `--model, -m`: claude, cc-sonnet, cc-opus, fable, fable52, fable51, codex, codex-spark, codex-high, codex-xhigh, sol, terra, luna, astra, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, gemini37, gemini37-high, gemini37-medium, gemini37-low, argon, argon-high, argon-medium, argon-low, agy, zai, glm5, glm52, glm53, flash, glm53-flash, kimi, synthetic, syn-flash, syn-kimi, syn-kimi3, syn-qwen, syn-minimax, syn-nemotron, syn-glm53, syn-glm53-flash, syn-ds41-flash, deepseek, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b
+- `--model, -m`: claude, cc-sonnet, cc-opus, fable, fable52, fable51, codex, codex-spark, codex-high, codex-xhigh, sol, terra, luna, astra, gpt54, gpt54-high, gpt54-xhigh, gpt55, gpt55-high, gpt55-xhigh, gpt52, gpt52-high, gpt52-xhigh, gemini, gemini-high, gemini-xhigh, gemini25pro, gemini25flash, gemini25lite, gemini3flash, gemini3pro, gemini31pro, gemini37, gemini37-high, gemini37-medium, gemini37-low, argon, argon-high, argon-medium, argon-low, carbon, carbon-high, carbon-medium, carbon-low, agy, zai, glm5, glm52, glm53, flash, glm53-flash, kimi, synthetic, syn-flash, syn-kimi, syn-kimi3, syn-qwen, syn-minimax, syn-nemotron, syn-glm53, syn-glm53-flash, syn-ds41-flash, deepseek, opencode, local, qwen, devstral, glm-local, qwen-small, qwen36, qwen36-27b
   - `glm53`: GLM-5.3 via Z.AI / OpenCode (1M context)
   - `synthetic`: GLM-5.2 via Synthetic / OpenCode (`syn:large:text`, requires `SYNTHETIC_API_KEY`)
 <!-- END GENERATED: skill-model-options -->
@@ -301,6 +301,10 @@ python3 "$EXECUTOR" --loop-status
 | argon-high | agy --model "Gemini 4 Argon (High)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Argon high reasoning (AGY only) |
 | argon-medium | agy --model "Gemini 4 Argon (Medium)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Argon medium reasoning (AGY only) |
 | argon-low | agy --model "Gemini 4 Argon (Low)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Argon low reasoning (AGY only) |
+| carbon | agy --model "Gemini 4 Carbon (High)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Carbon high reasoning (default Carbon alias; AGY only) |
+| carbon-high | agy --model "Gemini 4 Carbon (High)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Carbon high reasoning (AGY only) |
+| carbon-medium | agy --model "Gemini 4 Carbon (Medium)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Carbon medium reasoning (AGY only) |
+| carbon-low | agy --model "Gemini 4 Carbon (Low)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Carbon low reasoning (AGY only) |
 | agy | agy --model "Gemini 3.8 Flash (High)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Antigravity default (same as gemini/gemini37) |
 | zai | codex exec --full-auto --profile zai | General coding fallback |
 | glm5 | opencode run --format json -m zai/glm-5.3 --pure --agent build | Latest GLM 5.x tasks via OpenCode |
