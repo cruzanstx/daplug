@@ -202,6 +202,11 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `carbon-high` | agy | gemini-4-carbon-high |
 | `carbon-medium` | agy | gemini-4-carbon-medium |
 | `carbon-low` | agy | gemini-4-carbon-low |
+| `hydrogen` | agy | gemini-4-hydrogen-high |
+| `hydrogen-xhigh` | agy | gemini-4-hydrogen-xhigh |
+| `hydrogen-high` | agy | gemini-4-hydrogen-high |
+| `hydrogen-medium` | agy | gemini-4-hydrogen-medium |
+| `hydrogen-low` | agy | gemini-4-hydrogen-low |
 | `agy` | agy/gemini | gemini-3.8-flash (High reasoning) |
 | `zai` | codex | GLM-4.7 via Z.AI (may have issues) |
 | `glm5` | opencode | GLM-5.3 via OpenCode (latest GLM 5.x, 1M context) |

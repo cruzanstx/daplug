@@ -304,6 +304,32 @@ def test_carbon_rejects_unverified_cli_overrides(no_router, tmp_path, shorthand,
         executor.get_cli_info(shorthand, repo_root=tmp_path, cli_override=cli_override)
 
 
+@pytest.mark.parametrize("shorthand,tier", [
+    ("hydrogen", "High"), ("hydrogen-high", "High"), ("hydrogen-xhigh", "XHigh"),
+    ("hydrogen-medium", "Medium"), ("hydrogen-low", "Low"),
+])
+@pytest.mark.parametrize("cli_override", [None, "agy"])
+def test_hydrogen_exact_argv_without_router(no_router, tmp_path, shorthand, tier, cli_override):
+    info = executor.get_cli_info(shorthand, repo_root=tmp_path, cli_override=cli_override)
+    assert info["selected_cli"] == "agy"
+    assert info["stdin_mode"] == "arg"
+    assert info["model_id"] == f"google:gemini-4-hydrogen-{tier.lower()}"
+    assert info["command"] == ["agy", "--model", f"Gemini 4 Hydrogen ({tier})",
+                               "--dangerously-skip-permissions", "--print-timeout", "60m",
+                               "--output-format", "stream-json", "--print"]
+    timed = executor.get_cli_info(shorthand, repo_root=tmp_path, agy_print_timeout="15m")
+    assert timed["command"][5] == "15m"
+    with pytest.raises(ValueError, match="not supported"):
+        executor.get_cli_info(shorthand, repo_root=tmp_path, variant="medium")
+
+
+@pytest.mark.parametrize("shorthand", ["hydrogen", "hydrogen-xhigh", "hydrogen-high", "hydrogen-medium", "hydrogen-low"])
+@pytest.mark.parametrize("cli_override", ["gemini", "opencode", "codex"])
+def test_hydrogen_rejects_unverified_cli_overrides(no_router, tmp_path, shorthand, cli_override):
+    with pytest.raises(ValueError, match="not supported"):
+        executor.get_cli_info(shorthand, repo_root=tmp_path, cli_override=cli_override)
+
+
 def test_agy_cli_override_for_gemini37_models(no_router, tmp_path):
     """--cli agy on gemini37 shorthands produces byte-exact agy commands."""
     info = executor.get_cli_info("gemini37", repo_root=tmp_path, cli_override="agy")
@@ -624,6 +650,11 @@ EXPECTED_MODEL_KEYS = [
     "carbon-high",
     "carbon-medium",
     "carbon-low",
+    "hydrogen",
+    "hydrogen-xhigh",
+    "hydrogen-high",
+    "hydrogen-medium",
+    "hydrogen-low",
     "agy",
     "zai",
     "glm5",

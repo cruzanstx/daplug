@@ -3,6 +3,11 @@
 # agy --version: 1.1.25
 # Raw tab-separated output from `agy models`; the CLI progress line is excluded.
 # --- BEGIN agy models ---
+# Hydrogen rows captured from agy 1.5.8 (2026-11-13).
+gemini-4-hydrogen-high	Gemini 4 Hydrogen (High)
+gemini-4-hydrogen-xhigh	Gemini 4 Hydrogen (XHigh)
+gemini-4-hydrogen-medium	Gemini 4 Hydrogen (Medium)
+gemini-4-hydrogen-low	Gemini 4 Hydrogen (Low)
 # Carbon rows captured from agy 1.5.5 (2026-11-10).
 gemini-4-carbon-medium	Gemini 4 Carbon (Medium)
 gemini-4-carbon-high	Gemini 4 Carbon (High)

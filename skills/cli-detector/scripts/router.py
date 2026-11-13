@@ -129,6 +129,12 @@ _SHORTHAND: dict[str, _ModelRequest] = {
     "carbon-high": _ModelRequest("carbon-high", family="google", model_id="google:gemini-4-carbon-high", force_cli="agy", strict_cli=True),
     "carbon-medium": _ModelRequest("carbon-medium", family="google", model_id="google:gemini-4-carbon-medium", force_cli="agy", strict_cli=True),
     "carbon-low": _ModelRequest("carbon-low", family="google", model_id="google:gemini-4-carbon-low", force_cli="agy", strict_cli=True),
+    # Hydrogen is verified only on Antigravity; do not invent legacy CLI fallbacks.
+    "hydrogen": _ModelRequest("hydrogen", family="google", model_id="google:gemini-4-hydrogen-high", force_cli="agy", strict_cli=True),
+    "hydrogen-xhigh": _ModelRequest("hydrogen-xhigh", family="google", model_id="google:gemini-4-hydrogen-xhigh", force_cli="agy", strict_cli=True),
+    "hydrogen-high": _ModelRequest("hydrogen-high", family="google", model_id="google:gemini-4-hydrogen-high", force_cli="agy", strict_cli=True),
+    "hydrogen-medium": _ModelRequest("hydrogen-medium", family="google", model_id="google:gemini-4-hydrogen-medium", force_cli="agy", strict_cli=True),
+    "hydrogen-low": _ModelRequest("hydrogen-low", family="google", model_id="google:gemini-4-hydrogen-low", force_cli="agy", strict_cli=True),
     # Z.AI
     "zai": _ModelRequest("zai", family="zai", model_id="zai:glm-4.7"),
     "glm5": _ModelRequest("glm5", family="zai", model_id="zai:glm-5.3", codex_profile="glm5"),
@@ -411,6 +417,15 @@ _AGY_MODEL_ARGS: dict[str, str] = {
     "carbon-high": "Gemini 4 Carbon (High)",
     "carbon-medium": "Gemini 4 Carbon (Medium)",
     "carbon-low": "Gemini 4 Carbon (Low)",
+    "google:gemini-4-hydrogen-xhigh": "Gemini 4 Hydrogen (XHigh)",
+    "google:gemini-4-hydrogen-high": "Gemini 4 Hydrogen (High)",
+    "google:gemini-4-hydrogen-medium": "Gemini 4 Hydrogen (Medium)",
+    "google:gemini-4-hydrogen-low": "Gemini 4 Hydrogen (Low)",
+    "hydrogen": "Gemini 4 Hydrogen (High)",
+    "hydrogen-xhigh": "Gemini 4 Hydrogen (XHigh)",
+    "hydrogen-high": "Gemini 4 Hydrogen (High)",
+    "hydrogen-medium": "Gemini 4 Hydrogen (Medium)",
+    "hydrogen-low": "Gemini 4 Hydrogen (Low)",
 }
 
 

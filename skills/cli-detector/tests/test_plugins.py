@@ -225,6 +225,23 @@ def test_agy_plugin_carbon_commands_and_inventory(tmp_path, shorthand, tier):
     assert by_id[shorthand] == by_id[model_id] == f"Gemini 4 Carbon ({tier})"
 
 
+@pytest.mark.parametrize("shorthand,tier", [
+    ("hydrogen", "High"), ("hydrogen-high", "High"), ("hydrogen-xhigh", "XHigh"),
+    ("hydrogen-medium", "Medium"), ("hydrogen-low", "Low"),
+])
+def test_agy_plugin_hydrogen_commands_and_inventory(tmp_path, shorthand, tier):
+    plugin = get_plugin("agy")
+    prompt_file = tmp_path / "prompt.md"
+    prompt_file.write_text("test", encoding="utf-8")
+    expected = ["agy", "--model", f"Gemini 4 Hydrogen ({tier})",
+                "--dangerously-skip-permissions", "--print", "test"]
+    assert plugin.build_command(shorthand, prompt_file, tmp_path) == expected
+    model_id = f"google:gemini-4-hydrogen-{tier.lower()}"
+    assert plugin.build_command(model_id, prompt_file, tmp_path) == expected
+    by_id = {m.id: m.display_name for m in plugin.get_available_models()}
+    assert by_id[shorthand] == by_id[model_id] == f"Gemini 4 Hydrogen ({tier})"
+
+
 def test_agy_plugin_version_command():
     plugin = get_plugin("agy")
     assert plugin is not None

@@ -722,6 +722,11 @@ These tables are generated from `scripts/models.json`.
 | `carbon-high` | gemini-4-carbon-high | Carbon high reasoning (AGY only) |
 | `carbon-medium` | gemini-4-carbon-medium | Carbon medium reasoning (AGY only) |
 | `carbon-low` | gemini-4-carbon-low | Carbon low reasoning (AGY only) |
+| `hydrogen` | gemini-4-hydrogen-high | Hydrogen high reasoning (AGY only) |
+| `hydrogen-xhigh` | gemini-4-hydrogen-xhigh | Hydrogen xhigh reasoning (AGY only) |
+| `hydrogen-high` | gemini-4-hydrogen-high | Hydrogen high reasoning (AGY only) |
+| `hydrogen-medium` | gemini-4-hydrogen-medium | Hydrogen medium reasoning (AGY only) |
+| `hydrogen-low` | gemini-4-hydrogen-low | Hydrogen low reasoning (AGY only) |
 | `agy` | gemini-3.8-flash | Antigravity default (same as gemini/gemini37) |
 
 #### Z.AI / OpenCode

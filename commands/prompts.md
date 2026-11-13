@@ -77,7 +77,7 @@ Use AskUserQuestion tool with options:
 - `gpt52-xhigh` - OpenAI GPT-5.2 with xhigh reasoning (30+ min tasks)
 - `gemini` - Gemini 3.8 Flash (High reasoning) via Antigravity (default Gemini shorthand)
 - `gemini-high` - Gemini 2.5 Pro
-- Google shorthands prefer Antigravity CLI (`agy`) when healthy and fall back to legacy `gemini`; `argon*` and `carbon*` are AGY-only.
+- Google shorthands prefer Antigravity CLI (`agy`) when healthy and fall back to legacy `gemini`; `argon*`, `carbon*` and `hydrogen*` are AGY-only.
 - `gemini-xhigh` - Gemini 3 Pro Preview
 - `gemini25pro` - Gemini 2.5 Pro (explicit shorthand)
 - `gemini25flash` - Gemini 2.5 Flash
@@ -97,6 +97,11 @@ Use AskUserQuestion tool with options:
 - `carbon-high` - Gemini 4 Carbon (High reasoning) via Antigravity
 - `carbon-medium` - Gemini 4 Carbon (Medium reasoning) via Antigravity
 - `carbon-low` - Gemini 4 Carbon (Low reasoning) via Antigravity
+- `hydrogen` - Gemini 4 Hydrogen (High reasoning) via Antigravity
+- `hydrogen-xhigh` - Gemini 4 Hydrogen (XHigh reasoning) via Antigravity
+- `hydrogen-high` - Gemini 4 Hydrogen (High reasoning) via Antigravity
+- `hydrogen-medium` - Gemini 4 Hydrogen (Medium reasoning) via Antigravity
+- `hydrogen-low` - Gemini 4 Hydrogen (Low reasoning) via Antigravity
 - `agy` - Gemini 3.8 Flash (High) via Antigravity (default agy shorthand)
 - `zai` - Z.AI GLM-4.7 via Codex CLI
 - `glm5` - Z.AI GLM-5.3 via OpenCode (latest GLM 5.x, 1M context)

@@ -253,6 +253,15 @@ _AGY_MODEL_ARGS = {
     "carbon-high": "Gemini 4 Carbon (High)",
     "carbon-medium": "Gemini 4 Carbon (Medium)",
     "carbon-low": "Gemini 4 Carbon (Low)",
+    "google:gemini-4-hydrogen-xhigh": "Gemini 4 Hydrogen (XHigh)",
+    "google:gemini-4-hydrogen-high": "Gemini 4 Hydrogen (High)",
+    "google:gemini-4-hydrogen-medium": "Gemini 4 Hydrogen (Medium)",
+    "google:gemini-4-hydrogen-low": "Gemini 4 Hydrogen (Low)",
+    "hydrogen": "Gemini 4 Hydrogen (High)",
+    "hydrogen-xhigh": "Gemini 4 Hydrogen (XHigh)",
+    "hydrogen-high": "Gemini 4 Hydrogen (High)",
+    "hydrogen-medium": "Gemini 4 Hydrogen (Medium)",
+    "hydrogen-low": "Gemini 4 Hydrogen (Low)",
 }
 
 

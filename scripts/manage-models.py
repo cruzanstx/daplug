@@ -185,6 +185,10 @@ AGY_DISPLAY_NAMES = {
     "google:gemini-4-carbon-high": "Gemini 4 Carbon (High)",
     "google:gemini-4-carbon-medium": "Gemini 4 Carbon (Medium)",
     "google:gemini-4-carbon-low": "Gemini 4 Carbon (Low)",
+    "google:gemini-4-hydrogen-xhigh": "Gemini 4 Hydrogen (XHigh)",
+    "google:gemini-4-hydrogen-high": "Gemini 4 Hydrogen (High)",
+    "google:gemini-4-hydrogen-medium": "Gemini 4 Hydrogen (Medium)",
+    "google:gemini-4-hydrogen-low": "Gemini 4 Hydrogen (Low)",
     "google:gemini-3.8-flash": "Gemini 3.8 Flash (High)",
     "google:gemini-3.5-flash": "Gemini 3.5 Flash (Medium)",
     "google:gemini-3-flash-preview": "Gemini 3.5 Flash (Medium)",
@@ -341,7 +345,7 @@ def render_run_prompt_model_argument(registry: dict) -> str:
 
 def render_preferred_agent_options(registry: dict) -> str:
     lines = [f"- `{model['name']}` - {docs(model, 'option_description')}" for model in models(registry)]
-    lines.insert(25, "- Google shorthands prefer Antigravity CLI (`agy`) when healthy and fall back to legacy `gemini`; `argon*` and `carbon*` are AGY-only.")
+    lines.insert(25, "- Google shorthands prefer Antigravity CLI (`agy`) when healthy and fall back to legacy `gemini`; `argon*`, `carbon*` and `hydrogen*` are AGY-only.")
     return "\n".join(lines)
 
 
@@ -364,7 +368,7 @@ def render_available_models(registry: dict) -> str:
     headings = {
         "Claude": "**Claude Family:** (check: `claude.five_hour.used`, `claude.seven_day.used`)",
         "OpenAI Codex": "**OpenAI Codex Family:** (check: `codex.primary_window.used`, `codex.secondary_window.used`)",
-        "Google Gemini": "**Google Gemini Family:** (check: `gemini.models.<model>.used` for each; `agy` is preferred when healthy, legacy `gemini` is fallback except for AGY-only `argon*`/`carbon*`)",
+        "Google Gemini": "**Google Gemini Family:** (check: `gemini.models.<model>.used` for each; `agy` is preferred when healthy, legacy `gemini` is fallback except for AGY-only `argon*`/`carbon*`/`hydrogen*`)",
         "Z.AI / OpenCode": "**Z.AI / OpenCode Models:** (check: `zai.token_quota.percentage` where applicable)",
         "Synthetic": "**Synthetic Models:** (check request quota from `/v2/quotas`; requires `SYNTHETIC_API_KEY`)",
         "Local": "**Local Models:** (opencode + LMStudio; no hosted quota)",
@@ -376,7 +380,7 @@ def render_available_models(registry: dict) -> str:
         lines.append("")
     lines.extend([
         "**Gemini Model Mapping:**",
-        "Antigravity (`agy`) maps legacy shorthands to the closest current `agy models` display names; legacy `gemini` keeps these API model IDs. `argon*` and `carbon*` use AGY catalog IDs only; no legacy Gemini route or quota bucket is verified.",
+        "Antigravity (`agy`) maps legacy shorthands to the closest current `agy models` display names; legacy `gemini` keeps these API model IDs. `argon*`, `carbon*` and `hydrogen*` use AGY catalog IDs only; no legacy Gemini route or quota bucket is verified.",
         "| Shorthand | API Model | Quota Bucket |",
         "|-----------|-----------|--------------|",
     ])
