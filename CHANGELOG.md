@@ -2,6 +2,11 @@
 
 All notable changes to daplug are documented here.
 
+## [0.40.19] - 2026-11-13
+
+### Added
+- **Gemini 4 Hydrogen** — `hydrogen`, `hydrogen-xhigh`, `hydrogen-high`, `hydrogen-medium`, and `hydrogen-low` select Gemini 4 Hydrogen through Antigravity (`agy`) only; `hydrogen` means High (Google's default tier) and XHigh is a Hydrogen-only fourth tier. No legacy Gemini route or quota bucket is verified, and unverified CLI overrides are rejected. Existing `agy`/`gemini37*` shorthands still map to Gemini 3.8 Flash. Hydrogen (High) and (XHigh) verified live on agy 1.5.8.
+
 ## [0.40.18] - 2026-11-10
 
 ### Added
