@@ -456,8 +456,8 @@
     },
     {
       "name": "sol",
-      "display": "sol (gpt-6-sol)",
-      "model_id": "openai:gpt-6-sol",
+      "display": "sol (gpt-6.2-sol)",
+      "model_id": "openai:gpt-6.2-sol",
       "default_cli": "codex",
       "supports_codex_reasoning": true,
       "codex_profile": null,
@@ -471,7 +471,9 @@
         "exec",
         "--approve-for-me",
         "-m",
-        "gpt-6-sol"
+        "gpt-6.2-sol",
+        "-c",
+        "daybreak=false"
       ],
       "routing": {
         "cli_overrides": [
@@ -485,15 +487,15 @@
       "docs": {
         "family": "OpenAI Codex",
         "cli_label": "codex",
-        "actual_model": "gpt-6-sol",
-        "option_description": "OpenAI GPT-6 Sol (latest frontier agentic coding model)",
-        "reference_cli": "codex exec --approve-for-me -m gpt-6-sol",
+        "actual_model": "gpt-6.2-sol",
+        "option_description": "OpenAI GPT-6.2 Sol (latest frontier agentic coding model)",
+        "reference_cli": "codex exec --approve-for-me -m gpt-6.2-sol -c daybreak=false",
         "reference_description": "Hardest agentic coding tasks",
         "readme_section": "OpenAI",
-        "readme_model": "gpt-6-sol",
+        "readme_model": "gpt-6.2-sol",
         "best_for": "Hardest agentic coding tasks",
-        "prompt_description": "OpenAI GPT-6 Sol (latest frontier agentic coding model)",
-        "menu_note": "gpt-6-sol frontier tier",
+        "prompt_description": "OpenAI GPT-6.2 Sol (latest frontier agentic coding model)",
+        "menu_note": "gpt-6.2-sol frontier tier",
         "include_in_prompt_guides": true
       }
     },
@@ -585,8 +587,8 @@
     },
     {
       "name": "astra",
-      "display": "astra (GPT-6 Astra, direct shorthand)",
-      "model_id": "openai:gpt-6-astra",
+      "display": "astra (GPT-6.2 Astra, direct shorthand)",
+      "model_id": "openai:gpt-6.2-astra",
       "default_cli": "codex",
       "supports_codex_reasoning": true,
       "codex_profile": null,
@@ -600,7 +602,9 @@
         "exec",
         "--approve-for-me",
         "-m",
-        "gpt-6-astra"
+        "gpt-6.2-astra",
+        "-c",
+        "daybreak=false"
       ],
       "routing": {
         "cli_overrides": [
@@ -613,15 +617,15 @@
       "docs": {
         "family": "OpenAI Codex",
         "cli_label": "codex",
-        "actual_model": "gpt-6-astra",
-        "option_description": "OpenAI GPT-6 Astra (account-gated, direct shorthand)",
-        "reference_cli": "codex exec --approve-for-me -m gpt-6-astra",
-        "reference_description": "GPT-6 Astra coding",
+        "actual_model": "gpt-6.2-astra",
+        "option_description": "OpenAI GPT-6.2 Astra (account-gated, direct shorthand)",
+        "reference_cli": "codex exec --approve-for-me -m gpt-6.2-astra -c daybreak=false",
+        "reference_description": "GPT-6.2 Astra coding",
         "readme_section": "OpenAI",
-        "readme_model": "gpt-6-astra",
-        "best_for": "GPT-6 Astra coding",
-        "prompt_description": "OpenAI GPT-6 Astra (account-gated, direct shorthand)",
-        "menu_note": "gpt-6-astra explicit shorthand",
+        "readme_model": "gpt-6.2-astra",
+        "best_for": "GPT-6.2 Astra coding",
+        "prompt_description": "OpenAI GPT-6.2 Astra (account-gated, direct shorthand)",
+        "menu_note": "gpt-6.2-astra explicit shorthand",
         "include_in_prompt_guides": true
       }
     },

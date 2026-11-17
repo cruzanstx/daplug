@@ -47,10 +47,10 @@ If user chooses "Run prompt now", run `npx cclimits --json 2>/dev/null`, summari
   8. codex-spark - {X}% used - fast/low-cost coding tier
   9. codex-high - {X}% used - higher reasoning
   10. codex-xhigh - {X}% used - maximum reasoning
-  11. sol - {X}% used - gpt-6-sol frontier tier
+  11. sol - {X}% used - gpt-6.2-sol frontier tier
   12. terra - {X}% used - gpt-5.6-terra balanced tier
   13. luna - {X}% used - gpt-6-luna fast/affordable tier
-  14. astra - {X}% used - gpt-6-astra explicit shorthand
+  14. astra - {X}% used - gpt-6.2-astra explicit shorthand
   15. gpt54 - {X}% used - gpt-5.4 explicit shorthand
   16. gpt54-high - {X}% used - deep reasoning
   17. gpt54-xhigh - {X}% used - maximum reasoning
@@ -180,10 +180,10 @@ If running now, run `npx cclimits --json 2>/dev/null`, summarize current quota s
   8. codex-spark - {X}% used - fast/low-cost coding tier
   9. codex-high - {X}% used - higher reasoning
   10. codex-xhigh - {X}% used - maximum reasoning
-  11. sol - {X}% used - gpt-6-sol frontier tier
+  11. sol - {X}% used - gpt-6.2-sol frontier tier
   12. terra - {X}% used - gpt-5.6-terra balanced tier
   13. luna - {X}% used - gpt-6-luna fast/affordable tier
-  14. astra - {X}% used - gpt-6-astra explicit shorthand
+  14. astra - {X}% used - gpt-6.2-astra explicit shorthand
   15. gpt54 - {X}% used - gpt-5.4 explicit shorthand
   16. gpt54-high - {X}% used - deep reasoning
   17. gpt54-xhigh - {X}% used - maximum reasoning
@@ -314,10 +314,10 @@ If running now, run `npx cclimits --json 2>/dev/null`, summarize current quota s
   8. codex-spark - {X}% used - fast/low-cost coding tier
   9. codex-high - {X}% used - higher reasoning
   10. codex-xhigh - {X}% used - maximum reasoning
-  11. sol - {X}% used - gpt-6-sol frontier tier
+  11. sol - {X}% used - gpt-6.2-sol frontier tier
   12. terra - {X}% used - gpt-5.6-terra balanced tier
   13. luna - {X}% used - gpt-6-luna fast/affordable tier
-  14. astra - {X}% used - gpt-6-astra explicit shorthand
+  14. astra - {X}% used - gpt-6.2-astra explicit shorthand
   15. gpt54 - {X}% used - gpt-5.4 explicit shorthand
   16. gpt54-high - {X}% used - deep reasoning
   17. gpt54-xhigh - {X}% used - maximum reasoning

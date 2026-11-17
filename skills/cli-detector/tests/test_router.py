@@ -819,10 +819,10 @@ class TestOpenAIModels:
             ("codex", "gpt-5.6-terra", None),
             ("codex-high", "gpt-5.6-terra", "high"),
             ("codex-xhigh", "gpt-5.6-terra", "xhigh"),
-            ("sol", "gpt-6-sol", None),
+            ("sol", "gpt-6.2-sol", None),
             ("terra", "gpt-5.6-terra", None),
             ("luna", "gpt-6-luna", None),
-            ("astra", "gpt-6-astra", None),
+            ("astra", "gpt-6.2-astra", None),
             ("gpt54", "gpt-5.4", None),
             ("gpt54-high", "gpt-5.4", "high"),
             ("gpt54-xhigh", "gpt-5.4", "xhigh"),
@@ -845,15 +845,21 @@ class TestOpenAIModels:
             assert any(expected_reasoning in str(c) for c in cmd)
 
     @pytest.mark.parametrize("alias,model_id", [
-        ("gpt-6-sol", "openai:gpt-6-sol"),
+        ("gpt-6.2-sol", "openai:gpt-6.2-sol"),
+        ("gpt-6.2-astra", "openai:gpt-6.2-astra"),
+        # Older tier slugs alias to the current tier shorthand.
+        ("gpt-6-sol", "openai:gpt-6.2-sol"),
         ("gpt-6-luna", "openai:gpt-6-luna"),
-        ("gpt-6-astra", "openai:gpt-6-astra"),
+        ("gpt-6-astra", "openai:gpt-6.2-astra"),
     ])
     def test_gpt6_slugs_route_to_matching_model(self, full_cache, alias, model_id):
         cli, resolved, command = router.resolve_model(alias)
         assert cli == "codex"
         assert resolved == model_id
-        assert command[-2:] == ["-m", model_id.removeprefix("openai:")]
+        slug = model_id.removeprefix("openai:")
+        assert command[command.index("-m") + 1] == slug
+        # gpt-6.2 tiers reject Daybreak; older tiers must not get the override.
+        assert (command[-2:] == ["-c", "daybreak=false"]) == slug.startswith("gpt-6.2-")
 
     @pytest.mark.parametrize(
         "alias,expected_shorthand",

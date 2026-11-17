@@ -220,6 +220,9 @@ def default_command(
             stripped = strip_provider(model_id)
             if stripped and stripped != "gpt-5.5":
                 command.extend(["-m", stripped])
+            # gpt-6.2 tiers reject Codex's Daybreak mode ("Daybreak is unavailable for model").
+            if stripped.startswith("gpt-6.2-"):
+                command.extend(["-c", "daybreak=false"])
         if default_variant:
             command.extend(["-c", f'model_reasoning_effort="{default_variant}"'])
         return command

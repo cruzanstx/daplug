@@ -168,10 +168,10 @@ Location: `{git_root}/prompts/` (active) and `{git_root}/prompts/completed/` (ar
 | `codex-spark` | codex | gpt-5.3-codex-spark (low latency) |
 | `codex-high` | codex | gpt-5.6-terra (high reasoning) |
 | `codex-xhigh` | codex | gpt-5.6-terra (xhigh reasoning) |
-| `sol` | codex | gpt-6-sol |
+| `sol` | codex | gpt-6.2-sol |
 | `terra` | codex | gpt-5.6-terra |
 | `luna` | codex | gpt-6-luna |
-| `astra` | codex | gpt-6-astra |
+| `astra` | codex | gpt-6.2-astra |
 | `gpt54` | codex | gpt-5.4 |
 | `gpt54-high` | codex | gpt-5.4 (high reasoning) |
 | `gpt54-xhigh` | codex | gpt-5.4 (xhigh reasoning) |

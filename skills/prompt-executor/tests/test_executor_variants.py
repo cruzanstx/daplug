@@ -191,15 +191,18 @@ def test_codex_variant_mapping_high_and_xhigh(no_router, tmp_path):
     assert _reasoning_value(xhigh_info["command"]) == "xhigh"
 
 @pytest.mark.parametrize("alias,slug", [
-    ("sol", "gpt-6-sol"),
+    ("sol", "gpt-6.2-sol"),
     ("luna", "gpt-6-luna"),
-    ("astra", "gpt-6-astra"),
+    ("astra", "gpt-6.2-astra"),
 ])
 def test_gpt6_registry_routes(no_router, tmp_path, alias, slug):
     info = executor.get_cli_info(alias, repo_root=tmp_path)
     assert info["selected_cli"] == "codex"
     assert info["model_id"] == f"openai:{slug}"
-    assert info["command"][-2:] == ["-m", slug]
+    cmd = info["command"]
+    assert cmd[cmd.index("-m") + 1] == slug
+    # gpt-6.2 tiers reject Daybreak; older tiers must not get the override.
+    assert (cmd[-2:] == ["-c", "daybreak=false"]) == slug.startswith("gpt-6.2-")
 
 
 def test_opus_alias_uses_claude_codes_current_model(no_router, tmp_path, monkeypatch):

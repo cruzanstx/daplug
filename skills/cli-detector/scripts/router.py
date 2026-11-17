@@ -56,10 +56,10 @@ _SHORTHAND: dict[str, _ModelRequest] = {
         model_id="openai:gpt-5.6-terra",
         reasoning_effort="xhigh",
     ),
-    "sol": _ModelRequest("sol", family="openai", model_id="openai:gpt-6-sol"),
+    "sol": _ModelRequest("sol", family="openai", model_id="openai:gpt-6.2-sol"),
     "terra": _ModelRequest("terra", family="openai", model_id="openai:gpt-5.6-terra"),
     "luna": _ModelRequest("luna", family="openai", model_id="openai:gpt-6-luna"),
-    "astra": _ModelRequest("astra", family="openai", model_id="openai:gpt-6-astra"),
+    "astra": _ModelRequest("astra", family="openai", model_id="openai:gpt-6.2-astra"),
     "gpt54": _ModelRequest("gpt54", family="openai", model_id="openai:gpt-5.4"),
     "gpt54-high": _ModelRequest(
         "gpt54-high",
@@ -358,6 +358,10 @@ _ALIASES: dict[str, str] = {
     "spark": "codex-spark",
     "gpt-5.6-terra": "terra",
     "gpt5.6-terra": "terra",
+    "gpt-6.2-sol": "sol",
+    "gpt-6.2-astra": "astra",
+    "gpt6.2-sol": "sol",
+    "gpt6.2-astra": "astra",
     "gpt-6-sol": "sol",
     "gpt-6-luna": "luna",
     "gpt-6-astra": "astra",
@@ -712,6 +716,9 @@ def _build_command(cli: str, model_id: str, request: _ModelRequest) -> list[str]
             cmd.extend(["--profile", profile])
         else:
             cmd.extend(["-m", _strip_provider_prefix(model_id)])
+            # gpt-6.2 tiers reject Codex's Daybreak mode ("Daybreak is unavailable for model").
+            if _strip_provider_prefix(model_id).startswith("gpt-6.2-"):
+                cmd.extend(["-c", "daybreak=false"])
 
         if request.reasoning_effort:
             cmd.extend(["-c", f'model_reasoning_effort="{request.reasoning_effort}"'])

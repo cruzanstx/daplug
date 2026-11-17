@@ -13,10 +13,10 @@
 - `codex-spark` - OpenAI Codex Spark (lowest-latency tier)
 - `codex-high` - OpenAI Codex CLI (gpt-5.6-terra) with high reasoning effort
 - `codex-xhigh` - OpenAI Codex CLI (gpt-5.6-terra) with xhigh reasoning effort
-- `sol` - OpenAI GPT-6 Sol (latest frontier agentic coding model)
+- `sol` - OpenAI GPT-6.2 Sol (latest frontier agentic coding model)
 - `terra` - OpenAI GPT-5.6 Terra (balanced everyday agentic coding)
 - `luna` - OpenAI GPT-6 Luna (fast and affordable agentic coding)
-- `astra` - OpenAI GPT-6 Astra (account-gated, direct shorthand)
+- `astra` - OpenAI GPT-6.2 Astra (account-gated, direct shorthand)
 - `gpt54` - OpenAI GPT-5.4 (direct shorthand)
 - `gpt54-high` - OpenAI GPT-5.4 with high reasoning effort
 - `gpt54-xhigh` - OpenAI GPT-5.4 with xhigh reasoning

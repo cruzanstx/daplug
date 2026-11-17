@@ -687,10 +687,10 @@ These tables are generated from `scripts/models.json`.
 | `codex-spark` | gpt-5.3-codex-spark | Lowest-latency quick edits |
 | `codex-high` | gpt-5.6-terra | Complex coding |
 | `codex-xhigh` | gpt-5.6-terra | Large refactors |
-| `sol` | gpt-6-sol | Hardest agentic coding tasks |
+| `sol` | gpt-6.2-sol | Hardest agentic coding tasks |
 | `terra` | gpt-5.6-terra | Balanced everyday coding (codex default) |
 | `luna` | gpt-6-luna | Fast, cost-efficient coding |
-| `astra` | gpt-6-astra | GPT-6 Astra coding |
+| `astra` | gpt-6.2-astra | GPT-6.2 Astra coding |
 | `gpt54` | gpt-5.4 | Explicit GPT-5.4 shorthand |
 | `gpt54-high` | gpt-5.4 | Deep reasoning with GPT-5.4 |
 | `gpt54-xhigh` | gpt-5.4 | Maximum reasoning with GPT-5.4 |

@@ -437,6 +437,9 @@ def _build_codex_command(
         stripped = _strip_provider_prefix(model_id)
         if stripped and stripped != "gpt-5.5":
             cmd.extend(["-m", stripped])
+        # gpt-6.2 tiers reject Codex's Daybreak mode ("Daybreak is unavailable for model").
+        if stripped.startswith("gpt-6.2-"):
+            cmd.extend(["-c", "daybreak=false"])
 
     if variant:
         if variant not in CODEX_REASONING_VARIANTS:

@@ -17,10 +17,10 @@
 | codex-spark | codex exec --approve-for-me -m gpt-5.3-codex-spark | Lowest-latency quick edits |
 | codex-high | codex exec --approve-for-me -m gpt-5.6-terra -c model_reasoning_effort="high" | Complex coding |
 | codex-xhigh | codex exec --approve-for-me -m gpt-5.6-terra -c model_reasoning_effort="xhigh" | Large refactors |
-| sol | codex exec --approve-for-me -m gpt-6-sol | Hardest agentic coding tasks |
+| sol | codex exec --approve-for-me -m gpt-6.2-sol -c daybreak=false | Hardest agentic coding tasks |
 | terra | codex exec --approve-for-me -m gpt-5.6-terra | Balanced everyday coding (codex default) |
 | luna | codex exec --approve-for-me -m gpt-6-luna | Fast, cost-efficient coding |
-| astra | codex exec --approve-for-me -m gpt-6-astra | GPT-6 Astra coding |
+| astra | codex exec --approve-for-me -m gpt-6.2-astra -c daybreak=false | GPT-6.2 Astra coding |
 | gpt54 | codex exec --approve-for-me -m gpt-5.4 | Explicit GPT-5.4 shorthand |
 | gpt54-high | codex exec --approve-for-me -m gpt-5.4 -c model_reasoning_effort="high" | Deep reasoning with GPT-5.4 |
 | gpt54-xhigh | codex exec --approve-for-me -m gpt-5.4 -c model_reasoning_effort="xhigh" | Maximum reasoning with GPT-5.4 |
