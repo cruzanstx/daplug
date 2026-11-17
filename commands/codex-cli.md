@@ -63,7 +63,7 @@ fi
 
 **If --worktree provided:**
 ```bash
-bash -c "codex exec --full-auto $REASONING_CONFIG \
+bash -c "codex exec --approve-for-me $REASONING_CONFIG \
   --add-dir ~/.cache --add-dir ~/go --add-dir ~/.npm \
   -C '{WORKTREE_PATH}' \"\$(cat {WORKTREE_PATH}/TASK.md)\" > '$LOGFILE' 2>&1" &
 echo "PID: $!"
@@ -71,7 +71,7 @@ echo "PID: $!"
 
 **Otherwise (simple task):**
 ```bash
-bash -c "codex exec --full-auto $REASONING_CONFIG \
+bash -c "codex exec --approve-for-me $REASONING_CONFIG \
   --add-dir ~/.cache --add-dir ~/go --add-dir ~/.npm \
   '{TASK}' > '$LOGFILE' 2>&1" &
 echo "PID: $!"

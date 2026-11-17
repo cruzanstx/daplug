@@ -40,7 +40,7 @@ class CodexCLI(SimpleCLIPlugin):
     def build_command(self, model: str, prompt_file: Path, cwd: Path) -> list[str]:
         _ = prompt_file, cwd
         # Headless mode reads prompt from stdin via "-".
-        cmd = ["codex", "exec", "--full-auto"]
+        cmd = ["codex", "exec", "--approve-for-me"]
         if model:
             cmd.extend(["-m", model])
         cmd.append("-")

@@ -222,7 +222,7 @@ class TestGetCliInfo(unittest.TestCase):
     def test_local_models_cli_override_codex(self):
         """Verify --cli codex forces legacy local profiles."""
         info = executor.get_cli_info("qwen", cli_override="codex")
-        self.assertEqual(info["command"], ["codex", "exec", "--full-auto", "--profile", "local"])
+        self.assertEqual(info["command"], ["codex", "exec", "--approve-for-me", "--profile", "local"])
         self.assertEqual(info["stdin_mode"], "dash")
 
     def test_codex_models_no_pty(self):

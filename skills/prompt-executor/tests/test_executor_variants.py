@@ -438,7 +438,7 @@ def test_explicit_cli_override_takes_precedence_over_router_default(tmp_path, mo
     monkeypatch.setattr(
         models,
         "_resolve_router_command",
-        lambda *_args, **_kwargs: ("codex", "openai:gpt-5.3-codex", ["codex", "exec", "--full-auto"]),
+        lambda *_args, **_kwargs: ("codex", "openai:gpt-5.3-codex", ["codex", "exec", "--approve-for-me"]),
     )
 
     info = executor.get_cli_info("codex", repo_root=tmp_path, cli_override="opencode", variant="high")
@@ -466,10 +466,10 @@ def test_legacy_aliases_remain_backward_compatible(no_router, tmp_path):
     codex_alias = executor.get_cli_info("codex-xhigh", repo_root=tmp_path)
     gpt_alias = executor.get_cli_info("gpt52-high", repo_root=tmp_path)
 
-    assert codex_alias["command"][0:3] == ["codex", "exec", "--full-auto"]
+    assert codex_alias["command"][0:3] == ["codex", "exec", "--approve-for-me"]
     assert _reasoning_value(codex_alias["command"]) == "xhigh"
 
-    assert gpt_alias["command"][0:5] == ["codex", "exec", "--full-auto", "-m", "gpt-5.2"]
+    assert gpt_alias["command"][0:5] == ["codex", "exec", "--approve-for-me", "-m", "gpt-5.2"]
     assert _reasoning_value(gpt_alias["command"]) == "high"
 
 

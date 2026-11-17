@@ -13,7 +13,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from models import apply_claude_sandbox_permissions
+from models import apply_claude_sandbox_permissions, apply_codex_compat
 from paths import get_cli_logs_dir, get_repo_root
 import agy_stream
 from repostate import (
@@ -605,6 +605,7 @@ def run_cli(
         sandbox_active=sandbox_active,
         allow_bypass_without_sandbox=bool(cli_info.get("allow_bypass_without_sandbox")),
     )
+    base_command = apply_codex_compat(base_command)
 
     # Claude Code refuses bypassPermissions when running as root/sudo unless it
     # believes it is sandboxed (IS_SANDBOX). Under bwrap that is genuinely true;
@@ -906,6 +907,7 @@ def run_cli_foreground(
         sandbox_active=sandbox_active,
         allow_bypass_without_sandbox=bool(cli_info.get("allow_bypass_without_sandbox")),
     )
+    base_command = apply_codex_compat(base_command)
 
     # Claude Code refuses bypassPermissions when running as root/sudo unless it
     # believes it is sandboxed (IS_SANDBOX). Under bwrap that is genuinely true;

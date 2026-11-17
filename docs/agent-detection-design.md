@@ -21,7 +21,7 @@ Key design choice: treat **CLI runners** (Codex, OpenCode, Aider, etc.) and **lo
 | CLI | Detect installed | Config locations (typical) | Config format | Model discovery strategy | Cross-provider? | Invocation for daplug |
 |---|---|---|---|---|---|---|
 | **Claude Code** (`claude`) | `command -v claude` | `~/.claude/settings.json`, `.claude/settings.json`, `.claude/settings.local.json` | JSON | Static “known Claude Code models” + (optional) `ANTHROPIC_MODEL`/settings | No (Anthropic only) | `claude -p "<prompt>"` |
-| **OpenAI Codex CLI** (`codex`) | `command -v codex` | `~/.codex/config.toml` | TOML | Parse config for default model + profiles; optionally hit provider `/v1/models` for OpenAI-compatible providers | Yes (custom providers) | `codex exec --full-auto ... "<prompt>"` |
+| **OpenAI Codex CLI** (`codex`) | `command -v codex` | `~/.codex/config.toml` | TOML | Parse config for default model + profiles; optionally hit provider `/v1/models` for OpenAI-compatible providers | Yes (custom providers) | `codex exec --approve-for-me ... "<prompt>"` |
 | **Google Gemini CLI** (`gemini`) | `command -v gemini` | `~/.gemini/settings.json`, `.gemini/settings.json` | JSON | Static/known Gemini model set + user preference; optionally parse settings | No (Google only) | `gemini -m <model> -p "<prompt>"` |
 | **OpenCode** (`opencode`) | `command -v opencode` | `~/.config/opencode/opencode.json`, `./opencode.json` | JSON/JSONC | `opencode models` and config parse | Yes | `opencode run --format json -m <provider/model> "<prompt>"` |
 | **Goose** (`goose`) | `command -v goose` | `~/.config/goose/config.yaml` (+ related files) | YAML | Parse config (provider/model); optional “provider-known defaults” | Yes | `goose run --text "<prompt>"` |
@@ -64,8 +64,8 @@ Key design choice: treat **CLI runners** (Codex, OpenCode, Aider, etc.) and **lo
   - Custom providers:
     - Codex supports additional `model_providers` and `profiles` (used today in daplug for Z.AI and local LM Studio).
 - Invocation:
-  - `codex exec --full-auto -m <model> "<prompt>"`
-  - Profiles: `codex exec --full-auto --profile <name> "<prompt>"`
+  - `codex exec --approve-for-me -m <model> "<prompt>"`
+  - Profiles: `codex exec --approve-for-me --profile <name> "<prompt>"`
 - Cross-provider support: **Yes** (via custom providers / OpenAI-compatible endpoints).
 - Auth:
   - Either user account login or API key flow; treat missing credentials as an issue if codex commands fail.

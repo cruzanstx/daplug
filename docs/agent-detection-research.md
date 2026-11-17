@@ -38,7 +38,7 @@ This document summarizes the research on various AI coding CLIs and local model 
 ### 2. Codex CLI
 - **Detection**: Check for `codex` in path.
 - **Config**: `~/.codex/config.json` (also supports `.toml` in some versions).
-- **Headless**: `codex exec --full-auto -` (reads from stdin).
+- **Headless**: `codex exec --approve-for-me -` (reads from stdin).
 
 ### 3. Gemini CLI
 - **Detection**: Check for `gemini` in path.

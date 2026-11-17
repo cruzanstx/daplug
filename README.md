@@ -638,7 +638,7 @@ The executor uses stdin for codex models to avoid shell escaping issues with com
 
 ```python
 # Codex: uses stdin with '-' flag
-codex exec --full-auto -  # reads from stdin
+codex exec --approve-for-me -  # reads from stdin
 
 # Antigravity: uses --print with the prompt as the flag value
 agy --model "Gemini 3.8 Flash (High)" --dangerously-skip-permissions --print "prompt content"
