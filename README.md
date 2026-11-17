@@ -25,6 +25,10 @@ Clone/copy this plugin to one of:
 - `~/.claude/plugins/daplug/` (user scope)
 - `.claude/plugins/daplug/` (project scope)
 
+### Antigravity (agy)
+
+`agy plugin install https://github.com/cruzanstx/daplug` (or a local checkout path) converts daplug for Antigravity CLI 1.5.9+. Commands become `daplug-cmd-<name>` skills, and the hook fires on `run_command`. State stays shared under `~/.claude`. See [docs/antigravity.md](docs/antigravity.md) for what converts, the agent `model:` tier limit, and the executor's built-in no-Google guard.
+
 ## OpenCode Compatibility
 
 OpenCode does not load Claude marketplace plugins, so daplug's namespaced commands (for example `/daplug:run-prompt`) are not available and will fail with `Command or skill not found.`

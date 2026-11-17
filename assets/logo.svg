@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none">
+  <title>daplug</title>
+  <rect x="24" y="24" width="208" height="208" rx="48" stroke="#5B6CFF" stroke-width="16"/>
+  <path d="M96 76v40M160 76v40" stroke="#5B6CFF" stroke-width="16" stroke-linecap="round"/>
+  <path d="M76 116h104v20a52 52 0 0 1-104 0z" fill="#5B6CFF"/>
+  <path d="M128 188v32" stroke="#5B6CFF" stroke-width="16" stroke-linecap="round"/>
+</svg>
