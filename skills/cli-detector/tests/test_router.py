@@ -127,7 +127,7 @@ def test_resolve_model_returns_installed_cli(monkeypatch):
     cli, model_id, cmd = router.resolve_model("codex")
     assert cli == "codex"
     assert model_id == "openai:gpt-5.6-terra"
-    assert cmd[:3] == ["codex", "exec", "--full-auto"]
+    assert cmd[:3] == ["codex", "exec", "--approve-for-me"]
 
 
 def test_resolve_model_falls_back_when_preferred_missing(monkeypatch):
@@ -840,7 +840,7 @@ class TestOpenAIModels:
         assert expected_model in model_id
         assert cmd[0] == "codex"
         assert "exec" in cmd
-        assert "--full-auto" in cmd
+        assert "--approve-for-me" in cmd
         if expected_reasoning:
             assert any(expected_reasoning in str(c) for c in cmd)
 
@@ -1030,7 +1030,7 @@ class TestLocalModels:
         cli, model_id, cmd = router.resolve_model("local")
         assert cli == "codex"
         assert "local:lmstudio" in model_id
-        assert cmd[:3] == ["codex", "exec", "--full-auto"]
+        assert cmd[:3] == ["codex", "exec", "--approve-for-me"]
         assert "--profile" in cmd
         assert "local" in cmd
 
@@ -1108,9 +1108,9 @@ class TestCommandStructure:
     """Test that generated commands match expected CLI patterns."""
 
     def test_codex_command_structure(self, full_cache):
-        """Codex commands should follow: codex exec --full-auto [-m model] [-c config]"""
+        """Codex commands should follow: codex exec --approve-for-me [-m model] [-c config]"""
         cli, model_id, cmd = router.resolve_model("codex")
-        assert cmd[0:3] == ["codex", "exec", "--full-auto"]
+        assert cmd[0:3] == ["codex", "exec", "--approve-for-me"]
 
     def test_gemini_command_structure(self, full_cache):
         """Gemini commands should follow: gemini -y -m model -p"""

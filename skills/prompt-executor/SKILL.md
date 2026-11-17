@@ -180,7 +180,7 @@ Per-run info lands in `prompts[].moa.runs[]` (worktree, branch, log, state file,
 1. Get CLI command from executor:
 ```bash
 python3 "$EXECUTOR" 123 --model codex
-# Returns: {"cli_command": ["codex", "exec", "--full-auto"], "content": "...", "log": "..."}
+# Returns: {"cli_command": ["codex", "exec", "--approve-for-me"], "content": "...", "log": "..."}
 ```
 
 2. Create tmux session using tmux-manager patterns:
@@ -191,7 +191,7 @@ tmux new-session -d -s "$SESSION_NAME" -c "$WORKTREE_PATH"
 
 3. Send command to session:
 ```bash
-tmux send-keys -t "$SESSION_NAME" "codex exec --full-auto '...' 2>&1 | tee $LOG_FILE" C-m
+tmux send-keys -t "$SESSION_NAME" "codex exec --approve-for-me '...' 2>&1 | tee $LOG_FILE" C-m
 ```
 
 ### With Verification Loop

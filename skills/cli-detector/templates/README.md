@@ -15,7 +15,7 @@ Notes:
 ### Codex CLI (`~/.codex/config.json`)
 - Template: `codex.json`
 - Required env: `OPENAI_API_KEY` (or `~/.codex/auth.json` from interactive login)
-- Codex headless mode uses `--full-auto`.
+- Codex headless mode uses `--approve-for-me` (daplug falls back to `--full-auto` on Codex builds that predate `--approve-for-me`).
 
 ### Antigravity CLI (`~/.gemini/antigravity-cli/settings.json`)
 - Binary: `agy`

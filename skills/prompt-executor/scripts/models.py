@@ -3,7 +3,9 @@
 
 import json
 import os
+import functools
 import shutil
+import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -373,13 +375,61 @@ def _resolve_router_command(
         return None
 
 
+# codex-cli 0.167.0 removed `codex exec --full-auto`. The closest equivalent is
+# `--approve-for-me` (automatic approval review; it implies the workspace-write
+# sandbox and cannot be combined with --sandbox). Commands are
+# always built with the modern flags; at launch time `apply_codex_compat`
+# swaps them back to the legacy flag only for older Codex builds.
+CODEX_UNATTENDED_FLAGS = ["--approve-for-me"]
+CODEX_LEGACY_UNATTENDED_FLAG = "--full-auto"
+
+
+@functools.lru_cache(maxsize=None)
+def codex_supports_approve_for_me(codex_bin: str = "codex") -> bool:
+    """Probe `codex exec --help` once per process for `--approve-for-me`.
+
+    Only a successful help run that lacks the flag means "older Codex"; if the
+    probe cannot run at all we keep the modern flags (the launch would surface
+    the real error anyway).
+    """
+    try:
+        result = subprocess.run(
+            [codex_bin, "exec", "--help"],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return True
+    output = (result.stdout or "") + (result.stderr or "")
+    if result.returncode != 0 or "usage" not in output.lower():
+        return True
+    return "--approve-for-me" in output
+
+
+def apply_codex_compat(command: list[str]) -> list[str]:
+    """Return `command` adapted to the installed Codex's unattended flags."""
+    if len(command) < 2 or Path(command[0]).name != "codex" or command[1] != "exec":
+        return command
+    n = len(CODEX_UNATTENDED_FLAGS)
+    idx = next(
+        (i for i in range(len(command) - n + 1) if command[i:i + n] == CODEX_UNATTENDED_FLAGS),
+        None,
+    )
+    if idx is None:
+        return command
+    if codex_supports_approve_for_me(command[0]):
+        return command
+    return command[:idx] + [CODEX_LEGACY_UNATTENDED_FLAG] + command[idx + n:]
+
+
 def _build_codex_command(
     model: str,
     model_spec: dict,
     model_id: str,
     variant: Optional[str],
 ) -> list[str]:
-    cmd = ["codex", "exec", "--full-auto"]
+    cmd = ["codex", "exec", *CODEX_UNATTENDED_FLAGS]
     profile = model_spec.get("codex_profile")
     if profile:
         cmd.extend(["--profile", str(profile)])

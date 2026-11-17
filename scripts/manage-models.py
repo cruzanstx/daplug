@@ -213,7 +213,7 @@ def default_command(
             raise RegistryError("Subagent models cannot have a default variant")
         return []
     if default_cli == "codex":
-        command = ["codex", "exec", "--full-auto"]
+        command = ["codex", "exec", "--approve-for-me"]
         if codex_profile:
             command.extend(["--profile", codex_profile])
         else:

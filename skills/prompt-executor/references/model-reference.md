@@ -13,23 +13,23 @@
 | fable | claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model fable | Floating Claude Code Fable alias (currently Fable 5.2) |
 | fable52 | claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model claude-fable-5-2 | Explicit Fable 5.2 pin via Claude Code CLI |
 | fable51 | claude --print --no-session-persistence --output-format text --input-format text --permission-mode dontAsk --model claude-fable-5-1 | Explicit Fable 5.1 pin via Claude Code CLI |
-| codex | codex exec --full-auto -m gpt-5.6-terra | Fast coding execution (default Codex shorthand) |
-| codex-spark | codex exec --full-auto -m gpt-5.3-codex-spark | Lowest-latency quick edits |
-| codex-high | codex exec --full-auto -m gpt-5.6-terra -c model_reasoning_effort="high" | Complex coding |
-| codex-xhigh | codex exec --full-auto -m gpt-5.6-terra -c model_reasoning_effort="xhigh" | Large refactors |
-| sol | codex exec --full-auto -m gpt-6-sol | Hardest agentic coding tasks |
-| terra | codex exec --full-auto -m gpt-5.6-terra | Balanced everyday coding (codex default) |
-| luna | codex exec --full-auto -m gpt-6-luna | Fast, cost-efficient coding |
-| astra | codex exec --full-auto -m gpt-6-astra | GPT-6 Astra coding |
-| gpt54 | codex exec --full-auto -m gpt-5.4 | Explicit GPT-5.4 shorthand |
-| gpt54-high | codex exec --full-auto -m gpt-5.4 -c model_reasoning_effort="high" | Deep reasoning with GPT-5.4 |
-| gpt54-xhigh | codex exec --full-auto -m gpt-5.4 -c model_reasoning_effort="xhigh" | Maximum reasoning with GPT-5.4 |
-| gpt55 | codex exec --full-auto | Explicit GPT-5.5 shorthand |
-| gpt55-high | codex exec --full-auto -c model_reasoning_effort="high" | Deep reasoning with GPT-5.5 |
-| gpt55-xhigh | codex exec --full-auto -c model_reasoning_effort="xhigh" | Maximum reasoning with GPT-5.5 |
-| gpt52 | codex exec --full-auto -m gpt-5.2 | Planning, research, analysis |
-| gpt52-high | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="high" | Deep reasoning |
-| gpt52-xhigh | codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort="xhigh" | Maximum reasoning (30+ min) |
+| codex | codex exec --approve-for-me -m gpt-5.6-terra | Fast coding execution (default Codex shorthand) |
+| codex-spark | codex exec --approve-for-me -m gpt-5.3-codex-spark | Lowest-latency quick edits |
+| codex-high | codex exec --approve-for-me -m gpt-5.6-terra -c model_reasoning_effort="high" | Complex coding |
+| codex-xhigh | codex exec --approve-for-me -m gpt-5.6-terra -c model_reasoning_effort="xhigh" | Large refactors |
+| sol | codex exec --approve-for-me -m gpt-6-sol | Hardest agentic coding tasks |
+| terra | codex exec --approve-for-me -m gpt-5.6-terra | Balanced everyday coding (codex default) |
+| luna | codex exec --approve-for-me -m gpt-6-luna | Fast, cost-efficient coding |
+| astra | codex exec --approve-for-me -m gpt-6-astra | GPT-6 Astra coding |
+| gpt54 | codex exec --approve-for-me -m gpt-5.4 | Explicit GPT-5.4 shorthand |
+| gpt54-high | codex exec --approve-for-me -m gpt-5.4 -c model_reasoning_effort="high" | Deep reasoning with GPT-5.4 |
+| gpt54-xhigh | codex exec --approve-for-me -m gpt-5.4 -c model_reasoning_effort="xhigh" | Maximum reasoning with GPT-5.4 |
+| gpt55 | codex exec --approve-for-me | Explicit GPT-5.5 shorthand |
+| gpt55-high | codex exec --approve-for-me -c model_reasoning_effort="high" | Deep reasoning with GPT-5.5 |
+| gpt55-xhigh | codex exec --approve-for-me -c model_reasoning_effort="xhigh" | Maximum reasoning with GPT-5.5 |
+| gpt52 | codex exec --approve-for-me -m gpt-5.2 | Planning, research, analysis |
+| gpt52-high | codex exec --approve-for-me -m gpt-5.2 -c model_reasoning_effort="high" | Deep reasoning |
+| gpt52-xhigh | codex exec --approve-for-me -m gpt-5.2 -c model_reasoning_effort="xhigh" | Maximum reasoning (30+ min) |
 | gemini | agy --model "Gemini 3.8 Flash (High)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Fast daily driver, high reasoning (default) |
 | gemini-high | gemini -y -m gemini-2.5-pro | Stable, more capable |
 | gemini-xhigh | gemini -y -m gemini-3-pro-preview | Most capable Gemini fallback |
@@ -57,7 +57,7 @@
 | hydrogen-medium | agy --model "Gemini 4 Hydrogen (Medium)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Hydrogen medium reasoning (AGY only) |
 | hydrogen-low | agy --model "Gemini 4 Hydrogen (Low)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Hydrogen low reasoning (AGY only) |
 | agy | agy --model "Gemini 3.8 Flash (High)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Antigravity default (same as gemini/gemini37) |
-| zai | codex exec --full-auto --profile zai | General coding fallback |
+| zai | codex exec --approve-for-me --profile zai | General coding fallback |
 | glm5 | opencode run --format json -m zai/glm-5.3 --pure --agent build | Latest GLM 5.x tasks via OpenCode |
 | glm52 | opencode run --format json -m zai/glm-5.2 --pure --agent build | Explicit GLM-5.2 pin via OpenCode |
 | glm53 | opencode run --format json -m zai/glm-5.3 --pure --agent build | Explicit GLM-5.3 pin via OpenCode |

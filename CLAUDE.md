@@ -117,7 +117,7 @@ For codex-based CLIs, use stdin to avoid shell escaping issues:
 
 ```python
 # Codex-style: use '-' to read from stdin
-process = subprocess.Popen(["codex", "exec", "--full-auto", "-"], stdin=subprocess.PIPE, ...)
+process = subprocess.Popen(["codex", "exec", "--approve-for-me", "-"], stdin=subprocess.PIPE, ...)
 process.stdin.write(content)
 
 # Antigravity/Gemini-style: pass as argument

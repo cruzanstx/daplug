@@ -360,7 +360,7 @@ class TestInactivityTimeout:
         assert loop._is_agy_cli(info) is True
 
     def test_is_agy_cli_rejects_non_agy(self):
-        info = {"command": ["codex", "exec", "--full-auto"]}
+        info = {"command": ["codex", "exec", "--approve-for-me"]}
         assert loop._is_agy_cli(info) is False
 
     def test_agy_failure_explanations_defined(self):
@@ -491,13 +491,13 @@ class TestNonAgyCommandsUnchanged:
         assert info["command"] == expected, f"{shorthand} command changed"
 
     @pytest.mark.parametrize("shorthand,expected", [
-        ("codex", ["codex", "exec", "--full-auto", "-m", "gpt-5.6-terra"]),
-        ("codex-spark", ["codex", "exec", "--full-auto", "-m", "gpt-5.3-codex-spark"]),
-        ("sol", ["codex", "exec", "--full-auto", "-m", "gpt-6-sol"]),
-        ("terra", ["codex", "exec", "--full-auto", "-m", "gpt-5.6-terra"]),
-        ("luna", ["codex", "exec", "--full-auto", "-m", "gpt-6-luna"]),
-        ("astra", ["codex", "exec", "--full-auto", "-m", "gpt-6-astra"]),
-        ("zai", ["codex", "exec", "--full-auto", "--profile", "zai"]),
+        ("codex", ["codex", "exec", "--approve-for-me", "-m", "gpt-5.6-terra"]),
+        ("codex-spark", ["codex", "exec", "--approve-for-me", "-m", "gpt-5.3-codex-spark"]),
+        ("sol", ["codex", "exec", "--approve-for-me", "-m", "gpt-6-sol"]),
+        ("terra", ["codex", "exec", "--approve-for-me", "-m", "gpt-5.6-terra"]),
+        ("luna", ["codex", "exec", "--approve-for-me", "-m", "gpt-6-luna"]),
+        ("astra", ["codex", "exec", "--approve-for-me", "-m", "gpt-6-astra"]),
+        ("zai", ["codex", "exec", "--approve-for-me", "--profile", "zai"]),
     ])
     def test_codex_argv_unchanged(self, tmp_path, shorthand, expected):
         info = models.get_cli_info(shorthand, repo_root=tmp_path)

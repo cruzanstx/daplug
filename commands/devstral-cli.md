@@ -114,7 +114,7 @@ echo "LOGFILE: $LOGFILE"
 **If --worktree provided:**
 ```bash
 bash -c "export LMSTUDIO_API_KEY='lm-studio' && \
-  codex exec --full-auto --profile local-devstral \
+  codex exec --approve-for-me --profile local-devstral \
   --add-dir ~/.cache --add-dir ~/go --add-dir ~/.npm \
   -C '{WORKTREE_PATH}' \"\$(cat {WORKTREE_PATH}/TASK.md)\" > '$LOGFILE' 2>&1" &
 echo "PID: $!"
@@ -123,7 +123,7 @@ echo "PID: $!"
 **Otherwise (simple task):**
 ```bash
 bash -c "export LMSTUDIO_API_KEY='lm-studio' && \
-  codex exec --full-auto --profile local-devstral \
+  codex exec --approve-for-me --profile local-devstral \
   --add-dir ~/.cache --add-dir ~/go --add-dir ~/.npm \
   '{TASK}' > '$LOGFILE' 2>&1" &
 echo "PID: $!"

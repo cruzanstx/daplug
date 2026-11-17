@@ -293,7 +293,7 @@
       "command": [
         "codex",
         "exec",
-        "--full-auto",
+        "--approve-for-me",
         "-m",
         "gpt-5.6-terra"
       ],
@@ -311,7 +311,7 @@
         "cli_label": "codex",
         "actual_model": "gpt-5.6-terra",
         "option_description": "OpenAI Codex CLI (gpt-5.6-terra, balanced everyday coding)",
-        "reference_cli": "codex exec --full-auto -m gpt-5.6-terra",
+        "reference_cli": "codex exec --approve-for-me -m gpt-5.6-terra",
         "reference_description": "Fast coding execution (default Codex shorthand)",
         "readme_section": "OpenAI",
         "readme_model": "gpt-5.6-terra",
@@ -336,7 +336,7 @@
       "command": [
         "codex",
         "exec",
-        "--full-auto",
+        "--approve-for-me",
         "-m",
         "gpt-5.3-codex-spark"
       ],
@@ -354,7 +354,7 @@
         "cli_label": "codex",
         "actual_model": "gpt-5.3-codex-spark (low latency)",
         "option_description": "OpenAI Codex Spark (lowest-latency tier)",
-        "reference_cli": "codex exec --full-auto -m gpt-5.3-codex-spark",
+        "reference_cli": "codex exec --approve-for-me -m gpt-5.3-codex-spark",
         "reference_description": "Lowest-latency quick edits",
         "readme_section": "OpenAI",
         "readme_model": "gpt-5.3-codex-spark",
@@ -379,7 +379,7 @@
       "command": [
         "codex",
         "exec",
-        "--full-auto",
+        "--approve-for-me",
         "-m",
         "gpt-5.6-terra",
         "-c",
@@ -399,7 +399,7 @@
         "cli_label": "codex",
         "actual_model": "gpt-5.6-terra (high reasoning)",
         "option_description": "OpenAI Codex CLI (gpt-5.6-terra) with high reasoning effort",
-        "reference_cli": "codex exec --full-auto -m gpt-5.6-terra -c model_reasoning_effort=\"high\"",
+        "reference_cli": "codex exec --approve-for-me -m gpt-5.6-terra -c model_reasoning_effort=\"high\"",
         "reference_description": "Complex coding",
         "readme_section": "OpenAI",
         "readme_model": "gpt-5.6-terra",
@@ -424,7 +424,7 @@
       "command": [
         "codex",
         "exec",
-        "--full-auto",
+        "--approve-for-me",
         "-m",
         "gpt-5.6-terra",
         "-c",
@@ -444,7 +444,7 @@
         "cli_label": "codex",
         "actual_model": "gpt-5.6-terra (xhigh reasoning)",
         "option_description": "OpenAI Codex CLI (gpt-5.6-terra) with xhigh reasoning effort",
-        "reference_cli": "codex exec --full-auto -m gpt-5.6-terra -c model_reasoning_effort=\"xhigh\"",
+        "reference_cli": "codex exec --approve-for-me -m gpt-5.6-terra -c model_reasoning_effort=\"xhigh\"",
         "reference_description": "Large refactors",
         "readme_section": "OpenAI",
         "readme_model": "gpt-5.6-terra",
@@ -469,7 +469,7 @@
       "command": [
         "codex",
         "exec",
-        "--full-auto",
+        "--approve-for-me",
         "-m",
         "gpt-6-sol"
       ],
@@ -487,7 +487,7 @@
         "cli_label": "codex",
         "actual_model": "gpt-6-sol",
         "option_description": "OpenAI GPT-6 Sol (latest frontier agentic coding model)",
-        "reference_cli": "codex exec --full-auto -m gpt-6-sol",
+        "reference_cli": "codex exec --approve-for-me -m gpt-6-sol",
         "reference_description": "Hardest agentic coding tasks",
         "readme_section": "OpenAI",
         "readme_model": "gpt-6-sol",
@@ -512,7 +512,7 @@
       "command": [
         "codex",
         "exec",
-        "--full-auto",
+        "--approve-for-me",
         "-m",
         "gpt-5.6-terra"
       ],
@@ -530,7 +530,7 @@
         "cli_label": "codex",
         "actual_model": "gpt-5.6-terra",
         "option_description": "OpenAI GPT-5.6 Terra (balanced everyday agentic coding)",
-        "reference_cli": "codex exec --full-auto -m gpt-5.6-terra",
+        "reference_cli": "codex exec --approve-for-me -m gpt-5.6-terra",
         "reference_description": "Balanced everyday coding (codex default)",
         "readme_section": "OpenAI",
         "readme_model": "gpt-5.6-terra",
@@ -555,7 +555,7 @@
       "command": [
         "codex",
         "exec",
-        "--full-auto",
+        "--approve-for-me",
         "-m",
         "gpt-6-luna"
       ],
@@ -573,7 +573,7 @@
         "cli_label": "codex",
         "actual_model": "gpt-6-luna",
         "option_description": "OpenAI GPT-6 Luna (fast and affordable agentic coding)",
-        "reference_cli": "codex exec --full-auto -m gpt-6-luna",
+        "reference_cli": "codex exec --approve-for-me -m gpt-6-luna",
         "reference_description": "Fast, cost-efficient coding",
         "readme_section": "OpenAI",
         "readme_model": "gpt-6-luna",
@@ -598,7 +598,7 @@
       "command": [
         "codex",
         "exec",
-        "--full-auto",
+        "--approve-for-me",
         "-m",
         "gpt-6-astra"
       ],
@@ -615,7 +615,7 @@
         "cli_label": "codex",
         "actual_model": "gpt-6-astra",
         "option_description": "OpenAI GPT-6 Astra (account-gated, direct shorthand)",
-        "reference_cli": "codex exec --full-auto -m gpt-6-astra",
+        "reference_cli": "codex exec --approve-for-me -m gpt-6-astra",
         "reference_description": "GPT-6 Astra coding",
         "readme_section": "OpenAI",
         "readme_model": "gpt-6-astra",
@@ -640,7 +640,7 @@
       "command": [
         "codex",
         "exec",
-        "--full-auto",
+        "--approve-for-me",
         "-m",
         "gpt-5.4"
       ],
@@ -658,7 +658,7 @@
         "cli_label": "codex",
         "actual_model": "gpt-5.4",
         "option_description": "OpenAI GPT-5.4 (direct shorthand)",
-        "reference_cli": "codex exec --full-auto -m gpt-5.4",
+        "reference_cli": "codex exec --approve-for-me -m gpt-5.4",
         "reference_description": "Explicit GPT-5.4 shorthand",
         "readme_section": "OpenAI",
         "readme_model": "gpt-5.4",
@@ -683,7 +683,7 @@
       "command": [
         "codex",
         "exec",
-        "--full-auto",
+        "--approve-for-me",
         "-m",
         "gpt-5.4",
         "-c",
@@ -703,7 +703,7 @@
         "cli_label": "codex",
         "actual_model": "gpt-5.4 (high reasoning)",
         "option_description": "OpenAI GPT-5.4 with high reasoning effort",
-        "reference_cli": "codex exec --full-auto -m gpt-5.4 -c model_reasoning_effort=\"high\"",
+        "reference_cli": "codex exec --approve-for-me -m gpt-5.4 -c model_reasoning_effort=\"high\"",
         "reference_description": "Deep reasoning with GPT-5.4",
         "readme_section": "OpenAI",
         "readme_model": "gpt-5.4",
@@ -728,7 +728,7 @@
       "command": [
         "codex",
         "exec",
-        "--full-auto",
+        "--approve-for-me",
         "-m",
         "gpt-5.4",
         "-c",
@@ -748,7 +748,7 @@
         "cli_label": "codex",
         "actual_model": "gpt-5.4 (xhigh reasoning)",
         "option_description": "OpenAI GPT-5.4 with xhigh reasoning",
-        "reference_cli": "codex exec --full-auto -m gpt-5.4 -c model_reasoning_effort=\"xhigh\"",
+        "reference_cli": "codex exec --approve-for-me -m gpt-5.4 -c model_reasoning_effort=\"xhigh\"",
         "reference_description": "Maximum reasoning with GPT-5.4",
         "readme_section": "OpenAI",
         "readme_model": "gpt-5.4",
@@ -773,7 +773,7 @@
       "command": [
         "codex",
         "exec",
-        "--full-auto"
+        "--approve-for-me"
       ],
       "routing": {
         "cli_overrides": [
@@ -789,7 +789,7 @@
         "cli_label": "codex",
         "actual_model": "gpt-5.5",
         "option_description": "OpenAI GPT-5.5 (direct shorthand)",
-        "reference_cli": "codex exec --full-auto",
+        "reference_cli": "codex exec --approve-for-me",
         "reference_description": "Explicit GPT-5.5 shorthand",
         "readme_section": "OpenAI",
         "readme_model": "gpt-5.5",
@@ -814,7 +814,7 @@
       "command": [
         "codex",
         "exec",
-        "--full-auto",
+        "--approve-for-me",
         "-c",
         "model_reasoning_effort=\"high\""
       ],
@@ -832,7 +832,7 @@
         "cli_label": "codex",
         "actual_model": "gpt-5.5 (high reasoning)",
         "option_description": "OpenAI GPT-5.5 with high reasoning effort",
-        "reference_cli": "codex exec --full-auto -c model_reasoning_effort=\"high\"",
+        "reference_cli": "codex exec --approve-for-me -c model_reasoning_effort=\"high\"",
         "reference_description": "Deep reasoning with GPT-5.5",
         "readme_section": "OpenAI",
         "readme_model": "gpt-5.5",
@@ -857,7 +857,7 @@
       "command": [
         "codex",
         "exec",
-        "--full-auto",
+        "--approve-for-me",
         "-c",
         "model_reasoning_effort=\"xhigh\""
       ],
@@ -875,7 +875,7 @@
         "cli_label": "codex",
         "actual_model": "gpt-5.5 (xhigh reasoning)",
         "option_description": "OpenAI GPT-5.5 with xhigh reasoning",
-        "reference_cli": "codex exec --full-auto -c model_reasoning_effort=\"xhigh\"",
+        "reference_cli": "codex exec --approve-for-me -c model_reasoning_effort=\"xhigh\"",
         "reference_description": "Maximum reasoning with GPT-5.5",
         "readme_section": "OpenAI",
         "readme_model": "gpt-5.5",
@@ -900,7 +900,7 @@
       "command": [
         "codex",
         "exec",
-        "--full-auto",
+        "--approve-for-me",
         "-m",
         "gpt-5.2"
       ],
@@ -918,7 +918,7 @@
         "cli_label": "codex",
         "actual_model": "gpt-5.2",
         "option_description": "OpenAI GPT-5.2 (planning, research, analysis)",
-        "reference_cli": "codex exec --full-auto -m gpt-5.2",
+        "reference_cli": "codex exec --approve-for-me -m gpt-5.2",
         "reference_description": "Planning, research, analysis",
         "readme_section": "OpenAI",
         "readme_model": "gpt-5.2",
@@ -943,7 +943,7 @@
       "command": [
         "codex",
         "exec",
-        "--full-auto",
+        "--approve-for-me",
         "-m",
         "gpt-5.2",
         "-c",
@@ -963,7 +963,7 @@
         "cli_label": "codex",
         "actual_model": "gpt-5.2 (high reasoning)",
         "option_description": "OpenAI GPT-5.2 with high reasoning effort",
-        "reference_cli": "codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort=\"high\"",
+        "reference_cli": "codex exec --approve-for-me -m gpt-5.2 -c model_reasoning_effort=\"high\"",
         "reference_description": "Deep reasoning",
         "readme_section": "OpenAI",
         "readme_model": "gpt-5.2",
@@ -988,7 +988,7 @@
       "command": [
         "codex",
         "exec",
-        "--full-auto",
+        "--approve-for-me",
         "-m",
         "gpt-5.2",
         "-c",
@@ -1008,7 +1008,7 @@
         "cli_label": "codex",
         "actual_model": "gpt-5.2 (xhigh reasoning)",
         "option_description": "OpenAI GPT-5.2 with xhigh reasoning (30+ min tasks)",
-        "reference_cli": "codex exec --full-auto -m gpt-5.2 -c model_reasoning_effort=\"xhigh\"",
+        "reference_cli": "codex exec --approve-for-me -m gpt-5.2 -c model_reasoning_effort=\"xhigh\"",
         "reference_description": "Maximum reasoning (30+ min)",
         "readme_section": "OpenAI",
         "readme_model": "gpt-5.2",
@@ -2024,7 +2024,7 @@
       "command": [
         "codex",
         "exec",
-        "--full-auto",
+        "--approve-for-me",
         "--profile",
         "zai"
       ],
@@ -2042,7 +2042,7 @@
         "cli_label": "codex",
         "actual_model": "GLM-4.7 via Z.AI (may have issues)",
         "option_description": "Z.AI GLM-4.7 via Codex CLI",
-        "reference_cli": "codex exec --full-auto --profile zai",
+        "reference_cli": "codex exec --approve-for-me --profile zai",
         "reference_description": "General coding fallback",
         "readme_section": "Z.AI / OpenCode",
         "readme_model": "glm-4.7",

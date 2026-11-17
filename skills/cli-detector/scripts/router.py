@@ -701,7 +701,7 @@ def _build_command(cli: str, model_id: str, request: _ModelRequest) -> list[str]
         return cmd
 
     if cli == "codex":
-        cmd: list[str] = ["codex", "exec", "--full-auto"]
+        cmd: list[str] = ["codex", "exec", "--approve-for-me"]
 
         if request.family == "zai":
             # Existing daplug convention: codex profile "zai" points at Z.AI.

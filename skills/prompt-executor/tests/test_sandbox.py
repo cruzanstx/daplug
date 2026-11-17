@@ -113,7 +113,7 @@ def test_build_bwrap_args_non_opencode_no_opencode_binds(profile, tmp_path, monk
         "network": profile != "strict",
     }
     for child in (
-        ["codex", "exec", "--full-auto", "-"],
+        ["codex", "exec", "--approve-for-me", "-"],
         ["agy", "--model", "Gemini 3.8 Flash (High)", "--dangerously-skip-permissions", "--print"],
         ["claude", "--print"],
     ):
@@ -259,7 +259,7 @@ def test_antigravity_basename_gets_token_ro_bind(tmp_path, monkeypatch):
     "child",
     [
         ["opencode", "run"],
-        ["codex", "exec", "--full-auto", "-"],
+        ["codex", "exec", "--approve-for-me", "-"],
         ["claude", "--print"],
         ["gemini", "-y", "-p"],
     ],
@@ -287,7 +287,7 @@ def test_non_agy_children_no_token_bind(child, tmp_path, monkeypatch):
     [
         ["agy", "--model", "Gemini 3.8 Flash (High)", "--dangerously-skip-permissions", "--print"],
         ["opencode", "run"],
-        ["codex", "exec", "--full-auto", "-"],
+        ["codex", "exec", "--approve-for-me", "-"],
         ["claude", "--print"],
     ],
 )
@@ -735,7 +735,7 @@ def test_agy_preflight_not_invoked_for_non_agy(tmp_path, monkeypatch):
     monkeypatch.setattr(executor.subprocess, "run", fake_run)
 
     env = {
-        "cli_info": {"command": ["codex", "exec", "--full-auto"], "env": {}},
+        "cli_info": {"command": ["codex", "exec", "--approve-for-me"], "env": {}},
         "sandbox_config": {
             "enabled": True,
             "type": "bubblewrap",
@@ -868,10 +868,12 @@ def test_run_cli_wraps_with_bwrap_when_enabled(tmp_path, monkeypatch):
         "build_bwrap_args",
         lambda config, child, extra_env=None: ["bwrap", "--unshare-all", "--", *child],
     )
+    # Popen is faked, so keep the codex --approve-for-me help probe off it.
+    monkeypatch.setattr(sys.modules["models"], "codex_supports_approve_for_me", lambda *a, **kw: True)
     monkeypatch.setattr(executor.subprocess, "Popen", fake_popen)
 
     log_file = tmp_path / "sandbox.log"
-    cli_info = {"command": ["codex", "exec", "--full-auto"], "env": {}, "stdin_mode": "dash"}
+    cli_info = {"command": ["codex", "exec", "--approve-for-me"], "env": {}, "stdin_mode": "dash"}
     sandbox_config = {
         "enabled": True,
         "type": "bubblewrap",
