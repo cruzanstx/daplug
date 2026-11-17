@@ -1,3 +1,8 @@
+---
+name: prompt-manager
+description: CRUD operations for prompt files in ./prompts/. Use when you need the next prompt number, to list, create, read, delete, or move prompts to completed.
+---
+
 # prompt-manager
 
 CRUD operations for prompt files. Centralizes all prompt management logic to avoid shell parsing issues and provide consistent behavior across commands.
