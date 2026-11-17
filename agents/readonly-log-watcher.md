@@ -1,7 +1,7 @@
 ---
 name: readonly-log-watcher
 description: Monitors log files and state files for prompt execution. READ-ONLY - no file modifications, no bash commands. Use for background monitoring of CLI executions.
-tools: Read, Grep
+tools: [Read, Grep]
 model: haiku
 ---
 

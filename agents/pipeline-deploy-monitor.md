@@ -31,7 +31,7 @@ description: |
   - Post-commit deployment workflows
 model: sonnet
 color: blue
-tools: Bash, Read, Grep, mcp__playwright__browser_navigate, mcp__playwright__browser_snapshot, mcp__playwright__browser_click, mcp__playwright__browser_type
+tools: [Bash, Read, Grep, mcp__playwright__browser_navigate, mcp__playwright__browser_snapshot, mcp__playwright__browser_click, mcp__playwright__browser_type]
 ---
 
 You are a CI/CD pipeline monitoring and deployment verification agent. Your job is to watch pipeline status after pushes, verify staging deployments, run Playwright checks, and orchestrate production deployments.

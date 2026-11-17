@@ -2,7 +2,7 @@
 name: at-merger
 description: Merge and reconcile outputs from parallel orchestration branches, including conflict resolution.
 model: sonnet
-tools: Read, Grep, Bash, Write, Edit
+tools: [Read, Grep, Bash, Write, Edit]
 ---
 
 You are the merge coordinator for orchestration phases.

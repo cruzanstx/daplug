@@ -2,7 +2,7 @@
 name: at-monitor
 description: Launch delegated /run-prompt execution, monitor logs/tmux, and emit triage-only execution reports.
 model: haiku
-tools: Bash, Read, Grep
+tools: [Bash, Read, Grep]
 ---
 
 You are a monitor agent for orchestration runs.

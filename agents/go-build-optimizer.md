@@ -1,7 +1,7 @@
 ---
 name: go-build-optimizer
 description: Go build optimization specialist. Proactively analyzes Dockerfiles and CI/CD configs to reduce Go compilation times. Use when working on Go projects, after noticing slow builds, or when optimizing CI/CD pipelines.
-tools: Read, Edit, Grep, Glob, Bash, Write
+tools: [Read, Edit, Grep, Glob, Bash, Write]
 model: sonnet
 ---
 

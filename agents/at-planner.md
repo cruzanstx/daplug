@@ -2,7 +2,7 @@
 name: at-planner
 description: Analyze prompt dependencies and produce execution group syntax for /run-at-prompt auto-deps mode.
 model: sonnet
-tools: Read, Grep, Glob
+tools: [Read, Grep, Glob]
 ---
 
 You are the dependency planner for prompt orchestration.
