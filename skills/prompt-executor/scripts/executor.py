@@ -134,6 +134,14 @@ from sandbox import (
     resolve_sandbox_config,
     sandbox_preflight,
 )
+from google_guard import (
+    DEFAULT_NO_GOOGLE_REPOS,
+    NO_GOOGLE_ENV,
+    REFUSAL_EXIT_CODE,
+    GoogleRouteRefused,
+    enforce_no_google_policy,
+    enforce_resolved_cli_policy,
+)
 from loop import (
     DEFAULT_COMPLETION_MARKER,
     DEFAULT_MAX_ITERATIONS,
@@ -739,6 +747,16 @@ def main():
                     print(json.dumps({"error": f"No loop state found for prompt {prompt_num}"}))
             return
 
+        # No-Google policy (TLDRHQ / youtubesummaries): refuse Google routes in
+        # protected repos BEFORE any CLI preflight, worktree, or log is created.
+        guard_paths = [repo_root, args.cwd, args.original_repo_root, args.worktree_path]
+        guard_routes = (
+            [(entry["model"], entry["cli"]) for entry in moa_models]
+            if moa_models
+            else [(args.model, args.cli)]
+        )
+        enforce_no_google_policy(guard_routes, guard_paths, MODEL_REGISTRY_BY_NAME)
+
         # Handle --prompt-file: read from specific file instead of resolving
         if args.prompt_file:
             prompt_file_path = Path(args.prompt_file)
@@ -778,6 +796,13 @@ def main():
             )
             if args.dangerously_bypass_permissions:
                 cli_info["allow_bypass_without_sandbox"] = True
+        # Router/preferred_agent resolution can still land on agy/gemini.
+        enforce_resolved_cli_policy(
+            [(entry["model"], entry["cli_info"].get("selected_cli")) for entry in moa_cli_infos]
+            if moa_models
+            else [(args.model, cli_info.get("selected_cli"))],
+            guard_paths,
+        )
         log_dir = get_cli_logs_dir(repo_root)
         log_dir.mkdir(parents=True, exist_ok=True)
 
@@ -1051,6 +1076,10 @@ def main():
 
         print(json.dumps(result, indent=2))
 
+    except GoogleRouteRefused as e:
+        print(str(e), file=sys.stderr)
+        print(json.dumps({"error": str(e), "refused": "no_google_policy"}))
+        sys.exit(REFUSAL_EXIT_CODE)
     except Exception as e:
         print(json.dumps({"error": str(e)}))
         sys.exit(1)
