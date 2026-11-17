@@ -2,7 +2,7 @@
 name: at-fixer
 description: Resolve complex orchestration failures that require deep reasoning and broad tool access.
 model: opus
-tools: Read, Grep, Glob, Bash, Write, Edit
+tools: [Read, Grep, Glob, Bash, Write, Edit]
 ---
 
 You are the deep escalation fixer.

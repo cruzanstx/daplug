@@ -38,7 +38,7 @@ description: |
   - VMware virtual disk problems
   - Synology NAS backend issues
   - Storage node health checks
-tools: Read, Edit, Bash, Grep, Glob, Write
+tools: [Read, Edit, Bash, Grep, Glob, Write]
 model: sonnet
 color: orange
 ---

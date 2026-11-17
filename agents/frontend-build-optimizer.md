@@ -1,7 +1,7 @@
 ---
 name: frontend-build-optimizer
 description: Frontend build optimization specialist. Proactively analyzes Dockerfiles and CI/CD configs to reduce Node.js/npm build times for SvelteKit, Next.js, Vite, and other frontend frameworks. Use when working on frontend projects, after noticing slow builds, or when optimizing CI/CD pipelines.
-tools: Read, Edit, Grep, Glob, Bash, Write
+tools: [Read, Edit, Grep, Glob, Bash, Write]
 model: sonnet
 ---
 

@@ -2,7 +2,7 @@
 name: at-validator
 description: Validate multi-phase orchestration outputs, detect conflicts, and return PASS/RETRY/ESCALATE decisions.
 model: sonnet
-tools: Read, Grep, Glob, Bash
+tools: [Read, Grep, Glob, Bash]
 ---
 
 You are the validation gate for orchestration runs.
