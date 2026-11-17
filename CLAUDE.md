@@ -271,13 +271,13 @@ python3 scripts/manage-models.py add
 | 1 | `scripts/models.json` | Runtime model registry source of truth |
 | 2 | `skills/prompt-executor/scripts/executor.py` | Runtime maps and `--model` argparse choices derived from registry |
 | 3 | `skills/prompt-executor/SKILL.md` | `--model` options list |
-| 4 | `skills/prompt-executor/SKILL.md` | Model Reference table |
+| 4 | `skills/prompt-executor/references/model-reference.md` | Model Reference table |
 | 5 | `commands/run-prompt.md` | `--model` argument description |
-| 6 | `commands/prompts.md` | preferred_agent options list |
-| 7 | `commands/create-prompt.md` | `<available_models>` section |
+| 6 | `references/prompts-preferred-agent-options.md` | preferred_agent options list (for `commands/prompts.md`) |
+| 7 | `references/create-prompt-available-models.md` | `<available_models>` section (for `commands/create-prompt.md`) |
 | 8 | `commands/create-prompt.md` | Recommendation logic table |
-| 9 | `commands/create-prompt.md` | Model selection menus (3 generated regions) |
-| 10 | `commands/create-llms-txt.md` | `<available_models>` section |
+| 9 | `references/create-prompt-next-step-scenarios.md` | Model selection menus (3 generated regions, for `commands/create-prompt.md`) |
+| 10 | `references/create-llms-txt-available-models.md` | `<available_models>` section (for `commands/create-llms-txt.md`) |
 | 11 | `commands/create-llms-txt.md` | Recommendation logic table |
 | 12 | `commands/create-llms-txt.md` | Model selection menu |
 | 13 | `README.md` | Model Tiers section |
@@ -285,6 +285,8 @@ python3 scripts/manage-models.py add
 <!-- END GENERATED: generated-model-locations -->
 
 Generated regions are bounded by HTML comments like `<!-- BEGIN GENERATED: model-shorthand-table -->` and `<!-- END GENERATED: model-shorthand-table -->`. Hand-written prose around those markers is preserved.
+
+Large generated regions live in `references/` (and `skills/prompt-executor/references/`) so command and skill bodies stay under Antigravity's 24000-byte skill limit; `scripts/tests/test_agy_compat.py` enforces the limit.
 
 ### Verification
 

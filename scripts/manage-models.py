@@ -484,13 +484,13 @@ def render_generated_locations() -> str:
         (1, "`scripts/models.json`", "Runtime model registry source of truth"),
         (2, "`skills/prompt-executor/scripts/executor.py`", "Runtime maps and `--model` argparse choices derived from registry"),
         (3, "`skills/prompt-executor/SKILL.md`", "`--model` options list"),
-        (4, "`skills/prompt-executor/SKILL.md`", "Model Reference table"),
+        (4, "`skills/prompt-executor/references/model-reference.md`", "Model Reference table"),
         (5, "`commands/run-prompt.md`", "`--model` argument description"),
-        (6, "`commands/prompts.md`", "preferred_agent options list"),
-        (7, "`commands/create-prompt.md`", "`<available_models>` section"),
+        (6, "`references/prompts-preferred-agent-options.md`", "preferred_agent options list (for `commands/prompts.md`)"),
+        (7, "`references/create-prompt-available-models.md`", "`<available_models>` section (for `commands/create-prompt.md`)"),
         (8, "`commands/create-prompt.md`", "Recommendation logic table"),
-        (9, "`commands/create-prompt.md`", "Model selection menus (3 generated regions)"),
-        (10, "`commands/create-llms-txt.md`", "`<available_models>` section"),
+        (9, "`references/create-prompt-next-step-scenarios.md`", "Model selection menus (3 generated regions, for `commands/create-prompt.md`)"),
+        (10, "`references/create-llms-txt-available-models.md`", "`<available_models>` section (for `commands/create-llms-txt.md`)"),
         (11, "`commands/create-llms-txt.md`", "Recommendation logic table"),
         (12, "`commands/create-llms-txt.md`", "Model selection menu"),
         (13, "`README.md`", "Model Tiers section"),
@@ -530,6 +530,8 @@ def render_managing_models_section() -> str:
         "",
         "Generated regions are bounded by HTML comments like `<!-- BEGIN GENERATED: model-shorthand-table -->` and `<!-- END GENERATED: model-shorthand-table -->`. Hand-written prose around those markers is preserved.",
         "",
+        "Large generated regions live in `references/` (and `skills/prompt-executor/references/`) so command and skill bodies stay under Antigravity's 24000-byte skill limit; `scripts/tests/test_agy_compat.py` enforces the limit.",
+        "",
         "### Verification",
         "",
         "After adding a model, verify it works:",
@@ -547,9 +549,22 @@ def render_managing_models_section() -> str:
 Target = tuple[str, Callable[[dict], str], str]
 
 
+def replace_required_region(text: str, name: str, generated: str) -> str:
+    """Replace an existing marked region; the markers must already be present."""
+    new_text, replaced = replace_marked_region(text, name, generated)
+    if not replaced:
+        raise GenerationError(f"Generated region markers not found: {name}")
+    return new_text
+
+
 def update_skill(path: Path, registry: dict) -> str:
     text = path.read_text()
     text = replace_region(text, "skill-model-options", render_skill_model_options(registry), r"- `--model, -m`:.*?(?=\n- `--cli`)")
+    return text
+
+
+def update_skill_model_reference(path: Path, registry: dict) -> str:
+    text = path.read_text()
     text = replace_region(text, "skill-model-reference", render_skill_reference_table(registry), r"\| Model \| CLI \| Description \|\n\|[-| ]+\|\n.*?(?=\n\nOpenCode runs include)")
     return text
 
@@ -561,29 +576,44 @@ def update_run_prompt(path: Path, registry: dict) -> str:
     return text
 
 
-def update_prompts(path: Path, registry: dict) -> str:
+def update_prompts_options(path: Path, registry: dict) -> str:
     text = path.read_text()
-    text = replace_region(text, "preferred-agent-options", render_preferred_agent_options(registry), r"- `claude` - Claude Code.*?(?=\n\n3\. \*\*After user selects)")
-    return text
+    return replace_required_region(text, "preferred-agent-options", render_preferred_agent_options(registry))
 
 
 def update_create_prompt(path: Path, registry: dict) -> str:
     text = path.read_text()
-    text = replace_region(text, "create-prompt-available-models", render_available_models(registry), r"(?<=<available_models>\n).*?(?=\n</available_models>)")
     text = replace_region(text, "create-prompt-recommendations", render_create_prompt_recommendations(registry), r"\| Task Type.*?\| Default.*?\|\s*(?=\n\n\*\*Step 3)" )
-    menu_pattern = r"  \*\*Claude:\*\* \{usage status\}.*?Choose \(1-29\), or type model with flags \(e\.g\., 'codex --loop'\): _"
-    text = replace_region_after(text, "create-prompt-selection-menu", render_model_selection_menu(registry, "Choose"), "<single_prompt_scenario>", menu_pattern)
-    text = replace_region_after(text, "create-prompt-parallel-selection-menu", render_model_selection_menu(registry, "Choose"), "<parallel_scenario>", menu_pattern)
-    text = replace_region_after(text, "create-prompt-sequential-selection-menu", render_model_selection_menu(registry, "Choose"), "<sequential_scenario>", menu_pattern)
+    return text
+
+
+def update_create_prompt_available_models(path: Path, registry: dict) -> str:
+    text = path.read_text()
+    return replace_required_region(text, "create-prompt-available-models", render_available_models(registry))
+
+
+def update_create_prompt_scenarios(path: Path, registry: dict) -> str:
+    text = path.read_text()
+    menu = render_model_selection_menu(registry, "Choose")
+    for name in (
+        "create-prompt-selection-menu",
+        "create-prompt-parallel-selection-menu",
+        "create-prompt-sequential-selection-menu",
+    ):
+        text = replace_required_region(text, name, menu)
     return text
 
 
 def update_create_llms(path: Path, registry: dict) -> str:
     text = path.read_text()
-    text = replace_region(text, "create-llms-available-models", render_available_models(registry), r"(?<=<available_models>\n).*?(?=\n</available_models>)")
     text = replace_region(text, "create-llms-recommendations", render_llms_recommendations(registry), r"\| Priority \| Model \| Reason \|.*?(?=\n\n\*\*Recommended flags)")
     text = replace_region(text, "create-llms-selection-menu", render_model_selection_menu(registry, "Choose"), r"  \*\*Claude:\*\* \{usage status\}.*?Choose \(1-28\), or type model with flags \(e\.g\., 'gpt52-xhigh --worktree --loop'\): _")
     return text
+
+
+def update_create_llms_available_models(path: Path, registry: dict) -> str:
+    text = path.read_text()
+    return replace_required_region(text, "create-llms-available-models", render_available_models(registry))
 
 
 def update_readme(path: Path, registry: dict) -> str:
@@ -602,10 +632,14 @@ def update_claude(path: Path, registry: dict) -> str:
 
 TARGETS: list[tuple[str, Callable[[Path, dict], str]]] = [
     ("skills/prompt-executor/SKILL.md", update_skill),
+    ("skills/prompt-executor/references/model-reference.md", update_skill_model_reference),
     ("commands/run-prompt.md", update_run_prompt),
-    ("commands/prompts.md", update_prompts),
+    ("references/prompts-preferred-agent-options.md", update_prompts_options),
     ("commands/create-prompt.md", update_create_prompt),
+    ("references/create-prompt-available-models.md", update_create_prompt_available_models),
+    ("references/create-prompt-next-step-scenarios.md", update_create_prompt_scenarios),
     ("commands/create-llms-txt.md", update_create_llms),
+    ("references/create-llms-txt-available-models.md", update_create_llms_available_models),
     ("README.md", update_readme),
     ("CLAUDE.md", update_claude),
 ]
