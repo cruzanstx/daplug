@@ -8,6 +8,11 @@ gemini-4-hydrogen-high	Gemini 4 Hydrogen (High)
 gemini-4-hydrogen-xhigh	Gemini 4 Hydrogen (XHigh)
 gemini-4-hydrogen-medium	Gemini 4 Hydrogen (Medium)
 gemini-4-hydrogen-low	Gemini 4 Hydrogen (Low)
+# Neon rows captured from agy 1.5.11 (2026-11-18).
+gemini-4-neon-high	Gemini 4 Neon (High)
+gemini-4-neon-xhigh	Gemini 4 Neon (XHigh)
+gemini-4-neon-medium	Gemini 4 Neon (Medium)
+gemini-4-neon-low	Gemini 4 Neon (Low)
 # Carbon rows captured from agy 1.5.5 (2026-11-10).
 gemini-4-carbon-medium	Gemini 4 Carbon (Medium)
 gemini-4-carbon-high	Gemini 4 Carbon (High)

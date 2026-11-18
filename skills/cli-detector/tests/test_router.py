@@ -308,6 +308,35 @@ def test_hydrogen_does_not_fall_back_when_agy_missing(monkeypatch, shorthand):
         router.resolve_model(shorthand)
 
 
+@pytest.mark.parametrize("shorthand,tier", [
+    ("neon", "High"), ("neon-high", "High"), ("neon-xhigh", "XHigh"),
+    ("neon-medium", "Medium"), ("neon-low", "Low"),
+])
+def test_neon_routes_only_through_agy(monkeypatch, shorthand, tier):
+    fake = _FakeCache({"clis": {
+        "agy": {"installed": True, "issues": []},
+        "gemini": {"installed": True, "issues": []},
+    }, "providers": {}})
+    monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+    cli, model_id, cmd = router.resolve_model(shorthand, preferred_cli="gemini")
+    assert cli == "agy"
+    assert model_id == f"google:gemini-4-neon-{tier.lower()}"
+    assert cmd == ["agy", "--model", f"Gemini 4 Neon ({tier})",
+                   "--dangerously-skip-permissions", "--print-timeout", "60m",
+                   "--output-format", "stream-json", "--print"]
+
+
+@pytest.mark.parametrize("shorthand", ["neon", "neon-xhigh", "neon-high", "neon-medium", "neon-low"])
+def test_neon_does_not_fall_back_when_agy_missing(monkeypatch, shorthand):
+    fake = _FakeCache({"clis": {
+        "gemini": {"installed": True, "issues": []},
+        "opencode": {"installed": True, "issues": []},
+    }, "providers": {}})
+    monkeypatch.setattr(router, "load_cache_file", lambda: fake)
+    with pytest.raises(router.ModelNotAvailable, match="agy.*not installed"):
+        router.resolve_model(shorthand)
+
+
 def test_gemini37_routes_through_agy_when_healthy(monkeypatch):
     """gemini37/37-high/37-medium/37-low must route to agy with byte-exact display names."""
     fake = _FakeCache(

@@ -56,6 +56,11 @@
 | hydrogen-high | agy --model "Gemini 4 Hydrogen (High)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Hydrogen high reasoning (AGY only) |
 | hydrogen-medium | agy --model "Gemini 4 Hydrogen (Medium)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Hydrogen medium reasoning (AGY only) |
 | hydrogen-low | agy --model "Gemini 4 Hydrogen (Low)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Hydrogen low reasoning (AGY only) |
+| neon | agy --model "Gemini 4 Neon (High)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Neon high reasoning (default Neon alias; AGY only) |
+| neon-xhigh | agy --model "Gemini 4 Neon (XHigh)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Neon xhigh reasoning (AGY only) |
+| neon-high | agy --model "Gemini 4 Neon (High)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Neon high reasoning (AGY only) |
+| neon-medium | agy --model "Gemini 4 Neon (Medium)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Neon medium reasoning (AGY only) |
+| neon-low | agy --model "Gemini 4 Neon (Low)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Neon low reasoning (AGY only) |
 | agy | agy --model "Gemini 3.8 Flash (High)" --dangerously-skip-permissions --print-timeout 60m --output-format stream-json --print | Antigravity default (same as gemini/gemini37) |
 | zai | codex exec --approve-for-me --profile zai | General coding fallback |
 | glm5 | opencode run --format json -m zai/glm-5.3 --pure --agent build | Latest GLM 5.x tasks via OpenCode |

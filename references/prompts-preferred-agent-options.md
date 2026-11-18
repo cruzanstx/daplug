@@ -28,7 +28,7 @@
 - `gpt52-xhigh` - OpenAI GPT-5.2 with xhigh reasoning (30+ min tasks)
 - `gemini` - Gemini 3.8 Flash (High reasoning) via Antigravity (default Gemini shorthand)
 - `gemini-high` - Gemini 2.5 Pro
-- Google shorthands prefer Antigravity CLI (`agy`) when healthy and fall back to legacy `gemini`; `argon*`, `carbon*` and `hydrogen*` are AGY-only.
+- Google shorthands prefer Antigravity CLI (`agy`) when healthy and fall back to legacy `gemini`; `argon*`, `carbon*`, `neon*` and `hydrogen*` are AGY-only.
 - `gemini-xhigh` - Gemini 3 Pro Preview
 - `gemini25pro` - Gemini 2.5 Pro (explicit shorthand)
 - `gemini25flash` - Gemini 2.5 Flash
@@ -53,6 +53,11 @@
 - `hydrogen-high` - Gemini 4 Hydrogen (High reasoning) via Antigravity
 - `hydrogen-medium` - Gemini 4 Hydrogen (Medium reasoning) via Antigravity
 - `hydrogen-low` - Gemini 4 Hydrogen (Low reasoning) via Antigravity
+- `neon` - Gemini 4 Neon (High reasoning) via Antigravity
+- `neon-xhigh` - Gemini 4 Neon (XHigh reasoning) via Antigravity
+- `neon-high` - Gemini 4 Neon (High reasoning) via Antigravity
+- `neon-medium` - Gemini 4 Neon (Medium reasoning) via Antigravity
+- `neon-low` - Gemini 4 Neon (Low reasoning) via Antigravity
 - `agy` - Gemini 3.8 Flash (High) via Antigravity (default agy shorthand)
 - `zai` - Z.AI GLM-4.7 via Codex CLI
 - `glm5` - Z.AI GLM-5.3 via OpenCode (latest GLM 5.x, 1M context)

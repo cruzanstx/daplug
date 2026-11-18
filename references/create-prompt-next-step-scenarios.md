@@ -88,41 +88,46 @@ If user chooses "Run prompt now", run `npx cclimits --json 2>/dev/null`, summari
   47. hydrogen-high - {X}% used - Hydrogen High, AGY only
   48. hydrogen-medium - {X}% used - Hydrogen Medium, AGY only
   49. hydrogen-low - {X}% used - Hydrogen Low, AGY only
-  50. agy - {X}% used - 3.8-flash High, default agy shorthand
+  50. neon - {X}% used - Neon High, AGY only
+  51. neon-xhigh - {X}% used - Neon XHigh, AGY only
+  52. neon-high - {X}% used - Neon High, AGY only
+  53. neon-medium - {X}% used - Neon Medium, AGY only
+  54. neon-low - {X}% used - Neon Low, AGY only
+  55. agy - {X}% used - 3.8-flash High, default agy shorthand
 
   **Z.AI / OpenCode:** {usage status}
-  51. zai - {X}% used - Z.AI GLM-4.7
-  52. glm5 - {X}% used - Z.AI GLM-5.3 latest alias
-  53. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
-  54. glm53 - {X}% used - Z.AI GLM-5.3 explicit pin
-  55. flash - {X}% used - Z.AI GLM-5.3-Flash multimodal, 3x quota, reasoning max
-  56. glm53-flash - {X}% used - Z.AI GLM-5.3-Flash versioned alias of flash
-  57. kimi - {X}% used - Kimi K2.5 via OpenCode
-  58. opencode - {X}% used - OpenCode GLM-4.7
+  56. zai - {X}% used - Z.AI GLM-4.7
+  57. glm5 - {X}% used - Z.AI GLM-5.3 latest alias
+  58. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
+  59. glm53 - {X}% used - Z.AI GLM-5.3 explicit pin
+  60. flash - {X}% used - Z.AI GLM-5.3-Flash multimodal, 3x quota, reasoning max
+  61. glm53-flash - {X}% used - Z.AI GLM-5.3-Flash versioned alias of flash
+  62. kimi - {X}% used - Kimi K2.5 via OpenCode
+  63. opencode - {X}% used - OpenCode GLM-4.7
 
   **Synthetic:** {usage status}
-  59. synthetic - {requests}/{limit} requests - Synthetic floating (currently DS V4.1 Flash)
-  60. syn-flash - {requests}/{limit} requests - Synthetic floating (currently GLM-4.7-Flash)
-  61. syn-kimi - {requests}/{limit} requests - Synthetic floating (currently Kimi-K3) vision
-  62. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
-  63. syn-qwen - {requests}/{limit} requests - Synthetic floating (currently Qwen3.8-27B) vision
-  64. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
-  65. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
-  66. syn-glm53 - {requests}/{limit} requests - Synthetic GLM-5.3 beta text-only
-  67. syn-glm53-flash - {requests}/{limit} requests - Synthetic GLM-5.3-Flash beta vision
-  68. syn-ds41-flash - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash vision
-  69. deepseek - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash (alias of syn-ds41-flash)
+  64. synthetic - {requests}/{limit} requests - Synthetic floating (currently DS V4.1 Flash)
+  65. syn-flash - {requests}/{limit} requests - Synthetic floating (currently GLM-4.7-Flash)
+  66. syn-kimi - {requests}/{limit} requests - Synthetic floating (currently Kimi-K3) vision
+  67. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
+  68. syn-qwen - {requests}/{limit} requests - Synthetic floating (currently Qwen3.8-27B) vision
+  69. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
+  70. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
+  71. syn-glm53 - {requests}/{limit} requests - Synthetic GLM-5.3 beta text-only
+  72. syn-glm53-flash - {requests}/{limit} requests - Synthetic GLM-5.3-Flash beta vision
+  73. syn-ds41-flash - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash vision
+  74. deepseek - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash (alias of syn-ds41-flash)
 
   **Local:** {usage status}
-  70. local - local qwen3.6-35b-a3b, no quota
-  71. qwen - local qwen3.6-35b-a3b, no quota
-  72. devstral - local Devstral, no quota
-  73. glm-local - local GLM-4.7 Flash, no quota
-  74. qwen-small - local qwen3-4b, no quota
-  75. qwen36 - local qwen3.6-35b-a3b, no quota
-  76. qwen36-27b - local qwen3.6-27b, no quota
+  75. local - local qwen3.6-35b-a3b, no quota
+  76. qwen - local qwen3.6-35b-a3b, no quota
+  77. devstral - local Devstral, no quota
+  78. glm-local - local GLM-4.7 Flash, no quota
+  79. qwen-small - local qwen3-4b, no quota
+  80. qwen36 - local qwen3.6-35b-a3b, no quota
+  81. qwen36-27b - local qwen3.6-27b, no quota
 
-  Choose (1-76), or type model with flags (e.g., 'codex --worktree --loop'): _
+  Choose (1-81), or type model with flags (e.g., 'codex --worktree --loop'): _
 <!-- END GENERATED: create-prompt-selection-menu -->
 
 After selection:
@@ -221,41 +226,46 @@ If running now, run `npx cclimits --json 2>/dev/null`, summarize current quota s
   47. hydrogen-high - {X}% used - Hydrogen High, AGY only
   48. hydrogen-medium - {X}% used - Hydrogen Medium, AGY only
   49. hydrogen-low - {X}% used - Hydrogen Low, AGY only
-  50. agy - {X}% used - 3.8-flash High, default agy shorthand
+  50. neon - {X}% used - Neon High, AGY only
+  51. neon-xhigh - {X}% used - Neon XHigh, AGY only
+  52. neon-high - {X}% used - Neon High, AGY only
+  53. neon-medium - {X}% used - Neon Medium, AGY only
+  54. neon-low - {X}% used - Neon Low, AGY only
+  55. agy - {X}% used - 3.8-flash High, default agy shorthand
 
   **Z.AI / OpenCode:** {usage status}
-  51. zai - {X}% used - Z.AI GLM-4.7
-  52. glm5 - {X}% used - Z.AI GLM-5.3 latest alias
-  53. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
-  54. glm53 - {X}% used - Z.AI GLM-5.3 explicit pin
-  55. flash - {X}% used - Z.AI GLM-5.3-Flash multimodal, 3x quota, reasoning max
-  56. glm53-flash - {X}% used - Z.AI GLM-5.3-Flash versioned alias of flash
-  57. kimi - {X}% used - Kimi K2.5 via OpenCode
-  58. opencode - {X}% used - OpenCode GLM-4.7
+  56. zai - {X}% used - Z.AI GLM-4.7
+  57. glm5 - {X}% used - Z.AI GLM-5.3 latest alias
+  58. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
+  59. glm53 - {X}% used - Z.AI GLM-5.3 explicit pin
+  60. flash - {X}% used - Z.AI GLM-5.3-Flash multimodal, 3x quota, reasoning max
+  61. glm53-flash - {X}% used - Z.AI GLM-5.3-Flash versioned alias of flash
+  62. kimi - {X}% used - Kimi K2.5 via OpenCode
+  63. opencode - {X}% used - OpenCode GLM-4.7
 
   **Synthetic:** {usage status}
-  59. synthetic - {requests}/{limit} requests - Synthetic floating (currently DS V4.1 Flash)
-  60. syn-flash - {requests}/{limit} requests - Synthetic floating (currently GLM-4.7-Flash)
-  61. syn-kimi - {requests}/{limit} requests - Synthetic floating (currently Kimi-K3) vision
-  62. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
-  63. syn-qwen - {requests}/{limit} requests - Synthetic floating (currently Qwen3.8-27B) vision
-  64. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
-  65. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
-  66. syn-glm53 - {requests}/{limit} requests - Synthetic GLM-5.3 beta text-only
-  67. syn-glm53-flash - {requests}/{limit} requests - Synthetic GLM-5.3-Flash beta vision
-  68. syn-ds41-flash - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash vision
-  69. deepseek - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash (alias of syn-ds41-flash)
+  64. synthetic - {requests}/{limit} requests - Synthetic floating (currently DS V4.1 Flash)
+  65. syn-flash - {requests}/{limit} requests - Synthetic floating (currently GLM-4.7-Flash)
+  66. syn-kimi - {requests}/{limit} requests - Synthetic floating (currently Kimi-K3) vision
+  67. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
+  68. syn-qwen - {requests}/{limit} requests - Synthetic floating (currently Qwen3.8-27B) vision
+  69. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
+  70. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
+  71. syn-glm53 - {requests}/{limit} requests - Synthetic GLM-5.3 beta text-only
+  72. syn-glm53-flash - {requests}/{limit} requests - Synthetic GLM-5.3-Flash beta vision
+  73. syn-ds41-flash - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash vision
+  74. deepseek - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash (alias of syn-ds41-flash)
 
   **Local:** {usage status}
-  70. local - local qwen3.6-35b-a3b, no quota
-  71. qwen - local qwen3.6-35b-a3b, no quota
-  72. devstral - local Devstral, no quota
-  73. glm-local - local GLM-4.7 Flash, no quota
-  74. qwen-small - local qwen3-4b, no quota
-  75. qwen36 - local qwen3.6-35b-a3b, no quota
-  76. qwen36-27b - local qwen3.6-27b, no quota
+  75. local - local qwen3.6-35b-a3b, no quota
+  76. qwen - local qwen3.6-35b-a3b, no quota
+  77. devstral - local Devstral, no quota
+  78. glm-local - local GLM-4.7 Flash, no quota
+  79. qwen-small - local qwen3-4b, no quota
+  80. qwen36 - local qwen3.6-35b-a3b, no quota
+  81. qwen36-27b - local qwen3.6-27b, no quota
 
-  Choose (1-76), or type model with flags (e.g., 'codex --worktree --loop'): _
+  Choose (1-81), or type model with flags (e.g., 'codex --worktree --loop'): _
 <!-- END GENERATED: create-prompt-parallel-selection-menu -->
 
 After selection:
@@ -355,41 +365,46 @@ If running now, run `npx cclimits --json 2>/dev/null`, summarize current quota s
   47. hydrogen-high - {X}% used - Hydrogen High, AGY only
   48. hydrogen-medium - {X}% used - Hydrogen Medium, AGY only
   49. hydrogen-low - {X}% used - Hydrogen Low, AGY only
-  50. agy - {X}% used - 3.8-flash High, default agy shorthand
+  50. neon - {X}% used - Neon High, AGY only
+  51. neon-xhigh - {X}% used - Neon XHigh, AGY only
+  52. neon-high - {X}% used - Neon High, AGY only
+  53. neon-medium - {X}% used - Neon Medium, AGY only
+  54. neon-low - {X}% used - Neon Low, AGY only
+  55. agy - {X}% used - 3.8-flash High, default agy shorthand
 
   **Z.AI / OpenCode:** {usage status}
-  51. zai - {X}% used - Z.AI GLM-4.7
-  52. glm5 - {X}% used - Z.AI GLM-5.3 latest alias
-  53. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
-  54. glm53 - {X}% used - Z.AI GLM-5.3 explicit pin
-  55. flash - {X}% used - Z.AI GLM-5.3-Flash multimodal, 3x quota, reasoning max
-  56. glm53-flash - {X}% used - Z.AI GLM-5.3-Flash versioned alias of flash
-  57. kimi - {X}% used - Kimi K2.5 via OpenCode
-  58. opencode - {X}% used - OpenCode GLM-4.7
+  56. zai - {X}% used - Z.AI GLM-4.7
+  57. glm5 - {X}% used - Z.AI GLM-5.3 latest alias
+  58. glm52 - {X}% used - Z.AI GLM-5.2 explicit pin
+  59. glm53 - {X}% used - Z.AI GLM-5.3 explicit pin
+  60. flash - {X}% used - Z.AI GLM-5.3-Flash multimodal, 3x quota, reasoning max
+  61. glm53-flash - {X}% used - Z.AI GLM-5.3-Flash versioned alias of flash
+  62. kimi - {X}% used - Kimi K2.5 via OpenCode
+  63. opencode - {X}% used - OpenCode GLM-4.7
 
   **Synthetic:** {usage status}
-  59. synthetic - {requests}/{limit} requests - Synthetic floating (currently DS V4.1 Flash)
-  60. syn-flash - {requests}/{limit} requests - Synthetic floating (currently GLM-4.7-Flash)
-  61. syn-kimi - {requests}/{limit} requests - Synthetic floating (currently Kimi-K3) vision
-  62. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
-  63. syn-qwen - {requests}/{limit} requests - Synthetic floating (currently Qwen3.8-27B) vision
-  64. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
-  65. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
-  66. syn-glm53 - {requests}/{limit} requests - Synthetic GLM-5.3 beta text-only
-  67. syn-glm53-flash - {requests}/{limit} requests - Synthetic GLM-5.3-Flash beta vision
-  68. syn-ds41-flash - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash vision
-  69. deepseek - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash (alias of syn-ds41-flash)
+  64. synthetic - {requests}/{limit} requests - Synthetic floating (currently DS V4.1 Flash)
+  65. syn-flash - {requests}/{limit} requests - Synthetic floating (currently GLM-4.7-Flash)
+  66. syn-kimi - {requests}/{limit} requests - Synthetic floating (currently Kimi-K3) vision
+  67. syn-kimi3 - {requests}/{limit} requests - Synthetic Kimi-K3 vision
+  68. syn-qwen - {requests}/{limit} requests - Synthetic floating (currently Qwen3.8-27B) vision
+  69. syn-minimax - {requests}/{limit} requests - Synthetic MiniMax-M3 vision
+  70. syn-nemotron - {requests}/{limit} requests - Synthetic Nemotron-3-Super
+  71. syn-glm53 - {requests}/{limit} requests - Synthetic GLM-5.3 beta text-only
+  72. syn-glm53-flash - {requests}/{limit} requests - Synthetic GLM-5.3-Flash beta vision
+  73. syn-ds41-flash - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash vision
+  74. deepseek - {requests}/{limit} requests - Synthetic DeepSeek V4.1 Flash (alias of syn-ds41-flash)
 
   **Local:** {usage status}
-  70. local - local qwen3.6-35b-a3b, no quota
-  71. qwen - local qwen3.6-35b-a3b, no quota
-  72. devstral - local Devstral, no quota
-  73. glm-local - local GLM-4.7 Flash, no quota
-  74. qwen-small - local qwen3-4b, no quota
-  75. qwen36 - local qwen3.6-35b-a3b, no quota
-  76. qwen36-27b - local qwen3.6-27b, no quota
+  75. local - local qwen3.6-35b-a3b, no quota
+  76. qwen - local qwen3.6-35b-a3b, no quota
+  77. devstral - local Devstral, no quota
+  78. glm-local - local GLM-4.7 Flash, no quota
+  79. qwen-small - local qwen3-4b, no quota
+  80. qwen36 - local qwen3.6-35b-a3b, no quota
+  81. qwen36-27b - local qwen3.6-27b, no quota
 
-  Choose (1-76), or type model with flags (e.g., 'codex --worktree --loop'): _
+  Choose (1-81), or type model with flags (e.g., 'codex --worktree --loop'): _
 <!-- END GENERATED: create-prompt-sequential-selection-menu -->
 
 After selection:

@@ -45,6 +45,15 @@ _AGY_MODEL_ARGS = {
     "hydrogen-high": "Gemini 4 Hydrogen (High)",
     "hydrogen-medium": "Gemini 4 Hydrogen (Medium)",
     "hydrogen-low": "Gemini 4 Hydrogen (Low)",
+    "google:gemini-4-neon-xhigh": "Gemini 4 Neon (XHigh)",
+    "google:gemini-4-neon-high": "Gemini 4 Neon (High)",
+    "google:gemini-4-neon-medium": "Gemini 4 Neon (Medium)",
+    "google:gemini-4-neon-low": "Gemini 4 Neon (Low)",
+    "neon": "Gemini 4 Neon (High)",
+    "neon-xhigh": "Gemini 4 Neon (XHigh)",
+    "neon-high": "Gemini 4 Neon (High)",
+    "neon-medium": "Gemini 4 Neon (Medium)",
+    "neon-low": "Gemini 4 Neon (Low)",
 }
 
 
@@ -95,6 +104,11 @@ class AgyCLI(SimpleCLIPlugin):
                 "google:gemini-4-hydrogen-medium",
                 "google:gemini-4-hydrogen-low",
                 "hydrogen", "hydrogen-xhigh", "hydrogen-high", "hydrogen-medium", "hydrogen-low",
+                "google:gemini-4-neon-xhigh",
+                "google:gemini-4-neon-high",
+                "google:gemini-4-neon-medium",
+                "google:gemini-4-neon-low",
+                "neon", "neon-xhigh", "neon-high", "neon-medium", "neon-low",
             )
         ] + [
             ModelInfo(

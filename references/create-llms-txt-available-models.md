@@ -32,7 +32,7 @@ All available models for /daplug:run-prompt --model:
 - `gpt52-high` - OpenAI GPT-5.2 with high reasoning effort
 - `gpt52-xhigh` - OpenAI GPT-5.2 with xhigh reasoning (30+ min tasks)
 
-**Google Gemini Family:** (check: `gemini.models.<model>.used` for each; `agy` is preferred when healthy, legacy `gemini` is fallback except for AGY-only `argon*`/`carbon*`/`hydrogen*`)
+**Google Gemini Family:** (check: `gemini.models.<model>.used` for each; `agy` is preferred when healthy, legacy `gemini` is fallback except for AGY-only `argon*`/`carbon*`/`neon*`/`hydrogen*`)
 - `gemini` - Gemini 3.8 Flash (High reasoning) via Antigravity (default Gemini shorthand)
 - `gemini-high` - Gemini 2.5 Pro
 - `gemini-xhigh` - Gemini 3 Pro Preview
@@ -59,6 +59,11 @@ All available models for /daplug:run-prompt --model:
 - `hydrogen-high` - Gemini 4 Hydrogen (High reasoning) via Antigravity
 - `hydrogen-medium` - Gemini 4 Hydrogen (Medium reasoning) via Antigravity
 - `hydrogen-low` - Gemini 4 Hydrogen (Low reasoning) via Antigravity
+- `neon` - Gemini 4 Neon (High reasoning) via Antigravity
+- `neon-xhigh` - Gemini 4 Neon (XHigh reasoning) via Antigravity
+- `neon-high` - Gemini 4 Neon (High reasoning) via Antigravity
+- `neon-medium` - Gemini 4 Neon (Medium reasoning) via Antigravity
+- `neon-low` - Gemini 4 Neon (Low reasoning) via Antigravity
 - `agy` - Gemini 3.8 Flash (High) via Antigravity (default agy shorthand)
 
 **Z.AI / OpenCode Models:** (check: `zai.token_quota.percentage` where applicable)
@@ -94,7 +99,7 @@ All available models for /daplug:run-prompt --model:
 - `qwen36-27b` - Local Qwen 3.6 27b via opencode + LMStudio
 
 **Gemini Model Mapping:**
-Antigravity (`agy`) maps legacy shorthands to the closest current `agy models` display names; legacy `gemini` keeps these API model IDs. `argon*`, `carbon*` and `hydrogen*` use AGY catalog IDs only; no legacy Gemini route or quota bucket is verified.
+Antigravity (`agy`) maps legacy shorthands to the closest current `agy models` display names; legacy `gemini` keeps these API model IDs. `argon*`, `carbon*`, `neon*` and `hydrogen*` use AGY catalog IDs only; no legacy Gemini route or quota bucket is verified.
 | Shorthand | API Model | Quota Bucket |
 |-----------|-----------|--------------|
 | `gemini` | gemini-3.8-flash | gemini-3.8-flash |
@@ -123,5 +128,10 @@ Antigravity (`agy`) maps legacy shorthands to the closest current `agy models` d
 | `hydrogen-high` | gemini-4-hydrogen-high | Unverified |
 | `hydrogen-medium` | gemini-4-hydrogen-medium | Unverified |
 | `hydrogen-low` | gemini-4-hydrogen-low | Unverified |
+| `neon` | gemini-4-neon-high | Unverified |
+| `neon-xhigh` | gemini-4-neon-xhigh | Unverified |
+| `neon-high` | gemini-4-neon-high | Unverified |
+| `neon-medium` | gemini-4-neon-medium | Unverified |
+| `neon-low` | gemini-4-neon-low | Unverified |
 | `agy` | gemini-3.8-flash | gemini-3.8-flash |
 <!-- END GENERATED: create-llms-available-models -->

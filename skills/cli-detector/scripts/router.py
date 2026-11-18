@@ -135,6 +135,12 @@ _SHORTHAND: dict[str, _ModelRequest] = {
     "hydrogen-high": _ModelRequest("hydrogen-high", family="google", model_id="google:gemini-4-hydrogen-high", force_cli="agy", strict_cli=True),
     "hydrogen-medium": _ModelRequest("hydrogen-medium", family="google", model_id="google:gemini-4-hydrogen-medium", force_cli="agy", strict_cli=True),
     "hydrogen-low": _ModelRequest("hydrogen-low", family="google", model_id="google:gemini-4-hydrogen-low", force_cli="agy", strict_cli=True),
+    # Neon is verified only on Antigravity; do not invent legacy CLI fallbacks.
+    "neon": _ModelRequest("neon", family="google", model_id="google:gemini-4-neon-high", force_cli="agy", strict_cli=True),
+    "neon-xhigh": _ModelRequest("neon-xhigh", family="google", model_id="google:gemini-4-neon-xhigh", force_cli="agy", strict_cli=True),
+    "neon-high": _ModelRequest("neon-high", family="google", model_id="google:gemini-4-neon-high", force_cli="agy", strict_cli=True),
+    "neon-medium": _ModelRequest("neon-medium", family="google", model_id="google:gemini-4-neon-medium", force_cli="agy", strict_cli=True),
+    "neon-low": _ModelRequest("neon-low", family="google", model_id="google:gemini-4-neon-low", force_cli="agy", strict_cli=True),
     # Z.AI
     "zai": _ModelRequest("zai", family="zai", model_id="zai:glm-4.7"),
     "glm5": _ModelRequest("glm5", family="zai", model_id="zai:glm-5.3", codex_profile="glm5"),
@@ -430,6 +436,15 @@ _AGY_MODEL_ARGS: dict[str, str] = {
     "hydrogen-high": "Gemini 4 Hydrogen (High)",
     "hydrogen-medium": "Gemini 4 Hydrogen (Medium)",
     "hydrogen-low": "Gemini 4 Hydrogen (Low)",
+    "google:gemini-4-neon-xhigh": "Gemini 4 Neon (XHigh)",
+    "google:gemini-4-neon-high": "Gemini 4 Neon (High)",
+    "google:gemini-4-neon-medium": "Gemini 4 Neon (Medium)",
+    "google:gemini-4-neon-low": "Gemini 4 Neon (Low)",
+    "neon": "Gemini 4 Neon (High)",
+    "neon-xhigh": "Gemini 4 Neon (XHigh)",
+    "neon-high": "Gemini 4 Neon (High)",
+    "neon-medium": "Gemini 4 Neon (Medium)",
+    "neon-low": "Gemini 4 Neon (Low)",
 }
 
 
