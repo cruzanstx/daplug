@@ -33,3 +33,4 @@ opencode_web_backup.json
 
 # Local agent runtime state
 .sisyphus/
+.omo/
