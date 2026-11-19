@@ -845,6 +845,74 @@ AGY_FAILURE_EXPLANATIONS = {
     "agy_inactivity_timeout": "AGY inactivity timeout (no output from process)",
 }
 
+_ANSI_ESCAPE_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+_FATAL_LAUNCH_MAX_LOG_BYTES = 8192
+_FATAL_LAUNCH_PATTERNS = (
+    re.compile(r"error:\s+unexpected argument\b", re.IGNORECASE),
+    re.compile(r"error:\s+the argument\b.*\bcannot be used with\b", re.IGNORECASE),
+    re.compile(r"error:\s+invalid value\b.*\bfor\b", re.IGNORECASE),
+    re.compile(r"error:\s+unrecognized subcommand\b", re.IGNORECASE),
+    re.compile(r"\bunrecognized arguments?:", re.IGNORECASE),
+    re.compile(r"\bunknown (?:option|flag)\b", re.IGNORECASE),
+    re.compile(r"\binvalid option\b", re.IGNORECASE),
+    re.compile(r"^bwrap:\s+", re.MULTILINE),
+)
+
+
+def _detect_fatal_launch_error(
+    exit_code: int,
+    log_file: Path,
+    command: Optional[list[str]] = None,
+) -> Optional[str]:
+    """Return an error summary if a child CLI failed to launch or rejected its arguments.
+
+    Retrying invalid CLI flags or a missing executable can never succeed, so the
+    verification loop must abort immediately and propagate a non-zero exit.
+    """
+    if exit_code == 0:
+        return None
+
+    cli_name = Path(command[0]).name if command else "CLI"
+    raw_text = ""
+    try:
+        size = log_file.stat().st_size
+        if exit_code in (126, 127) or size <= _FATAL_LAUNCH_MAX_LOG_BYTES:
+            raw_text = log_file.read_text(errors="replace")[:_FATAL_LAUNCH_MAX_LOG_BYTES]
+    except OSError:
+        size = 0
+
+    clean_text = _ANSI_ESCAPE_RE.sub("", raw_text)
+    first_error_line = ""
+    for line in clean_text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.lower().startswith("warning:"):
+            continue
+        first_error_line = stripped
+        break
+
+    if exit_code in (126, 127):
+        detail = first_error_line or "executable not found or not runnable"
+        return f"{cli_name} failed to launch (exit {exit_code}): {detail}"
+
+    if size > _FATAL_LAUNCH_MAX_LOG_BYTES or not clean_text:
+        return None
+
+    for pattern in _FATAL_LAUNCH_PATTERNS:
+        match = pattern.search(clean_text)
+        if match:
+            # Prefer the specific line containing the matched fatal launch error.
+            line_start = clean_text.rfind("\n", 0, match.start()) + 1
+            line_end = clean_text.find("\n", match.end())
+            matched_line = (
+                clean_text[line_start:] if line_end == -1 else clean_text[line_start:line_end]
+            ).strip()
+            detail = matched_line or first_error_line or f"exit code {exit_code}"
+            return f"{cli_name} rejected arguments or failed to launch (exit {exit_code}): {detail}"
+
+    return None
+
 
 def run_cli_foreground(
     cli_info: dict,
@@ -986,6 +1054,18 @@ def run_cli_foreground(
                 )
                 reader = _run_agy_reader_loop(process, log_handle, inactivity_secs)
                 log_handle.close()
+                if reader.get("terminal_event") is None and not reader["inactivity_killed"]:
+                    fatal_error = _detect_fatal_launch_error(
+                        reader["exit_code"], log_file, base_command
+                    )
+                    if fatal_error:
+                        return {
+                            "status": "error",
+                            "exit_code": reader["exit_code"],
+                            "error": fatal_error,
+                            "fatal_launch_error": True,
+                            "log": str(log_file),
+                        }
                 status = _classify_agy_result(
                     reader["exit_code"],
                     reader.get("terminal_event"),
@@ -1013,6 +1093,15 @@ def run_cli_foreground(
             exit_code = process.wait()
 
         log_handle.close()
+        fatal_error = _detect_fatal_launch_error(exit_code, log_file, base_command)
+        if fatal_error:
+            return {
+                "status": "error",
+                "exit_code": exit_code,
+                "error": fatal_error,
+                "fatal_launch_error": True,
+                "log": str(log_file),
+            }
         return {
             "status": "completed",
             "exit_code": exit_code,
@@ -1221,6 +1310,10 @@ def run_verification_loop(
             result["final_status"] = "failed"
             result["status"] = "error"
             result["error"] = error_msg
+            if "exit_code" in exec_result:
+                result["exit_code"] = exec_result["exit_code"]
+            if exec_result.get("fatal_launch_error"):
+                result["fatal_launch_error"] = True
             break
 
         # Log agy-specific failure classifications (non-error statuses that still
